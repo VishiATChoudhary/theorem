@@ -98,17 +98,8 @@ def norm_rows(rows) -> frozenset:
 
 
 def rows_match(got, gold) -> bool:
-    got_n, gold_n = norm_rows(got), norm_rows(gold)
-    if got_n == gold_n:
-        return True
-    # single-column projections: allow extra id/name column mismatch shape
-    if gold_n and got_n:
-        gold_w = {len(r) for r in gold_n}
-        got_w = {len(r) for r in got_n}
-        if gold_w == {1} and got_w == {1}:
-            return got_n == gold_n
-        # gold sometimes returns [name, value]; accept exact only
-    return False
+    """Strict normalized set comparison; no shape leniency."""
+    return norm_rows(got) == norm_rows(gold)
 
 
 # ---- condition B: GraphLang -------------------------------------------
@@ -182,8 +173,14 @@ def ensure_neo4j() -> None:
     raise RuntimeError("neo4j container did not become ready")
 
 
+LAST_RAW_RESULT = {"text": ""}
+
+
 def neo4j_query(cypher: str, timeout: int = 60) -> list[list]:
-    """Run cypher via cypher-shell, parse its output rows."""
+    """Run cypher via cypher-shell, parse its output rows. The raw textual
+    output (what an agent would actually receive, header line included) is
+    kept in LAST_RAW_RESULT for token accounting comparable to GraphLang's
+    rendered output."""
     with tempfile.NamedTemporaryFile("w", suffix=".cypher", delete=False) as f:
         f.write(cypher if cypher.rstrip().endswith(";") else cypher + ";")
         path = f.name
@@ -199,6 +196,7 @@ def neo4j_query(cypher: str, timeout: int = 60) -> list[list]:
         Path(path).unlink(missing_ok=True)
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip()[:500])
+    LAST_RAW_RESULT["text"] = result.stdout
     lines = result.stdout.strip().splitlines()
     if not lines:
         return []
@@ -235,7 +233,7 @@ def _split_shell_row(line: str) -> list[str]:
 def _parse_shell_cell(cell: str):
     cell = cell.strip()
     if cell.startswith('"') and cell.endswith('"'):
-        return cell[1:-1]
+        return cell[1:-1].replace('""', '"')
     if cell in ("NULL", "null"):
         return None
     if cell in ("TRUE", "true"):
@@ -323,7 +321,9 @@ def eval_cypher(question: dict, cb_schema: dict, model: str) -> dict:
                     "error": str(e2)[:300], "query": query, "rows": None}
     gold = json.loads(question["answer_json"])
     ok = rows_match(rows, gold)
-    tokens = count_tokens("\n".join(str(r) for r in rows)) if rows else 0
+    # comparable accounting: the full textual result each system hands the
+    # agent (cypher-shell output with its header, like GraphLang's render)
+    tokens = count_tokens(LAST_RAW_RESULT["text"])
     return {"qid": qid, "ok": ok, "syntax_ok": syntax_ok, "query": query,
             "rows": rows[:20], "gold": gold[:20], "result_tokens": tokens}
 
@@ -378,6 +378,8 @@ def main() -> None:
     ap.add_argument("--model", default="claude-haiku-4-5-20251001")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--skip-cypher", action="store_true")
+    ap.add_argument("--tag", default=None,
+                    help="suffix for the results file: results-<tag>.json")
     args = ap.parse_args()
     n = 3 if args.smoke else args.n
 
@@ -425,7 +427,8 @@ def main() -> None:
         "details": {"graphlang": gl_results, "text2cypher": cy_results},
     }
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "results.json").write_text(json.dumps(out, indent=1))
+    name = f"results-{args.tag}.json" if args.tag else "results.json"
+    (OUT / name).write_text(json.dumps(out, indent=1))
     print(json.dumps({k: v for k, v in out.items() if k != "details"}, indent=1))
 
 
