@@ -1,0 +1,562 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{etoolbox}
+\usepackage{needspace}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\definecolor{kw}{RGB}{20,60,140}
+\definecolor{oldbg}{RGB}{248,246,242}
+\definecolor{newbg}{RGB}{242,248,244}
+\definecolor{resbg}{RGB}{246,244,250}
+\definecolor{glossbg}{RGB}{245,245,240}
+\definecolor{failcol}{RGB}{150,40,30}
+
+\lstdefinestyle{old}{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{kw},
+  backgroundcolor=\color{oldbg},
+  frame=single, rulecolor=\color{gray!50},
+  framesep=5pt, breaklines=true,
+  showstringspaces=false,
+  sensitive=false
+}
+\lstdefinestyle{new}{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{kw},
+  backgroundcolor=\color{newbg},
+  frame=single, rulecolor=\color{green!30!gray},
+  framesep=5pt, breaklines=true,
+  showstringspaces=false,
+  sensitive=true,
+  morekeywords={find,follow,group,count,sum,return,limit,budget,tokens,where,order,by,as,assert,edge,merge,distinct,refine,compact,retire,flag,derive,class,from,with,into,prefer,newest,source,reason,continue,after,schema,via,check,plan}
+}
+\lstdefinestyle{result}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{resbg},
+  frame=single, rulecolor=\color{blue!20!gray},
+  framesep=5pt, breaklines=true,
+  showstringspaces=false
+}
+
+\newtcolorbox{failbox}{colback=red!3,colframe=failcol,title={Where models break here},fonttitle=\bfseries,boxrule=0.6pt,left=6pt,right=6pt}
+\newtcolorbox{featurebox}[1]{colback=green!4,colframe=green!30!black,title={New feature: #1},fonttitle=\bfseries,boxrule=0.6pt,left=6pt,right=6pt}
+\newtcolorbox{glossbox}{colback=glossbg,colframe=gray!60,title={Plain words},fonttitle=\bfseries,boxrule=0.4pt,left=6pt,right=6pt}
+
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.7em}{}
+
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+% keep every code listing on one page
+\BeforeBeginEnvironment{lstlisting}{\par\noindent\begin{minipage}{\linewidth}}
+\AfterEndEnvironment{lstlisting}{\end{minipage}\par\addvspace{4pt}}
+
+\title{\textbf{The Query Language, Explained by Example}\\[6pt]
+\large What the old languages do, where they break, and what we do instead\\[2pt]
+\normalsize (language name TBD; syntax shown is the current working sketch)}
+\author{LossMetricKG project}
+\date{August 24, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent This document teaches the proposed agent graph language the way the evidence says languages should be taught: through worked examples. Part I sets up one running example graph and asks the same questions of the five languages that matter today (SQL, Cypher, SPARQL, Gremlin, and the new ISO standard GQL), showing what each does well and exactly where language models break when writing it. Part II rebuilds the same questions in the new language, one feature at a time, so every design choice is visible as a diff against something familiar. Part III covers what no existing query language has at all: structural writes with receipts, deduplication surfacing, granularity refinement, health queries, and token budgets. A final session transcript shows an agent doing real construction work end to end.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{The running example}
+
+One graph, used for every example in this document. A small supply-chain world:
+
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+  \item \textbf{Node classes}: \texttt{product} (name, launch\_year), \texttt{part} (name, unit\_cost), \texttt{supplier} (name, country).
+  \item \textbf{Edge types with named roles}: \texttt{uses} connects a \texttt{product} (role: \emph{whole}) to a \texttt{part} (role: \emph{component}); \texttt{supplied\_by} connects a \texttt{part} (role: \emph{item}) to a \texttt{supplier} (role: \emph{source}).
+\end{itemize}
+
+And two questions, one easy and one hard, asked of every language:
+
+\begin{description}[leftmargin=1.4em,itemsep=2pt]
+  \item[Q1 (one hop):] Which suppliers supply the part called ``lithium cell''?
+  \item[Q2 (multi-hop + aggregation):] For products launched after 2024, which suppliers provide their parts, and how many distinct parts does each supplier provide?
+\end{description}
+
+Q1 is the kind of question where familiar languages are fine and a new language cannot win much; Q2 is the compositional kind where roughly 40\% of frontier-model queries fail today and where the Anka result says a designed language wins big. Keep that asymmetry in mind throughout: the new language is built for Q2-shaped work.
+
+%======================================================================
+\section{Part I: the old languages}
+
+\subsection{SQL: the relational baseline}
+
+The graph lives in three entity tables plus two join tables (\texttt{uses}, \texttt{supplied\_by}) holding foreign keys. Q2:
+
+\begin{lstlisting}[style=old,morekeywords={SELECT,FROM,JOIN,ON,WHERE,GROUP,BY,COUNT,DISTINCT,AS,AND}]
+SELECT s.name, COUNT(DISTINCT pt.id) AS n_parts
+FROM product p
+JOIN uses u          ON u.product_id  = p.id
+JOIN part pt         ON pt.id         = u.part_id
+JOIN supplied_by sb  ON sb.part_id    = pt.id
+JOIN supplier s      ON s.id          = sb.supplier_id
+WHERE p.launch_year > 2024
+GROUP BY s.id, s.name;
+\end{lstlisting}
+
+\textbf{Features worth stealing.} Explicit \texttt{GROUP BY} (you can see the grouping key), a huge training corpus (673k Stack Overflow posts, which is why LLMs write SQL better than any graph language), and declarative optimizer-friendly semantics. Note the \texttt{GROUP BY s.id, s.name}: grouping by \texttt{s.name} alone would silently merge two suppliers that share a name. Identity-versus-value grouping is a real trap in every language in this part, and one models fall into constantly.
+
+\textbf{Features that hurt.} Every hop is a join the model must assemble by hand from foreign-key knowledge; a four-join query has four chances to pair the wrong columns. Multi-hop paths of unknown length (``parts connected through any chain of subassemblies'') are painful recursive CTEs. The graph structure is implicit in the schema, invisible in the query.
+
+\begin{failbox}
+Join-condition errors dominate: wrong column pairings that still typecheck and run, returning plausible garbage. This is the relational cousin of the reversed-edge failure. Silent, hard to catch without checking answers.
+\end{failbox}
+
+\subsection{Cypher: the incumbent graph language}
+
+Neo4j's language, the one all the agent benchmarks target. Patterns are drawn as ASCII art: nodes in parentheses, edges in brackets, direction as an arrow.
+
+\begin{lstlisting}[style=old,morekeywords={MATCH,WHERE,WITH,RETURN,count,DISTINCT,AS}]
+MATCH (p:Product)-[:USES]->(pt:Part)-[:SUPPLIED_BY]->(s:Supplier)
+WHERE p.launch_year > 2024
+WITH s, count(DISTINCT pt) AS n_parts
+RETURN s.name, n_parts
+\end{lstlisting}
+
+\textbf{Features worth stealing.} The pattern reads like a picture of the path, one line expresses what took SQL five clauses, and variable-length paths are trivial (\texttt{-[:USES*1..3]->}). Largest corpus of any graph language.
+
+\textbf{Features that hurt.} Three of the five documented LLM failure modes live in this one query. The arrows: is it \texttt{(pt)-[:SUPPLIED\_BY]->(s)} or \texttt{(s)-[:SUPPLIED\_BY]->(pt)}? The model must recall the schema's direction convention, and reversed direction is the single most-cited text-to-Cypher failure; entire repair systems exist just to flip arrows. The aggregation: the natural one-liner \texttt{RETURN s.name, count(DISTINCT pt)} groups \emph{implicitly} by every non-aggregated return column, here by supplier \emph{name}, silently merging same-named suppliers; the correct query needs the \texttt{WITH s} step above to group by node identity, and changing a return list silently changes the grouping. Cypher 25 added an optional explicit \texttt{GROUP BY}, but the implicit form remains legal, so the trap persists and there are now two spellings of the same thing, the opposite of a canonical form. And label hallucination: nothing stops the model emitting \texttt{(:Vendor)} when the schema says \texttt{Supplier}; the query fails, or worse, matches nothing and returns an empty answer that looks like a fact.
+
+\begin{failbox}
+CypherBench error taxonomy on exactly this query shape: reversed \texttt{SUPPLIED\_BY} arrow (most common), hallucinated \texttt{Vendor}/\texttt{Component} labels, and implicit-grouping mistakes when a second property is added to \texttt{RETURN}. Best frontier models: about 60\% execution accuracy overall, worse on multi-hop slices [arXiv 2412.18702].
+\end{failbox}
+
+\subsection{SPARQL: the semantic-web veteran}
+
+The W3C standard for RDF data, where everything, including the schema, is triples of \texttt{subject predicate object}.
+
+\begin{lstlisting}[style=old,morekeywords={SELECT,WHERE,GROUP,BY,COUNT,DISTINCT,AS,FILTER,PREFIX,a}]
+PREFIX : <http://example.org/supply#>
+SELECT (SAMPLE(?sname) AS ?name) (COUNT(DISTINCT ?pt) AS ?nparts)
+WHERE {
+  ?p  a :Product ;  :launchYear ?y ;  :uses ?pt .
+  ?pt :suppliedBy ?s .
+  ?s  :name ?sname .
+  FILTER(?y > 2024)
+}
+GROUP BY ?s
+\end{lstlisting}
+
+\textbf{Features worth stealing.} Triple patterns are wonderfully uniform (there is only one syntactic shape in the whole language), federation across datasets is built in, and the explicit \texttt{GROUP BY} returns.
+
+\textbf{Features that hurt.} URI ceremony everywhere; the \texttt{PREFIX} machinery and \texttt{?variable} sigils burn tokens and create failure surface. The corpus is tiny (6k Stack Overflow posts), and it shows: most models score under 4\% zero-shot on SPARQL generation [arXiv 2411.05521]. RDF serialization is also the most token-expensive way known to show a graph to a model, 3 to 5 times the cost of an edge list for zero accuracy gain [arXiv 2504.07087].
+
+\begin{failbox}
+Predicate direction again (\texttt{?pt :suppliedBy ?s} vs \texttt{?s :supplies ?pt}, both plausible), invented predicates, and punctuation errors: the semicolon/period/comma continuation rules inside \texttt{WHERE} are exactly the kind of long-range, low-redundancy syntax models fumble.
+\end{failbox}
+
+\subsection{Gremlin: the traversal machine}
+
+Apache TinkerPop's language. Not declarative: a Gremlin query is an imperative pipeline of traversal steps, executed left to right.
+
+\begin{lstlisting}[style=old,morekeywords={hasLabel,has,out,in,gt,groupCount,by,values,g,V,unfold,dedup,select,name}]
+g.V().hasLabel('product').has('launchYear', gt(2024)).
+  out('uses').dedup().
+  out('suppliedBy').
+  groupCount()   // keys are supplier vertices, not names
+\end{lstlisting}
+
+\textbf{Features worth stealing.} Composability: each step is small and typed, and the pipeline shape means you can reason about one hop at a time. This is the closest ancestor of our line-oriented design.
+
+\textbf{Features that hurt.} Everything is method chaining on one expression: no named intermediates, so the model must track the implicit ``current position'' of the traverser through a dozen chained calls. The Anka study measured exactly this pattern (chaining plus shadowing) as the cause of 69\% of failures in Python pipelines. \texttt{out()} vs \texttt{in()} is the direction failure again, now spelled as method names. The placement of \texttt{dedup()} changes the count semantics silently. And the tempting \texttt{.by('name')} modulator on \texttt{groupCount} groups by name string, merging same-named suppliers; grouping by vertex is correct but then extracting names needs a further \texttt{unfold().project(...)} chain.
+
+\begin{failbox}
+Wrong \texttt{out}/\texttt{in} choice, lost track of traverser position mid-chain, \texttt{dedup()} in the wrong spot producing subtly wrong counts. Chaining is the named-intermediates failure mode in its purest form.
+\end{failbox}
+
+\subsection{GQL and SQL/PGQ: the new ISO standards}
+
+GQL (ISO/IEC 39075:2024) standardises the Cypher pattern style; SQL/PGQ embeds the same patterns inside SQL via \texttt{GRAPH\_TABLE}. Q2 in SQL/PGQ:
+
+\begin{lstlisting}[style=old,morekeywords={SELECT,FROM,GRAPH_TABLE,MATCH,WHERE,COLUMNS,GROUP,BY,COUNT,DISTINCT,AS}]
+SELECT sname, COUNT(DISTINCT ptid) AS n_parts
+FROM GRAPH_TABLE (supply_graph,
+  MATCH (p IS product)-[IS uses]->(pt IS part)
+        -[IS supplied_by]->(s IS supplier)
+  WHERE p.launch_year > 2024
+  COLUMNS (s.id AS sid, s.name AS sname, pt.id AS ptid))
+GROUP BY sid, sname;
+\end{lstlisting}
+
+\textbf{Features worth stealing.} Explicit per-query path semantics (\texttt{WALK}/\texttt{TRAIL}/\texttt{ACYCLIC} keywords, a genuinely good idea we simplify rather than copy), and standardisation gravity: this will be in Postgres, Oracle, DuckDB, everywhere.
+
+\textbf{Features that hurt.} It inherits Cypher's arrows and implicit grouping wholesale, adds SQL's ceremony around them, and, being new, has almost no corpus: GQL currently benchmarks \emph{worse} than Cypher for LLM generation purely from unfamiliarity [arXiv 2602.11745]. Standard-language status does not buy generation accuracy.
+
+\begin{failbox}
+All Cypher failure modes, plus new-syntax unfamiliarity. The instructive part: GQL proves that corpus familiarity, not language quality, sets today's accuracy, which is exactly the variable a designed language plus in-context teaching attacks.
+\end{failbox}
+
+\subsection{Scorecard}
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+\toprule
+ & SQL & Cypher & SPARQL & Gremlin & GQL/PGQ \\
+\midrule
+Multi-hop ergonomics        & poor & good & fair & good & good \\
+Direction mistake possible  & (joins) & yes & yes & yes & yes \\
+Grouping explicit           & yes & optional & yes & no & optional \\
+Named intermediates         & CTEs only & \texttt{WITH} & vars & no & \texttt{LET} \\
+Schema closed (can't hallucinate) & no & no & no & no & no \\
+Line-local syntax           & fair & no & no & no & no \\
+Token cost of results       & n/a & mixed & worst & mixed & mixed \\
+LLM corpus                  & huge & mid & tiny & small & none \\
+Agent write surface (receipts, dedup) & no & no & no & no & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two rows need honesty notes. ``Optional'' grouping: Cypher 25 and GQL both added explicit \texttt{GROUP BY}, but the implicit form stays legal in each, so the trap survives and the language gains a second spelling. And every language here \emph{has} write operations (\texttt{INSERT}, \texttt{CREATE}, SPARQL Update, \texttt{addV}); what none has is a write surface built for agents: provenance-carrying verbs, receipts, dedup candidates, lineage. That distinction is what the last row measures. No column has the profile we need; the bottom rows are the design brief for Part II.
+
+\begin{glossbox}
+\textbf{Declarative}: you state what you want, the engine picks how (SQL, Cypher). \textbf{Imperative/traversal}: you state the steps (Gremlin). \textbf{RDF/triples}: data model where every fact is subject-predicate-object. \textbf{CTE}: SQL's \texttt{WITH} clause for naming intermediate results. \textbf{Corpus}: the amount of code in a language the model saw during training; the dominant predictor of generation accuracy today.
+\end{glossbox}
+
+%======================================================================
+\section{Part II: the same questions, rebuilt}
+
+Now the new language, feature by feature. Each feature is introduced as a diff against a failure you just saw. First the full answers, then the anatomy.
+
+Q1, one hop:
+
+\begin{lstlisting}[style=new]
+find part where name = "lithium cell" as cell
+follow cell supplied_by source as sups
+return sups.name
+\end{lstlisting}
+
+Q2, multi-hop with aggregation:
+
+\begin{lstlisting}[style=new]
+find product where launch_year > 2024 as recent
+follow recent uses component as parts
+follow parts supplied_by source as sups
+group by sups as g
+count distinct g.parts as n_parts
+return sups.name, n_parts order by n_parts budget 2000 tokens
+\end{lstlisting}
+
+How to read this: a query builds one \textbf{binding table}, in the style of SPARQL solution mappings. Each name (\texttt{recent}, \texttt{parts}, \texttt{sups}) is a column; each \texttt{follow} extends the rows, keeping provenance, so a row remembers \emph{which} product led to \emph{which} part led to \emph{which} supplier. \texttt{group by sups} groups rows by the \emph{node identity} bound in that column, never by a display property; two suppliers who share a name stay separate. Grouping by a value is a visibly different spelling (\texttt{group by sups.country}), so the identity-versus-value choice that silently corrupts the Part I examples is explicit here. \texttt{count distinct g.parts} counts distinct part bindings within each group. There is no \texttt{limit}: the query answers the whole question, and the \texttt{budget} clause handles size with explicit truncation and continuation (Section~\ref{sec:budget}). Now the anatomy.
+
+\subsection{One line, one step, one name}
+
+\begin{featurebox}{line-oriented named steps}
+Every line performs exactly one operation and binds its result to exactly one name. No chaining, no nesting, no brackets to balance across distance. The Gremlin pipeline above becomes five lines, each inspectable.
+\end{featurebox}
+
+Compare the Gremlin chain, where the traverser position is implicit, with the rewrite: \texttt{recent}, \texttt{parts}, \texttt{sups}, \texttt{g}, \texttt{n\_parts}. If the model mis-thinks step three, the error is localised to one line mentioning named inputs, and the verifier can report ``\texttt{sups} is a set of suppliers; you grouped by \texttt{part}'' instead of ``query returned wrong answer''. This is the direct application of the Anka finding: named intermediates eliminated the failure class that caused 69\% of Python pipeline errors. Locality also kills the bracket-matching failure mode: there are no delimiters that open on one line and close on another.
+
+\subsection{Role-named edges: direction cannot be written}
+
+\begin{featurebox}{role traversal}
+Edges are traversed by naming the \emph{role} you want to arrive at, never by drawing a direction. \texttt{follow parts supplied\_by source} reads: from \texttt{parts}, across \texttt{supplied\_by} edges, to the node playing the \emph{source} role. The reverse trip is \texttt{follow sups supplied\_by item}, a different word, not a flipped arrow.
+\end{featurebox}
+
+Recall the Cypher failure: \texttt{(pt)-[:SUPPLIED\_BY]->(s)} vs the reversed arrow, both syntactically valid, one silently wrong. Here the schema declares \texttt{supplied\_by(item: part, source: supplier)}, and the query mentions the destination role by name. Honest accounting of what this buys. When the two endpoints have different classes, as here, naming the wrong role is a \emph{type error}: \texttt{follow parts supplied\_by item} asks to arrive at the role \texttt{parts} already occupies, and the verifier rejects the plan before execution with a corrective message. When both endpoints share a class (\texttt{manages(manager: person, report: person)}), the role choice is genuinely semantic and no grammar can decide it for the model; what the design changes is that the choice is carried by a meaningful word (\texttt{manager} vs \texttt{report}) rather than a direction glyph, and words are where the language prior actually helps. So the most-cited text-to-Cypher failure mode is machine-checked in the heterogeneous case and made legible in the homogeneous one, not eliminated outright.
+
+\subsection{Schema-closed vocabulary}
+
+\begin{featurebox}{schema-closed grammar}
+The set of legal class names, edge types, role names, and properties in any query is generated from the live schema. With constrained decoding, the model \emph{cannot emit} \texttt{vendor} if the schema says \texttt{supplier}: the token is not in the grammar. Without constrained decoding, the same closure runs as parse-time validation with corrective errors.
+\end{featurebox}
+
+The Cypher hallucination failure (\texttt{:Vendor}, \texttt{:Component}) dies at decode time. When constrained decoding is unavailable (closed APIs), the verifier catches it before execution and answers in natural language built for self-repair:
+
+\begin{lstlisting}[style=result]
+error: unknown class "vendor" in line 1
+  did you mean: supplier (class), or distributor (class)?
+  schema excerpt: part --supplied_by--> supplier {name, country}
+nothing was executed.
+\end{lstlisting}
+
+The error message is a language feature, not an afterthought: execution-error feedback is the only form of self-correction that measurably works, so errors name the line, offer schema-grounded alternatives, and confirm nothing ran.
+
+\subsection{Staged, explicit aggregation}
+
+\begin{featurebox}{group then count, as separate named steps}
+Aggregation is two lines: \texttt{group by <column> as <name>} declares the grouping key explicitly (a bound name groups by node identity; \texttt{<column>.<property>} groups by value, a visibly different spelling), then \texttt{count}/\texttt{sum}/... consumes the groups. Nothing is implicit, and adding a column to \texttt{return} cannot change the grouping.
+\end{featurebox}
+
+This is SQL's explicit \texttt{GROUP BY} (the good part) rescued from Cypher's implicit-grouping trap, and staged so each half is one line with one name. The Cypher failure where extending \texttt{RETURN s.name} to \texttt{RETURN s.name, s.country} silently changes what is being counted is impossible: the grouping lives on its own line, untouched by the return list. The identity-versus-name trap from Part I is also closed by spelling: \texttt{group by sups} can never mean ``by name'', and \texttt{group by sups.name} says exactly what it does.
+
+\subsection{Canonical forms}
+
+\begin{featurebox}{one way to say each thing}
+For every operation there is exactly one spelling. No \texttt{WHERE} clause vs pattern-property shorthand, no three ways to count, no optional syntax. If two agents answer the same question correctly, they produce byte-identical queries.
+\end{featurebox}
+
+Cypher offers \texttt{WHERE p.launch\_year > 2024} and \texttt{(p:Product \{launch\_year: ...\})} styles, plus several aggregation spellings; every choice point is a place for the model to wobble and for the grader to mis-score. Canonicality also makes the eval harness sharper (string-level checking becomes meaningful) and makes cached plan lookup trivial. The cost, verbosity in corner cases, is accepted deliberately: this is the Anka trade, removing degrees of freedom to remove errors.
+
+\subsection{Verify before execute}
+
+\begin{featurebox}{queries are plans; plans are checked}
+Every submitted query is validated as a whole against the live schema and graph statistics before anything runs: classes exist, roles exist and connect compatible classes, types line up, budgets are sane. Ill-formed plans return corrective errors; nothing partial ever executes.
+\end{featurebox}
+
+This adopts the plan-verify-execute result: building a whole traversal plan and verifying it against the actual graph beats per-hop agent loops by 10 to 50\% at 3 to 13 times lower cost [arXiv 2507.08945]. The line-oriented named-step syntax is what makes verification precise: each line is a typed claim (``\texttt{parts} is a set of \texttt{part}''), so the checker can point at the exact line where the plan goes wrong, in the same style as the error example above.
+
+\subsection{Token budgets and continuation}\label{sec:budget}
+
+\begin{featurebox}{budget as a first-class clause}
+\texttt{budget 2000 tokens} caps the serialized result. Overflow truncates at a clean boundary and returns a continuation handle. Unstated budgets get a default; results never silently flood the context window.
+\end{featurebox}
+
+\begin{lstlisting}[style=result]
+results: 20 of 47 suppliers (budget hit)
+...rows...
+truncated: 27 more. resume with: continue @c81f
+\end{lstlisting}
+
+\begin{lstlisting}[style=new]
+continue @c81f budget 1500 tokens
+\end{lstlisting}
+
+No existing query language knows the consumer has a context window. \texttt{LIMIT} bounds rows, not tokens; a row with a huge property blows the context anyway. The budget clause plus the declared-count header (``20 of 47'') gives the model an honest, checkable view of what it is seeing, per the redundancy-as-self-check principle.
+
+\subsection{The result format is part of the language}
+
+\begin{featurebox}{incident encoding, relevance-ordered, counts declared}
+Results print each node once, with its relevant edges gathered immediately around it, most relevant material first, counts declared up front, truncation always explicit.
+\end{featurebox}
+
+A subgraph answer to ``show me the lithium cell's context'':
+
+\begin{lstlisting}[style=result]
+nodes: 3 detailed + 2 referenced, edges: 4, complete
+part "lithium cell" {unit_cost: 4.20}
+  supplied_by -> supplier "VoltaChem"
+  supplied_by -> supplier "Ionix"
+  uses <- product "PowerBank Pro" {launch_year: 2025}
+  uses <- product "SolarCharger X" {launch_year: 2023}
+supplier "VoltaChem" {country: "DE"}
+supplier "Ionix" {country: "KR"}
+\end{lstlisting}
+
+The header distinguishes \emph{detailed} nodes (printed with properties and gathered edges) from \emph{referenced} nodes (named only as edge endpoints, here the two products); both counts are declared so the model can verify what it received. The choices are evidence-backed, stated carefully: encoding choice alone swings graph-task accuracy by tens of points, with incident-style encodings winning on structural tasks such as degree and neighbourhood questions [arXiv 2310.04560], while KG-LLM-Bench finds structured formats competitive on accuracy and token costs varying up to 5x between formats [arXiv 2504.07087]; keeping related edges textually adjacent counters the up-to-6x cross-referencing collapse of Lost-in-Distance [arXiv 2410.01985]; and the declared header is the self-check invariant. Incident style is the working choice for its adjacency locality and token economy, and the format is explicitly re-tested in the eval harness rather than assumed. Results stay small enough to reason over by construction: budgets cap output and truncation is always explicit, never silent.
+
+%======================================================================
+\section{Part III: what no old language has at all}
+
+Everything in Part II improves on features the old languages have. This part is the write-side surface, which no existing query language offers agents in any safe form.
+
+\subsection{Structural writes with receipts}
+
+\begin{lstlisting}[style=new]
+assert part {name: "graphene sheet", unit_cost: 12.0}
+  source doc:ingest-2026-08-24/p3 as gs
+assert edge supplied_by(item: gs, source: voltachem)
+  source doc:ingest-2026-08-24/p3
+\end{lstlisting}
+
+Every write states its provenance (\texttt{source ...}) and returns a \textbf{receipt}:
+
+\begin{lstlisting}[style=result]
+receipt: created part gs = #p-88231 at @t-99841
+  guards: schema ok, class invariants ok
+  dup candidates: 1
+    #p-71002 part "graphene sheets" score 0.94
+      shared: supplied_by -> VoltaChem; unit_cost 12.0 vs 11.8
+  resolve with: merge / distinct
+\end{lstlisting}
+
+The receipt is the system's half of the conversation. Old languages return ``1 row affected''; here every write comes back with what changed, which guards ran, and, critically, any duplicate candidates the write triggered. The agent's next action is right there in the receipt.
+
+\subsection{Deduplication: system detects, agent resolves}
+
+\begin{lstlisting}[style=new]
+merge gs, #p-71002 prefer newest
+\end{lstlisting}
+\begin{lstlisting}[style=new]
+distinct gs, #p-71002 reason "sheet vs pre-cut sheets, different SKUs"
+\end{lstlisting}
+
+The engine runs detection continuously (cheap blocking keys at write time, embedding similarity asynchronously) and exposes candidates as ordinary queryable data:
+
+\begin{lstlisting}[style=new]
+find dup_candidates where class = supplier order by score as dups
+return dups limit 10
+\end{lstlisting}
+
+\texttt{merge} carries an explicit reconciliation policy (\texttt{prefer newest} is the default; \texttt{prefer source <provenance>} and explicit values exist). Merge semantics: one node is designated the \emph{survivor} (by default the older, more-referenced one), the absorbed node's id becomes a permanent alias of the survivor so existing references never dangle, and lineage records the full pre-merge state of both. A merge is therefore unwindable from lineage alone. \texttt{distinct} is a durable ``these are different'' assertion that suppresses the pair from future candidate lists. Old-language equivalent: none. In SQL or Cypher, dedup is an external ETL job the agent never sees; in the memory systems it is automatic and silently wrong sometimes. Here it is a visible, resolvable work queue.
+
+\subsection{Granularity: blob, refine, compact}
+
+An agent ingests a supplier price table. Storing it row-by-row immediately would be slow and lossy; storing it as one node forever makes it unqueryable. Both grains are legal, and moving between them is a verb:
+
+\begin{lstlisting}[style=new]
+assert table_blob {title: "EU supplier prices 2026",
+  payload: attach:csv-4471} source doc:report-2026-08 as prices
+\end{lstlisting}
+
+Later, when queries start needing the rows:
+
+\begin{lstlisting}[style=new]
+refine prices into part
+  with {name: col "component", unit_cost: col "eur_unit"}
+  as price_parts
+\end{lstlisting}
+
+\begin{lstlisting}[style=result]
+receipt: refined #b-2210 -> 142 part nodes at @t-99902
+  lineage: each new node carries origin #b-2210
+  dup candidates: 17 (queued per class)
+  blob state: retained as lineage parent (cold)
+\end{lstlisting}
+
+And the inverse, when detail has stopped paying for itself:
+
+\begin{lstlisting}[style=new]
+compact old_quotes as summary_quote
+  {period: "2024", mean_cost: avg(old_quotes.unit_cost)}
+\end{lstlisting}
+
+Nodes carry a granularity state (\texttt{blob}, \texttt{composite}, \texttt{atom}); classes declare which states they allow; lineage makes every refinement traceable back to its source blob and every compact reversible in principle. Old-language equivalent: none. Granularity in SQL is a schema migration; in graph databases it is a hand-written ETL rewrite. Here it is two verbs the agent holds.
+
+\subsection{Health and failure nodes}
+
+The graph's own damage report is queryable data in the same language:
+
+\begin{lstlisting}[style=new]
+find nodes where health.loss > 0.8 order by query_traffic as worklist
+return worklist.class, worklist.health, worklist.lineage limit 10
+budget 1500 tokens
+\end{lstlisting}
+
+Four named subscores feed \texttt{health}: \texttt{health.loss} (construction-loss signals: extraction disagreement, property instability, contradiction density; the LossMetricKG metrics computed incrementally), \texttt{health.query} (blame from failed or flagged queries), \texttt{health.structure} (supernodes, orphans, grain mismatches), \texttt{health.staleness} (temporal decay, contradicted-by-newer). Agents feed the query signal explicitly:
+
+\begin{lstlisting}[style=new]
+flag #p-88231 reason "returned as Li-ion cell supplier, actually LiFePO4"
+\end{lstlisting}
+
+Maintenance is not a mode: the repair verbs are the same \texttt{merge}, \texttt{refine}, \texttt{retire}, \texttt{assert} used everywhere else, now pointed at the worklist. \texttt{retire} deserves a note: it is temporal invalidation, not deletion; the node stops being current but remains queryable historically with \texttt{after}-style time scoping.
+
+\begin{lstlisting}[style=new]
+retire #s-1120 reason "acquired by VoltaChem 2026-05, see #s-0071"
+\end{lstlisting}
+
+\subsection{Schema evolution: derive class}
+
+\begin{lstlisting}[style=new]
+derive class broker from supplier
+  with {takes_inventory: bool}
+\end{lstlisting}
+
+\begin{lstlisting}[style=result]
+receipt: class broker provisional at @t-99950
+  quota: 500 instances; promotion needs 50 stable + dedup review
+  note: similar existing class "distributor" (score 0.81), review advised
+\end{lstlisting}
+
+Agents extend the schema through the language, gated: provisional status, instance quotas, dedup against existing classes, promotion after stability. On promotion the schema-closed grammar regenerates, and every agent's decoder learns the new word. The schema is data too: \texttt{schema} introspects it, and \texttt{find class where ...} queries it like anything else.
+
+%======================================================================
+\section{A construction session, end to end}
+
+An agent processes one supplier report. Abridged transcript; \texttt{>} lines are the agent, boxes are the system.
+
+\begin{lstlisting}[style=new]
+> schema
+\end{lstlisting}
+\begin{lstlisting}[style=result]
+classes: product{name, launch_year} part{name, unit_cost}
+         supplier{name, country}
+edges: uses(whole: product, component: part)
+       supplied_by(item: part, source: supplier)
+\end{lstlisting}
+
+\begin{lstlisting}[style=new]
+> assert supplier {name: "Ionix Co", country: "KR"}
+    source doc:report-08/p1 as ionix
+\end{lstlisting}
+\begin{lstlisting}[style=result]
+receipt: created supplier ionix = #s-3401
+  dup candidates: 1
+    #s-0954 supplier "Ionix" score 0.97; shared country KR
+\end{lstlisting}
+
+\begin{lstlisting}[style=new]
+> merge ionix, #s-0954 prefer newest
+> assert table_blob {title: "Ionix price list Q3"}
+    source doc:report-08/p4 as pricelist
+\end{lstlisting}
+\begin{lstlisting}[style=result]
+receipt: merged -> #s-0954 (lineage keeps both)
+receipt: created table_blob pricelist = #b-5590
+\end{lstlisting}
+
+Weeks later, a maintenance agent:
+
+\begin{lstlisting}[style=new]
+> find nodes where health.structure > 0.7 as worklist
+\end{lstlisting}
+\begin{lstlisting}[style=result]
+results: 1 of 1, complete
+table_blob #b-5590 "Ionix price list Q3"
+  signal: grain mismatch, 214 traversals/day into blob payload
+\end{lstlisting}
+
+\begin{lstlisting}[style=new]
+> refine #b-5590 into part
+    with {name: col "item", unit_cost: col "unit_eur"} as rows
+\end{lstlisting}
+\begin{lstlisting}[style=result]
+receipt: refined -> 38 part nodes, lineage kept
+  dup candidates: 12 queued
+\end{lstlisting}
+
+The loop closes: writes surface duplicates, health surfaces grain problems, the same small verb set fixes both, and every step is traceable through lineage to the document it came from.
+
+%======================================================================
+\section{Feature map: old world to new}
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{7.8cm}}
+\toprule
+\textbf{Old-language feature or failure} & \textbf{What the new language does} \\
+\midrule
+SQL explicit \texttt{GROUP BY} & Kept, and staged into its own named line \\
+SQL join-condition errors & Gone: hops name schema roles, not key pairs \\
+Cypher path readability & Kept as \texttt{follow} lines, one hop per line \\
+Cypher arrows / reversed direction & No direction glyphs; wrong role type-checked where endpoint classes differ \\
+Cypher implicit grouping & Inexpressible: grouping is its own line \\
+Label/property hallucination & Unemittable under schema-closed decoding \\
+SPARQL uniform patterns & Echoed: every line is verb-object-name \\
+SPARQL URI ceremony & Dropped; names come from the schema \\
+Gremlin composable steps & Kept, with mandatory named intermediates \\
+Gremlin chaining confusion & Gone: no chains exist \\
+GQL per-query path semantics & Simplified: one fixed default semantics \\
+\texttt{LIMIT} rows & Plus \texttt{budget} tokens and continuation \\
+``1 row affected'' & Receipts: guards, dup candidates, lineage \\
+External ETL dedup & In-language: candidates queryable, \texttt{merge}/\texttt{distinct} \\
+Schema migrations & In-language, gated: \texttt{derive class}, \texttt{refine}, \texttt{compact} \\
+No health concept & \texttt{health.*} subscores queryable; \texttt{flag} feedback \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{4pt}
+Open decisions affecting this syntax (verb tiering, exact role-naming rules, semantics defaults, budget defaults) are decisions 1--14 in the companion design briefing; everything shown here follows that document's recommended options. The name is TBD; nothing in the syntax depends on it.
+
+\end{document}
