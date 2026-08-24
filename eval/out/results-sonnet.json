@@ -4,14 +4,14 @@
  "n": 60,
  "slice_note": "categories excluded (not expressible in GraphLang v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
  "graphlang": {
-  "overall": 83.3,
+  "overall": 95.0,
   "n": 60,
-  "multi-hop": 76.0,
+  "multi-hop": 92.0,
   "n_multi-hop": 25,
-  "1-hop": 88.6,
+  "1-hop": 97.1,
   "n_1-hop": 35,
-  "syntax_validity": 98.3,
-  "mean_result_tokens": 241.8
+  "syntax_validity": 100.0,
+  "mean_result_tokens": 278.2
  },
  "text2cypher": {
   "overall": 71.7,
@@ -294,7 +294,7 @@
     "qid": "b5c759bb-c89b-4d32-b063-4909efc645dd",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Isaac Bonga\" as p1\nfind player where name = \"Linas Kleiza\" as p2\ncompute p1.height_cm minus p2.height_cm as height_diff\nreturn height_diff",
+    "query": "find player where name = \"Isaac Bonga\" as p1\nfind player where name = \"Linas Kleiza\" as p2\ncompute p1.height_cm minus p2.height_cm as diff\nreturn diff",
     "rows": [
      [
       0.0
@@ -305,7 +305,7 @@
       0.0
      ]
     ],
-    "result_tokens": 12
+    "result_tokens": 10
    },
    {
     "qid": "169efd3d-5147-4a6e-98c3-826eef355b3a",
@@ -544,21 +544,6 @@
     "query": "find player as p\nfollow p draftedBy team as t\nreturn p.name order by p.mass_kg desc",
     "rows": [
      [
-      "David Nash"
-     ],
-     [
-      "Doug Altenberger"
-     ],
-     [
-      "Albie Grant"
-     ],
-     [
-      "Michael Eversley"
-     ],
-     [
-      "Jalen Suggs"
-     ],
-     [
       "Ray Allen"
      ],
      [
@@ -602,6 +587,21 @@
      ],
      [
       "Dalibor Bagari\u0107"
+     ],
+     [
+      "Al Jefferson"
+     ],
+     [
+      "Stanley Roberts"
+     ],
+     [
+      "Robert Traylor"
+     ],
+     [
+      "Andrew Bynum"
+     ],
+     [
+      "Kyrylo Fesenko"
      ]
     ],
     "gold": [
@@ -666,16 +666,73 @@
       "Dalibor Bagari\u0107"
      ]
     ],
-    "result_tokens": 2004
+    "result_tokens": 2003
    },
    {
     "qid": "49b5b6a9-b72d-4152-a7d0-edd85bdf301d",
-    "ok": true,
+    "ok": false,
     "syntax_ok": true,
-    "query": "find team where name = \"Washington Wizards\" as wiz\nfollow wiz playsFor player as p\nfollow p playsFor team as t\ncount distinct t as n\nreturn n",
+    "query": "find team where name = \"Washington Wizards\" as wiz\nfollow wiz playsFor player as p\nfollow p playsFor team as t\nreturn t.name",
     "rows": [
      [
-      30
+      "Detroit Pistons"
+     ],
+     [
+      "New York Knicks"
+     ],
+     [
+      "Toronto Raptors"
+     ],
+     [
+      "San Antonio Spurs"
+     ],
+     [
+      "Orlando Magic"
+     ],
+     [
+      "Houston Rockets"
+     ],
+     [
+      "Portland Trail Blazers"
+     ],
+     [
+      "Miami Heat"
+     ],
+     [
+      "Minnesota Timberwolves"
+     ],
+     [
+      "Orlando Magic"
+     ],
+     [
+      "Detroit Pistons"
+     ],
+     [
+      "Los Angeles Lakers"
+     ],
+     [
+      "Sacramento Kings"
+     ],
+     [
+      "Portland Trail Blazers"
+     ],
+     [
+      "Brooklyn Nets"
+     ],
+     [
+      "Los Angeles Lakers"
+     ],
+     [
+      "New York Knicks"
+     ],
+     [
+      "Golden State Warriors"
+     ],
+     [
+      "Miami Heat"
+     ],
+     [
+      "Minnesota Timberwolves"
      ]
     ],
     "gold": [
@@ -683,7 +740,7 @@
       30
      ]
     ],
-    "result_tokens": 9
+    "result_tokens": 2003
    },
    {
     "qid": "9a4685c2-cb2d-4ede-a508-ce077526051b",
@@ -704,20 +761,16 @@
    },
    {
     "qid": "f070dc0e-8c06-437d-a889-5ef6008d5806",
-    "ok": true,
+    "ok": false,
     "syntax_ok": true,
-    "query": "find player where name = \"Bulbs Ehlers\" as p1\nfollow p1 playsPosition position as pos\nfollow pos playsPosition player where name = \"Derek Anderson\" as p2\nreturn pos.name",
-    "rows": [
-     [
-      "shooting guard"
-     ]
-    ],
+    "query": "",
+    "rows": [],
     "gold": [
      [
       "shooting guard"
      ]
     ],
-    "result_tokens": 14
+    "result_tokens": 0
    },
    {
     "qid": "0480c6db-ae32-442b-97c8-9cd76c99b9fd",
@@ -1117,7 +1170,7 @@
     "qid": "eed738c7-f7f7-4058-b8b9-27c70431015d",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Golden State Warriors\" as t1\nfollow t1 partOfDivision division as d\nfollow d partOfDivision team where name = \"Los Angeles Clippers\" as t2\nreturn d.name",
+    "query": "find team where name = \"Golden State Warriors\" as t1\nfind team where name = \"Los Angeles Clippers\" as t2\nfollow t1 partOfDivision division as d1\nfollow t2 partOfDivision division as d2\nreturn d1.name",
     "rows": [
      [
       "Pacific Division"
@@ -1149,12 +1202,12 @@
    },
    {
     "qid": "4e5ed21a-4d0a-418d-98a9-cde47903857b",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"JaVale McGee\" as p1\nfind player where name = \"Kevin Grevey\" as p2\ncompute p1.mass_kg minus p2.mass_kg as diff\nreturn diff",
+    "query": "find player where name = \"JaVale McGee\" as p1\nfind player where name = \"Kevin Grevey\" as p2\nreturn p1.name order by p1.mass_kg desc limit 1",
     "rows": [
      [
-      27.0
+      "JaVale McGee"
      ]
     ],
     "gold": [
@@ -1162,15 +1215,34 @@
       "JaVale McGee"
      ]
     ],
-    "result_tokens": 10
+    "result_tokens": 13
    },
    {
     "qid": "98412f9e-dbff-45fd-8025-71659fe7cdb0",
-    "ok": false,
-    "syntax_ok": false,
-    "error": "parse error at line 1: unknown verb 'Backtick'",
-    "query": "Backtick stray in output. Fix:\n\nfind award where name = \"Kareem Abdul-Jabbar Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
-    "rows": null
+    "ok": true,
+    "syntax_ok": true,
+    "query": "find award where name = \"Kareem Abdul-Jabbar Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+    "rows": [
+     [
+      "power forward",
+      1
+     ],
+     [
+      "center",
+      1
+     ]
+    ],
+    "gold": [
+     [
+      "power forward",
+      1
+     ],
+     [
+      "center",
+      1
+     ]
+    ],
+    "result_tokens": 18
    },
    {
     "qid": "6b0ce2fe-f6ab-4f9a-89e6-53df6622c36a",
@@ -1292,12 +1364,12 @@
    },
    {
     "qid": "c00cad2c-7c11-40de-8f19-fc661b304f8e",
-    "ok": true,
+    "ok": false,
     "syntax_ok": true,
-    "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+    "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct p as n\nreturn n",
     "rows": [
      [
-      2
+      1
      ]
     ],
     "gold": [
@@ -1550,12 +1622,12 @@
    },
    {
     "qid": "6b3e04ef-80e2-43e7-b7ea-fdcc0aaf11c9",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Chris Whitney\" as p\nfollow p draftedBy team as t\nfollow t playsFor player as others\nreturn others.date_of_birth order by others.date_of_birth desc limit 1",
+    "query": "find player where name = \"Chris Whitney\" as p\nfollow p draftedBy team as t\nfollow t playsFor player as p2\nreturn p2.date_of_birth order by p2.date_of_birth desc limit 1",
     "rows": [
      [
-      null
+      "2004-01-04"
      ]
     ],
     "gold": [
@@ -1563,7 +1635,7 @@
       "2004-01-04"
      ]
     ],
-    "result_tokens": 15
+    "result_tokens": 16
    },
    {
     "qid": "5ce28bbd-d6c8-49e6-9d79-ddc07e77fa6c",
@@ -1620,15 +1692,12 @@
    },
    {
     "qid": "99d50929-5675-4f6c-919c-f80f5241a955",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Skeeter Swift\" as p1\nfind player where name = \"Lee Knorek\" as p2\nreturn p1.name, p1.date_of_death, p2.name, p2.date_of_death",
+    "query": "find player where name = \"Skeeter Swift\" or name = \"Lee Knorek\" as p\nreturn p.name order by p.date_of_death desc limit 1",
     "rows": [
      [
-      "Skeeter Swift",
-      "2017-04-20",
-      "Lee Knorek",
-      "2003-07-22"
+      "Skeeter Swift"
      ]
     ],
     "gold": [
@@ -1636,13 +1705,13 @@
       "Skeeter Swift"
      ]
     ],
-    "result_tokens": 34
+    "result_tokens": 13
    },
    {
     "qid": "d6badaed-4add-4b95-a078-68bf10f3541f",
     "ok": true,
     "syntax_ok": true,
-    "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+    "query": "find position where name = \"Swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
     "rows": [
      [
       "NBA Most Valuable Player Award",
@@ -1772,7 +1841,7 @@
     "qid": "3dffa227-502f-42e3-bffb-09947424be00",
     "ok": true,
     "syntax_ok": true,
-    "query": "find division where name = \"Northwest Division\" as d1\nfollow d1 partOfConference conference as c\nfollow c partOfConference division where name = \"Southwest Division\" as d2\nreturn c.name",
+    "query": "find conference as c\nfollow c partOfConference division where name = \"Northwest Division\" as d1\nfollow c partOfConference division where name = \"Southwest Division\" as d2\nreturn c.name",
     "rows": [
      [
       "Western Conference"
@@ -1804,12 +1873,12 @@
    },
    {
     "qid": "f9f4c195-929a-4922-a5a0-e804df936190",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Greg Jackson\" as p1\nfind player where name = \"Nate Hawthorne\" as p2\ncompute p1.date_of_death same p2.date_of_death as answer\nreturn answer",
+    "query": "find player where name = \"Greg Jackson\" or name = \"Nate Hawthorne\" as p\nreturn p.name order by p.date_of_death desc limit 1",
     "rows": [
      [
-      false
+      "Greg Jackson"
      ]
     ],
     "gold": [
@@ -1817,7 +1886,7 @@
       "Greg Jackson"
      ]
     ],
-    "result_tokens": 11
+    "result_tokens": 13
    },
    {
     "qid": "048c39e7-9056-42b3-931a-d7016ed96490",
@@ -2009,10 +2078,47 @@
    },
    {
     "qid": "3d3b116c-6da1-4cce-9080-e08f1c4ba87a",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Khalid El-Amin\" as p\nfollow p playsFor team as t\nfollow t draftedBy player where date_of_death < 2019 as d\nreturn d.name",
-    "rows": [],
+    "query": "find player where name = \"Khalid El-Amin\" as p\nfollow p playsFor team as t\nfollow t draftedBy player where date_of_death < \"2019\" as d\nreturn d.name",
+    "rows": [
+     [
+      "Orlando Woolridge"
+     ],
+     [
+      "Erwin Louis Mueller"
+     ],
+     [
+      "Jack Haley"
+     ],
+     [
+      "Tom Boerwinkle"
+     ],
+     [
+      "Norm Van Lier"
+     ],
+     [
+      "Quintin Dailey"
+     ],
+     [
+      "Lari Ketner"
+     ],
+     [
+      "Simmie Hill"
+     ],
+     [
+      "Jackson Vroman"
+     ],
+     [
+      "Howard Porter"
+     ],
+     [
+      "Maurice Lucas"
+     ],
+     [
+      "Kennedy McIntosh"
+     ]
+    ],
     "gold": [
      [
       "Maurice Lucas"
@@ -2051,14 +2157,35 @@
       "Jack Haley"
      ]
     ],
-    "result_tokens": 10
+    "result_tokens": 55
    },
    {
     "qid": "58d1ad18-29ef-45bb-ad70-faf82dc5ac18",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find division where name = \"Southeast\" as d\nfollow d partOfDivision team as t\nreturn t.name, t.head_coach",
-    "rows": [],
+    "query": "find division where name = \"Southeast Division\" as d\nfollow d partOfDivision team as t\nreturn t.name, t.head_coach",
+    "rows": [
+     [
+      "Atlanta Hawks",
+      "Lloyd Pierce"
+     ],
+     [
+      "Orlando Magic",
+      "Jamahl Mosley"
+     ],
+     [
+      "Charlotte Hornets",
+      "James Borrego"
+     ],
+     [
+      "Miami Heat",
+      "Erik Spoelstra"
+     ],
+     [
+      "Washington Wizards",
+      "Wes Unseld Jr."
+     ]
+    ],
     "gold": [
      [
       "Atlanta Hawks",
@@ -2081,7 +2208,7 @@
       "Wes Unseld Jr."
      ]
     ],
-    "result_tokens": 13
+    "result_tokens": 51
    },
    {
     "qid": "70338d8d-1a76-44bd-911d-413d96a0972e",
@@ -2468,10 +2595,71 @@
    },
    {
     "qid": "ddf26fab-79e3-43e7-80ba-7e9c62217385",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find division where name = \"Atlantic\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\nreturn p.handedness",
-    "rows": [],
+    "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\nreturn p.handedness",
+    "rows": [
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ],
+     [
+      null
+     ]
+    ],
     "gold": [
      [
       null
@@ -2483,7 +2671,7 @@
       "left-handedness"
      ]
     ],
-    "result_tokens": 11
+    "result_tokens": 750
    },
    {
     "qid": "a550e214-eb55-452c-8416-75f3e9044d79",
@@ -2504,88 +2692,12 @@
    },
    {
     "qid": "9e00c9ea-7cd4-4e44-8934-3656a6498bb4",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find award where name = \"Australian Sports Medal\" as a\nfollow a receivesAward player as p\nfind team where name = \"Houston Rockets\" as t\nfollow t playsFor player as p2\nfollow p2 playsFor team as t2\nreturn p.name, p.gender",
+    "query": "find award where name = \"Australian Sports Medal\" as a\nfollow a receivesAward player as p\nfollow p playsFor team where name = \"Houston Rockets\" as t\nreturn p.name, p.gender",
     "rows": [
      [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
-      "male"
-     ],
-     [
-      "Chris Anstey",
+      "David Andersen",
       "male"
      ]
     ],
@@ -2595,7 +2707,7 @@
       "male"
      ]
     ],
-    "result_tokens": 2003
+    "result_tokens": 18
    },
    {
     "qid": "f0824791-26e5-46e3-8d92-609937ab1af9",
@@ -2618,7 +2730,7 @@
     "qid": "d94d0061-7000-4478-b913-15d833f73958",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Jack Stephens\" as js\nfollow js playsPosition position as pos\nfollow pos playsPosition player as p\ngroup by p as g\ncount distinct g.pos as n\nreturn p.name, n",
+    "query": "find player where name = \"Jack Stephens\" as p1\nfollow p1 playsPosition position as pos\nfollow pos playsPosition player as p2\ngroup by p2 as g\ncount distinct g.pos as n\nreturn p2.name, n",
     "rows": [
      [
       "Calvin Murphy",
@@ -2864,16 +2976,77 @@
    },
    {
     "qid": "fc233aa5-328c-4f5a-a18e-19ee17dd24d6",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find division where name = \"Northwest\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\nreturn p.gender",
-    "rows": [],
+    "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\nreturn p.gender",
+    "rows": [
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ]
+    ],
     "gold": [
      [
       "male"
      ]
     ],
-    "result_tokens": 10
+    "result_tokens": 1619
    },
    {
     "qid": "032f1ce7-3acb-4de9-b37d-290c512a5c2f",

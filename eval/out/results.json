@@ -4,24 +4,24 @@
  "n": 60,
  "slice_note": "categories excluded (not expressible in GraphLang v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
  "graphlang": {
-  "overall": 96.7,
+  "overall": 98.3,
   "n": 60,
   "multi-hop": 96.0,
   "n_multi-hop": 25,
-  "1-hop": 97.1,
+  "1-hop": 100.0,
   "n_1-hop": 35,
-  "syntax_validity": 98.3,
-  "mean_result_tokens": 222.5
+  "syntax_validity": 100.0,
+  "mean_result_tokens": 245.3
  },
  "text2cypher": {
-  "overall": 70.0,
+  "overall": 73.3,
   "n": 60,
-  "multi-hop": 52.0,
+  "multi-hop": 56.0,
   "n_multi-hop": 25,
-  "1-hop": 82.9,
+  "1-hop": 85.7,
   "n_1-hop": 35,
   "syntax_validity": 98.3,
-  "mean_result_tokens": 393.8
+  "mean_result_tokens": 394.0
  },
  "cypher_mode": "live",
  "details": {
@@ -178,7 +178,7 @@
     "qid": "df3389b0-1ba2-4dea-9216-b1c5eabd79e8",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"New Orleans Pelicans\" as t\nfollow t partOfDivision division as d\nfollow d partOfDivision team where name != \"New Orleans Pelicans\" as others\nreturn others.name",
+    "query": "find team where name = \"New Orleans Pelicans\" as pelicans\nfollow pelicans partOfDivision division as d\nfollow d partOfDivision team as t\nreturn t.name",
     "rows": [
      [
       "Dallas Mavericks"
@@ -207,7 +207,7 @@
       "Dallas Mavericks"
      ]
     ],
-    "result_tokens": 28
+    "result_tokens": 27
    },
    {
     "qid": "9bf0c917-b7a2-4c1e-9b3e-9661030b372f",
@@ -254,7 +254,7 @@
     "qid": "be667a90-0313-4806-a6ca-e7d1d69e5303",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team as t\nfollow t playsFor player where name = \"Herm Gilliam\" as p1\nfollow t playsFor player where name = \"Scoot Henderson\" as p2\nreturn t.name, t.owners",
+    "query": "find player where name = \"Herm Gilliam\" as hg\nfollow hg playsFor team as hg_team\nfollow hg_team playsFor player where name = \"Scoot Henderson\" as sh\nreturn hg_team.name, hg_team.owners",
     "rows": [
      [
       "Portland Trail Blazers",
@@ -269,7 +269,7 @@
       ]
      ]
     ],
-    "result_tokens": 21
+    "result_tokens": 24
    },
    {
     "qid": "35d4cf0b-db94-4958-99a8-7e948aa4805d",
@@ -311,7 +311,7 @@
     "qid": "169efd3d-5147-4a6e-98c3-826eef355b3a",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Buddy Hield\" as bh\nfollow bh receivesAward award as awards\nfollow awards receivesAward player where name != \"Buddy Hield\" as others\ngroup by others as g\ncount distinct g.awards as award_count\nreturn others.name, award_count",
+    "query": "find player where name = \"Buddy Hield\" as bh\nfollow bh receivesAward award as a\nfollow a receivesAward player as p\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
     "rows": [
      [
       "Frank Kaminsky",
@@ -404,7 +404,7 @@
       1
      ]
     ],
-    "result_tokens": 64
+    "result_tokens": 62
    },
    {
     "qid": "05885222-231e-47c3-a064-a713dab2a132",
@@ -544,21 +544,6 @@
     "query": "find player as p\nfollow p draftedBy team as t\nreturn p.name order by p.mass_kg desc",
     "rows": [
      [
-      "David Nash"
-     ],
-     [
-      "Doug Altenberger"
-     ],
-     [
-      "Albie Grant"
-     ],
-     [
-      "Michael Eversley"
-     ],
-     [
-      "Jalen Suggs"
-     ],
-     [
       "Ray Allen"
      ],
      [
@@ -602,6 +587,21 @@
      ],
      [
       "Dalibor Bagari\u0107"
+     ],
+     [
+      "Al Jefferson"
+     ],
+     [
+      "Stanley Roberts"
+     ],
+     [
+      "Robert Traylor"
+     ],
+     [
+      "Andrew Bynum"
+     ],
+     [
+      "Kyrylo Fesenko"
      ]
     ],
     "gold": [
@@ -666,16 +666,16 @@
       "Dalibor Bagari\u0107"
      ]
     ],
-    "result_tokens": 2004
+    "result_tokens": 2003
    },
    {
     "qid": "49b5b6a9-b72d-4152-a7d0-edd85bdf301d",
-    "ok": true,
+    "ok": false,
     "syntax_ok": true,
-    "query": "find team where name = \"Washington Wizards\" as wizards\nfollow wizards playsFor player as p\nfollow p playsFor team as t\ncount distinct t as team_count\nreturn team_count",
+    "query": "find team where name = \"Washington Wizards\" as wiz\nfollow wiz playsFor player as p\nfollow p playsFor team where name != \"Washington Wizards\" as other_teams\ncount distinct other_teams as n\nreturn n",
     "rows": [
      [
-      30
+      29
      ]
     ],
     "gold": [
@@ -683,13 +683,13 @@
       30
      ]
     ],
-    "result_tokens": 12
+    "result_tokens": 9
    },
    {
     "qid": "9a4685c2-cb2d-4ede-a508-ce077526051b",
     "ok": true,
     "syntax_ok": true,
-    "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\ncount d as num_divisions\nreturn num_divisions",
+    "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\ncount distinct d as num\nreturn num",
     "rows": [
      [
       3
@@ -700,13 +700,13 @@
       3
      ]
     ],
-    "result_tokens": 12
+    "result_tokens": 10
    },
    {
     "qid": "f070dc0e-8c06-437d-a889-5ef6008d5806",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Bulbs Ehlers\" as p1\nfollow p1 playsPosition position as pos\nfollow pos playsPosition player where name = \"Derek Anderson\" as check\nreturn pos.name",
+    "query": "find position as pos\nfollow pos playsPosition player where name = \"Bulbs Ehlers\" as p1\nfollow pos playsPosition player where name = \"Derek Anderson\" as p2\nreturn pos.name",
     "rows": [
      [
       "shooting guard"
@@ -1117,7 +1117,7 @@
     "qid": "eed738c7-f7f7-4058-b8b9-27c70431015d",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Golden State Warriors\" as warriors\nfollow warriors partOfDivision division as div\nfollow div partOfDivision team where name = \"Los Angeles Clippers\" as clippers\nreturn div.name",
+    "query": "find division as d\nfollow d partOfDivision team where name = \"Golden State Warriors\" as t1\nfollow d partOfDivision team where name = \"Los Angeles Clippers\" as t2\nreturn d.name",
     "rows": [
      [
       "Pacific Division"
@@ -1128,7 +1128,7 @@
       "Pacific Division"
      ]
     ],
-    "result_tokens": 15
+    "result_tokens": 14
    },
    {
     "qid": "9949be94-04e8-4e5f-97a3-6b0337882684",
@@ -1149,15 +1149,12 @@
    },
    {
     "qid": "4e5ed21a-4d0a-418d-98a9-cde47903857b",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"JaVale McGee\" as p1\nfind player where name = \"Kevin Grevey\" as p2\nreturn p1.name, p1.mass_kg, p2.name, p2.mass_kg",
+    "query": "find player where name = \"JaVale McGee\" or name = \"Kevin Grevey\" as p\nreturn p.name order by p.mass_kg desc limit 1",
     "rows": [
      [
-      "JaVale McGee",
-      122.0,
-      "Kevin Grevey",
-      95.0
+      "JaVale McGee"
      ]
     ],
     "gold": [
@@ -1165,13 +1162,13 @@
       "JaVale McGee"
      ]
     ],
-    "result_tokens": 27
+    "result_tokens": 13
    },
    {
     "qid": "98412f9e-dbff-45fd-8025-71659fe7cdb0",
     "ok": true,
     "syntax_ok": true,
-    "query": "find award where name = \"Kareem Abdul-Jabbar Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as player_count\nreturn pos.name, player_count",
+    "query": "find award where name = \"Kareem Abdul-Jabbar Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
     "rows": [
      [
       "power forward",
@@ -1192,7 +1189,7 @@
       1
      ]
     ],
-    "result_tokens": 21
+    "result_tokens": 18
    },
    {
     "qid": "6b0ce2fe-f6ab-4f9a-89e6-53df6622c36a",
@@ -1316,7 +1313,7 @@
     "qid": "c00cad2c-7c11-40de-8f19-fc661b304f8e",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+    "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct pos as num_positions\nreturn num_positions",
     "rows": [
      [
       2
@@ -1327,13 +1324,13 @@
       2
      ]
     ],
-    "result_tokens": 9
+    "result_tokens": 12
    },
    {
     "qid": "77741715-db78-4186-a03b-146bfce2ba79",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position where name = \"point guard\" as pos\nreturn p.name",
+    "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position where name = \"Point Guard\" as pos\nreturn p.name",
     "rows": [
      [
       "Rod Strickland"
@@ -1498,7 +1495,7 @@
     "qid": "cb5e298f-9275-42a8-a0a1-c3abeee8dc96",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+    "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as count\nreturn pos.name, count",
     "rows": [
      [
       "shooting guard",
@@ -1551,13 +1548,13 @@
       1
      ]
     ],
-    "result_tokens": 35
+    "result_tokens": 36
    },
    {
     "qid": "e26821b6-6a22-4d03-8f13-5461db203d7c",
     "ok": true,
     "syntax_ok": true,
-    "query": "find conference as c\ncount distinct c as num\nreturn num",
+    "query": "find conference as c\ncount c as n\nreturn n",
     "rows": [
      [
       2
@@ -1568,7 +1565,7 @@
       2
      ]
     ],
-    "result_tokens": 10
+    "result_tokens": 9
    },
    {
     "qid": "6b3e04ef-80e2-43e7-b7ea-fdcc0aaf11c9",
@@ -1661,7 +1658,7 @@
     "qid": "d6badaed-4add-4b95-a078-68bf10f3541f",
     "ok": true,
     "syntax_ok": true,
-    "query": "find position where name = \"Swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as num_players\nreturn a.name, num_players",
+    "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
     "rows": [
      [
       "NBA Most Valuable Player Award",
@@ -1730,7 +1727,7 @@
       1
      ]
     ],
-    "result_tokens": 91
+    "result_tokens": 88
    },
    {
     "qid": "7535ba70-b009-43a3-8eab-3f6fac5d8edd",
@@ -1791,7 +1788,7 @@
     "qid": "3dffa227-502f-42e3-bffb-09947424be00",
     "ok": true,
     "syntax_ok": true,
-    "query": "find division where name = \"Northwest Division\" as nw\nfollow nw partOfConference conference as c\nfollow c partOfConference division where name = \"Southwest Division\" as d\nreturn c.name",
+    "query": "find division where name = \"Northwest Division\" as nw\nfollow nw partOfConference conference as conf\nfollow conf partOfConference division where name = \"Southwest Division\" as sw\nreturn conf.name",
     "rows": [
      [
       "Western Conference"
@@ -1842,7 +1839,7 @@
     "qid": "048c39e7-9056-42b3-931a-d7016ed96490",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Utah Jazz\" as uj\nfollow uj draftedBy player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+    "query": "find team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p\nfollow p playsFor team as played_for\ngroup by played_for as g\ncount distinct g.p as count\nreturn played_for.name, count",
     "rows": [
      [
       "Toronto Raptors",
@@ -2007,7 +2004,7 @@
       8
      ]
     ],
-    "result_tokens": 163
+    "result_tokens": 166
    },
    {
     "qid": "9707e428-0375-4557-82fb-b527c34681d2",
@@ -2030,7 +2027,7 @@
     "qid": "3d3b116c-6da1-4cce-9080-e08f1c4ba87a",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Khalid El-Amin\" as kea\nfollow kea playsFor team as t\nfollow t draftedBy player where date_of_death < \"2019-01-01\" as p\nreturn p.name",
+    "query": "find player where name = \"Khalid El-Amin\" as kea\nfollow kea playsFor team as t\nfollow t draftedBy player where date_of_death < \"2019\" as p\nreturn p.name",
     "rows": [
      [
       "Orlando Woolridge"
@@ -2329,63 +2326,11 @@
     "qid": "e01ace2f-7bde-4e43-9d56-1d65f52ef670",
     "ok": true,
     "syntax_ok": true,
-    "query": "find team where name = \"Memphis Grizzlies\" as grizzlies\nfollow grizzlies playsFor player as p\nfollow p draftedBy team as draft_team\ngroup by draft_team as g\ncount distinct g.p as num_players\nreturn draft_team.name, num_players order by num_players desc",
+    "query": "find team where name = \"Memphis Grizzlies\" as t\nfollow t playsFor player as p\nfollow p draftedBy team as drafted_team\ngroup by drafted_team as g\ncount distinct g.p as num_players\nreturn drafted_team.name, num_players",
     "rows": [
-     [
-      "Memphis Grizzlies",
-      23
-     ],
-     [
-      "Boston Celtics",
-      8
-     ],
      [
       "Utah Jazz",
       7
-     ],
-     [
-      "Portland Trail Blazers",
-      7
-     ],
-     [
-      "Orlando Magic",
-      6
-     ],
-     [
-      "Miami Heat",
-      6
-     ],
-     [
-      "Los Angeles Lakers",
-      6
-     ],
-     [
-      "Toronto Raptors",
-      5
-     ],
-     [
-      "Los Angeles Clippers",
-      5
-     ],
-     [
-      "Detroit Pistons",
-      5
-     ],
-     [
-      "Minnesota Timberwolves",
-      5
-     ],
-     [
-      "Philadelphia 76ers",
-      4
-     ],
-     [
-      "Houston Rockets",
-      4
-     ],
-     [
-      "Chicago Bulls",
-      4
      ],
      [
       "Sacramento Kings",
@@ -2400,15 +2345,67 @@
       3
      ],
      [
+      "Brooklyn Nets",
+      1
+     ],
+     [
+      "Memphis Grizzlies",
+      23
+     ],
+     [
+      "Portland Trail Blazers",
+      7
+     ],
+     [
+      "Toronto Raptors",
+      5
+     ],
+     [
       "Atlanta Hawks",
       3
+     ],
+     [
+      "Philadelphia 76ers",
+      4
+     ],
+     [
+      "Milwaukee Bucks",
+      2
+     ],
+     [
+      "Dallas Mavericks",
+      2
+     ],
+     [
+      "Orlando Magic",
+      6
+     ],
+     [
+      "Boston Celtics",
+      8
+     ],
+     [
+      "Los Angeles Clippers",
+      5
+     ],
+     [
+      "Miami Heat",
+      6
+     ],
+     [
+      "Houston Rockets",
+      4
      ],
      [
       "Golden State Warriors",
       3
      ],
      [
-      "Milwaukee Bucks",
+      "Los Angeles Lakers",
+      6
+     ],
+     [
+      "Cleveland Cavaliers",
       2
      ]
     ],
@@ -2680,7 +2677,7 @@
     "qid": "d94d0061-7000-4478-b913-15d833f73958",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player where name = \"Jack Stephens\" as js\nfollow js playsPosition position as jack_pos\nfollow jack_pos playsPosition player as p\ngroup by p as g\ncount distinct g.jack_pos as num_positions\nreturn p.name, num_positions",
+    "query": "find player where name = \"Jack Stephens\" as jack\nfollow jack playsPosition position as pos\nfollow pos playsPosition player as other\ngroup by other as g\ncount distinct g.pos as num_positions\nreturn other.name, num_positions",
     "rows": [
      [
       "Calvin Murphy",
@@ -2845,13 +2842,13 @@
       1
      ]
     ],
-    "result_tokens": 2005
+    "result_tokens": 2002
    },
    {
     "qid": "7960644e-99f8-48c8-9b43-729dd97a0a3f",
     "ok": true,
     "syntax_ok": true,
-    "query": "find player as p\nreturn p.gender",
+    "query": "find player as p\ngroup by p.gender as g\nreturn p.gender",
     "rows": [
      [
       "male"
@@ -2926,11 +2923,77 @@
    },
    {
     "qid": "fc233aa5-328c-4f5a-a18e-19ee17dd24d6",
-    "ok": false,
-    "syntax_ok": false,
-    "error": "cannot resolve column p.gender",
-    "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by p.gender as g\ncount distinct g.p as n\nreturn p.gender",
-    "rows": null
+    "ok": true,
+    "syntax_ok": true,
+    "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\nreturn p.gender",
+    "rows": [
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ],
+     [
+      "male"
+     ]
+    ],
+    "gold": [
+     [
+      "male"
+     ]
+    ],
+    "result_tokens": 1619
    },
    {
     "qid": "032f1ce7-3acb-4de9-b37d-290c512a5c2f",
@@ -3147,7 +3210,7 @@
     "qid": "9bf0c917-b7a2-4c1e-9b3e-9661030b372f",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (t:Team)-[:hasHomeVenue]->(v:Venue)\nWHERE t.name = \"Los Angeles Clippers\"\nRETURN v.name",
+    "query": "MATCH (team:Team {name: \"Los Angeles Clippers\"})-[:hasHomeVenue]->(venue:Venue)\nRETURN DISTINCT venue.name",
     "rows": [
      [
       "Maple Leaf Gardens"
@@ -3249,26 +3312,10 @@
     "qid": "169efd3d-5147-4a6e-98c3-826eef355b3a",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (buddy:Player {name: \"Buddy Hield\"})-[:receivesAward]->(award:Award)\nWITH buddy, collect(award) as buddyAwards\nMATCH (player:Player)-[:receivesAward]->(award:Award)\nWHERE award IN buddyAwards AND player <> buddy\nWITH player, count(distinct award) as awardCount\nRETURN player.name, awardCount\nORDER BY awardCount DESC",
+    "query": "MATCH (buddy:Player {name: \"Buddy Hield\"})-[:receivesAward]->(buddyAward:Award)\nWITH COLLECT(buddyAward) as buddyAwards\nMATCH (player:Player)-[:receivesAward]->(award:Award)\nWHERE award IN buddyAwards AND player.name <> \"Buddy Hield\"\nWITH player, COUNT(award) as awardCount\nRETURN player.name, awardCount\nORDER BY player.name",
     "rows": [
      [
-      "Glenn Robinson",
-      1
-     ],
-     [
-      "Obi Toppin",
-      1
-     ],
-     [
-      "Doug McDermott",
-      1
-     ],
-     [
-      "Jimmer Fredette",
-      1
-     ],
-     [
-      "Frank Kaminsky",
+      "Andrew Bogut",
       1
      ],
      [
@@ -3276,7 +3323,27 @@
       1
      ],
      [
+      "Doug McDermott",
+      1
+     ],
+     [
+      "Frank Kaminsky",
+      1
+     ],
+     [
       "Frank Mason III",
+      1
+     ],
+     [
+      "Glenn Robinson",
+      1
+     ],
+     [
+      "Jalen Brunson",
+      1
+     ],
+     [
+      "Jimmer Fredette",
       1
      ],
      [
@@ -3284,11 +3351,7 @@
       1
      ],
      [
-      "Andrew Bogut",
-      1
-     ],
-     [
-      "Jalen Brunson",
+      "Obi Toppin",
       1
      ],
      [
@@ -3659,14 +3722,12 @@
    },
    {
     "qid": "0480c6db-ae32-442b-97c8-9cd76c99b9fd",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
     "query": "MATCH (p:Player {name: \"George Lehmann\"})\nRETURN p.date_of_birth",
     "rows": [
      [
-      "left-handedness",
-      "right-handedness",
-      false
+      "1942-05-01"
      ]
     ],
     "gold": [
@@ -3674,7 +3735,7 @@
       "1942-05-01"
      ]
     ],
-    "result_tokens": 26
+    "result_tokens": 7
    },
    {
     "qid": "0f76e925-cb2e-46c6-8a73-cdb9478a6df1",
@@ -3699,7 +3760,7 @@
     "qid": "92ad9905-dbac-47b8-9d19-bab0ee2316fe",
     "ok": false,
     "syntax_ok": true,
-    "query": "MATCH (joelKramer:Player {name: \"Joel Kramer\"})-[:playsPosition]->(joelPos:Position)\nWITH collect(joelPos) AS joelPositions\nMATCH (player:Player)-[:playsPosition]->(pos:Position)\nWHERE player.name <> \"Joel Kramer\" AND pos IN joelPositions\nWITH player, COUNT(DISTINCT pos) AS numberOfPositions\nRETURN player.name, numberOfPositions\nORDER BY player.name",
+    "query": "MATCH (joel:Player {name: \"Joel Kramer\"})-[:playsPosition]->(pos:Position)\nWITH joel, COLLECT(pos) as joelPositions\nMATCH (player:Player)-[:playsPosition]->(position:Position)\nWHERE position IN joelPositions AND player <> joel\nWITH player.name as playerName, COUNT(DISTINCT position) as posCount\nRETURN playerName, posCount",
     "rows": [
      [
       "Sam Mitchell",
@@ -3870,7 +3931,7 @@
     "qid": "6497340e-a859-4483-9ab6-ac83a0400b2a",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (t:Team) RETURN t.name",
+    "query": "MATCH (t:Team)\nRETURN t.name",
     "rows": [
      [
       "Los Angeles Lakers"
@@ -4001,7 +4062,7 @@
     "qid": "5257c6c3-779f-4b96-90d8-aaf6083d9e27",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (pos:Position {name: \"point forward\"})<-[:playsPosition]-(player:Player)-[:playsFor]->(team:Team)\nRETURN DISTINCT team.name, team.inception_year",
+    "query": "MATCH (p:Player)-[:playsPosition]->(pos:Position)\nWHERE pos.name = \"point forward\"\nMATCH (p)-[:playsFor]->(t:Team)\nRETURN DISTINCT t.name, t.inception_year",
     "rows": [
      [
       "Los Angeles Lakers",
@@ -4030,13 +4091,13 @@
       1970
      ]
     ],
-    "result_tokens": 26
+    "result_tokens": 24
    },
    {
     "qid": "93830abd-079d-43de-b596-3e3b98ab7fa7",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (p:Player {name: \"Bob Dandridge\"})-[:draftedBy]->(t:Team)\nRETURN t.name AS team, t.head_coach AS head_coach",
+    "query": "MATCH (p:Player {name: \"Bob Dandridge\"})-[:draftedBy]->(t:Team)\nRETURN t.name, t.head_coach",
     "rows": [
      [
       "Milwaukee Bucks",
@@ -4049,13 +4110,13 @@
       "Mike Budenholzer"
      ]
     ],
-    "result_tokens": 13
+    "result_tokens": 14
    },
    {
     "qid": "eed738c7-f7f7-4058-b8b9-27c70431015d",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (t1:Team {name: \"Golden State Warriors\"})-[:partOfDivision]->(d:Division)\nMATCH (t2:Team {name: \"Los Angeles Clippers\"})-[:partOfDivision]->(d)\nRETURN d.name",
+    "query": "MATCH (warriors:Team {name: \"Golden State Warriors\"})-[:partOfDivision]->(div:Division)\nMATCH (clippers:Team {name: \"Los Angeles Clippers\"})-[:partOfDivision]->(div)\nRETURN div.name",
     "rows": [
      [
       "Pacific Division"
@@ -4066,7 +4127,7 @@
       "Pacific Division"
      ]
     ],
-    "result_tokens": 6
+    "result_tokens": 7
    },
    {
     "qid": "9949be94-04e8-4e5f-97a3-6b0337882684",
@@ -4254,7 +4315,7 @@
     "qid": "c00cad2c-7c11-40de-8f19-fc661b304f8e",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (p:Player {name: \"Robert Rose\"})-[:playsPosition]->(:Position)\nRETURN count(*) AS count",
+    "query": "MATCH (p:Player {name: \"Robert Rose\"})-[:playsPosition]->(pos:Position)\nRETURN count(pos)",
     "rows": [
      [
       2
@@ -4265,7 +4326,7 @@
       2
      ]
     ],
-    "result_tokens": 2
+    "result_tokens": 3
    },
    {
     "qid": "77741715-db78-4186-a03b-146bfce2ba79",
@@ -4373,12 +4434,33 @@
    },
    {
     "qid": "cb5e298f-9275-42a8-a0a1-c3abeee8dc96",
-    "ok": false,
+    "ok": true,
     "syntax_ok": true,
     "query": "MATCH (team:Team {name: \"Brooklyn Nets\"})<-[:draftedBy]-(player:Player)-[:playsPosition]->(position:Position)\nRETURN position.name AS position, COUNT(DISTINCT player) AS player_count\nORDER BY position",
     "rows": [
      [
-      2
+      "center",
+      21
+     ],
+     [
+      "point guard",
+      12
+     ],
+     [
+      "power forward",
+      19
+     ],
+     [
+      "shooting guard",
+      14
+     ],
+     [
+      "small forward",
+      21
+     ],
+     [
+      "swingman",
+      1
      ]
     ],
     "gold": [
@@ -4407,7 +4489,7 @@
       1
      ]
     ],
-    "result_tokens": 2
+    "result_tokens": 32
    },
    {
     "qid": "e26821b6-6a22-4d03-8f13-5461db203d7c",
@@ -5079,7 +5161,7 @@
     "qid": "e01ace2f-7bde-4e43-9d56-1d65f52ef670",
     "ok": false,
     "syntax_ok": true,
-    "query": "MATCH (memphis:Team {name: \"Memphis Grizzlies\"})<-[:playsFor]-(player:Player)\nMATCH (player)-[:draftedBy]->(draftTeam:Team)\nRETURN draftTeam.name, COUNT(DISTINCT player) as drafted_player_count\nORDER BY drafted_player_count DESC",
+    "query": "MATCH (p:Player)-[:playsFor]->(mg:Team {name: \"Memphis Grizzlies\"})\nMATCH (p)-[:draftedBy]->(draftingTeam:Team)\nRETURN draftingTeam.name, COUNT(p) as player_count\nORDER BY player_count DESC",
     "rows": [
      [
       "Memphis Grizzlies",
@@ -5250,7 +5332,7 @@
     "qid": "4f663af5-dab4-4246-bd48-df2f50302e4f",
     "ok": true,
     "syntax_ok": true,
-    "query": "MATCH (d:Division)\nRETURN d.name",
+    "query": "MATCH (d:Division) RETURN d.name",
     "rows": [
      [
       "Pacific Division"

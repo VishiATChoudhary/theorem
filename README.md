@@ -34,7 +34,20 @@ return sups.name, n_parts order by n_parts desc budget 2000 tokens
 
 ## Benchmark results
 
-See `eval/out/results.json` and the spider diagram at `eval/out/spider.png`. RESULTS_PLACEHOLDER
+CypherBench NBA slice, 60 questions stratified over the expressible categories (no union, optional-match, or edge-property questions; both conditions ran on the identical slice with one repair retry each). Execution accuracy against CypherBench gold answers; text2cypher executed live on Neo4j.
+
+| Condition | Overall EX | Multi-hop | 1-hop | Syntax valid | Mean result tokens |
+|-----------|-----------:|----------:|------:|-------------:|-------------------:|
+| GraphLang + Haiku 4.5 | **98.3%** | **96.0%** | **100%** | 100% | 245 |
+| text2cypher + Haiku 4.5 | 73.3% | 56.0% | 85.7% | 98.3% | 394 |
+| GraphLang + Sonnet 5 | **95.0%** | **92.0%** | 97.1% | 100% | 278 |
+| text2cypher + Sonnet 5 | 71.7% | 60.0% | 80.0% | 96.7% | 207 |
+
+Published full-test-set frontier baselines for context: Claude 3.5 Sonnet 61.6% EX, GPT-4o 60.2% (CypherBench paper, arXiv 2412.18702; different slice, not directly comparable).
+
+The headline: on multi-hop questions, the design's target zone, GraphLang with the small Haiku model reaches 96% where text2cypher with the same model reaches 56%. Three benchmark-driven language changes came out of the eval loop (global aggregates, trail semantics, the compute verb), each documented in the spec.
+
+![Spider diagram](eval/out/spider.png)
 
 Reproduce: `uv run python -m eval.run_eval --n 60` (needs the `claude` CLI; docker for the Neo4j text2cypher baseline), then `uv run python -m eval.spider`.
 
