@@ -1,0 +1,459 @@
+"""Tokenizer and recursive-descent parser for GraphLang.
+
+Line-oriented: one statement per logical line. A physical line starting
+with whitespace continues the previous logical line. Lines whose first
+character is '#' are comments (node ids never start a line).
+"""
+
+from __future__ import annotations
+
+import re
+
+from .ast_nodes import (
+    Aggregate,
+    AssertEdge,
+    AssertNode,
+    Clause,
+    Col,
+    Compact,
+    Cond,
+    Continue,
+    DeriveClass,
+    Distinct,
+    Find,
+    Flag,
+    Follow,
+    GroupBy,
+    Merge,
+    Refine,
+    Retire,
+    Return,
+    SchemaStmt,
+    Stmt,
+)
+
+DEFAULT_BUDGET = 2000
+
+AGG_VERBS = {"count", "sum", "avg", "min", "max"}
+COMPARISON_OPS = {"=", "!=", ">", ">=", "<", "<=", "contains"}
+
+
+class ParseError(Exception):
+    def __init__(self, line_no: int, msg: str):
+        self.line_no = line_no
+        super().__init__(f"parse error at line {line_no}: {msg}")
+
+
+TOKEN_RE = re.compile(
+    r"""
+    (?P<string>"(?:[^"\\]|\\.)*")
+  | (?P<provenance>(?:doc|attach):[^\s,)}]+)
+  | (?P<position>@t-[0-9]+)
+  | (?P<handle>@c[a-z0-9]+)
+  | (?P<nodeid>\#[a-z]+-[a-z0-9]+)
+  | (?P<number>-?[0-9]+(?:\.[0-9]+)?)
+  | (?P<op>>=|<=|!=|=|>|<)
+  | (?P<word>[A-Za-z_][A-Za-z0-9_.]*)
+  | (?P<punct>[{}(),:])
+    """,
+    re.VERBOSE,
+)
+
+
+def tokenize(text: str, line_no: int) -> list[tuple[str, str]]:
+    tokens = []
+    pos = 0
+    while pos < len(text):
+        if text[pos].isspace():
+            pos += 1
+            continue
+        m = TOKEN_RE.match(text, pos)
+        if not m:
+            raise ParseError(line_no, f"unexpected character {text[pos]!r}")
+        kind = m.lastgroup
+        tokens.append((kind, m.group()))
+        pos = m.end()
+    return tokens
+
+
+def logical_lines(text: str):
+    """Yield (line_no, joined_text) for each logical line."""
+    current: list[str] = []
+    start = 0
+    for i, raw in enumerate(text.splitlines(), start=1):
+        if not raw.strip() or raw.lstrip().startswith("#") and raw[0] == "#":
+            continue
+        if raw[0].isspace() and current:
+            current.append(raw.strip())
+        else:
+            if current:
+                yield start, " ".join(current)
+            current = [raw.strip()]
+            start = i
+    if current:
+        yield start, " ".join(current)
+
+
+class _Parser:
+    def __init__(self, tokens: list[tuple[str, str]], line_no: int):
+        self.tokens = tokens
+        self.i = 0
+        self.line_no = line_no
+
+    def peek(self) -> tuple[str, str] | None:
+        return self.tokens[self.i] if self.i < len(self.tokens) else None
+
+    def at_word(self, *words: str) -> bool:
+        t = self.peek()
+        return t is not None and t[0] == "word" and t[1] in words
+
+    def next(self) -> tuple[str, str]:
+        t = self.peek()
+        if t is None:
+            raise ParseError(self.line_no, "expected more input, statement ended early")
+        self.i += 1
+        return t
+
+    def expect_word(self, *words: str) -> str:
+        t = self.peek()
+        if t is None or t[0] != "word" or (words and t[1] not in words):
+            want = " or ".join(f"'{w}'" for w in words) if words else "a name"
+            got = t[1] if t else "end of line"
+            raise ParseError(self.line_no, f"expected {want}, got {got!r}")
+        self.i += 1
+        return t[1]
+
+    def expect_punct(self, ch: str) -> None:
+        t = self.peek()
+        if t is None or t[0] != "punct" or t[1] != ch:
+            got = t[1] if t else "end of line"
+            raise ParseError(self.line_no, f"expected {ch!r}, got {got!r}")
+        self.i += 1
+
+    def expect_name(self) -> str:
+        w = self.expect_word()
+        if "." in w:
+            raise ParseError(self.line_no, f"expected a plain name, got {w!r}")
+        return w
+
+    def expect_end(self) -> None:
+        t = self.peek()
+        if t is not None:
+            raise ParseError(self.line_no, f"unexpected trailing input starting at {t[1]!r}")
+
+    # ---- terminals -------------------------------------------------
+
+    def col(self) -> Col:
+        w = self.expect_word()
+        return tuple(w.split("."))
+
+    def literal(self) -> object:
+        t = self.next()
+        kind, text = t
+        if kind == "string":
+            return _unquote(text)
+        if kind == "number":
+            return float(text) if "." in text else int(text)
+        if kind == "provenance":
+            return text
+        if kind == "word":
+            if text == "true":
+                return True
+            if text == "false":
+                return False
+            # bare word literal: used for class names in conditions
+            # (find dup_candidates where class = supplier)
+            return text
+        raise ParseError(self.line_no, f"expected a literal value, got {text!r}")
+
+    def ref(self) -> str:
+        t = self.next()
+        if t[0] == "nodeid":
+            return t[1]
+        if t[0] == "word" and "." not in t[1]:
+            return t[1]
+        raise ParseError(self.line_no, f"expected a binding name or node id, got {t[1]!r}")
+
+    def string(self) -> str:
+        t = self.next()
+        if t[0] != "string":
+            raise ParseError(self.line_no, f"expected a quoted string, got {t[1]!r}")
+        return _unquote(t[1])
+
+    def props(self) -> dict[str, object]:
+        self.expect_punct("{")
+        out: dict[str, object] = {}
+        while True:
+            key = self.expect_name()
+            self.expect_punct(":")
+            out[key] = self.literal()
+            t = self.peek()
+            if t == ("punct", ","):
+                self.i += 1
+                continue
+            self.expect_punct("}")
+            return out
+
+    def mapping(self) -> dict[str, str]:
+        self.expect_punct("{")
+        out: dict[str, str] = {}
+        while True:
+            key = self.expect_name()
+            self.expect_punct(":")
+            self.expect_word("col")
+            out[key] = self.string()
+            t = self.peek()
+            if t == ("punct", ","):
+                self.i += 1
+                continue
+            self.expect_punct("}")
+            return out
+
+    def propdecls(self) -> dict[str, str]:
+        self.expect_punct("{")
+        out: dict[str, str] = {}
+        while True:
+            key = self.expect_name()
+            self.expect_punct(":")
+            out[key] = self.expect_word("str", "int", "float", "bool")
+            t = self.peek()
+            if t == ("punct", ","):
+                self.i += 1
+                continue
+            self.expect_punct("}")
+            return out
+
+    def cond(self) -> Cond:
+        out: Cond = []
+        joiner = "and"
+        while True:
+            col = self.col()
+            t = self.peek()
+            if t is None or (t[0] != "op" and not (t[0] == "word" and t[1] == "contains")):
+                got = t[1] if t else "end of line"
+                raise ParseError(self.line_no, f"expected a comparison operator, got {got!r}")
+            self.i += 1
+            op = t[1]
+            if op not in COMPARISON_OPS:
+                raise ParseError(self.line_no, f"unknown operator {op!r}")
+            value = self.literal()
+            out.append((joiner, Clause(col, op, value)))
+            if self.at_word("and", "or"):
+                joiner = self.next()[1]
+                continue
+            return out
+
+    def order_by_opt(self) -> tuple[Col | None, bool]:
+        if not self.at_word("order"):
+            return None, False
+        self.next()
+        self.expect_word("by")
+        col = self.col()
+        desc = False
+        if self.at_word("desc"):
+            self.next()
+            desc = True
+        return col, desc
+
+    def budget_opt(self) -> int | None:
+        if not self.at_word("budget"):
+            return None
+        self.next()
+        t = self.next()
+        if t[0] != "number" or "." in t[1]:
+            raise ParseError(self.line_no, f"expected an integer token budget, got {t[1]!r}")
+        self.expect_word("tokens")
+        return int(t[1])
+
+    def source_opt(self) -> str | None:
+        if not self.at_word("source"):
+            return None
+        self.next()
+        t = self.next()
+        if t[0] != "provenance":
+            raise ParseError(self.line_no, f"expected doc:/attach: provenance, got {t[1]!r}")
+        return t[1]
+
+    # ---- statements ------------------------------------------------
+
+    def statement(self) -> Stmt:
+        verb = self.expect_word()
+        method = getattr(self, f"parse_{verb}", None)
+        if verb in AGG_VERBS:
+            stmt = self.parse_aggregate(verb)
+        elif method is None:
+            raise ParseError(self.line_no, f"unknown verb {verb!r}")
+        else:
+            stmt = method()
+        self.expect_end()
+        stmt.line = self.line_no
+        return stmt
+
+    def parse_find(self) -> Find:
+        target = self.expect_name()
+        cond: Cond = []
+        if self.at_word("where"):
+            self.next()
+            cond = self.cond()
+        order_by, desc = self.order_by_opt()
+        self.expect_word("as")
+        name = self.expect_name()
+        return Find(target, cond, name, order_by=order_by, desc=desc)
+
+    def parse_follow(self) -> Follow:
+        src = self.expect_name()
+        edge = self.expect_name()
+        role = self.expect_name()
+        cond: Cond = []
+        if self.at_word("where"):
+            self.next()
+            cond = self.cond()
+        self.expect_word("as")
+        name = self.expect_name()
+        return Follow(src, edge, role, name, cond=cond)
+
+    def parse_group(self) -> GroupBy:
+        self.expect_word("by")
+        col = self.col()
+        self.expect_word("as")
+        name = self.expect_name()
+        return GroupBy(col, name)
+
+    def parse_aggregate(self, op: str) -> Aggregate:
+        distinct = False
+        if self.at_word("distinct"):
+            self.next()
+            distinct = True
+        col = self.col()
+        self.expect_word("as")
+        name = self.expect_name()
+        return Aggregate(op, distinct, col, name)
+
+    def parse_return(self) -> Return:
+        cols = [self.col()]
+        while self.peek() == ("punct", ","):
+            self.next()
+            cols.append(self.col())
+        order_by, desc = self.order_by_opt()
+        limit = None
+        if self.at_word("limit"):
+            self.next()
+            t = self.next()
+            if t[0] != "number" or "." in t[1]:
+                raise ParseError(self.line_no, f"expected an integer limit, got {t[1]!r}")
+            limit = int(t[1])
+        budget = self.budget_opt()
+        after = None
+        if self.at_word("after"):
+            self.next()
+            t = self.next()
+            if t[0] != "position":
+                raise ParseError(self.line_no, f"expected a position like @t-42, got {t[1]!r}")
+            after = t[1]
+        return Return(cols, order_by, desc, limit,
+                      DEFAULT_BUDGET if budget is None else budget, after)
+
+    def parse_continue(self) -> Continue:
+        t = self.next()
+        if t[0] != "handle":
+            raise ParseError(self.line_no, f"expected a continuation handle like @c81f, got {t[1]!r}")
+        budget = self.budget_opt()
+        return Continue(t[1], DEFAULT_BUDGET if budget is None else budget)
+
+    def parse_assert(self) -> Stmt:
+        if self.at_word("edge"):
+            self.next()
+            edge = self.expect_name()
+            self.expect_punct("(")
+            role_refs: dict[str, str] = {}
+            while True:
+                role = self.expect_name()
+                self.expect_punct(":")
+                role_refs[role] = self.ref()
+                if self.peek() == ("punct", ","):
+                    self.next()
+                    continue
+                self.expect_punct(")")
+                break
+            source = self.source_opt()
+            return AssertEdge(edge, role_refs, source)
+        cls = self.expect_name()
+        props = self.props()
+        source = self.source_opt()
+        self.expect_word("as")
+        name = self.expect_name()
+        return AssertNode(cls, props, source, name)
+
+    def parse_merge(self) -> Merge:
+        a = self.ref()
+        self.expect_punct(",")
+        b = self.ref()
+        policy = "newest"
+        if self.at_word("prefer"):
+            self.next()
+            which = self.expect_word("newest", "source")
+            if which == "source":
+                t = self.next()
+                if t[0] != "provenance":
+                    raise ParseError(self.line_no, f"expected provenance after 'prefer source', got {t[1]!r}")
+                policy = f"source {t[1]}"
+            else:
+                policy = "newest"
+        return Merge(a, b, policy)
+
+    def parse_distinct(self) -> Distinct:
+        a = self.ref()
+        self.expect_punct(",")
+        b = self.ref()
+        self.expect_word("reason")
+        return Distinct(a, b, self.string())
+
+    def parse_refine(self) -> Refine:
+        ref = self.ref()
+        self.expect_word("into")
+        cls = self.expect_name()
+        self.expect_word("with")
+        mapping = self.mapping()
+        self.expect_word("as")
+        name = self.expect_name()
+        return Refine(ref, cls, mapping, name)
+
+    def parse_compact(self) -> Compact:
+        src = self.expect_name()
+        self.expect_word("as")
+        name = self.expect_name()
+        props = self.props()
+        return Compact(src, name, props)
+
+    def parse_retire(self) -> Retire:
+        ref = self.ref()
+        self.expect_word("reason")
+        return Retire(ref, self.string())
+
+    def parse_flag(self) -> Flag:
+        ref = self.ref()
+        self.expect_word("reason")
+        return Flag(ref, self.string())
+
+    def parse_derive(self) -> DeriveClass:
+        self.expect_word("class")
+        name = self.expect_name()
+        self.expect_word("from")
+        base = self.expect_name()
+        self.expect_word("with")
+        return DeriveClass(name, base, self.propdecls())
+
+    def parse_schema(self) -> SchemaStmt:
+        return SchemaStmt()
+
+
+def _unquote(s: str) -> str:
+    return s[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+
+
+def parse(text: str) -> list[Stmt]:
+    stmts = []
+    for line_no, logical in logical_lines(text):
+        tokens = tokenize(logical, line_no)
+        stmts.append(_Parser(tokens, line_no).statement())
+    return stmts

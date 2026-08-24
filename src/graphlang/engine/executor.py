@@ -1,0 +1,408 @@
+"""Read executor: binding-table semantics over the store, plus result
+serialization with token budgets and continuation handles.
+
+A query builds one binding table. find seeds rows, follow extends them
+(homomorphism semantics), group/aggregate collapse them, return serializes.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from ..ast_nodes import (
+    Aggregate,
+    Clause,
+    Col,
+    Cond,
+    Continue,
+    Find,
+    Follow,
+    GroupBy,
+    Return,
+    SchemaStmt,
+)
+from ..schema import Schema
+from ..verifier import Plan
+from . import health
+from .storage import Store
+
+TOKEN_DIVISOR = 4
+
+
+def count_tokens(text: str) -> int:
+    return len(text) // TOKEN_DIVISOR
+
+
+class ExecError(Exception):
+    pass
+
+
+@dataclass
+class ReadContext:
+    """Session-scoped state: continuation handles."""
+
+    continuations: dict[str, dict] = field(default_factory=dict)
+    _counter: int = 0
+
+    def register(self, payload: dict) -> str:
+        self._counter += 1
+        handle = f"@c{self._counter:x}{len(payload.get('blocks', [])):x}"
+        self.continuations[handle] = payload
+        return handle
+
+
+@dataclass
+class Table:
+    rows: list[dict] = field(default_factory=list)
+    # group binding name -> (key col, key kind "identity"|"value")
+    group_meta: dict[str, tuple[Col, str]] = field(default_factory=dict)
+    grouped: bool = False  # rows are group-rows after first aggregate
+
+
+def _node_value(store: Store, schema: Schema, node_id: str, prop: str):
+    node = store.nodes[store.resolve(node_id)]
+    if prop == "class":
+        return node.cls
+    if prop == "id":
+        return node.id
+    if prop == "state":
+        return node.state
+    if prop == "query_traffic":
+        return node.traffic
+    if prop == "lineage":
+        related = [rec for rec in store.lineage
+                   if node.id in (rec.get("survivor"), rec.get("absorbed"),
+                                  rec.get("parent"), rec.get("child"))]
+        origin = f"origin {node.origin}; " if node.origin else ""
+        return origin + f"{len(related)} lineage records"
+    if prop == "health":
+        s = health.scores(store, node.id)
+        return "{" + ", ".join(f"{k}: {v:.2f}" for k, v in s.items()) + "}"
+    return node.props.get(prop)
+
+
+def _col_value(store: Store, schema: Schema, row: dict, col: Col):
+    head = col[0]
+    if head in row:
+        value = row[head]
+        if len(col) == 1:
+            return value
+        if isinstance(value, str) and value in store.nodes:
+            if col[1] == "health" and len(col) == 3:
+                return health.scores(store, value)[col[2]]
+            if col[1] == "health" and len(col) == 2:
+                return _node_value(store, schema, value, "health")
+            return _node_value(store, schema, value, col[1])
+        if isinstance(value, dict):  # dup candidate / class row
+            return value.get(col[1])
+        return value
+    if len(col) >= 2 and f"{head}_key" in row and col[1] == "key":
+        return row[f"{head}_key"]
+    raise ExecError(f"cannot resolve column {'.'.join(col)}")
+
+
+def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> bool:
+    v = row_value
+    want = clause.value
+    op = clause.op
+    if v is None:
+        return False
+    try:
+        if op == "=":
+            return v == want
+        if op == "!=":
+            return v != want
+        if op == ">":
+            return v > want
+        if op == ">=":
+            return v >= want
+        if op == "<":
+            return v < want
+        if op == "<=":
+            return v <= want
+        if op == "contains":
+            return str(want) in str(v)
+    except TypeError:
+        return False
+    raise ExecError(f"unknown operator {op}")
+
+
+def _eval_cond(store: Store, schema: Schema, cond: Cond, getter) -> bool:
+    """and binds tighter than or: evaluate as OR over AND-groups."""
+    if not cond:
+        return True
+    groups: list[list[bool]] = [[]]
+    for joiner, clause in cond:
+        if joiner == "or":
+            groups.append([])
+        groups[-1].append(_clause_matches(store, schema, getter(clause.col), clause))
+    return any(all(g) for g in groups if g)
+
+
+def _candidate_rows(store: Store) -> list[dict]:
+    rows = []
+    for rec in store.dup_ledger:
+        pair = frozenset((store.resolve(rec["a"]), store.resolve(rec["b"])))
+        if len(pair) < 2 or pair in store.distinct_pairs:
+            continue  # already merged or asserted distinct
+        rows.append({"class": rec["cls"], "score": rec["score"],
+                     "a": rec["a"], "b": rec["b"],
+                     "evidence": rec.get("evidence", "")})
+    return rows
+
+
+def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
+    name = stmt.name
+    if stmt.target == "dup_candidates":
+        pool = [{name: rec, **{}} for rec in _candidate_rows(store)]
+        getter = lambda row: (lambda col: row[name].get(col[0]))
+    elif stmt.target == "class":
+        pool = [{name: {"name": c.name, "status": c.status, "base": c.base,
+                        "quota": c.quota}} for c in schema.classes.values()]
+        getter = lambda row: (lambda col: row[name].get(col[0]))
+    else:
+        if stmt.target == "nodes":
+            nodes = [n for n in store.nodes.values()]
+        else:
+            nodes = [n for n in store.nodes.values() if n.cls == stmt.target]
+        pool = [{name: n.id} for n in nodes
+                if n.retired_at is None and store.resolve(n.id) == n.id]
+        getter = lambda row: (lambda col: _first_prop(store, schema, row[name], col))
+    rows = [r for r in pool if _eval_cond(store, schema, stmt.cond, getter(r))]
+    if stmt.order_by is not None:
+        rows.sort(key=lambda r: _sort_key(getter(r)(stmt.order_by)),
+                  reverse=stmt.desc)
+    return rows
+
+
+def _first_prop(store: Store, schema: Schema, node_id: str, col: Col):
+    if col[0] == "health":
+        return health.scores(store, node_id)[col[1]]
+    return _node_value(store, schema, node_id, col[0])
+
+
+def _sort_key(v):
+    # None sorts last; mixed types sort by string form
+    return (v is None, isinstance(v, str), v if v is not None else "")
+
+
+def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
+    edef = schema.edges[stmt.edge]
+    arrive_role = stmt.role
+    depart_role = edef.other_role(arrive_role)
+    new_rows = []
+    touched: set[str] = set()
+    for row in table.rows:
+        src_id = store.resolve(row[stmt.src])
+        for edge in store.edges.get(src_id, []):
+            if edge.type != stmt.edge or edge.retired_at is not None:
+                continue
+            if store.resolve(edge.roles[depart_role]) != src_id:
+                continue
+            dst = store.resolve(edge.roles[arrive_role])
+            dst_node = store.nodes.get(dst)
+            if dst_node is None or dst_node.retired_at is not None:
+                continue
+            if stmt.cond and not _eval_cond(
+                    store, schema, stmt.cond,
+                    lambda col: _first_prop(store, schema, dst, col)):
+                continue
+            touched.add(src_id)
+            touched.add(dst)
+            new_rows.append({**row, stmt.name: dst})
+    for nid in touched:
+        blob = 1 if store.nodes[nid].state == "blob" else 0
+        store.apply({"op": "traffic", "id": nid, "n": 1, "blob": blob})
+    table.rows = new_rows
+
+
+def _group(stmt: GroupBy, table: Table, store: Store, schema: Schema) -> None:
+    kind = "identity" if len(stmt.col) == 1 else "value"
+    table.group_meta[stmt.name] = (stmt.col, kind)
+
+
+def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> None:
+    gname = stmt.col[0]
+    member = stmt.col[1]
+    prop = stmt.col[2] if len(stmt.col) > 2 else None
+    key_col, kind = table.group_meta[gname]
+
+    if not table.grouped:
+        groups: dict = {}
+        order: list = []
+        for row in table.rows:
+            key = _col_value(store, schema, row, key_col)
+            if key not in groups:
+                groups[key] = []
+                order.append(key)
+            groups[key].append(row)
+        group_rows = []
+        for key in order:
+            members = groups[key]
+            base = {f"{gname}_key": key, f"__members_{gname}": members}
+            if kind == "identity":
+                base[key_col[0]] = key  # keep the node binding on the group row
+            group_rows.append(base)
+        table.rows = group_rows
+        table.grouped = True
+
+    for row in table.rows:
+        members = row[f"__members_{gname}"]
+        values = []
+        for m in members:
+            v = m.get(member)
+            if v is None:
+                v = _col_value(store, schema, m, (member,) if prop is None else (member,))
+            if prop is not None and isinstance(v, str) and v in store.nodes:
+                v = _node_value(store, schema, v, prop)
+            values.append(v)
+        if stmt.distinct:
+            seen = []
+            for v in values:
+                if v not in seen:
+                    seen.append(v)
+            values = seen
+        if stmt.op == "count":
+            out = len(values)
+        elif stmt.op == "sum":
+            out = sum(values)
+        elif stmt.op == "avg":
+            out = sum(values) / len(values) if values else None
+        elif stmt.op == "min":
+            out = min(values) if values else None
+        elif stmt.op == "max":
+            out = max(values) if values else None
+        else:
+            raise ExecError(f"unknown aggregate {stmt.op}")
+        row[stmt.name] = out
+
+
+def _fmt(v) -> str:
+    if isinstance(v, float):
+        return f"{v:g}"
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    return str(v)
+
+
+def _render_node_block(store: Store, schema: Schema, node_id: str) -> list[str]:
+    node = store.nodes[store.resolve(node_id)]
+    shown = {k: v for k, v in node.props.items()
+             if k != "name" and not k.startswith("_")}
+    props = ", ".join(f"{k}: {_fmt(v)}" for k, v in shown.items())
+    name = node.props.get("name") or node.props.get("title") or node.id
+    lines = [f'{node.cls} "{name}"' + (f" {{{props}}}" if props else "")]
+    for edge in store.edges.get(node.id, []):
+        if edge.retired_at is not None:
+            continue
+        roles = list(edge.roles.items())
+        (subj_role, subj_id), (obj_role, obj_id) = roles[0], roles[1]
+        subj_id, obj_id = store.resolve(subj_id), store.resolve(obj_id)
+        if subj_id == node.id:
+            other = store.nodes[obj_id]
+            arrow = "->"
+        else:
+            other = store.nodes[subj_id]
+            arrow = "<-"
+        oname = other.props.get("name") or other.props.get("title") or other.id
+        lines.append(f'  {edge.type} {arrow} {other.cls} "{oname}"')
+    return lines
+
+
+def _serialize(store: Store, schema: Schema, stmt: Return, table: Table,
+               ctx: ReadContext) -> str:
+    incident = any(len(c) == 1 and table.rows and isinstance(
+        table.rows[0].get(c[0]), str) and table.rows[0][c[0]] in store.nodes
+        for c in stmt.cols)
+
+    rows = table.rows
+    if stmt.order_by is not None:
+        rows = sorted(rows, key=lambda r: _sort_key(
+            _col_value(store, schema, r, stmt.order_by)), reverse=stmt.desc)
+    total = len(rows)
+    if stmt.limit is not None:
+        rows = rows[: stmt.limit]
+
+    blocks: list[str] = []
+    if incident:
+        for row in rows:
+            block_lines: list[str] = []
+            for col in stmt.cols:
+                v = _col_value(store, schema, row, col)
+                if len(col) == 1 and isinstance(v, str) and v in store.nodes:
+                    block_lines.extend(_render_node_block(store, schema, v))
+                else:
+                    block_lines.append(_fmt(v))
+            blocks.append("\n".join(block_lines))
+        header_cols = None
+    else:
+        header_cols = "columns: " + ", ".join(".".join(c) for c in stmt.cols)
+        for row in rows:
+            blocks.append(", ".join(
+                _fmt(_col_value(store, schema, row, col)) for col in stmt.cols))
+
+    return _emit(blocks, total, stmt.budget, header_cols, ctx)
+
+
+def _emit(blocks: list[str], total: int, budget: int,
+          header_cols: str | None, ctx: ReadContext, already_shown: int = 0) -> str:
+    shown = []
+    used = 0
+    overhead = 60 + (len(header_cols) if header_cols else 0)
+    budget_chars = max(budget * TOKEN_DIVISOR - overhead, 0)
+    for block in blocks:
+        cost = len(block) + 1
+        if shown and used + cost > budget_chars:
+            break
+        shown.append(block)
+        used += cost
+    remaining = blocks[len(shown):]
+    n_shown = len(shown)
+    status = "complete" if not remaining else "budget hit"
+    header = f"results: {already_shown + n_shown} of {total}, {status}"
+    out_lines = [header]
+    if header_cols:
+        out_lines.append(header_cols)
+    out_lines.extend(shown)
+    if remaining:
+        handle = ctx.register({"blocks": remaining, "total": total,
+                               "header_cols": header_cols,
+                               "shown": already_shown + n_shown})
+        out_lines.append(f"truncated: {len(remaining)} more. resume with: continue {handle}")
+    return "\n".join(out_lines)
+
+
+def execute_read(plans: list[Plan], store: Store, schema: Schema,
+                 ctx: ReadContext, table: Table | None = None) -> str:
+    if table is None:
+        table = Table()
+    output: list[str] = []
+    for plan in plans:
+        stmt = plan.stmt
+        if isinstance(stmt, Find):
+            found = _find_rows(stmt, store, schema)
+            table.rows = _cross(table.rows, found) if table.rows else found
+        elif isinstance(stmt, Follow):
+            _follow(stmt, table, store, schema)
+        elif isinstance(stmt, GroupBy):
+            _group(stmt, table, store, schema)
+        elif isinstance(stmt, Aggregate):
+            _aggregate(stmt, table, store, schema)
+        elif isinstance(stmt, Return):
+            output.append(_serialize(store, schema, stmt, table, ctx))
+        elif isinstance(stmt, Continue):
+            payload = ctx.continuations.pop(stmt.handle, None)
+            if payload is None:
+                raise ExecError(f"unknown continuation handle {stmt.handle}")
+            output.append(_emit(payload["blocks"], payload["total"], stmt.budget,
+                                payload["header_cols"], ctx,
+                                already_shown=payload["shown"]))
+        elif isinstance(stmt, SchemaStmt):
+            output.append(schema.render())
+        else:
+            raise ExecError(f"execute_read cannot run {type(stmt).__name__}")
+    return "\n".join(output)
+
+
+def _cross(rows_a: list[dict], rows_b: list[dict]) -> list[dict]:
+    return [{**a, **b} for a in rows_a for b in rows_b]

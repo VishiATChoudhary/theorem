@@ -42,9 +42,10 @@ program     := statement*
 statement   := read_stmt | write_stmt | util_stmt
 
 read_stmt   := find | follow | group | aggregate | return | continue
-find        := "find" target ["where" cond] "as" NAME
+find        := "find" target ["where" cond] ["order" "by" col ["desc"]] "as" NAME
 target      := CLASSNAME | "nodes" | "dup_candidates" | "class"
-follow      := "follow" NAME EDGENAME ROLENAME "as" NAME
+follow      := "follow" NAME EDGENAME ROLENAME ["where" cond] "as" NAME
+               ; cond filters the arrival node's properties
 group       := "group" "by" col "as" NAME
 aggregate   := AGGVERB ["distinct"] col "as" NAME     ; AGGVERB: count|sum|avg|min|max
 return      := "return" col ("," col)* ["order" "by" col ["desc"]]
