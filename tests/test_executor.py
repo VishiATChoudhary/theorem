@@ -119,3 +119,28 @@ return parts.name
 """
     out = run(text, fixture_store)
     assert "lithium cell" in out and "copper wire" not in out and "casing" not in out
+
+
+def test_global_count_distinct(fixture_store):
+    out = run("find supplier as s\ncount distinct s as n\nreturn n", fixture_store)
+    assert "results: 1 of 1" in out
+    assert out.splitlines()[-1] == "3"
+
+
+def test_global_avg_prop(fixture_store):
+    out = run("find part as p\navg p.unit_cost as m\nreturn m", fixture_store)
+    assert out.splitlines()[-1] == "3.7"  # (4.2+1.1+7.5+2.0)/4
+
+
+def test_trail_semantics_excludes_backtrack(fixture_store):
+    # products sharing a part with PowerBank Pro, excluding itself via
+    # edge-uniqueness (same uses edge cannot be walked twice in a row)
+    text = """\
+find product where name = "PowerBank Pro" as pb
+follow pb uses component as parts
+follow parts uses whole as others
+return others.name
+"""
+    out = run(text, fixture_store)
+    assert "GridPack" in out            # shares lithium cell
+    assert "PowerBank Pro" not in out   # backtrack over same edge excluded

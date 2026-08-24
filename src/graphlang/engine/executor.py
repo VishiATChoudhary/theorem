@@ -203,13 +203,16 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             dst_node = store.nodes.get(dst)
             if dst_node is None or dst_node.retired_at is not None:
                 continue
+            if edge.id in row.get("__edges__", ()):
+                continue  # trail semantics: an edge instance is used once per row
             if stmt.cond and not _eval_cond(
                     store, schema, stmt.cond,
                     lambda col: _first_prop(store, schema, dst, col)):
                 continue
             touched.add(src_id)
             touched.add(dst)
-            new_rows.append({**row, stmt.name: dst})
+            new_rows.append({**row, stmt.name: dst,
+                             "__edges__": row.get("__edges__", ()) + (edge.id,)})
     for nid in touched:
         blob = 1 if store.nodes[nid].state == "blob" else 0
         store.apply({"op": "traffic", "id": nid, "n": 1, "blob": blob})
@@ -221,8 +224,46 @@ def _group(stmt: GroupBy, table: Table, store: Store, schema: Schema) -> None:
     table.group_meta[stmt.name] = (stmt.col, kind)
 
 
+def _agg_compute(op: str, values: list):
+    if op == "count":
+        return len(values)
+    if op == "sum":
+        return sum(values)
+    if op == "avg":
+        return sum(values) / len(values) if values else None
+    if op == "min":
+        return min(values) if values else None
+    if op == "max":
+        return max(values) if values else None
+    raise ExecError(f"unknown aggregate {op}")
+
+
+def _global_aggregate(stmt: Aggregate, table: Table, store: Store,
+                      schema: Schema) -> None:
+    """Aggregate over a plain binding column: collapses the table to one row."""
+    prop = stmt.col[1] if len(stmt.col) > 1 else None
+    raw = [row.get(stmt.col[0]) for row in table.rows]
+    if stmt.distinct:
+        seen = []
+        for v in raw:
+            if v not in seen:
+                seen.append(v)
+        raw = seen
+    values = []
+    for v in raw:
+        if prop is not None and isinstance(v, str) and v in store.nodes:
+            v = _node_value(store, schema, v, prop)
+        values.append(v)
+    values = [v for v in values if v is not None]
+    table.rows = [{stmt.name: _agg_compute(stmt.op, values)}]
+    table.group_meta.clear()
+
+
 def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> None:
     gname = stmt.col[0]
+    if gname not in table.group_meta:
+        _global_aggregate(stmt, table, store, schema)
+        return
     member = stmt.col[1]
     prop = stmt.col[2] if len(stmt.col) > 2 else None
     key_col, kind = table.group_meta[gname]
@@ -248,33 +289,20 @@ def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> N
 
     for row in table.rows:
         members = row[f"__members_{gname}"]
+        raw = [m.get(member) for m in members]
+        if stmt.distinct:
+            seen = []
+            for v in raw:
+                if v not in seen:
+                    seen.append(v)
+            raw = seen
         values = []
-        for m in members:
-            v = m.get(member)
-            if v is None:
-                v = _col_value(store, schema, m, (member,) if prop is None else (member,))
+        for v in raw:
             if prop is not None and isinstance(v, str) and v in store.nodes:
                 v = _node_value(store, schema, v, prop)
             values.append(v)
-        if stmt.distinct:
-            seen = []
-            for v in values:
-                if v not in seen:
-                    seen.append(v)
-            values = seen
-        if stmt.op == "count":
-            out = len(values)
-        elif stmt.op == "sum":
-            out = sum(values)
-        elif stmt.op == "avg":
-            out = sum(values) / len(values) if values else None
-        elif stmt.op == "min":
-            out = min(values) if values else None
-        elif stmt.op == "max":
-            out = max(values) if values else None
-        else:
-            raise ExecError(f"unknown aggregate {stmt.op}")
-        row[stmt.name] = out
+        values = [v for v in values if v is not None]
+        row[stmt.name] = _agg_compute(stmt.op, values)
 
 
 def _fmt(v) -> str:
@@ -372,6 +400,20 @@ def _emit(blocks: list[str], total: int, budget: int,
     return "\n".join(out_lines)
 
 
+def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> None:
+    if isinstance(stmt, Find):
+        found = _find_rows(stmt, store, schema)
+        table.rows = _cross(table.rows, found) if table.rows else found
+    elif isinstance(stmt, Follow):
+        _follow(stmt, table, store, schema)
+    elif isinstance(stmt, GroupBy):
+        _group(stmt, table, store, schema)
+    elif isinstance(stmt, Aggregate):
+        _aggregate(stmt, table, store, schema)
+    else:
+        raise ExecError(f"cannot run {type(stmt).__name__} in a read pipeline")
+
+
 def execute_read(plans: list[Plan], store: Store, schema: Schema,
                  ctx: ReadContext, table: Table | None = None) -> str:
     if table is None:
@@ -379,16 +421,7 @@ def execute_read(plans: list[Plan], store: Store, schema: Schema,
     output: list[str] = []
     for plan in plans:
         stmt = plan.stmt
-        if isinstance(stmt, Find):
-            found = _find_rows(stmt, store, schema)
-            table.rows = _cross(table.rows, found) if table.rows else found
-        elif isinstance(stmt, Follow):
-            _follow(stmt, table, store, schema)
-        elif isinstance(stmt, GroupBy):
-            _group(stmt, table, store, schema)
-        elif isinstance(stmt, Aggregate):
-            _aggregate(stmt, table, store, schema)
-        elif isinstance(stmt, Return):
+        if isinstance(stmt, Return):
             output.append(_serialize(store, schema, stmt, table, ctx))
         elif isinstance(stmt, Continue):
             payload = ctx.continuations.pop(stmt.handle, None)
@@ -400,8 +433,38 @@ def execute_read(plans: list[Plan], store: Store, schema: Schema,
         elif isinstance(stmt, SchemaStmt):
             output.append(schema.render())
         else:
-            raise ExecError(f"execute_read cannot run {type(stmt).__name__}")
+            _apply_pipeline_stmt(stmt, table, store, schema)
     return "\n".join(output)
+
+
+def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
+    """Run a read program and return the final Return's rows as plain values.
+
+    Used by the eval harness for machine scoring; ignores budgets.
+    """
+    table = Table()
+    rows_out: list[list] = []
+    for plan in plans:
+        stmt = plan.stmt
+        if isinstance(stmt, Return):
+            rows = table.rows
+            if stmt.order_by is not None:
+                rows = sorted(rows, key=lambda r: _sort_key(
+                    _col_value(store, schema, r, stmt.order_by)),
+                    reverse=stmt.desc)
+            if stmt.limit is not None:
+                rows = rows[: stmt.limit]
+            def plain(v):
+                if isinstance(v, str) and v in store.nodes:
+                    return store.nodes[v].props.get("name", v)
+                return v
+            rows_out = [[plain(_col_value(store, schema, r, col))
+                         for col in stmt.cols] for r in rows]
+        elif isinstance(stmt, SchemaStmt):
+            continue
+        else:
+            _apply_pipeline_stmt(stmt, table, store, schema)
+    return rows_out
 
 
 def _cross(rows_a: list[dict], rows_b: list[dict]) -> list[dict]:

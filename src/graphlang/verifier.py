@@ -202,11 +202,11 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             head = col[0]
             if head not in env:
                 raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
-            if not env[head].startswith("group:"):
+            if env[head].startswith("value:"):
                 raise VerifyError(
-                    line,
-                    f'{op} consumes a group; "{head}" is not a group binding. '
-                    f"group by <column> as <name> first")
+                    line, f'"{head}" is already an aggregate value')
+            # group binding -> per-group aggregate; any other binding ->
+            # global aggregate over that column
             _bind(env, name, f"value:{op}", line)
 
         case Return(cols=cols, order_by=order_by):

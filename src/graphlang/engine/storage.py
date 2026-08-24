@@ -81,6 +81,15 @@ class Store:
         self._apply_to_memory(record, self.position)
         return self.position
 
+    def bulk(self, records: list[dict]) -> int:
+        """Append many records in one WAL write. Returns the final position."""
+        with self.wal_path.open("a") as f:
+            for record in records:
+                f.write(json.dumps(record) + "\n")
+                self.position += 1
+                self._apply_to_memory(record, self.position)
+        return self.position
+
     def wal_len(self) -> int:
         if not self.wal_path.exists():
             return 0

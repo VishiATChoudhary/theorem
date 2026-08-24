@@ -60,9 +60,13 @@ def test_unbound_follow_source():
     assert "ghosts" in msg and ("unbound" in msg or "not bound" in msg)
 
 
-def test_aggregate_needs_group():
-    msg = err("find part as p\ncount distinct p.name as n")
-    assert "group" in msg
+def test_global_aggregate_verifies():
+    verify(parse("find part as p\ncount distinct p as n\nreturn n"), S)
+
+
+def test_aggregate_over_aggregate_rejected():
+    msg = err("find part as p\ncount p as n\ncount n as m")
+    assert "already an aggregate" in msg
 
 
 def test_duplicate_binding_rejected():

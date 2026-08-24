@@ -11,7 +11,7 @@ This spec freezes the open decisions from `research/design-briefing/trellis-desi
 | 1 | Verb surface | B: two-tier (core read verbs + maintenance verbs, taught separately) |
 | 2 | Edge direction | A: role-named only, no direction glyphs |
 | 3 | Cold start | A grammar prompting (baseline) + B schema-closed validation (parse-time in v0; constrained decoding later) |
-| 4 | Pattern semantics | A: homomorphism, fixed, nothing exposed |
+| 4 | Pattern semantics | A-shaped: one fixed semantics, nothing exposed. v0 uses per-row edge-uniqueness (trail semantics, Cypher's MATCH default) so results agree with CypherBench gold answers; nodes may repeat, edge instances may not |
 | 5 | Granularity states | A: `blob`, `composite`, `atom` |
 | 6 | Refinement mapping | A: agent supplies mapping inline |
 | 7 | Lineage | A: full lineage forever (v0: lineage log on disk, never pruned) |
@@ -91,7 +91,7 @@ Canonical forms: exactly one spelling per operation. No optional shorthands beyo
 
 **Roles.** Edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.
 
-**group/aggregate.** `group by sups` groups by node identity; `group by sups.country` groups by value (visibly different spelling). Aggregates consume a group name: `count distinct g.parts as n_parts` counts distinct node bindings of column `parts` within each group of `g`.
+**group/aggregate.** `group by sups` groups by node identity; `group by sups.country` groups by value (visibly different spelling). Aggregates consume a group name: `count distinct g.parts as n_parts` counts distinct node bindings of column `parts` within each group of `g`. An aggregate over a plain (non-group) binding is a global aggregate: `count distinct v as n` collapses the table to one row. `distinct` dedups bindings before property extraction; aggregates over a property skip members where the property is null.
 
 **return.** Serializes the requested columns. `order by` sorts, `limit` bounds rows, `budget` bounds tokens (default 2000 when unstated). Overflow: truncate at row boundary, emit `truncated: K more. resume with: continue @cXXXX`. Token counting v0: `len(text) // 4` (documented heuristic).
 

@@ -1,0 +1,210 @@
+{
+ "graph": "nba",
+ "model": "claude-haiku-4-5-20251001",
+ "n": 3,
+ "slice_note": "categories excluded (not expressible in GraphLang v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
+ "graphlang": {
+  "overall": 100.0,
+  "n": 3,
+  "multi-hop": 100.0,
+  "n_multi-hop": 1,
+  "1-hop": 100.0,
+  "n_1-hop": 2,
+  "syntax_validity": 100.0,
+  "mean_result_tokens": 680.7
+ },
+ "text2cypher": {
+  "mode": "published",
+  "claude-3.5-sonnet": 61.6,
+  "gpt-4o": 60.2
+ },
+ "cypher_mode": "published-baseline",
+ "details": {
+  "graphlang": [
+   {
+    "qid": "2e2c70f0-7a57-4aa8-89d6-459d45cfb643",
+    "ok": true,
+    "syntax_ok": true,
+    "query": "find venue as v\ncount distinct v as n\nreturn n",
+    "rows": [
+     [
+      105
+     ]
+    ],
+    "gold": [
+     [
+      105
+     ]
+    ],
+    "result_tokens": 10
+   },
+   {
+    "qid": "3dc0ecd4-6103-4db3-840e-906be0a25f44",
+    "ok": true,
+    "syntax_ok": true,
+    "query": "find player as p\nfollow p receivesAward award as a\nreturn p.name",
+    "rows": [
+     [
+      "Erick Green"
+     ],
+     [
+      "Chris Anstey"
+     ],
+     [
+      "Connie Hawkins"
+     ],
+     [
+      "Sergio Rodr\u00edguez"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ],
+     [
+      "Magic Johnson"
+     ]
+    ],
+    "gold": [
+     [
+      "Michael Jordan"
+     ],
+     [
+      "Nikola Miroti\u0107"
+     ],
+     [
+      "Marc Gasol"
+     ],
+     [
+      "Dick Groat"
+     ],
+     [
+      "David Andersen"
+     ],
+     [
+      "Chris Anstey"
+     ],
+     [
+      "Rory Sparrow"
+     ],
+     [
+      "David Robinson"
+     ],
+     [
+      "Kareem Abdul-Jabbar"
+     ],
+     [
+      "LeBron James"
+     ],
+     [
+      "Dwyane Wade"
+     ],
+     [
+      "Bill Russell"
+     ],
+     [
+      "Tim Duncan"
+     ],
+     [
+      "Jerry Lucas"
+     ],
+     [
+      "Jimmer Fredette"
+     ],
+     [
+      "Shai Gilgeous-Alexander"
+     ],
+     [
+      "Jakob P\u00f6ltl"
+     ],
+     [
+      "Frank Kaminsky"
+     ],
+     [
+      "Zion Williamson"
+     ],
+     [
+      "Bill Walton"
+     ]
+    ],
+    "result_tokens": 2002
+   },
+   {
+    "qid": "df3389b0-1ba2-4dea-9216-b1c5eabd79e8",
+    "ok": true,
+    "syntax_ok": true,
+    "query": "find team where name = \"New Orleans Pelicans\" as nop\nfollow nop partOfDivision division as div\nfollow div partOfDivision team as other_teams\nreturn other_teams.name",
+    "rows": [
+     [
+      "Dallas Mavericks"
+     ],
+     [
+      "San Antonio Spurs"
+     ],
+     [
+      "Houston Rockets"
+     ],
+     [
+      "Memphis Grizzlies"
+     ]
+    ],
+    "gold": [
+     [
+      "Houston Rockets"
+     ],
+     [
+      "Memphis Grizzlies"
+     ],
+     [
+      "San Antonio Spurs"
+     ],
+     [
+      "Dallas Mavericks"
+     ]
+    ],
+    "result_tokens": 30
+   }
+  ],
+  "text2cypher": []
+ }
+}
