@@ -59,6 +59,14 @@ class Aggregate(Stmt):
 
 
 @dataclass
+class Compute(Stmt):
+    left: Col
+    op: str  # plus minus times over same
+    right: Col
+    name: str
+
+
+@dataclass
 class Return(Stmt):
     cols: list[Col]
     order_by: Col | None

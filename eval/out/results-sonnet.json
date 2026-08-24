@@ -1,6 +1,6 @@
 {
  "graph": "nba",
- "model": "claude-haiku-4-5-20251001",
+ "model": "claude-sonnet-5",
  "n": 60,
  "slice_note": "categories excluded (not expressible in GraphLang v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
  "graphlang": {

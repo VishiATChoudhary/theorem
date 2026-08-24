@@ -41,13 +41,16 @@ A program is a sequence of statements. One statement per logical line. A physica
 program     := statement*
 statement   := read_stmt | write_stmt | util_stmt
 
-read_stmt   := find | follow | group | aggregate | return | continue
+read_stmt   := find | follow | group | aggregate | compute | return | continue
 find        := "find" target ["where" cond] ["order" "by" col ["desc"]] "as" NAME
 target      := CLASSNAME | "nodes" | "dup_candidates" | "class"
 follow      := "follow" NAME EDGENAME ROLENAME ["where" cond] "as" NAME
                ; cond filters the arrival node's properties
 group       := "group" "by" col "as" NAME
 aggregate   := AGGVERB ["distinct"] col "as" NAME     ; AGGVERB: count|sum|avg|min|max
+compute     := "compute" col COMPOP col "as" NAME     ; COMPOP: plus|minus|times|over|same
+               ; scalar arithmetic / equality on two bound values; "same"
+               ; yields true/false. one row expected per operand column
 return      := "return" col ("," col)* ["order" "by" col ["desc"]]
                ["limit" INT] ["budget" INT "tokens"] ["after" POSITION]
 continue    := "continue" HANDLE ["budget" INT "tokens"]
@@ -92,6 +95,10 @@ Canonical forms: exactly one spelling per operation. No optional shorthands beyo
 **Roles.** Edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.
 
 **group/aggregate.** `group by sups` groups by node identity; `group by sups.country` groups by value (visibly different spelling). Aggregates consume a group name: `count distinct g.parts as n_parts` counts distinct node bindings of column `parts` within each group of `g`. An aggregate over a plain (non-group) binding is a global aggregate: `count distinct v as n` collapses the table to one row. `distinct` dedups bindings before property extraction; aggregates over a property skip members where the property is null.
+
+**String matching.** `=`, `!=`, and `contains` on strings are case-insensitive and accent-insensitive (casefold + NFKD strip): agents transliterate names ("Jose Calderon" for "José Calderón"), and silently matching nothing is the worse failure. Numeric comparison unchanged.
+
+**compute.** `compute p1.height_cm minus p2.height_cm as diff` evaluates per row; `same` yields a boolean. Word operators, no symbols, one op per line.
 
 **return.** Serializes the requested columns. `order by` sorts, `limit` bounds rows, `budget` bounds tokens (default 2000 when unstated). Overflow: truncate at row boundary, emit `truncated: K more. resume with: continue @cXXXX`. Token counting v0: `len(text) // 4` (documented heuristic).
 

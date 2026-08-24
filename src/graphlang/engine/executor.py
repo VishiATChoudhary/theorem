@@ -9,10 +9,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+import unicodedata
+
 from ..ast_nodes import (
     Aggregate,
     Clause,
     Col,
+    Compute,
     Cond,
     Continue,
     Find,
@@ -101,12 +104,24 @@ def _col_value(store: Store, schema: Schema, row: dict, col: Col):
     raise ExecError(f"cannot resolve column {'.'.join(col)}")
 
 
+def _fold(v):
+    """Agent-friendly string normalization: casefold + strip accents.
+    Agents transliterate names; silently matching nothing is the worse
+    failure mode. Numbers pass through untouched."""
+    if isinstance(v, str):
+        return unicodedata.normalize("NFKD", v).encode(
+            "ascii", "ignore").decode().casefold()
+    return v
+
+
 def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> bool:
     v = row_value
     want = clause.value
     op = clause.op
     if v is None:
         return False
+    if isinstance(v, str) or isinstance(want, str):
+        v, want = _fold(v), _fold(want)
     try:
         if op == "=":
             return v == want
@@ -400,6 +415,32 @@ def _emit(blocks: list[str], total: int, budget: int,
     return "\n".join(out_lines)
 
 
+def _compute(stmt: Compute, table: Table, store: Store, schema: Schema) -> None:
+    for row in table.rows:
+        left = _col_value(store, schema, row, stmt.left)
+        right = _col_value(store, schema, row, stmt.right)
+        if stmt.op == "same":
+            row[stmt.name] = _fold(left) == _fold(right)
+            continue
+        if not isinstance(left, (int, float)) or not isinstance(right, (int, float)) \
+                or isinstance(left, bool) or isinstance(right, bool):
+            raise ExecError(
+                f"compute {stmt.op} needs numbers; got "
+                f"{type(left).__name__} and {type(right).__name__}")
+        if stmt.op == "plus":
+            row[stmt.name] = left + right
+        elif stmt.op == "minus":
+            row[stmt.name] = left - right
+        elif stmt.op == "times":
+            row[stmt.name] = left * right
+        elif stmt.op == "over":
+            if right == 0:
+                raise ExecError("compute over: division by zero")
+            row[stmt.name] = left / right
+        else:
+            raise ExecError(f"unknown compute op {stmt.op}")
+
+
 def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> None:
     if isinstance(stmt, Find):
         found = _find_rows(stmt, store, schema)
@@ -410,6 +451,8 @@ def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> No
         _group(stmt, table, store, schema)
     elif isinstance(stmt, Aggregate):
         _aggregate(stmt, table, store, schema)
+    elif isinstance(stmt, Compute):
+        _compute(stmt, table, store, schema)
     else:
         raise ExecError(f"cannot run {type(stmt).__name__} in a read pipeline")
 

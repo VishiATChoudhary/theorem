@@ -144,3 +144,31 @@ return others.name
     out = run(text, fixture_store)
     assert "GridPack" in out            # shares lithium cell
     assert "PowerBank Pro" not in out   # backtrack over same edge excluded
+
+
+def test_compute_minus_and_same(fixture_store):
+    text = """\
+find part where name = "lithium cell" as a
+find part where name = "casing" as b
+compute a.unit_cost minus b.unit_cost as diff
+return diff
+"""
+    out = run(text, fixture_store)
+    assert out.splitlines()[-1] == "2.2"
+    text2 = """\
+find supplier where country = "KR" as a
+find supplier where country = "JP" as b
+compute a.name same b.name as same_name
+return same_name
+"""
+    out2 = run(text2, fixture_store)
+    assert out2.splitlines()[-1] == "true"
+
+
+def test_string_match_accent_and_case_insensitive(fixture_store):
+    store = fixture_store
+    nid = store.next_id("supplier")
+    store.apply({"op": "put_node", "id": nid, "cls": "supplier",
+                 "props": {"name": "José Calderón", "country": "ES"}})
+    out = run('find supplier where name = "jose calderon" as s\nreturn s.country', fixture_store)
+    assert "ES" in out

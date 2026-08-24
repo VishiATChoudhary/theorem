@@ -15,6 +15,7 @@ from .ast_nodes import (
     AssertNode,
     Col,
     Compact,
+    Compute,
     Cond,
     Continue,
     DeriveClass,
@@ -223,6 +224,11 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             # group binding -> per-group aggregate; any other binding ->
             # global aggregate over that column
             _bind(env, name, f"value:{op}", line)
+
+        case Compute(left=left, right=right, name=name):
+            _check_bound_col(left, schema, env, line)
+            _check_bound_col(right, schema, env, line)
+            _bind(env, name, "value:compute", line)
 
         case Return(cols=cols, order_by=order_by):
             for col in cols:

@@ -38,17 +38,27 @@ Rules:
   in `return`; `<g>.key` is the group key value.
 - The same edge instance is never used twice in one result row, so
   "other teams in the same division as X" naturally excludes X.
+- Scalar math and equality between two bound values:
+  `compute <col> plus|minus|times|over|same <col> as <name>`.
+  `same` yields true/false. Use for "how much taller", "do X and Y share".
+- String matching (`=`, `contains`) is case- and accent-insensitive.
+- RETURN DISCIPLINE: return exactly the values the question asks for,
+  nothing extra. A column used only for ordering goes in `order by`,
+  not in `return`. "Which X is biggest?" returns only the name:
+  `return t.name order by t.inception_year limit 1`.
 - `return <col>, ... [order by <col> [desc]] [limit N]` ends the query.
   Return properties (like `t.name`), never bare bindings.
 - Results are sets: duplicates do not matter, except counts must be exact,
   so use `count distinct` when the same node can be reached twice.
 
 Grammar (EBNF):
-  query   := (find | follow | group | agg)* return
+  query   := (find | follow | group | agg | compute)* return
   find    := "find" CLASS ["where" cond] "as" NAME
   follow  := "follow" NAME EDGE ROLE ["where" cond] "as" NAME
+            ; where comes BEFORE as: follow p playsFor team where name = "X" as t
   group   := "group" "by" NAME["." PROP] "as" NAME
   agg     := ("count"|"sum"|"avg"|"min"|"max") ["distinct"] NAME "." COL ["." PROP] "as" NAME
+  compute := "compute" col ("plus"|"minus"|"times"|"over"|"same") col "as" NAME
   return  := "return" col ("," col)* ["order" "by" col ["desc"]] ["limit" INT]
   cond    := clause (("and"|"or") clause)*
   clause  := PROP OP literal ; OP: = != > >= < <= contains
@@ -93,6 +103,24 @@ follow a receivesAward player as p
 group by a as g
 count distinct g.p as n
 return a.name, n order by n desc limit 1
+
+Q: How much taller is Alice Doe than Bob Roe in centimeters?
+find player where name = "Alice Doe" as p1
+find player where name = "Bob Roe" as p2
+compute p1.height_cm minus p2.height_cm as diff
+return diff
+
+Q: Do Alice Doe and Bob Roe have the same handedness?
+find player where name = "Alice Doe" as p1
+find player where name = "Bob Roe" as p2
+compute p1.handedness same p2.handedness as answer
+return answer
+
+Q: Which players played for teams that LeBron James also played for?
+find player where name = "LeBron James" as lj
+follow lj playsFor team as t
+follow t playsFor player as others
+return others.name
 """
 
 

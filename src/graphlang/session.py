@@ -18,6 +18,7 @@ from pathlib import Path
 
 from .ast_nodes import (
     Aggregate,
+    Compute,
     Continue,
     Find,
     Follow,
@@ -32,7 +33,8 @@ from .parser import ParseError, parse
 from .schema import Schema
 from .verifier import VerifyError, verify
 
-READ_STMTS = (Find, Follow, GroupBy, Aggregate, Return, Continue, SchemaStmt)
+READ_STMTS = (Find, Follow, GroupBy, Aggregate, Compute, Return, Continue,
+              SchemaStmt)
 
 
 class Session:

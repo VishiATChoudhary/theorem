@@ -16,6 +16,7 @@ from .ast_nodes import (
     Clause,
     Col,
     Compact,
+    Compute,
     Cond,
     Continue,
     DeriveClass,
@@ -341,6 +342,14 @@ class _Parser:
         self.expect_word("as")
         name = self.expect_name()
         return Aggregate(op, distinct, col, name)
+
+    def parse_compute(self) -> Compute:
+        left = self.col()
+        op = self.expect_word("plus", "minus", "times", "over", "same")
+        right = self.col()
+        self.expect_word("as")
+        name = self.expect_name()
+        return Compute(left, op, right, name)
 
     def parse_return(self) -> Return:
         cols = [self.col()]

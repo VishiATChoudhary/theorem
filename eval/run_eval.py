@@ -57,7 +57,7 @@ PUBLISHED_BASELINES = {
 def llm(prompt: str, model: str, cache_key: str) -> str:
     import hashlib
     CACHE.mkdir(parents=True, exist_ok=True)
-    digest = hashlib.sha1(prompt.encode()).hexdigest()[:10]
+    digest = hashlib.sha1(f"{model}\n{prompt}".encode()).hexdigest()[:10]
     cache_file = CACHE / f"{cache_key}-{digest}.txt"
     if cache_file.exists():
         return cache_file.read_text()
