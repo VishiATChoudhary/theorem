@@ -191,3 +191,41 @@ def test_parse_error_carries_line():
     with pytest.raises(ParseError) as e:
         parse("schema\nfrobnicate part as p")
     assert e.value.line_no == 2
+
+
+# regression tests from adversarial review round 1
+
+def test_bare_word_not_a_prop_literal():
+    with pytest.raises(ParseError):
+        parse("assert part {status: active} as p")
+
+
+def test_doc_provenance_not_a_literal():
+    with pytest.raises(ParseError):
+        parse("assert part {ref: doc:xyz} as p")
+
+
+def test_bare_word_ok_in_condition():
+    (f,) = parse("find dup_candidates where class = supplier as d")
+    assert f.cond[0][1].value == "supplier"
+
+
+def test_col_max_three_segments():
+    with pytest.raises(ParseError):
+        parse("return a.b.c.d")
+    with pytest.raises(ParseError):
+        parse("return a..b")
+
+
+def test_assert_edge_exactly_two_roles():
+    with pytest.raises(ParseError):
+        parse("assert edge uses(whole: x)")
+    with pytest.raises(ParseError):
+        parse("assert edge uses(whole: x, component: y, extra: z)")
+
+
+def test_indented_comment_skipped_but_nodeid_continuation_kept():
+    stmts = parse('assert part {name: "x"}\n  # a comment\n  as p')
+    assert stmts[0].name == "p"
+    (m,) = parse("merge gs,\n  #p-71002 prefer newest")
+    assert m.b == "#p-71002"

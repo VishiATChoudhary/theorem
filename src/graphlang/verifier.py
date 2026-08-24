@@ -76,9 +76,20 @@ def verify(stmts: list[Stmt], schema: Schema,
 
 
 def _bind(env: dict[str, str], name: str, typ: str, line: int) -> None:
-    if name in env:
+    if name in env and not env[name].startswith("prior:"):
         raise VerifyError(line, f'name "{name}" is already bound')
     env[name] = typ
+
+
+def _read_type(env: dict[str, str], name: str, line: int) -> str:
+    """Type of a binding used in a READ pipeline; stale bindings rejected."""
+    typ = env[name]
+    if typ.startswith("prior:"):
+        raise VerifyError(
+            line,
+            f'"{name}" was bound in a previous request; a read pipeline '
+            f"cannot continue from it. bind it again with find/follow")
+    return typ
 
 
 def _check_class(schema: Schema, name: str, line: int) -> None:
@@ -125,9 +136,9 @@ def _check_bound_col(col: Col, schema: Schema, env: dict[str, str], line: int) -
     head = col[0]
     if head not in env:
         raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
+    typ = _read_type(env, head, line)
     if len(col) == 1:
         return
-    typ = env[head]
     prop = col[1]
     if typ.startswith("group:"):
         return  # g.<member column>: checked against group source below by executor
@@ -143,12 +154,14 @@ def _check_bound_col(col: Col, schema: Schema, env: dict[str, str], line: int) -
 
 
 def _ref_type(ref: str, env: dict[str, str], line: int) -> str | None:
-    """A ref is a binding name or a literal node id. Node ids resolve at run time."""
+    """A ref is a binding name or a literal node id. Node ids resolve at run
+    time. Prior-run bindings ARE valid as write arguments."""
     if ref.startswith("#"):
         return None
     if ref not in env:
         raise VerifyError(line, f'"{ref}" is not bound.{_suggest(ref, env)}')
-    return env[ref]
+    typ = env[ref]
+    return typ[len("prior:"):] if typ.startswith("prior:") else typ
 
 
 def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
@@ -165,6 +178,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case Follow(src=src, edge=edge, role=role, name=name, cond=cond):
             if src not in env:
                 raise VerifyError(line, f'"{src}" is not bound.{_suggest(src, env)}')
+            _read_type(env, src, line)
             if edge not in schema.edges:
                 raise VerifyError(
                     line, f'unknown edge type "{edge}".{_suggest(edge, schema.edges)}')
@@ -202,6 +216,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             head = col[0]
             if head not in env:
                 raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
+            _read_type(env, head, line)
             if env[head].startswith("value:"):
                 raise VerifyError(
                     line, f'"{head}" is already an aggregate value')
@@ -265,7 +280,10 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case Compact(src=src, name=name):
             if src not in env:
                 raise VerifyError(line, f'"{src}" is not bound.{_suggest(src, env)}')
-            _bind(env, name, env[src], line)
+            typ = env[src]
+            if typ.startswith("prior:"):
+                typ = typ[len("prior:"):]
+            _bind(env, name, typ, line)
 
         case Retire(ref=ref) | Flag(ref=ref):
             _ref_type(ref, env, line)

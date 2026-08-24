@@ -146,3 +146,11 @@ def test_derive_similar_class_note(wctx):
     run_writes("derive class distributor from supplier with {region: str}", wctx)
     (r,) = run_writes("derive class distributer from supplier with {region: str}", wctx)
     assert "similar existing class" in r.render()
+
+
+def test_merge_prefer_source_neither_matches_errors(wctx):
+    from graphlang.engine.writes import WriteError
+    a, b = wctx.store.ids["ionix_kr"], wctx.store.ids["ionix_jp"]
+    plans = verify(parse(f"merge {a}, {b} prefer source doc:nowhere"), wctx.schema)
+    with pytest.raises(WriteError):
+        execute_write(plans[0].stmt, wctx)

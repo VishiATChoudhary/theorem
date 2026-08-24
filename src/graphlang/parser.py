@@ -81,7 +81,11 @@ def logical_lines(text: str):
     current: list[str] = []
     start = 0
     for i, raw in enumerate(text.splitlines(), start=1):
-        if not raw.strip() or raw.lstrip().startswith("#") and raw[0] == "#":
+        stripped = raw.lstrip()
+        # comments are "#" followed by a space (or a lone "#"); node ids
+        # like #p-71002 on continuation lines are NOT comments
+        is_comment = stripped.startswith("# ") or stripped == "#"
+        if not raw.strip() or is_comment or (not raw[0].isspace() and raw[0] == "#"):
             continue
         if raw[0].isspace() and current:
             current.append(raw.strip())
@@ -145,9 +149,13 @@ class _Parser:
 
     def col(self) -> Col:
         w = self.expect_word()
-        return tuple(w.split("."))
+        parts = tuple(w.split("."))
+        if len(parts) > 3 or any(not p for p in parts):
+            raise ParseError(self.line_no, f"bad column path {w!r}: "
+                             "1 to 3 non-empty dot-separated names")
+        return parts
 
-    def literal(self) -> object:
+    def literal(self, allow_word: bool = False) -> object:
         t = self.next()
         kind, text = t
         if kind == "string":
@@ -155,15 +163,20 @@ class _Parser:
         if kind == "number":
             return float(text) if "." in text else int(text)
         if kind == "provenance":
+            if not text.startswith("attach:"):
+                raise ParseError(
+                    self.line_no,
+                    f"{text!r} is not a value; doc: provenance only follows 'source'")
             return text
         if kind == "word":
             if text == "true":
                 return True
             if text == "false":
                 return False
-            # bare word literal: used for class names in conditions
-            # (find dup_candidates where class = supplier)
-            return text
+            if allow_word and "." not in text:
+                # bare word in a condition RHS: class names in
+                # (find dup_candidates where class = supplier)
+                return text
         raise ParseError(self.line_no, f"expected a literal value, got {text!r}")
 
     def ref(self) -> str:
@@ -236,7 +249,7 @@ class _Parser:
             op = t[1]
             if op not in COMPARISON_OPS:
                 raise ParseError(self.line_no, f"unknown operator {op!r}")
-            value = self.literal()
+            value = self.literal(allow_word=True)
             out.append((joiner, Clause(col, op, value)))
             if self.at_word("and", "or"):
                 joiner = self.next()[1]
@@ -366,15 +379,13 @@ class _Parser:
             edge = self.expect_name()
             self.expect_punct("(")
             role_refs: dict[str, str] = {}
-            while True:
+            for i in range(2):
                 role = self.expect_name()
                 self.expect_punct(":")
                 role_refs[role] = self.ref()
-                if self.peek() == ("punct", ","):
-                    self.next()
-                    continue
-                self.expect_punct(")")
-                break
+                if i == 0:
+                    self.expect_punct(",")
+            self.expect_punct(")")
             source = self.source_opt()
             return AssertEdge(edge, role_refs, source)
         cls = self.expect_name()

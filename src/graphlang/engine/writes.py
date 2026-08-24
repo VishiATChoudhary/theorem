@@ -166,8 +166,14 @@ def _merge(stmt: Merge, ctx: WriteContext) -> Receipt:
             merged[k] = v
     elif stmt.policy.startswith("source "):
         want_src = stmt.policy.split(" ", 1)[1]
-        preferred = na if na.props.get("_source") == want_src else nb
-        other = nb if preferred is na else na
+        if na.props.get("_source") == want_src:
+            preferred, other = na, nb
+        elif nb.props.get("_source") == want_src:
+            preferred, other = nb, na
+        else:
+            raise WriteError(
+                f"neither node has source {want_src}; "
+                f"use prefer newest or explicit values")
         merged = {**other.props, **preferred.props}
     else:
         raise WriteError(f"unknown merge policy {stmt.policy!r}")

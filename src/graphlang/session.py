@@ -2,7 +2,14 @@
 
 run() takes a program, verifies it whole (nothing executes on any error),
 then executes statement by statement: reads build a binding table, writes
-return receipts. Bindings persist across run() calls.
+return receipts.
+
+Binding lifetime: within one run() call, all bindings flow freely. Across
+calls, bindings stay usable as WRITE arguments (merge, retire, compact,
+edge roles) because the session keeps their node ids, but a read pipeline
+(follow, group, aggregate, return) must re-find them: the binding table
+is per-call, and the verifier rejects stale read references explicitly
+instead of executing against an empty table.
 """
 
 from __future__ import annotations
@@ -39,7 +46,10 @@ class Session:
     def run(self, text: str) -> str:
         try:
             stmts = parse(text)
-            plans = verify(stmts, self.schema, self.type_env)
+            stale_env = {
+                name: typ if typ.startswith("prior:") else f"prior:{typ}"
+                for name, typ in self.type_env.items()}
+            plans = verify(stmts, self.schema, stale_env)
         except ParseError as e:
             return f"error: {e}\nnothing was executed."
         except VerifyError as e:

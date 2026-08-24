@@ -35,7 +35,7 @@ This spec freezes the open decisions from `research/design-briefing/trellis-desi
 
 ## Grammar (EBNF)
 
-A program is a sequence of statements. One statement per logical line. A physical line starting with whitespace continues the previous logical line. `#` at start of line = comment (node ids `#x-123` only appear after a keyword or `,`, never at line start).
+A program is a sequence of statements. One statement per logical line. A physical line starting with whitespace continues the previous logical line. Comments: a line whose first non-blank character sequence is `# ` (hash space), or an unindented line starting with `#` that is not inside a continuation; node ids like `#p-71002` on continuation lines are never comments.
 
 ```
 program     := statement*
@@ -101,7 +101,7 @@ Canonical forms: exactly one spelling per operation. No optional shorthands beyo
 
 **Writes.** Every write returns a receipt: created/changed ids, position `@t-N`, guards run, dup candidates (sync blocking stage inline; async similarity stage lands in the ledger). `merge a, b`: survivor = older node; absorbed id becomes permanent alias; lineage records both pre-merge states; policy default `prefer newest` per conflicting property. `distinct a, b reason "..."`: durable pair suppression. `refine blob into class with {prop: col "colname"}`: blob payload must be tabular (attach:csv payloads parsed at assert time); creates one child per row, each with `origin` lineage to blob; blob → state `composite`, retained cold. `compact <binding> as <name> {props}`: replaces the bound node set with one summary node (state `composite` parent lineage); values may use `avg(col.prop)`-free literal props only in v0. `retire`: temporal invalidation; node keeps history, excluded from current-time reads. `derive class`: new subclass, provisional status, quota 500 instances, promotion out of scope for v0 (status queryable).
 
-**Dedup.** Blocking key: `(class, first 6 chars of casefolded-alnum name)`. Sync stage on every assert checks the block, similarity via `difflib.SequenceMatcher.ratio() >= 0.85` → candidate with score. Async stage (background thread or explicit `engine.run_maintenance()`) sweeps cross-block near-names. Candidates queryable: `find dup_candidates where class = supplier order by score as dups`.
+**Dedup.** Blocking key: `(class, first 4 chars of casefolded-alnum name)` (4, not 6, so short names like "Ionix" block with their extensions). Sync stage on every assert checks the block, similarity via `difflib.SequenceMatcher.ratio()` with a name-containment boost (one normalized name a strict prefix of the other lifts the score to at least 0.9, so "Ionix Co" vs "Ionix" is a candidate); candidates need score `>= 0.85`. Async stage (explicit `dedup.sweep()`) sweeps cross-block near-names per class. Candidates queryable: `find dup_candidates where class = supplier order by score as dups`.
 
 **Health.** Four subscores in `[0,1]`, computed incrementally, queryable as `health.loss`, `health.query`, `health.structure`, `health.staleness`. v0 definitions: loss = min(1, conflicting re-asserts of same property / 5); query = min(1, flags / 3); structure = max(supernode: min(1, degree/100), blob-traversal: min(1, traversals into blob payload / 50), orphan: 0.3 if degree==0); staleness = min(1, positions since last confirming write / 1000).
 

@@ -258,6 +258,15 @@ def _parse_shell_cell(cell: str):
     return cell
 
 
+def _cypher_literal(v) -> str:
+    """JSON value -> Cypher literal (Cypher map keys are bare identifiers)."""
+    if isinstance(v, dict):
+        return "{" + ", ".join(f"`{k}`: {_cypher_literal(x)}" for k, x in v.items()) + "}"
+    if isinstance(v, list):
+        return "[" + ", ".join(_cypher_literal(x) for x in v) + "]"
+    return json.dumps(v)
+
+
 def load_neo4j(graph_json: Path) -> None:
     """Load the simplekg into neo4j with batched UNWIND statements."""
     marker = neo4j_query("MATCH (n) RETURN count(n)")
@@ -274,11 +283,12 @@ def load_neo4j(graph_json: Path) -> None:
         by_label[ent["label"]].append(props)
     for label, items in by_label.items():
         for i in range(0, len(items), 500):
-            batch = json.dumps(items[i:i + 500])
+            batch = _cypher_literal(items[i:i + 500])
             neo4j_query(
                 f"UNWIND {batch} AS row CREATE (n:{label}) SET n = row",
                 timeout=300)
-    neo4j_query("CREATE INDEX eid_idx IF NOT EXISTS FOR (n:Player) ON (n.eid)")
+        neo4j_query(f"CREATE INDEX {label.lower()}_eid IF NOT EXISTS "
+                    f"FOR (n:{label}) ON (n.eid)")
     rels = defaultdict(list)
     for rel in kg["relations"]:
         props = {k: v for k, v in (rel.get("properties") or {}).items()
@@ -287,7 +297,7 @@ def load_neo4j(graph_json: Path) -> None:
             {"s": rel["subj_id"], "o": rel["obj_id"], "p": props})
     for label, items in rels.items():
         for i in range(0, len(items), 500):
-            batch = json.dumps(items[i:i + 500])
+            batch = _cypher_literal(items[i:i + 500])
             neo4j_query(
                 f"UNWIND {batch} AS row "
                 f"MATCH (a {{eid: row.s}}), (b {{eid: row.o}}) "

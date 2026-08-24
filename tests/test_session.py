@@ -77,3 +77,27 @@ def test_parse_error_reported_not_raised(tmp_path):
     s = make_session(tmp_path)
     out = s.run("frobnicate everything")
     assert "parse error" in out and "nothing was executed." in out
+
+
+# regression tests from adversarial review round 1
+
+def test_stale_read_binding_rejected_not_empty(tmp_path):
+    s = make_session(tmp_path)
+    s.run('assert product {name: "X", launch_year: 2026} as x')
+    s.run("find product as p")
+    out = s.run("follow p uses component as parts\nreturn parts.name")
+    assert "previous request" in out and "nothing was executed." in out
+
+
+def test_prior_binding_still_valid_for_writes(tmp_path):
+    s = make_session(tmp_path)
+    s.run('assert supplier {name: "A Corp", country: "DE"} as a')
+    out = s.run('retire a reason "gone"')
+    assert "retired" in out
+
+
+def test_rebinding_prior_name_allowed(tmp_path):
+    s = make_session(tmp_path)
+    s.run('assert supplier {name: "A Corp", country: "DE"} as a')
+    out = s.run("find supplier as a\nreturn a.name")
+    assert "A Corp" in out
