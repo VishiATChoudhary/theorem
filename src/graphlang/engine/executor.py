@@ -185,8 +185,7 @@ def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
         getter = lambda row: (lambda col: _first_prop(store, schema, row[name], col))
     rows = [r for r in pool if _eval_cond(store, schema, stmt.cond, getter(r))]
     if stmt.order_by is not None:
-        rows.sort(key=lambda r: _sort_key(getter(r)(stmt.order_by)),
-                  reverse=stmt.desc)
+        rows = _sorted_rows(rows, lambda r: getter(r)(stmt.order_by), stmt.desc)
     return rows
 
 
@@ -197,8 +196,16 @@ def _first_prop(store: Store, schema: Schema, node_id: str, col: Col):
 
 
 def _sort_key(v):
-    # None sorts last; mixed types sort by string form
-    return (v is None, isinstance(v, str), v if v is not None else "")
+    # mixed types sort by string form; None handled by _sorted_rows
+    return (isinstance(v, str), v if v is not None else "")
+
+
+def _sorted_rows(rows, key, desc: bool):
+    """Sort with None values always LAST, in both directions."""
+    present = [r for r in rows if key(r) is not None]
+    missing = [r for r in rows if key(r) is None]
+    return sorted(present, key=lambda r: _sort_key(key(r)),
+                  reverse=desc) + missing
 
 
 def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
@@ -360,8 +367,9 @@ def _serialize(store: Store, schema: Schema, stmt: Return, table: Table,
 
     rows = table.rows
     if stmt.order_by is not None:
-        rows = sorted(rows, key=lambda r: _sort_key(
-            _col_value(store, schema, r, stmt.order_by)), reverse=stmt.desc)
+        rows = _sorted_rows(
+            rows, lambda r: _col_value(store, schema, r, stmt.order_by),
+            stmt.desc)
     total = len(rows)
     if stmt.limit is not None:
         rows = rows[: stmt.limit]
@@ -496,9 +504,10 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
         if isinstance(stmt, Return):
             rows = table.rows
             if stmt.order_by is not None:
-                rows = sorted(rows, key=lambda r: _sort_key(
-                    _col_value(store, schema, r, stmt.order_by)),
-                    reverse=stmt.desc)
+                rows = _sorted_rows(
+                    rows,
+                    lambda r: _col_value(store, schema, r, stmt.order_by),
+                    stmt.desc)
             if stmt.limit is not None:
                 rows = rows[: stmt.limit]
             def plain(v):

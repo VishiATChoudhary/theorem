@@ -64,9 +64,28 @@ def llm(prompt: str, model: str, cache_key: str) -> str:
     result = subprocess.run(
         ["claude", "-p", "--model", model, "--max-turns", "1"],
         input=prompt, capture_output=True, text=True, timeout=300)
-    text = result.stdout.strip()
-    text = re.sub(r"^```[a-z]*\n|\n```$", "", text).strip()
+    text = _extract_query(result.stdout)
     cache_file.write_text(text)
+    return text
+
+
+GL_VERBS = ("find ", "follow ", "group ", "count ", "sum ", "avg ", "min ",
+            "max ", "compute ", "return ", "continue ", "schema")
+CY_STARTS = ("MATCH", "CALL", "WITH", "UNWIND", "OPTIONAL", "RETURN")
+
+
+def _extract_query(raw: str) -> str:
+    """Strip markdown fences and any prose before the first query line.
+    Applied identically to both conditions."""
+    text = raw.strip()
+    fence = re.search(r"```[a-z]*\n(.*?)```", text, re.DOTALL)
+    if fence:
+        text = fence.group(1).strip()
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s.lower().startswith(GL_VERBS) or s.startswith(CY_STARTS):
+            return "\n".join(lines[i:]).strip()
     return text
 
 

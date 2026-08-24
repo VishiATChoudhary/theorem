@@ -190,3 +190,12 @@ return x
     from graphlang.engine.executor import ExecError
     with _pytest.raises(ExecError):
         run(text, fixture_store)
+
+
+def test_nulls_sort_last_desc(fixture_store):
+    store = fixture_store
+    nid = store.next_id("part")
+    store.apply({"op": "put_node", "id": nid, "cls": "part",
+                 "props": {"name": "mystery part"}})  # unit_cost unset
+    out = run("find part as p\nreturn p.name order by p.unit_cost desc limit 1", fixture_store)
+    assert "solar film" in out and "mystery part" not in out

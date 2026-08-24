@@ -46,6 +46,14 @@ Rules:
   nothing extra. A column used only for ordering goes in `order by`,
   not in `return`. "Which X is biggest?" returns only the name:
   `return t.name order by t.inception_year limit 1`.
+- "Who is taller / heavier / died later, X or Y?" asks for a NAME:
+  find both with `or`, then `return p.name order by p.<prop> desc limit 1`.
+  Use `compute` only when the question asks for the numeric difference
+  or an explicit yes/no.
+- Entity names: use the FULL name as stated in the question
+  ("Southeast Division", not "Southeast").
+- Date properties are ISO strings: compare with quoted strings,
+  e.g. `where date_of_death < "2019"`.
 - `return <col>, ... [order by <col> [desc]] [limit N]` ends the query.
   Return properties (like `t.name`), never bare bindings.
 - Results are sets: duplicates do not matter, except counts must be exact,
