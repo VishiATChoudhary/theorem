@@ -96,7 +96,7 @@ Canonical forms: exactly one spelling per operation. No optional shorthands beyo
 
 **group/aggregate.** `group by sups` groups by node identity; `group by sups.country` groups by value (visibly different spelling). Aggregates consume a group name: `count distinct g.parts as n_parts` counts distinct node bindings of column `parts` within each group of `g`. An aggregate over a plain (non-group) binding is a global aggregate: `count distinct v as n` collapses the table to one row. `distinct` dedups bindings before property extraction; aggregates over a property skip members where the property is null.
 
-**String matching.** `=`, `!=`, and `contains` on strings are case-insensitive and accent-insensitive (casefold + NFKD strip): agents transliterate names ("Jose Calderon" for "José Calderón"), and silently matching nothing is the worse failure. Numeric comparison unchanged.
+**String matching.** `=`, `!=`, and `contains` on strings are case-insensitive and accent-insensitive (casefold + NFKD strip): agents transliterate names ("Jose Calderon" for "José Calderón"), and silently matching nothing is the worse failure. Numeric comparison unchanged. Known tradeoff: two distinct nodes whose names differ only by case/accent both match an exact-looking equality; the dedup pipeline flags such pairs, and the agent resolves them with merge/distinct. `compute ... same` errors when either operand is unset rather than reporting two missing values as equal.
 
 **compute.** `compute p1.height_cm minus p2.height_cm as diff` evaluates per row; `same` yields a boolean. Word operators, no symbols, one op per line.
 

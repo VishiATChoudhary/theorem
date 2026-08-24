@@ -172,3 +172,21 @@ def test_string_match_accent_and_case_insensitive(fixture_store):
                  "props": {"name": "José Calderón", "country": "ES"}})
     out = run('find supplier where name = "jose calderon" as s\nreturn s.country', fixture_store)
     assert "ES" in out
+
+
+def test_compute_same_null_errors(fixture_store):
+    store = fixture_store
+    for nm in ("Gap A", "Gap B"):
+        nid = store.next_id("supplier")
+        store.apply({"op": "put_node", "id": nid, "cls": "supplier",
+                     "props": {"name": nm}})  # country unset
+    text = """\
+find supplier where name = "Gap A" as a
+find supplier where name = "Gap B" as b
+compute a.country same b.country as x
+return x
+"""
+    import pytest as _pytest
+    from graphlang.engine.executor import ExecError
+    with _pytest.raises(ExecError):
+        run(text, fixture_store)

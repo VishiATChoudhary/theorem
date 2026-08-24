@@ -420,6 +420,10 @@ def _compute(stmt: Compute, table: Table, store: Store, schema: Schema) -> None:
         left = _col_value(store, schema, row, stmt.left)
         right = _col_value(store, schema, row, stmt.right)
         if stmt.op == "same":
+            if left is None or right is None:
+                raise ExecError(
+                    f"compute same: {'.'.join(stmt.left if left is None else stmt.right)} "
+                    "is unset; cannot compare a missing value")
             row[stmt.name] = _fold(left) == _fold(right)
             continue
         if not isinstance(left, (int, float)) or not isinstance(right, (int, float)) \
