@@ -1,0 +1,47 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - heading "GraphLang tour" [level=1] [ref=f1e3]
+    - generic [ref=f1e4]: every operation, visualized live
+    - button "Reset session" [ref=f1e5] [cursor=pointer]
+  - main [ref=f1e6]:
+    - region "guided tour" [ref=f1e7]:
+      - generic [ref=f1e8]:
+        - generic [ref=f1e9]: STEP 1 / 23
+        - generic [ref=f1e10]: The schema
+      - generic [ref=f1e11]:
+        - text: "Everything starts from a schema: node classes with typed properties, and edge types with two named"
+        - code [ref=f1e12]: roles
+        - text: instead of a direction. Run
+        - code [ref=f1e13]: schema
+        - text: to see the world we will build in. The graph is empty; you will fill it.
+      - textbox "GraphLang program" [ref=f1e14]: schema
+      - generic [ref=f1e15]:
+        - button "Back" [disabled] [ref=f1e16]
+        - button "Run" [ref=f1e17] [cursor=pointer]
+        - button "Next step" [ref=f1e19] [cursor=pointer]
+    - region "graph view" [ref=f1e21]:
+      - img [ref=f1e22]:
+        - generic [ref=f1e23]:
+          - generic [ref=f1e24]: uses
+          - generic [ref=f1e27]: uses
+          - generic [ref=f1e30]: supplied_by
+          - generic [ref=f1e33]: supplied_by
+          - generic [ref=f1e36]: uses
+          - generic [ref=f1e39]: supplied_by
+          - generic [ref=f1e42]: supplied_by
+        - generic [ref=f1e60]:
+          - generic: VoltaChem
+          - generic: PowerBank Pro
+          - generic: lithium cell
+          - generic: copper wire
+          - generic: SolarCharger X
+          - generic: solar film
+          - generic: Ionix Co
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62]: product
+        - generic [ref=f1e64]: part
+        - generic [ref=f1e66]: supplier
+        - generic [ref=f1e68]: dup candidate
+        - generic [ref=f1e70]: lineage / origin
+        - generic [ref=f1e72]: unhealthy
+        - generic [ref=f1e74]: query match

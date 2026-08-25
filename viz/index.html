@@ -243,11 +243,17 @@ async function reset() {
 
 // ---- d3 force graph ---------------------------------------------------
 const svg = d3.select("#graph");
-const gEdges = svg.append("g");
-const gDups = svg.append("g");
-const gOrigins = svg.append("g");
-const gNodes = svg.append("g");
-const gLabels = svg.append("g");
+const gRoot = svg.append("g");
+const gEdges = gRoot.append("g");
+const gDups = gRoot.append("g");
+const gOrigins = gRoot.append("g");
+const gNodes = gRoot.append("g");
+const gLabels = gRoot.append("g");
+svg.call(d3.zoom()
+  .scaleExtent([0.25, 4])
+  .filter(ev => !ev.target.closest("g.n"))  // node drag wins over pan
+  .on("zoom", ev => gRoot.attr("transform", ev.transform)))
+  .on("dblclick.zoom", null);
 let sim = null;
 let nodeCache = new Map();
 

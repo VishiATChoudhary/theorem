@@ -154,3 +154,18 @@ def test_merge_prefer_source_neither_matches_errors(wctx):
     plans = verify(parse(f"merge {a}, {b} prefer source doc:nowhere"), wctx.schema)
     with pytest.raises(WriteError):
         execute_write(plans[0].stmt, wctx)
+
+
+def test_self_merge_error_suggests_dup_candidate(wctx):
+    from graphlang.engine.writes import WriteError
+    # identical re-assert: candidate lands in ledger, binding points at new node
+    run_writes('assert supplier {name: "Volta Chem GmbH", country: "DE"} as v1', wctx)
+    run_writes('assert supplier {name: "Volta Chem GmbH", country: "DE"} as v1x', wctx)
+    new_id = wctx.env["v1x"]
+    old_id = wctx.env["v1"]
+    plans = verify(parse(f"merge {new_id}, {new_id}"), wctx.schema)
+    with pytest.raises(WriteError) as e:
+        execute_write(plans[0].stmt, wctx)
+    msg = str(e.value)
+    assert "itself" in msg
+    assert old_id in msg and "merge" in msg  # concrete resolving command suggested

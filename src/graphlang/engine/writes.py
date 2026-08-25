@@ -147,7 +147,20 @@ def _merge(stmt: Merge, ctx: WriteContext) -> Receipt:
     a = ctx.resolve_ref(stmt.a)
     b = ctx.resolve_ref(stmt.b)
     if a == b:
-        raise WriteError("merge of a node with itself")
+        # the user usually means "merge with my duplicate": consult the ledger
+        pending = []
+        for rec in ctx.store.dup_ledger:
+            ra, rb = ctx.store.resolve(rec["a"]), ctx.store.resolve(rec["b"])
+            pair = frozenset((ra, rb))
+            if a in pair and len(pair) == 2 and pair not in ctx.store.distinct_pairs:
+                pending.append((rec["score"], rb if ra == a else ra))
+        hint = ""
+        if pending:
+            _, other = max(pending)
+            name = ctx.store.nodes[other].props.get("name", other)
+            hint = (f'; {a} has a pending dup candidate {other} ("{name}"). '
+                    f"did you mean: merge {a}, {other}")
+        raise WriteError(f"merge of a node with itself{hint}")
     na, nb = store.nodes[a], store.nodes[b]
     if na.cls != nb.cls:
         raise WriteError(f"cannot merge {na.cls} with {nb.cls}")
