@@ -34,6 +34,15 @@ class Schema:
     classes: dict[str, ClassDef] = field(default_factory=dict)
     edges: dict[str, EdgeDef] = field(default_factory=dict)
 
+    def is_subclass(self, cls: str, base: str) -> bool:
+        """True when cls is base or derives (transitively) from base."""
+        cdef = self.classes.get(cls)
+        while cdef is not None:
+            if cdef.name == base:
+                return True
+            cdef = self.classes.get(cdef.base) if cdef.base else None
+        return False
+
     def all_props(self, cls: str) -> dict[str, str]:
         """Props of a class including inherited base-class props."""
         out: dict[str, str] = {}

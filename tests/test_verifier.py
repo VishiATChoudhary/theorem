@@ -109,3 +109,13 @@ def test_assert_edge_wrong_roles():
 def test_derive_unknown_base():
     msg = err("derive class broker from suplier with {takes_inventory: bool}")
     assert "supplier" in msg
+
+
+def test_subclass_valid_at_edge_role():
+    from graphlang.schema import ClassDef
+    s = Schema.supply_chain()
+    s.classes["broker"] = ClassDef("broker", {"takes_inventory": "bool"},
+                                   base="supplier", status="provisional")
+    verify(parse('assert broker {name: "M", takes_inventory: true} as m\n'
+                 'assert part {name: "x", unit_cost: 1.0} as p\n'
+                 "assert edge supplied_by(item: p, source: m)"), s)
