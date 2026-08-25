@@ -43,7 +43,7 @@ CypherBench NBA slice, 60 questions stratified over the expressible categories (
 | GraphLang + Sonnet 5 | **95.0%** | **92.0%** | 97.1% | 100% | 278 |
 | text2cypher + Sonnet 5 | 71.7% | 60.0% | 80.0% | 96.7% | 207 |
 
-Published full-test-set frontier baselines for context: Claude 3.5 Sonnet 61.6% EX, GPT-4o 60.2% (CypherBench paper, arXiv 2412.18702; different slice, not directly comparable).
+Published frontier baselines for context: Claude 3.5 Sonnet 61.6% EX, GPT-4o 60.2% (CypherBench, arXiv 2412.18702); two model generations later, Claude Opus 4.8 and GPT-5.5 still sit at 51-58% Cypher EX with 19-44% on hard queries (Text2GraphQuery-Bench, arXiv 2602.11745). Model scaling is flat on this task. Our own runs show the same thing live: Sonnet 5 text2cypher is no better than Haiku 4.5 text2cypher, while the language switch moves both models 20+ points. The full "won't better models fix Cypher?" argument is Section 7 of `docs/report/graphlang-v0-report.pdf`: corpus (not capacity) is the bottleneck and your schema is never in the corpus; surviving errors are the silent semantic kind that Cypher executes and GraphLang refuses; and a perfect Cypher generator still writes against a database with no receipts, dedup, lineage, granularity, health, or token budgets.
 
 The headline: on multi-hop questions, the design's target zone, GraphLang with the small Haiku model reaches 96% where text2cypher with the same model reaches 56%. Three benchmark-driven language changes came out of the eval loop (global aggregates, trail semantics, the compute verb), each documented in the spec.
 
