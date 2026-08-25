@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphLang tour</title>
+<style>
+/* Hallmark · macrostructure: Workbench · tone: technical · anchor hue: cobalt
+ * theme: Cobalt (light paper · grotesk-sans + mono · cool accent)
+ * nav: app header (tool scope) · footer: none · enrichment: none
+ * Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 */
+:root {
+  --color-paper: oklch(98% 0.003 250);
+  --color-panel: oklch(96% 0.005 250);
+  --color-ink: oklch(22% 0.02 260);
+  --color-ink-2: oklch(45% 0.02 260);
+  --color-line: oklch(88% 0.01 250);
+  --color-accent: oklch(52% 0.17 258);
+  --color-accent-soft: oklch(92% 0.04 258);
+  --color-ok: oklch(55% 0.13 155);
+  --color-warn: oklch(70% 0.14 75);
+  --color-danger: oklch(58% 0.18 25);
+  --color-code-bg: oklch(25% 0.02 260);
+  --color-code-ink: oklch(93% 0.01 250);
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px;
+  --radius: 8px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 180ms;
+}
+* { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body {
+  margin: 0; height: 100vh; display: flex; flex-direction: column;
+  background: var(--color-paper); color: var(--color-ink);
+  font-family: var(--font-body); font-size: 14px;
+}
+header {
+  display: flex; align-items: baseline; gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--color-line);
+}
+header h1 { font-family: var(--font-display); font-size: 18px; margin: 0; font-weight: 600; }
+header .sub { color: var(--color-ink-2); font-size: 13px; }
+header .grow { flex: 1; }
+button {
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  border: 1px solid var(--color-line); border-radius: var(--radius);
+  background: var(--color-paper); color: var(--color-ink);
+  padding: 6px 14px; cursor: pointer;
+  transition: transform var(--dur) var(--ease-out), background var(--dur) var(--ease-out);
+}
+button:hover { background: var(--color-panel); }
+button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--color-accent); border-color: var(--color-accent); color: white; }
+button.primary:hover { background: oklch(46% 0.17 258); }
+main { flex: 1; display: grid; grid-template-columns: 420px 1fr; min-height: 0; }
+#tour {
+  border-right: 1px solid var(--color-line); background: var(--color-panel);
+  display: flex; flex-direction: column; min-height: 0;
+}
+#step-head { padding: var(--space-4) var(--space-6) 0; }
+#step-count { font-family: var(--font-mono); font-size: 11px; color: var(--color-accent); letter-spacing: 0.06em; }
+#step-title { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: var(--space-1) 0 var(--space-2); }
+#step-body { padding: 0 var(--space-6); color: var(--color-ink-2); line-height: 1.55; }
+#step-body code { font-family: var(--font-mono); font-size: 12px; background: var(--color-accent-soft); padding: 1px 4px; border-radius: 4px; color: var(--color-ink); }
+#cmd {
+  margin: var(--space-3) var(--space-6) 0; width: calc(100% - 48px);
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5;
+  background: var(--color-code-bg); color: var(--color-code-ink);
+  border: 1px solid transparent; border-radius: var(--radius);
+  padding: var(--space-3); resize: vertical; min-height: 88px;
+}
+#cmd:focus-visible { outline: 2px solid var(--color-accent); }
+#controls { display: flex; gap: var(--space-2); padding: var(--space-3) var(--space-6); }
+#controls .grow { flex: 1; }
+#console {
+  flex: 1; min-height: 0; overflow-y: auto;
+  margin: 0 var(--space-6) var(--space-4); border-radius: var(--radius);
+  background: var(--color-paper); border: 1px solid var(--color-line);
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  padding: var(--space-3); white-space: pre-wrap;
+}
+#console .in { color: var(--color-accent); }
+#console .err { color: var(--color-danger); }
+#console .ok { color: var(--color-ink); }
+#graph-wrap { position: relative; min-width: 0; }
+#graph { width: 100%; height: 100%; display: block; }
+#legend {
+  position: absolute; top: var(--space-3); right: var(--space-3);
+  background: color-mix(in oklab, var(--color-paper) 88%, transparent);
+  border: 1px solid var(--color-line); border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3); font-size: 11.5px; line-height: 1.7;
+  color: var(--color-ink-2);
+}
+#legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+#legend .ln { display: inline-block; width: 16px; height: 0; border-top: 2px dashed; margin-right: 6px; vertical-align: 3px; }
+.edge { stroke: oklch(75% 0.01 250); stroke-width: 1.4; }
+.edge-label { font-family: var(--font-mono); font-size: 9px; fill: var(--color-ink-2); }
+.dup-link { stroke: var(--color-danger); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.origin-link { stroke: oklch(70% 0.01 250); stroke-width: 1; stroke-dasharray: 2 4; }
+.node-label { font-family: var(--font-mono); font-size: 10.5px; fill: var(--color-ink); pointer-events: none; }
+.node-label.retired { fill: var(--color-ink-2); text-decoration: line-through; }
+.halo { fill: none; stroke: var(--color-warn); stroke-width: 3; opacity: 0.8; }
+.hl-ring { fill: none; stroke: var(--color-accent); stroke-width: 3; }
+.state-ring { fill: none; stroke: var(--color-ink-2); stroke-width: 1; stroke-dasharray: 3 3; }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; } }
+@media (max-width: 768px) { main { grid-template-columns: 1fr; grid-template-rows: 50% 50%; } #tour { border-right: none; border-bottom: 1px solid var(--color-line); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>GraphLang tour</h1>
+  <span class="sub">every operation, visualized live</span>
+  <span class="grow"></span>
+  <button id="reset">Reset session</button>
+</header>
+<main>
+  <section id="tour" aria-label="guided tour">
+    <div id="step-head">
+      <div id="step-count"></div>
+      <div id="step-title"></div>
+    </div>
+    <div id="step-body"></div>
+    <textarea id="cmd" spellcheck="false" aria-label="GraphLang program"></textarea>
+    <div id="controls">
+      <button id="prev">Back</button>
+      <button id="run" class="primary">Run</button>
+      <span class="grow"></span>
+      <button id="next">Next step</button>
+    </div>
+    <div id="console" aria-live="polite"></div>
+  </section>
+  <section id="graph-wrap" aria-label="graph view">
+    <svg id="graph"></svg>
+    <div id="legend"></div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+const STEPS = [
+{ title: "The schema", body: "Everything starts from a schema: node classes with typed properties, and edge types with two named <code>roles</code> instead of a direction. Run <code>schema</code> to see the world we will build in. The graph is empty; you will fill it.",
+  code: "schema" },
+{ title: "assert your first node", body: "Writes are structural and carry provenance (<code>source doc:...</code>). Every write returns a <b>receipt</b>: what was created, its id, its position, which guards ran. Watch the first node appear.",
+  code: 'assert supplier {name: "VoltaChem", country: "DE"}\n  source doc:tour/1 as volta' },
+{ title: "More nodes", body: "Bind each node to a name (<code>as pb</code>) so later statements can refer to it. One statement per line; indented lines continue the statement.",
+  code: 'assert product {name: "PowerBank Pro", launch_year: 2025} source doc:tour/2 as pb\nassert part {name: "lithium cell", unit_cost: 4.2} source doc:tour/2 as cell\nassert part {name: "copper wire", unit_cost: 1.1} source doc:tour/2 as wire' },
+{ title: "assert edges by role", body: "No arrows anywhere. <code>uses(whole: pb, component: cell)</code> names both roles explicitly. A wrong role is a type error, not a silently reversed edge.",
+  code: "assert edge uses(whole: pb, component: cell) source doc:tour/3\nassert edge uses(whole: pb, component: wire) source doc:tour/3\nassert edge supplied_by(item: cell, source: volta) source doc:tour/3\nassert edge supplied_by(item: wire, source: volta) source doc:tour/3" },
+{ title: "A bit more world", body: "A second product and supplier so queries have something to find.",
+  code: 'assert product {name: "SolarCharger X", launch_year: 2023} source doc:tour/4 as sc\nassert part {name: "solar film", unit_cost: 7.5} source doc:tour/4 as film\nassert supplier {name: "Ionix", country: "KR"} source doc:tour/4 as ionix\nassert edge uses(whole: sc, component: film) source doc:tour/4\nassert edge supplied_by(item: film, source: ionix) source doc:tour/4\nassert edge supplied_by(item: cell, source: ionix) source doc:tour/4' },
+{ title: "Read: find, follow, return", body: "A query is a pipeline of named steps over a <b>binding table</b>. <code>follow</code> walks an edge type by naming the role you arrive at. Matched nodes light up blue in the graph.",
+  code: 'find part where name = "lithium cell" as c\nfollow c supplied_by source as sups\nreturn sups.name' },
+{ title: "Staged aggregation", body: "Grouping is its own line, by node <b>identity</b> (<code>group by sups</code>), never silently by name. Then <code>count distinct</code>. Editing the return list can never change the grouping.",
+  code: "find product where launch_year > 2024 as recent\nfollow recent uses component as parts\nfollow parts supplied_by source as sups\ngroup by sups as g\ncount distinct g.parts as n\nreturn sups.name, n order by n desc" },
+{ title: "compute", body: "Scalar arithmetic and equality use word operators, one per line: <code>minus</code>, <code>plus</code>, <code>times</code>, <code>over</code>, <code>same</code>.",
+  code: 'find part where name = "solar film" as a\nfind part where name = "lithium cell" as b\ncompute a.unit_cost minus b.unit_cost as diff\nreturn diff' },
+{ title: "Token budgets", body: "Results are budgeted in <b>tokens</b>, not rows. A tiny budget forces truncation with a declared count and a continuation handle. Copy the <code>@c...</code> handle from the output into a <code>continue</code> statement and run again to drain the rest.",
+  code: "find part as p\nreturn p.name, p.unit_cost order by p.unit_cost budget 25 tokens" },
+{ title: "Dedup: the system detects", body: "Assert a near-duplicate supplier. The write succeeds, but the receipt surfaces a <b>dup candidate</b>, and a dashed red link appears in the graph. The system detects; you resolve.",
+  code: 'assert supplier {name: "Ionix Co", country: "KR"} source doc:tour/5 as ionix2' },
+{ title: "merge: you resolve", body: "Merge the pair. The older node survives, the other id becomes a permanent alias, edges re-home, and lineage records both pre-merge states so the merge can be unwound. Watch the two nodes become one.",
+  code: "merge ionix, ionix2 prefer newest" },
+{ title: "distinct: the other resolution", body: "Sometimes candidates are genuinely different. Assert another near-name, then mark the pair <code>distinct</code>: the red link disappears and the pair is suppressed forever.",
+  code: 'assert supplier {name: "Volta Chemie", country: "AT"} source doc:tour/6 as vc2' },
+{ title: "distinct, part 2", body: "Now suppress it with a reason. The reason is durable evidence.",
+  code: 'distinct volta, vc2 reason "Austrian subsidiary, separate entity"' },
+{ title: "Granularity: blob in", body: "Ingest a whole price table as ONE opaque blob node (state: <code>blob</code>, dashed ring). Cheap, lossless, unqueryable inside.",
+  code: 'assert table_blob {title: "Q3 price list", payload: attach:prices}\n  source doc:tour/7 as prices' },
+{ title: "refine: blob into atoms", body: "When queries need the rows, split the blob with an agent-supplied column mapping. Children appear with dotted <b>origin</b> links back to the blob, which stays as a cold lineage parent.",
+  code: 'refine prices into part\n  with {name: col "item", unit_cost: col "unit_eur"}\n  as rows' },
+{ title: "compact: the inverse", body: "When detail stops paying for itself, collapse a node set into one summary node. Members retire (faded) with lineage to the summary.",
+  code: 'find part where unit_cost < 2 as cheap\ncompact cheap as bundle {name: "cheap parts bundle", unit_cost: 1.2}' },
+{ title: "retire", body: "Temporal invalidation, not deletion. The node fades out of current reads but keeps its history and lineage.",
+  code: 'retire sc reason "product line discontinued 2026"' },
+{ title: "flag: feed the health record", body: "Agents report bad answers with <code>flag</code>. Three flags max out <code>health.query</code>. Watch the amber halo appear on the flagged node.",
+  code: 'flag cell reason "returned as Li-ion supplier part, actually LiFePO4"\nflag cell reason "unit cost stale vs Q3 list"\nflag cell reason "duplicate suspicion with refined row"' },
+{ title: "Health is queryable", body: "The graph's damage report is ordinary data in the same language. Maintenance is not a mode: the same verbs (merge, refine, retire) point at this worklist.",
+  code: "find nodes where health.query > 0.5 as worklist\nreturn worklist.name, worklist.health" },
+{ title: "derive class: schema evolution", body: "Agents extend the schema through the language, gated: the new subclass is <b>provisional</b> with an instance quota, and the receipt warns about similar existing classes. Then use it immediately.",
+  code: "derive class broker from supplier with {takes_inventory: bool}" },
+{ title: "Use the new class", body: "The derived class inherits its base properties. New class, new color.",
+  code: 'assert broker {name: "MidChain GmbH", country: "DE", takes_inventory: true}\n  source doc:tour/8 as mid\nassert edge supplied_by(item: film, source: mid) source doc:tour/8' },
+{ title: "Verify before execute", body: "Try a class that does not exist. The whole program is checked first: the error names the line, suggests alternatives, and confirms <code>nothing was executed.</code> The graph is untouched.",
+  code: 'find vendor where name = "VoltaChem" as v\nreturn v.name' },
+{ title: "Free play", body: "The whole surface is yours: <code>find / follow / group by / count / sum / avg / compute / return / continue</code>, <code>assert / merge / distinct / refine / compact / retire / flag / derive class</code>, <code>schema</code>. Edit anything above and run. Reset starts a fresh graph.",
+  code: "find supplier as s\nfollow s supplied_by item as parts\ngroup by s as g\ncount distinct g.parts as n\nreturn s.name, n order by n desc" },
+];
+
+const CLASS_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
+const classColor = {};
+let colorIdx = 0;
+function colorFor(cls) {
+  if (!(cls in classColor)) classColor[cls] = CLASS_COLORS[colorIdx++ % CLASS_COLORS.length];
+  return classColor[cls];
+}
+
+let step = 0;
+let highlights = new Set();
+const $ = (id) => document.getElementById(id);
+
+function renderStep() {
+  $("step-count").textContent = `STEP ${step + 1} / ${STEPS.length}`;
+  $("step-title").textContent = STEPS[step].title;
+  $("step-body").innerHTML = STEPS[step].body;
+  $("cmd").value = STEPS[step].code;
+  $("prev").disabled = step === 0;
+  $("next").disabled = step === STEPS.length - 1;
+}
+
+function log(kind, text) {
+  const div = document.createElement("div");
+  div.className = kind;
+  div.textContent = text;
+  $("console").appendChild(div);
+  $("console").scrollTop = $("console").scrollHeight;
+}
+
+async function run() {
+  const text = $("cmd").value;
+  log("in", "> " + text.split("\n").join("\n> "));
+  const res = await fetch("/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+  const data = await res.json();
+  log(data.output.startsWith("error") ? "err" : "ok", data.output + "\n");
+  highlights = new Set(data.highlights || []);
+  updateGraph(data.graph);
+}
+
+async function reset() {
+  const res = await fetch("/reset", { method: "POST" });
+  const data = await res.json();
+  $("console").textContent = "";
+  log("ok", data.output + "\n");
+  highlights = new Set();
+  step = 0; renderStep();
+  updateGraph(data.graph);
+}
+
+// ---- d3 force graph ---------------------------------------------------
+const svg = d3.select("#graph");
+const gEdges = svg.append("g");
+const gDups = svg.append("g");
+const gOrigins = svg.append("g");
+const gNodes = svg.append("g");
+const gLabels = svg.append("g");
+let sim = null;
+let nodeCache = new Map();
+
+function updateGraph(graph) {
+  const wrap = $("graph-wrap");
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  svg.attr("viewBox", `0 0 ${W} ${H}`);
+
+  const nodes = graph.nodes.map(n => {
+    const prev = nodeCache.get(n.id);
+    return Object.assign({}, n, prev ? { x: prev.x, y: prev.y, vx: 0, vy: 0 } : { x: W / 2 + (Math.random() - 0.5) * 80, y: H / 2 + (Math.random() - 0.5) * 80 });
+  });
+  nodeCache = new Map(nodes.map(n => [n.id, n]));
+  const byId = new Map(nodes.map(n => [n.id, n]));
+  const edges = graph.edges.filter(e => byId.has(e.source) && byId.has(e.target)).map(e => ({ ...e }));
+  const dups = graph.dups.filter(d => byId.has(d.a) && byId.has(d.b)).map(d => ({ source: d.a, target: d.b, score: d.score }));
+  const origins = nodes.filter(n => n.origin && byId.has(n.origin)).map(n => ({ source: n.origin, target: n.id }));
+
+  const edgeSel = gEdges.selectAll("g.e").data(edges, e => e.id);
+  edgeSel.exit().remove();
+  const edgeEnter = edgeSel.enter().append("g").attr("class", "e");
+  edgeEnter.append("line").attr("class", "edge");
+  edgeEnter.append("text").attr("class", "edge-label");
+  const allEdges = gEdges.selectAll("g.e");
+  allEdges.select("text").text(e => e.type);
+
+  const dupSel = gDups.selectAll("line").data(dups, d => d.source + "|" + d.target);
+  dupSel.exit().remove();
+  dupSel.enter().append("line").attr("class", "dup-link");
+
+  const orgSel = gOrigins.selectAll("line").data(origins, d => d.source + "|" + d.target);
+  orgSel.exit().remove();
+  orgSel.enter().append("line").attr("class", "origin-link");
+
+  const nodeSel = gNodes.selectAll("g.n").data(nodes, n => n.id);
+  nodeSel.exit().interrupt().remove();
+  const nodeEnter = nodeSel.enter().append("g").attr("class", "n");
+  nodeEnter.append("circle").attr("class", "halo");
+  nodeEnter.append("circle").attr("class", "hl-ring");
+  nodeEnter.append("circle").attr("class", "body");
+  nodeEnter.append("circle").attr("class", "state-ring");
+  nodeEnter.call(d3.drag()
+    .on("start", (ev, d) => { if (!ev.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+    .on("drag", (ev, d) => { d.fx = ev.x; d.fy = ev.y; })
+    .on("end", (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+  const allNodes = gNodes.selectAll("g.n");
+  allNodes.style("opacity", n => n.retired ? 0.28 : 1);
+  allNodes.select("circle.body")
+    .attr("r", n => n.state === "blob" ? 16 : n.state === "composite" ? 11 : 8)
+    .attr("fill", n => colorFor(n.cls))
+    .attr("stroke", "white").attr("stroke-width", 1.5);
+  allNodes.select("circle.state-ring")
+    .attr("r", n => n.state === "blob" ? 21 : n.state === "composite" ? 15 : 0)
+    .style("display", n => n.state === "atom" ? "none" : null);
+  allNodes.select("circle.halo")
+    .attr("r", 14)
+    .style("display", n => Math.max(n.health.query, n.health.loss, n.health.structure) > 0.5 && !n.retired ? null : "none");
+  allNodes.select("circle.hl-ring")
+    .attr("r", 12)
+    .style("display", n => highlights.has(n.id) ? null : "none");
+
+  const labelSel = gLabels.selectAll("text").data(nodes, n => n.id);
+  labelSel.exit().remove();
+  labelSel.enter().append("text").attr("class", "node-label");
+  gLabels.selectAll("text")
+    .attr("class", n => "node-label" + (n.retired ? " retired" : ""))
+    .text(n => n.name + (n.flags ? " ⚑" : ""));
+
+  if (sim) sim.stop();
+  sim = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(edges.concat(origins.map(o => ({ ...o })))).id(n => n.id).distance(90).strength(0.5))
+    .force("charge", d3.forceManyBody().strength(-320))
+    .force("center", d3.forceCenter(W / 2, H / 2))
+    .force("collide", d3.forceCollide(30))
+    .on("tick", () => {
+      allEdges.select("line")
+        .attr("x1", e => e.source.x).attr("y1", e => e.source.y)
+        .attr("x2", e => e.target.x).attr("y2", e => e.target.y);
+      allEdges.select("text")
+        .attr("x", e => (e.source.x + e.target.x) / 2)
+        .attr("y", e => (e.source.y + e.target.y) / 2 - 4)
+        .attr("text-anchor", "middle");
+      gDups.selectAll("line")
+        .attr("x1", d => byId.get(d.source.id || d.source).x).attr("y1", d => byId.get(d.source.id || d.source).y)
+        .attr("x2", d => byId.get(d.target.id || d.target).x).attr("y2", d => byId.get(d.target.id || d.target).y);
+      gOrigins.selectAll("line")
+        .attr("x1", o => (o.source.x !== undefined ? o.source.x : byId.get(o.source).x))
+        .attr("y1", o => (o.source.y !== undefined ? o.source.y : byId.get(o.source).y))
+        .attr("x2", o => (o.target.x !== undefined ? o.target.x : byId.get(o.target).x))
+        .attr("y2", o => (o.target.y !== undefined ? o.target.y : byId.get(o.target).y));
+      allNodes.attr("transform", n => `translate(${n.x},${n.y})`);
+      gLabels.selectAll("text").attr("x", n => n.x + 14).attr("y", n => n.y + 4);
+    });
+
+  renderLegend(graph);
+}
+
+function renderLegend(graph) {
+  const rows = Object.keys(graph.classes).filter(c => graph.nodes.some(n => n.cls === c))
+    .map(c => `<div><span class="sw" style="background:${colorFor(c)}"></span>${c}${graph.classes[c].status === "provisional" ? " (provisional)" : ""}</div>`);
+  rows.push(`<div><span class="ln" style="border-color: var(--color-danger)"></span>dup candidate</div>`);
+  rows.push(`<div><span class="ln" style="border-color: oklch(70% 0.01 250)"></span>lineage / origin</div>`);
+  rows.push(`<div><span class="sw" style="background:none;border:2px solid var(--color-warn)"></span>unhealthy</div>`);
+  rows.push(`<div><span class="sw" style="background:none;border:2px solid var(--color-accent)"></span>query match</div>`);
+  $("legend").innerHTML = rows.join("");
+}
+
+$("run").addEventListener("click", run);
+$("prev").addEventListener("click", () => { step = Math.max(0, step - 1); renderStep(); });
+$("next").addEventListener("click", () => { step = Math.min(STEPS.length - 1, step + 1); renderStep(); });
+$("reset").addEventListener("click", reset);
+$("cmd").addEventListener("keydown", (ev) => { if ((ev.metaKey || ev.ctrlKey) && ev.key === "Enter") run(); });
+
+renderStep();
+fetch("/graph").then(r => r.json()).then(updateGraph);
+window.addEventListener("resize", () => fetch("/graph").then(r => r.json()).then(updateGraph));
+</script>
+</body>
+</html>

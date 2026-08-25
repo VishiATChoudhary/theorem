@@ -266,7 +266,8 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             for role, ref in role_refs.items():
                 typ = _ref_type(ref, env, line)
                 want = edef.roles[role]
-                if typ is not None and typ in schema.classes and typ != want:
+                if typ is not None and typ in schema.classes \
+                        and not schema.is_subclass(typ, want):
                     raise VerifyError(
                         line, f'role {role} of {edge} takes a {want}; "{ref}" is a {typ}')
 
