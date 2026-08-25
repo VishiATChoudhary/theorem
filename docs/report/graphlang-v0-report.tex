@@ -7,11 +7,14 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{enumitem}
+\usepackage{array}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
 \definecolor{kw}{RGB}{20,60,140}
 \definecolor{codebg}{RGB}{246,246,242}
 \definecolor{resbg}{RGB}{242,248,244}
+\definecolor{errbg}{RGB}{252,244,242}
+\definecolor{glossbg}{RGB}{245,245,240}
 
 \lstdefinestyle{gl}{
   basicstyle=\ttfamily\small,
@@ -20,7 +23,7 @@
   frame=single, rulecolor=\color{gray!50},
   framesep=5pt, breaklines=true,
   showstringspaces=false, sensitive=true,
-  morekeywords={find,follow,group,count,sum,avg,compute,return,limit,budget,tokens,where,order,by,as,assert,edge,merge,distinct,refine,compact,retire,flag,derive,class,from,with,into,prefer,newest,source,reason,continue,same,minus,plus,desc}
+  morekeywords={find,follow,group,count,sum,avg,min,max,compute,return,limit,budget,tokens,where,order,by,as,and,or,contains,assert,edge,merge,distinct,refine,compact,retire,flag,derive,class,from,with,into,col,prefer,newest,source,reason,continue,after,schema,same,minus,plus,times,over,desc,true,false}
 }
 \lstdefinestyle{res}{
   basicstyle=\ttfamily\small,
@@ -28,12 +31,27 @@
   frame=single, rulecolor=\color{green!30!gray},
   framesep=5pt, breaklines=true, showstringspaces=false
 }
+\lstdefinestyle{err}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{errbg},
+  frame=single, rulecolor=\color{red!30!gray},
+  framesep=5pt, breaklines=true, showstringspaces=false
+}
+\lstdefinestyle{plain}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{gray!50},
+  framesep=5pt, breaklines=true, showstringspaces=false
+}
+
+\usepackage[most]{tcolorbox}
+\newtcolorbox{glossbox}{colback=glossbg,colframe=gray!60,title={Plain words},fonttitle=\bfseries,boxrule=0.4pt,left=6pt,right=6pt}
 
 \setlength{\parskip}{4pt}
 \setlength{\parindent}{0pt}
 
-\title{\textbf{GraphLang v0: a graph language built for agents,\\ and the engine underneath it}\\[6pt]
-\large Project report}
+\title{\textbf{GraphLang: an agent-optimized graph query and\\ construction language, and its v0 engine}\\[6pt]
+\large Design, implementation, and evaluation report}
 \author{GraphLang project}
 \date{August 25, 2026}
 
@@ -41,59 +59,347 @@
 \maketitle
 
 \begin{abstract}
-\noindent In one build session we implemented v0 of GraphLang, an agent-optimized graph query and construction language, together with a single-process engine that preserves the architecture of the planned distributed system. We then measured it the only way that matters: head to head against text-to-Cypher on a CypherBench slice, same questions, same models, same retry budget, with the Cypher side executing live on Neo4j. GraphLang with Claude Haiku 4.5 reached 98.3\% execution accuracy against 73.3\% for text-to-Cypher with the same model, and on the multi-hop questions the language was designed around, the gap widened to 96.0\% versus 56.0\%. Every stage of the build passed through an adversarial review loop that surfaced thirteen confirmed defects, all fixed with regression tests before the benchmark numbers were accepted.
+\noindent Language models write graph database queries badly, and they fail in structural, predictable ways: reversed relationship directions, hallucinated schema elements, implicit-grouping mistakes, and long-range syntax errors. GraphLang is a graph query and construction language that removes each documented failure mode by construction rather than by prompting around it, paired with a write surface no existing query language offers agents: provenance-carrying structural writes with receipts, system-detected and agent-resolved deduplication, agent-controlled granularity with full lineage, and queryable per-node health. This report documents the complete v0: the data model, every language construct with its exact semantics, the verify-before-execute pipeline, the single-process engine whose write-ahead-log and immutable-run architecture preserves the shape of the planned distributed system, and the development methodology (test-first with an adversarial review loop that surfaced thirteen confirmed defects before evaluation). On a 60-question CypherBench slice with both conditions running the same models live, GraphLang reaches 98.3\% execution accuracy with Claude Haiku 4.5 against 73.3\% for text-to-Cypher with the same model; on multi-hop questions the margin is 96.0\% to 56.0\%. The language has no training corpus; it is taught entirely in context.
 \end{abstract}
 
-\section{Why this exists}
+\tableofcontents
+\newpage
 
-When a language model writes a database query today it writes Cypher, SQL, or SPARQL, all designed for people. Frontier models get roughly forty percent of realistic Cypher queries wrong, and they fail in the same few ways every time: they reverse the direction of a relationship arrow, they invent labels the schema does not have, they trip over Cypher's implicit grouping, and they lose track of brackets across long spans. The production world's answer has been to hide the database behind a handful of fixed tools, which works but throws away the ability to ask new kinds of questions.
+%======================================================================
+\section{Introduction}
 
-GraphLang takes the third path: change the language so each of those mistakes is either impossible to write or caught before anything runs. The design decisions were settled in an earlier research phase (eighteen decision points, all documented in the design brief and the spec); this session turned them into working software.
+When an AI agent needs to query a graph database today, it writes Cypher, the query language of Neo4j, or one of its relatives. The best frontier models get roughly forty percent of realistic Cypher queries wrong: Claude 3.5 Sonnet reaches 61.6\% execution accuracy on CypherBench and GPT-4o 60.2\%, with sharply worse results on multi-hop questions [arXiv 2412.18702]. The errors are not noise. The benchmark's own error taxonomy shows the same handful of failure modes over and over: the model reverses the direction of a relationship arrow, invents a label or property the schema does not have, writes a pattern that is syntactically valid but means something other than the question, mishandles Cypher's implicit grouping, or loses a bracket across a long span.
 
-\section{The language, by example}
+Production agent-memory systems responded by hiding the graph entirely behind a few fixed retrieval tools. That works, but it forfeits expressivity: every new question shape needs a new hand-written tool. GraphLang pursues the alternative the research points at but nobody had built: redesign the language so each failure mode is impossible to write, or is caught by a verifier before anything executes. The design evidence (assembled in an earlier research phase and frozen as eighteen explicit decisions) comes from the Anka result, where a purpose-built DSL with zero pretraining exposure beat Python by forty points on multi-step tasks purely by removing error-prone degrees of freedom [arXiv 2512.23214], from grammar prompting [arXiv 2305.19234], and from the token-economics literature on how result formats affect model accuracy [arXiv 2310.04560, 2504.07087, 2410.01985].
 
-A query is a short sequence of lines. Each line does one thing and names its result. Here is the flagship example, a multi-hop aggregation over a supply-chain graph:
+GraphLang goes beyond querying. Its target workload is agents \emph{building and maintaining} graphs, so the language owns the write side: structural writes with provenance and receipts, deduplication as a first-class dialogue between system and agent, granularity as an agent-controlled property of nodes, temporal retirement, gated schema evolution, and per-node health signals that make the graph's own damage a queryable dataset.
+
+This report covers four things: the language itself, construct by construct, with exact semantics (Section~\ref{sec:lang}); the v0 implementation, module by module (Section~\ref{sec:impl}); the development methodology, including the adversarial review loop and what it caught (Section~\ref{sec:method}); and the benchmark evaluation with its failure analysis, including three language changes the evaluation itself forced (Section~\ref{sec:eval}). The complete grammar is Appendix~A; a worked construction session is Appendix~B.
+
+\begin{glossbox}
+\textbf{Cypher}: Neo4j's graph query language, the one all text-to-query benchmarks target. \textbf{Execution accuracy}: the fraction of generated queries whose \emph{answers} match the gold answers when run, the strictest common metric. \textbf{Schema}: the catalogue of allowed node types, edge types, and properties. \textbf{DSL}: a small language built for one job. \textbf{Grammar prompting}: teaching a model a new language by placing a compact grammar plus worked examples in its context window.
+\end{glossbox}
+
+%======================================================================
+\section{Design principles}
+
+Nine rules, each traceable to a measured failure mode, govern every construct in the language:
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{One line, one operation, one name.} Every statement performs a single operation and binds its result to an explicit name. Chaining and shadowing caused 69\% of pipeline failures in the Anka study; named intermediates eliminate the class.
+  \item \textbf{No direction glyphs.} Edges are traversed by naming the destination \emph{role}. Direction cannot be written, so it cannot be reversed.
+  \item \textbf{Canonical forms.} Exactly one spelling per operation. No optional shorthands, no second aggregation syntax. Two correct agents produce byte-identical queries.
+  \item \textbf{Explicit staged aggregation.} Grouping is its own line; editing a return list can never silently change what is counted.
+  \item \textbf{Line-local syntax.} Keyword-delimited, newline-terminated. No delimiter opens on one line and closes on another.
+  \item \textbf{Verify before execute.} The whole program is checked against the live schema first. Errors name the line, suggest alternatives, and state that nothing ran. Partial execution never happens.
+  \item \textbf{Words over symbols.} Verbose keywords ride the language prior; symbol-dense operators concentrate errors. Even arithmetic is spelled with words (\texttt{minus}, \texttt{same}).
+  \item \textbf{The result format is part of the language.} Results are token-budgeted, count-declared, incident-encoded, and never silently truncated.
+  \item \textbf{Receipts, not row counts.} Every write returns a structured receipt carrying what changed, which guards ran, and what the system noticed (duplicate candidates above all). The receipt is the system's half of the conversation.
+\end{enumerate}
+
+%======================================================================
+\section{The language}\label{sec:lang}
+
+\subsection{Data model}
+
+A graph is a set of \textbf{nodes} and \textbf{edges} governed by a schema. Every node belongs to a \textbf{class} (for example \texttt{supplier}); a class declares typed properties (\texttt{str}, \texttt{int}, \texttt{float}, \texttt{bool}) and may derive from a base class, inheriting its properties. Every edge belongs to an \textbf{edge type} that declares exactly two named \textbf{roles}, each bound to a class:
+
+\begin{lstlisting}[style=res]
+classes: product{name, launch_year}  part{name, unit_cost}
+         supplier{name, country}
+edges:   uses(whole: product, component: part)
+         supplied_by(item: part, source: supplier)
+\end{lstlisting}
+
+Roles are the load-bearing idea. The edge type \texttt{supplied\_by} does not have a direction; it has an \texttt{item} end and a \texttt{source} end. A query traverses it by naming the role it wants to arrive at. When the two ends have different classes, asking to arrive at the wrong role is a type error the verifier rejects with a corrective message. When both ends share a class (\texttt{manages(manager: person, report: person)}), the choice is genuinely semantic, but it is now carried by a meaningful word rather than an arrow glyph.
+
+Nodes additionally carry a \textbf{granularity state}, one of \texttt{blob} (an opaque payload such as a whole ingested table), \texttt{composite} (has structured children), or \texttt{atom} (a single fact). Classes declare which states they allow. Moving between grains is done by agents with explicit verbs (Section~\ref{sec:granularity}), and the system keeps \textbf{lineage}: every derived node knows its origin, and every merge or refinement is recorded with enough state to unwind it.
+
+Nodes have stable ids of the form \texttt{\#p-142} (class-initial prefix, monotonic counter). When two nodes merge, the absorbed id becomes a permanent alias of the survivor, so references never dangle.
+
+\subsection{Program structure}
+
+A program is a sequence of statements, one per \emph{logical line}. A physical line starting with whitespace continues the previous logical line, which keeps long writes readable. Comments are a \texttt{\#} followed by a space (a node id such as \texttt{\#p-71002} on a continuation line is never mistaken for a comment). There are no brackets to balance beyond single-line property maps, no statement terminators, and no alternative spellings.
+
+\subsection{Reads}
+
+A read builds one \textbf{binding table}, in the style of SPARQL solution mappings. Each \texttt{as NAME} adds a column; each row is one consistent assignment of nodes and values to columns.
+
+\textbf{find} seeds the table with one row per matching node:
 
 \begin{lstlisting}[style=gl]
 find product where launch_year > 2024 as recent
-follow recent uses component as parts
-follow parts supplied_by source as sups
-group by sups as g
-count distinct g.parts as n_parts
-return sups.name, n_parts order by n_parts desc budget 2000 tokens
 \end{lstlisting}
 
-Four properties of this shape carry the accuracy result. There are no direction arrows: edges are traversed by naming the role you arrive at (\texttt{source}, \texttt{component}), and naming a role your binding already occupies is a type error caught before execution. Every step binds a name, so there is no invisible chaining state to lose track of. Aggregation is staged and explicit: the grouping key lives on its own line and cannot be silently changed by editing the return list, which is the trap that corrupts Cypher aggregations. And the whole program is verified against the live schema before anything executes; a wrong class name comes back as a corrective error with suggestions, ending with the sentence \texttt{nothing was executed.}
+The target is a class name or one of three special targets: \texttt{nodes} (any class), \texttt{dup\_candidates} (the deduplication ledger), and \texttt{class} (schema introspection). A second \texttt{find} in the same query cross-joins its matches with the existing rows, which is how comparison questions bind two entities side by side.
 
-The write side is the part no existing query language has. Agents write structurally, with provenance, and every write returns a receipt that carries what changed and any duplicate candidates the write triggered:
+\textbf{Conditions} are chains of clauses joined by \texttt{and} and \texttt{or} (with \texttt{and} binding tighter), over the operators \texttt{=}, \texttt{!=}, \texttt{>}, \texttt{>=}, \texttt{<}, \texttt{<=}, and \texttt{contains}. String comparison is case-insensitive and accent-insensitive (casefold plus Unicode NFKD accent stripping): agents transliterate names, writing \texttt{"Jose Calderon"} for José Calderón, and a query that silently matches nothing is a worse failure than a forgiving match. The tradeoff (two nodes whose names differ only by case would both match) is documented, and it is precisely the situation the dedup pipeline flags for resolution.
+
+\textbf{follow} extends every row across an edge type, arriving at a named role, optionally filtering the arrival node:
 
 \begin{lstlisting}[style=gl]
-assert supplier {name: "Ionix Co", country: "KR"}
-  source doc:report-08/p1 as ionix
+follow recent uses component where unit_cost > 3 as parts
+follow parts supplied_by source as sups
+\end{lstlisting}
+
+For each row, for each qualifying edge incident to the row's source node, a new row binds the arrival node; rows with no match are dropped. GraphLang uses \textbf{trail semantics}: within one row, the same edge \emph{instance} is never traversed twice. Nodes may repeat, edges may not. This matches the uniqueness rule of a Cypher \texttt{MATCH}, so questions like ``other teams in the same division as X'' naturally exclude X, and benchmark gold answers agree.
+
+\textbf{group by} declares a grouping key, and aggregation verbs consume it:
+
+\begin{lstlisting}[style=gl]
+group by sups as g
+count distinct g.parts as n_parts
+\end{lstlisting}
+
+\texttt{group by sups} groups by node \emph{identity}: two suppliers who share a name stay separate. Grouping by a value is a visibly different spelling (\texttt{group by sups.country}), so the identity-versus-value trap that silently corrupts SQL and Cypher aggregations is an explicit choice here. The aggregation verbs are \texttt{count}, \texttt{sum}, \texttt{avg}, \texttt{min}, \texttt{max}, each with an optional \texttt{distinct} that deduplicates \emph{bindings} before property extraction (so \texttt{avg distinct g.p.height\_cm} averages over distinct players, not distinct heights). Members whose property is null are skipped. An aggregate applied to a plain (ungrouped) binding is a \textbf{global aggregate} and collapses the table to a single row: \texttt{count distinct v as n} answers ``how many venues are there'' with no artificial grouping step.
+
+\textbf{compute} performs scalar arithmetic or equality between two bound values, with word operators:
+
+\begin{lstlisting}[style=gl]
+compute p1.height_cm minus p2.height_cm as diff
+compute p1.handedness same p2.handedness as answer
+\end{lstlisting}
+
+\texttt{same} yields a boolean and refuses to compare an unset value (both operands missing must not read as ``equal''). The numeric operators are \texttt{plus}, \texttt{minus}, \texttt{times}, \texttt{over}.
+
+\textbf{return} ends the query:
+
+\begin{lstlisting}[style=gl]
+return sups.name, n_parts order by n_parts desc limit 20 budget 2000 tokens
+\end{lstlisting}
+
+\texttt{order by} may sort on a column that is not returned; null values sort last in both directions. \texttt{limit} bounds rows; \texttt{budget} bounds \emph{tokens} (Section~\ref{sec:results}); \texttt{after @t-N} is a read barrier against a write position (a no-op in the single-process engine, but parsed and honored so agent code is forward-compatible). Pseudo-columns available on any node binding: \texttt{.class}, \texttt{.id}, \texttt{.state}, \texttt{.health}, \texttt{.lineage}, \texttt{.query\_traffic}.
+
+\subsection{Results, budgets, and continuation}\label{sec:results}
+
+No existing query language knows its consumer has a context window. GraphLang treats the serialized result as part of the language. Every result opens with a declared count the model can check itself against:
+
+\begin{lstlisting}[style=res]
+results: 20 of 47, budget hit
+columns: sups.name, n_parts
+VoltaChem, 12
+...
+truncated: 27 more. resume with: continue @c1a4
+\end{lstlisting}
+
+Overflow truncates at a row boundary and registers a \textbf{continuation handle}; \texttt{continue @c1a4 budget 1500 tokens} drains the remainder. Unstated budgets default to 2000 tokens. When a bare node binding is returned, the node prints in \textbf{incident encoding}, each node once with its edges gathered immediately around it, which is the format the evidence says models read most reliably:
+
+\begin{lstlisting}[style=res]
+part "lithium cell" {unit_cost: 4.2}
+  supplied_by -> supplier "VoltaChem"
+  uses <- product "PowerBank Pro"
+\end{lstlisting}
+
+\subsection{Writes and receipts}
+
+Writes are the novel half of the surface. Every write verb states its provenance and returns a receipt.
+
+\textbf{assert} creates a node or an edge:
+
+\begin{lstlisting}[style=gl]
+assert part {name: "graphene sheet", unit_cost: 12.0}
+  source doc:ingest-2026-08-24/p3 as gs
+assert edge supplied_by(item: gs, source: #s-1)
+  source doc:ingest-2026-08-24/p3
 \end{lstlisting}
 \begin{lstlisting}[style=res]
-receipt: created supplier ionix = #s-1 at @t-1
+receipt: created part gs = #p-8 at @t-41
   guards: schema ok, class invariants ok
   dup candidates: 1
-    #s-0954 supplier "Ionix" score 0.97
+    #p-3 part "graphene sheets" score 0.95
+      name 0.95; shared: unit_cost 12.0
   resolve with: merge / distinct
 \end{lstlisting}
 
-The rest of the surface follows the same pattern: \texttt{merge} and \texttt{distinct} resolve duplicates the system detects; \texttt{refine} splits a coarse blob node into fine-grained children under an agent-supplied mapping, with full lineage back to the source; \texttt{compact} is its inverse; \texttt{retire} invalidates without deleting; \texttt{flag} feeds the per-node health record; and \texttt{derive class} lets agents extend the schema through a gated, provisional path. Health is ordinary queryable data (\texttt{find nodes where health.loss > 0.8}), so graph maintenance is not a special mode, just the same verbs pointed at the graph's own damage report. Results are budgeted in tokens, not rows: overflow truncates cleanly and hands back a continuation token, so a result can never silently flood a context window.
+The receipt carries the write's position (\texttt{@t-41}), the guards that ran, and any duplicate candidates the synchronous blocking stage found. Edge assertions name both roles explicitly and are type-checked against the schema, honoring subclass relationships.
 
-\section{The engine}
+\textbf{merge} resolves two nodes into one, with an explicit reconciliation policy:
 
-The engine is deliberately shaped like the distributed system it will become, shrunk into one process. Durable truth is an append-only write-ahead log plus immutable snapshot runs on disk; memory is rebuilt by replay; nodes are stored with their incident edges so serializing a result is nearly a copy. Positions are monotonic and appear in every receipt. Scaling out later means swapping the storage client for an object-store-backed one, not rewriting the design. Dedup detection runs as a synchronous blocking stage on every write (cheap keys, exact-prefix buckets) plus an asynchronous similarity sweep, feeding a candidate ledger that agents query and resolve. This is the same pipeline shape the full system will use with embeddings; v0 stands the similarity stage in with string ratios.
+\begin{lstlisting}[style=gl]
+merge gs, #p-3 prefer newest
+\end{lstlisting}
 
-\section{How it was built: the review loop}
+The older node survives; the absorbed id becomes a permanent alias; the absorbed node's live edges are re-homed onto the survivor; and lineage records the complete pre-merge state of both nodes, so any merge can be unwound. \texttt{prefer newest} (the default) resolves property conflicts toward the newer node; \texttt{prefer source doc:...} prefers the node with the stated provenance and errors if neither has it, rather than silently picking one.
 
-Each implementation stage went through an adversarial review pass by a separate reviewer agent whose brief was to hunt for silent wrong results, not style. The loop was: implement test-first, run the reviewer, fix every confirmed finding with a regression test, re-run the suite, commit. Three rounds produced thirteen confirmed findings. The most serious was a session bug where a binding from an earlier request would pass verification but silently execute against an empty table, returning a well-formed empty result instead of an error; it is exactly the class of failure the language exists to prevent, and it now produces a corrective error instead. The reviewer also caught grammar leaks in the parser (bare words accepted as literals, unbounded column paths), an unfair token-accounting asymmetry in the benchmark harness itself, and a null-comparison hole in the new \texttt{compute} verb. The final suite is 108 tests, all green.
+\textbf{distinct} is the durable opposite: a recorded assertion that two candidates are different, which suppresses the pair from every future candidate list.
 
-The benchmark was not a one-way measurement; it fed the language. Failure analysis on early passes produced three spec-level changes: aggregates over a plain binding (a whole-result count needs no artificial grouping), per-row edge uniqueness (matching the semantics Cypher uses, so gold answers agree on questions like ``other teams in the same division''), and the \texttt{compute} verb for scalar arithmetic and equality, which the comparison-style questions require. Each change is documented in the spec, and each measurably moved the score.
+\begin{lstlisting}[style=gl]
+distinct gs, #p-3 reason "sheet vs pre-cut sheets, different SKUs"
+\end{lstlisting}
 
-\section{The benchmark}
+\textbf{retire} is temporal invalidation, not deletion: the node keeps its history and lineage but leaves current reads. \textbf{flag} is the explicit query-feedback verb; it increments the target's health record:
 
-The harness draws sixty questions from the CypherBench NBA graph (4{,}327 entities, 18{,}991 relations, loaded identically into the GraphLang engine and into Neo4j 5 running in Docker), stratified across the question categories the v0 language can express. Two conditions run on the identical slice with the identical model and one repair retry each: GraphLang via grammar prompting (a compact tutorial plus worked examples in context; the language has zero training corpus), and text-to-Cypher executing live on Neo4j. Scoring is execution accuracy: normalized, order-insensitive set comparison against CypherBench's published gold answers.
+\begin{lstlisting}[style=gl]
+retire #s-3 reason "acquired by VoltaChem 2026-05, see #s-1"
+flag #p-8 reason "returned as Li-ion supplier, actually LiFePO4"
+\end{lstlisting}
+
+\subsection{Granularity: refine and compact}\label{sec:granularity}
+
+An agent ingesting a report can store an entire table as one \texttt{blob} node (cheap, lossless), and only later, when queries start hitting it, split it:
+
+\begin{lstlisting}[style=gl]
+assert table_blob {title: "EU supplier prices", payload: attach:csv-4471}
+  source doc:report-2026-08 as prices
+refine prices into part
+  with {name: col "component", unit_cost: col "eur_unit"}
+  as price_parts
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: refined #b-1 -> 142 part nodes at @t-88
+  lineage: each new node carries origin #b-1
+  dup candidates: 17 (queued per class)
+  blob state: composite, retained as lineage parent (cold)
+\end{lstlisting}
+
+The mapping is agent-supplied (column name to property, with values coerced to the class's declared types); every child records its origin; new children are dedup-checked against the existing graph but not against each other. \textbf{compact} is the inverse: it replaces a bound node set with a single summary node, retiring the members with lineage back to the summary.
+
+\subsection{Schema evolution: derive class}
+
+Agents extend the schema through the language, gated:
+
+\begin{lstlisting}[style=gl]
+derive class broker from supplier with {takes_inventory: bool}
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: class broker provisional at @t-95
+  quota: 500 instances; promotion needs stable use + dedup review
+  note: similar existing class "distributor" (score 0.81), review advised
+\end{lstlisting}
+
+The new subclass inherits its base's properties, is immediately usable, and is quota-limited while provisional. Promotion gating is deferred beyond v0, but provisional status and quotas are enforced, and the receipt warns when a similar class already exists.
+
+\subsection{Deduplication pipeline}
+
+The system detects; the agent resolves. Detection is two stages. The \textbf{blocking stage} runs synchronously on every assert: candidates share a class and a blocking key (the first four characters of the casefolded, alphanumeric-only name), and are scored with a string-similarity ratio boosted to at least 0.9 when one normalized name is a strict prefix of the other (``Ionix Co'' vs ``Ionix''); pairs scoring at least 0.85 land in the receipt and the ledger. The \textbf{sweep stage} has the asynchronous shape of the planned embedding stage: it scans cross-block near-names per class and feeds the same ledger. The ledger is ordinary queryable data:
+
+\begin{lstlisting}[style=gl]
+find dup_candidates where class = supplier order by score as dups
+return dups.a, dups.b, dups.score limit 10
+\end{lstlisting}
+
+Merged and distinct-marked pairs are filtered out at read time, and \texttt{distinct} pairs are suppressed even on replay.
+
+\subsection{Health and the maintenance loop}
+
+Every node carries four health subscores in $[0,1]$, deliberately not combined into one magic number:
+
+\begin{center}
+\small
+\begin{tabular}{lp{9.2cm}}
+\toprule
+\texttt{health.loss} & construction instability: conflicting re-assertions of the same property (\(\min(1,\ \mathrm{conflicts}/5)\)) \\
+\texttt{health.query} & agent-reported failures via \texttt{flag} (\(\min(1,\ \mathrm{flags}/3)\)) \\
+\texttt{health.structure} & the max of supernode degree (\(\mathrm{deg}/100\)), blob-payload traversal pressure (\(\mathrm{traversals}/50\)), and an orphan floor (0.3 when degree is zero) \\
+\texttt{health.staleness} & write positions since last confirming write, \(/1000\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Health is queryable like everything else, so maintenance is not a mode; it is the same verbs pointed at a worklist:
+
+\begin{lstlisting}[style=gl]
+find nodes where health.structure > 0.7 as worklist
+return worklist.name, worklist.health limit 10
+\end{lstlisting}
+
+Read traffic feeds the structure signal automatically: each traversal durably increments the touched nodes' counters, with blob-payload traversals counted separately.
+
+\subsection{Verification and errors}\label{sec:verify}
+
+Every program is verified whole before anything executes. The verifier walks the statements once, tracking a typing environment that maps each binding to its class (or to group, aggregate-value, or special-target types). It checks that classes, edge types, roles, and properties exist (including inherited properties); that \texttt{follow} sources are bound and arrival roles are type-compatible; that aggregates consume groups or plain bindings but never other aggregates; that names are not rebound within a request; and that write references resolve. Errors are a language feature, engineered for self-repair:
+
+\begin{lstlisting}[style=err]
+error: unknown class "vendor" in line 1
+ did you mean one of: part, product, supplier, table_blob?
+nothing was executed.
+\end{lstlisting}
+
+Suggestions come from string proximity when a close name exists and from exhaustive listing when the option set is small. The closing sentence is load-bearing: the model knows no partial state exists.
+
+\subsection{Sessions and binding lifetime}
+
+Agents interact through a session that persists across requests. Within one request, bindings flow freely between reads and writes (a \texttt{find} can feed a \texttt{compact}; an \texttt{assert}'s name can appear in a later \texttt{merge} on the same request). Across requests, write arguments remain valid (the session keeps their node ids), but a read pipeline must re-establish its own bindings: the binding table is per-request, and the verifier rejects a stale read reference with a corrective error rather than executing against an empty table. Names can be re-bound in later requests. This rule exists because the alternative, discovered during adversarial review, was the worst kind of failure: a well-formed, silently empty result.
+
+%======================================================================
+\section{Implementation}\label{sec:impl}
+
+\subsection{Architecture}
+
+The core is 2{,}360 lines of dependency-free Python (standard library only); the test suite is 1{,}137 lines across 108 tests; the evaluation harness is a further 828 lines and is the only place with third-party dependencies (matplotlib for the figure).
+
+\begin{center}
+\small
+\begin{tabular}{llr}
+\toprule
+Module & Responsibility & Lines \\
+\midrule
+\texttt{parser.py} & tokenizer, logical lines, recursive descent & 479 \\
+\texttt{ast\_nodes.py} & one dataclass per statement & 150 \\
+\texttt{verifier.py} & whole-program checking, typing env, suggestions & 308 \\
+\texttt{schema.py} & classes, roles, inheritance, rendering & 77 \\
+\texttt{engine/storage.py} & WAL, snapshots, replay, aliases, lineage & 212 \\
+\texttt{engine/executor.py} & binding table, serialization, budgets & 527 \\
+\texttt{engine/writes.py} & write verbs, receipts, reconciliation & 343 \\
+\texttt{engine/dedup.py} & blocking keys, similarity, ledger & 93 \\
+\texttt{engine/health.py} & the four subscore formulas & 20 \\
+\texttt{session.py} & facade: parse, verify, route, binding lifetime & 101 \\
+\texttt{cli.py} & file runner and REPL & 45 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Parser}
+
+A single regular expression tokenizes each logical line into strings, numbers, node ids, position and continuation tokens, provenance references, words, operators, and punctuation. Logical-line assembly joins indented physical lines and strips comments before tokenization. Parsing is recursive descent with one function per verb and no lookahead beyond a single token; unknown verbs, wrong keyword choices, and malformed clauses raise a \texttt{ParseError} carrying the logical line's starting line number. The parser enforces grammar strictness deliberately: bare words are literals only in condition right-hand sides (where \texttt{class = supplier} needs them), \texttt{doc:} provenance is rejected as a property value, column paths are capped at three non-empty segments, and edge assertions take exactly two roles.
+
+\subsection{Verifier}
+
+The verifier is a single pass with a typing environment, as described in Section~\ref{sec:verify}. Two details matter for agents. First, the environment distinguishes fresh bindings from \texttt{prior:}-marked bindings carried over from earlier session requests; reads reject the latter, writes accept them. Second, every verified statement is snapshotted with its environment into a \texttt{Plan}, which is the unit the executors consume, so execution never re-derives typing.
+
+\subsection{Storage engine}
+
+The store keeps the disaggregated architecture in one process. Durable truth is an append-only write-ahead log (\texttt{wal.jsonl}, one JSON record per write; the position is the record's index) plus immutable snapshot runs. Opening a store replays the newest run and then the WAL through the same record-application code path that live writes use, so replayed and live state cannot diverge. A snapshot serializes the full state as replayable records, writes \texttt{runs/run-<pos>.json}, and truncates the WAL. The record vocabulary is small and pure data: \texttt{put\_node}, \texttt{patch\_node}, \texttt{put\_edge}, \texttt{retire}, \texttt{retire\_edge}, \texttt{alias}, \texttt{lineage}, \texttt{distinct}, \texttt{dup}, \texttt{flag}, \texttt{traffic}. Nodes are stored with incident edge lists, so incident-format serialization is nearly a copy. Alias resolution chases chains with cycle protection; id counters are rebuilt from replayed ids so identifiers never collide across restarts. A bulk-append path loads benchmark-scale graphs (23{,}000 records) in about a hundred milliseconds.
+
+\subsection{Read executor}
+
+The executor materializes the binding table as a list of row dictionaries. \texttt{find} filters the node set (or the dedup ledger, or the schema) under the condition evaluator; \texttt{follow} expands rows via incident edge lists with alias resolution, retirement filtering, the trail-semantics edge-set check, and durable traffic recording; grouping is lazy (declared by \texttt{group by}, materialized by the first aggregate, which collapses rows into group rows carrying their members); \texttt{compute} evaluates per row; \texttt{return} sorts (nulls last in both directions), limits, serializes, and enforces the token budget, registering continuation payloads in the session's read context. Token accounting uses a documented heuristic of one token per four characters. The same pipeline backs a machine-readable entry point (\texttt{execute\_rows}) that the evaluation harness uses for scoring, bypassing serialization.
+
+\subsection{Write executor, dedup, health}
+
+Each write verb is a function from a verified statement and a write context (store, schema, binding environment) to a \texttt{Receipt}. Receipts render in the exact format the language documentation shows, because agents pattern-match on receipts as much as on results. The merge implementation orders survivor and absorbed by creation position, records both pre-merge states in lineage before touching anything, re-homes edges through retire-and-recreate records, and only then installs the alias and reconciles properties. Refine parses CSV attachments at assert time into the blob's payload rows, coerces mapped columns to declared property types, and links every child to its origin. The dedup module and health formulas are exactly as specified in Sections 3.9 and 3.10; both are deliberately small (93 and 20 lines) because v0 stands in the string-similarity and counter-based versions for the planned embedding and statistics pipelines while keeping the interfaces.
+
+\subsection{Session and CLI}
+
+The session facade parses, verifies with the persistent typing environment, routes statement runs to the read or write executor, threads read bindings into the write environment (so \texttt{compact} can consume a \texttt{find}), and converts every error class into agent-readable text ending in \texttt{nothing was executed.} where applicable. The CLI runs \texttt{.gl} files or an interactive REPL against a database directory.
+
+%======================================================================
+\section{Development methodology}\label{sec:method}
+
+Every component was built test-first: failing tests, minimal implementation, green suite, commit. On top of that, each stage passed through an \textbf{adversarial review loop}: a separate reviewer agent, briefed to hunt for silent wrong results and to verify every suspicion by executing repro snippets against the actual code, reviewed each stage; every confirmed finding was fixed with a regression test before work continued.
+
+Three rounds produced thirteen confirmed findings: one P0, five P1, seven P2. A selection, with their classes:
+
+\begin{itemize}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Silent empty results (P0).} A read binding from a previous session request passed verification but executed against an empty table, returning a well-formed empty result. Fixed by the stale-binding rule of Section 3.12.
+  \item \textbf{Grammar leaks (P1, P2).} The parser accepted bare words as property literals, \texttt{doc:} provenance as a value, unbounded column paths, and one- or three-role edge assertions. Each is now a parse error; each got a regression test.
+  \item \textbf{Unfair benchmark accounting (P0, harness).} The token-economy metric compared GraphLang's fully rendered output against a bare Python repr of Cypher rows, a threefold formatting penalty. Both conditions now count the complete textual result their agent would receive.
+  \item \textbf{Null comparison hole (P1).} \texttt{compute same} on two unset properties returned true. It now raises a corrective error.
+  \item \textbf{Merge policy fallback (P1).} \texttt{prefer source} silently preferred the second node when neither matched the stated source. It now errors.
+\end{itemize}
+
+The reviewer also independently re-verified each fix. The final suite is 108 tests, all green, on the merged mainline.
+
+%======================================================================
+\section{Evaluation}\label{sec:eval}
+
+\subsection{Setup}
+
+The harness draws on CypherBench [arXiv 2412.18702], whose NBA property graph (4{,}327 entities, 18{,}991 relations) ships with natural-language questions, gold Cypher, and gold answers. The graph is loaded identically into the GraphLang engine (via a deterministic schema derivation: entity labels become classes, relation labels become edge types, role names come from the endpoint class names) and into Neo4j 5 in Docker. Sixty questions are drawn with a fixed seed, stratified across the question categories v0 can express; union, optional-match, and edge-property categories are excluded, and \emph{both conditions run on the identical slice}. Twenty-five of the sixty are multi-hop.
+
+The two conditions are symmetric by construction. Same model per run (Claude Haiku 4.5, then Claude Sonnet 5). Same single repair retry on execution error, with the error text fed back. Same query extraction applied to model output. Same scoring: normalized, order-insensitive set comparison of executed rows against gold answers. GraphLang is prompted with a compact grammar, ten worked examples, and the live schema; the language has zero training corpus. Text-to-Cypher is prompted with the benchmark's schema format and executes on Neo4j.
+
+\subsection{Results}
 
 \begin{center}
 \begin{tabular}{lrrrrr}
@@ -108,18 +414,158 @@ text2cypher + Sonnet 5 & 71.7\% & 60.0\% & 80.0\% & 96.7\% & 207 \\
 \end{tabular}
 \end{center}
 
-For context, the strongest published full-test-set CypherBench numbers are 61.6\% (Claude 3.5 Sonnet) and 60.2\% (GPT-4o); those are on the full benchmark rather than this slice, so they frame rather than directly compare. The cleanest reading of the table is the within-slice, same-model contrast, and its sharpest line is multi-hop with the small model: 96.0\% against 56.0\%. A language with no training data, taught entirely in context, beat the most-documented graph language in the world by forty points exactly where the research predicted a designed language should win, and a small model using GraphLang outperformed a frontier model writing Cypher.
+The published full-test-set frontier numbers (61.6\% for Claude 3.5 Sonnet, 60.2\% for GPT-4o) frame the scale but are on the full benchmark, not this slice. The clean comparison is within-slice and same-model, and its sharpest line is multi-hop with the small model: 96.0\% against 56.0\%. This is the Anka prediction realized on a graph workload: a designed language with zero corpus, taught in context, beating the most-documented graph language by forty points exactly where composition depth makes degrees of freedom expensive. Notably, Haiku with GraphLang also outperforms Sonnet with Cypher, which inverts the usual model-size economics.
 
-\begin{figure}[h]
+\begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{../../eval/out/spider.png}
 \caption{Both conditions, both models, five axes. Token economy is the normalized inverse of mean result tokens.}
 \end{figure}
 
-Honesty notes, all also recorded in the results file: the slice covers only categories v0 can express, excluding union, optional-match, and edge-property questions, and both conditions ran on that same slice; it is one domain graph; the two residual GraphLang misses are model discipline errors (an extra return column, a miscounted binding), not engine defects; and on the Sonnet run the Cypher side produced smaller results, so token economy is not uniformly a GraphLang win.
+\subsection{The evaluation fed the language}
 
-\section{What v0 defers}
+Three spec-level changes came directly out of miss analysis, which is the loop working as intended:
 
-Constrained decoding (the schema-closed grammar exists at verification, not yet at the decoder), union and optional traversal, edge properties, real embedding-based dedup, class promotion gating, historical reads of retired nodes, and the distributed substrate itself (decisions 15 through 18 of the design brief, which activate now that the language has cleared its falsification bar). The repository is the handoff: spec and plan under \texttt{docs/superpowers/}, language and engine under \texttt{src/graphlang/}, harness and results under \texttt{eval/}.
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{Global aggregates.} ``How many unique venues are there?'' forced models into a degenerate group-then-count that returned one row per venue. Aggregates over plain bindings now collapse the table.
+  \item \textbf{Trail semantics.} ``Teams in the same division as X'' included X under pure homomorphism; Cypher's per-\texttt{MATCH} edge uniqueness excludes it. Per-row edge uniqueness aligned the semantics and the gold answers.
+  \item \textbf{The compute verb.} Difference and same-value questions were inexpressible. The word-operator compute line fits the one-line-one-name discipline and closed the category.
+\end{enumerate}
+
+Alongside these, miss analysis produced engine fixes (nulls sorting first under descending order), harness robustness (prose-stripping query extraction applied to both conditions), and tutorial discipline rules (return exactly what is asked; use full entity names; dates compare as ISO strings).
+
+\subsection{Error analysis and threats to validity}
+
+The three residual GraphLang misses across both model runs are model discipline errors, not engine defects: an extra return column on a ``who weighs more'' question, a count of the wrong binding, one empty extraction. Threats to validity, all recorded in the results file: the slice covers only v0-expressible categories, so the headline number does not speak to union or edge-property workloads; it is one domain graph; set-based scoring collapses duplicate rows for both conditions equally; and token economy is not uniformly a GraphLang win (Sonnet's Cypher wrote smaller raw results than GraphLang's budgeted, header-carrying format on this slice). The forty-point multi-hop gap is far outside these error bars.
+
+%======================================================================
+\section{Limitations and future work}
+
+v0 defers, in language order: union and optional traversal; edge properties (the largest expressiveness gap against CypherBench, excluding the time-sensitive category); constrained decoding (the schema-closed grammar exists at verification time; wiring it into the decoder makes invalid labels unemittable rather than merely caught); class promotion gating; historical reads of retired nodes. In engine order: the object-storage substrate (SlateDB-based, per design decision 15), per-shard consistency with causal read tokens (16, the receipts already carry positions), partitioning (17), and embedding-based dedup with per-class vector indexes (18, the pipeline shape and ledger are already in place). The falsification bar the research phase set for the language (beat text-to-Cypher in-context on multi-hop slices before building infrastructure) is cleared, which is what those engine decisions were gated on.
+
+%======================================================================
+\appendix
+\section{Complete grammar}
+
+\begin{lstlisting}[style=plain]
+program     := statement*
+statement   := read_stmt | write_stmt | "schema"
+
+read_stmt   := find | follow | group | aggregate | compute | return | continue
+find        := "find" target ["where" cond] ["order" "by" col ["desc"]] "as" NAME
+target      := CLASSNAME | "nodes" | "dup_candidates" | "class"
+follow      := "follow" NAME EDGENAME ROLENAME ["where" cond] "as" NAME
+group       := "group" "by" col "as" NAME
+aggregate   := AGGVERB ["distinct"] col "as" NAME
+               ; AGGVERB: count | sum | avg | min | max
+compute     := "compute" col COMPOP col "as" NAME
+               ; COMPOP: plus | minus | times | over | same
+return      := "return" col ("," col)* ["order" "by" col ["desc"]]
+               ["limit" INT] ["budget" INT "tokens"] ["after" POSITION]
+continue    := "continue" HANDLE ["budget" INT "tokens"]
+
+write_stmt  := assert_node | assert_edge | merge | distinct_s | refine
+             | compact | retire | flag | derive
+assert_node := "assert" CLASSNAME props ["source" PROVENANCE] "as" NAME
+assert_edge := "assert" "edge" EDGENAME "(" ROLENAME ":" ref ","
+               ROLENAME ":" ref ")" ["source" PROVENANCE]
+merge       := "merge" ref "," ref ["prefer" ("newest" | "source" PROVENANCE)]
+distinct_s  := "distinct" ref "," ref "reason" STRING
+refine      := "refine" ref "into" CLASSNAME "with" mapping "as" NAME
+compact     := "compact" NAME "as" NAME props
+retire      := "retire" ref "reason" STRING
+flag        := "flag" ref "reason" STRING
+derive      := "derive" "class" NAME "from" CLASSNAME "with" propdecls
+
+cond        := clause (("and" | "or") clause)*     ; "and" binds tighter
+clause      := col OP literal                       ; OP: = != > >= < <= contains
+col         := NAME ["." NAME ["." NAME]]           ; 1..3 non-empty segments
+props       := "{" NAME ":" literal ("," NAME ":" literal)* "}"
+mapping     := "{" NAME ":" "col" STRING ("," ...)* "}"
+propdecls   := "{" NAME ":" TYPENAME ("," ...)* "}" ; TYPENAME: str|int|float|bool
+literal     := STRING | NUMBER | "true" | "false" | ATTACH
+               ; bare words allowed only as condition right-hand sides
+ref         := NAME | NODEID
+NODEID      := "#" [a-z]+ "-" [a-z0-9]+
+POSITION    := "@t-" [0-9]+
+HANDLE      := "@c" [a-z0-9]+
+PROVENANCE  := ("doc:" | "attach:") [^ ]+
+
+; One statement per logical line. Indented physical lines continue the
+; previous logical line. Comments are "# " (hash space) or an unindented
+; "#" line; node ids on continuation lines are never comments.
+\end{lstlisting}
+
+\section{A construction session, end to end}
+
+\texttt{>} lines are the agent; green boxes are the system. This transcript is the shape the integration tests replay.
+
+\begin{lstlisting}[style=gl]
+> schema
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+classes:
+  product{name, launch_year}
+  part{name, unit_cost}
+  supplier{name, country}
+  table_blob{title, payload}
+edges:
+  uses(whole: product, component: part)
+  supplied_by(item: part, source: supplier)
+\end{lstlisting}
+
+\begin{lstlisting}[style=gl]
+> assert supplier {name: "Ionix Co", country: "KR"}
+    source doc:report-08/p1 as ionix
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: created supplier ionix = #s-1 at @t-1
+  guards: schema ok, class invariants ok
+\end{lstlisting}
+
+\begin{lstlisting}[style=gl]
+> assert supplier {name: "Ionix"} source doc:report-08/p2 as ionix2
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: created supplier ionix2 = #s-2 at @t-2
+  dup candidates: 1
+    #s-1 supplier "Ionix Co" score 0.9
+  resolve with: merge / distinct
+\end{lstlisting}
+
+\begin{lstlisting}[style=gl]
+> merge ionix, ionix2 prefer newest
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: merged -> #s-1 (lineage keeps both) at @t-5
+  absorbed #s-2 is now an alias of #s-1
+  policy: prefer newest
+\end{lstlisting}
+
+\begin{lstlisting}[style=gl]
+> assert table_blob {title: "Ionix price list Q3", payload: attach:q3}
+    source doc:report-08/p4 as pricelist
+> refine pricelist into part
+    with {name: col "item", unit_cost: col "unit_eur"} as rows
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+receipt: created table_blob pricelist = #t-1 at @t-7
+receipt: refined #t-1 -> 2 part nodes at @t-10
+  lineage: each new node carries origin #t-1
+  blob state: composite, retained as lineage parent (cold)
+\end{lstlisting}
+
+\begin{lstlisting}[style=gl]
+> find part as p
+> return p.name, p.unit_cost order by p.unit_cost
+\end{lstlisting}
+\begin{lstlisting}[style=res]
+results: 2 of 2, complete
+columns: p.name, p.unit_cost
+anode, 2.5
+cathode, 3.5
+\end{lstlisting}
+
+The loop closes: writes surface duplicates, health surfaces grain problems, the same small verb set fixes both, and every step traces through lineage to the document it came from.
 
 \end{document}
