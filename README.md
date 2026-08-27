@@ -81,7 +81,7 @@ Reproduce: `uv run python -m eval.run_eval --n 60` (needs the `claude` CLI; dock
 git clone https://github.com/VishiATChoudhary/theorem
 cd theorem
 uv sync
-uv run pytest -q     # 119 tests incl. property-based hardening, < 2s
+uv run pytest -q     # 146 tests incl. property-based hardening, < 2s
 ```
 
 | Path | What |
