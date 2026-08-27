@@ -39,3 +39,43 @@ Match and return properties on edges. Touches schema declaration, assert edge, f
 
 **12. Property-test the dedup pipeline** `testing`
 `engine/dedup.py` has example tests only. Hypothesis strategies over near-duplicate name pairs would pin the blocking-key and containment-boost behavior.
+
+---
+
+# From the pre-launch edge-case reviews (not fixed for v0.1.0, tracked)
+
+**13. fsync WAL appends and run files** `engine` `durability`
+Acknowledged writes flush userspace buffers but never `os.fsync`; a power cut can drop them. Decide policy (fsync per write vs per block) and benchmark cost.
+
+**14. Multi-record writes (merge/refine/compact) need transaction markers** `engine` `durability`
+A crash mid-merge can leave an alias installed with the survivor unmerged; mid-refine leaves partial child sets. Design begin/commit records or single-record composite ops, plus replay-time rollback of unterminated groups.
+
+**15. Lock file / single-writer enforcement** `engine`
+Two processes on one db path silently interleave WAL appends and hand out duplicate ids. Add an advisory lock file with a clear error.
+
+**16. `!=` on unset properties returns false** `language-proposal` `semantics`
+`where discontinued != true` excludes nodes where the property was never set. Decide and spec explicit null semantics for each operator (current: no operator matches null).
+
+**17. Budget: first result block always emitted, header/truncation text not counted** `engine`
+A single oversized row blows the token budget. Reserve header cost and emit a truncation notice instead of an oversized first block.
+
+**18. Cap intermediate binding-table size** `engine`
+Cross products materialize fully in memory before budgets apply. Add a row cap with a clear error naming the offending statement.
+
+**19. `after @t-N` is parsed but inert; continuations unbounded** `engine`
+Implement the read barrier (or reject the clause until implemented) and add an LRU bound on stored continuations.
+
+**20. Quota bypass via refine; refine not atomic per row; re-refine duplicates children** `engine`
+`_quota_check` only runs on assert. Ragged/malformed CSV rows abort refine halfway with children already durable. Refining an already-composite blob mints a second child set.
+
+**21. assert edge discards its `source` provenance** `bug`
+`stmt.source` is parsed for edges but never stored.
+
+**22. Aggregate shape gaps: `count g` after value-group, aggregate consuming bindings used later** `verifier`
+`group by p.name as g` then `count g as n` hits an IndexError (now caught as internal error, still wrong); `count p as n` then `return p.name` verifies but fails at runtime.
+
+**23. Deep column paths partially validated** `verifier`
+`p.health.nope` and `p.name.extra` verify but fail or silently alias at runtime; `where unit_cost > "x"` verifies and matches nothing. Type-check condition literals against declared prop types.
+
+**24. Retired nodes accepted by write verbs; subclass follow checks; duplicate prop keys** `verifier` `engine`
+`retire`/`flag`/`merge` accept already-retired targets. `follow` rejects subclass bindings that edge roles accept. Duplicate keys in props/mappings silently keep the last.
