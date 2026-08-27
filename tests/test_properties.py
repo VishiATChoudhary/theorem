@@ -28,7 +28,12 @@ def test_parse_total(text):
         pass
 
 
-@given(st.text(alphabet="find follow group by as where return budget \n\"#@{}(),:.", max_size=200))
+@given(
+    st.text(
+        alphabet='find follow group by as where return budget \n"#@{}(),:.',
+        max_size=200,
+    )
+)
 @settings(max_examples=300)
 def test_parse_total_keyword_soup(text):
     """Keyword-dense fuzz: exercises deeper parser paths than raw unicode."""
@@ -130,7 +135,9 @@ def test_reopen_after_wal_truncation(tmp_path_factory, cut):
     store = Store(db)
     for i in range(5):
         nid = store.next_id("product")
-        store.apply({"op": "put_node", "id": nid, "cls": "product", "props": {"name": f"p{i}"}})
+        store.apply(
+            {"op": "put_node", "id": nid, "cls": "product", "props": {"name": f"p{i}"}}
+        )
     raw = store.wal_path.read_bytes()
     store.wal_path.write_bytes(raw[: min(cut, len(raw))])
     reopened = Store(db)
