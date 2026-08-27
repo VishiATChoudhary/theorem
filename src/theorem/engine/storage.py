@@ -68,11 +68,24 @@ class Store:
             for rec in data["records"]:
                 self._apply_to_memory(rec, rec["_pos"])
         if self.wal_path.exists():
-            with self.wal_path.open() as f:
+            # A crash mid-append leaves a torn final line. Replay the longest
+            # valid prefix, then truncate the file to it so the next append
+            # starts on a clean line boundary.
+            valid_bytes = 0
+            with self.wal_path.open("rb") as f:
                 for line in f:
-                    rec = json.loads(line)
+                    if not line.endswith(b"\n"):
+                        break
+                    try:
+                        rec = json.loads(line)
+                    except json.JSONDecodeError:
+                        break
                     self.position += 1
                     self._apply_to_memory(rec, self.position)
+                    valid_bytes += len(line)
+            if valid_bytes < self.wal_path.stat().st_size:
+                with self.wal_path.open("r+b") as f:
+                    f.truncate(valid_bytes)
 
     def apply(self, record: dict) -> int:
         """Append to WAL, apply to memory, return the new position."""

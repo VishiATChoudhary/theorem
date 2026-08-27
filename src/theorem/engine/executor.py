@@ -116,11 +116,11 @@ def _fold(v):
     Agents transliterate names; silently matching nothing is the worse
     failure mode. Numbers pass through untouched."""
     if isinstance(v, str):
+        # casefold BEFORE stripping accents: casefold('ß') == 'ss', but
+        # NFKD+ascii-ignore deletes 'ß' outright, so the reverse order
+        # makes upper/lower forms of the same word fold differently.
         return (
-            unicodedata.normalize("NFKD", v)
-            .encode("ascii", "ignore")
-            .decode()
-            .casefold()
+            unicodedata.normalize("NFKD", v.casefold()).encode("ascii", "ignore").decode()
         )
     return v
 
