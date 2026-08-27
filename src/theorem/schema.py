@@ -56,17 +56,23 @@ class Schema:
         return out
 
     @staticmethod
-    def supply_chain() -> "Schema":
+    def supply_chain() -> Schema:
         """The running-example schema from the design docs."""
         s = Schema()
-        s.classes["product"] = ClassDef("product", {"name": "str", "launch_year": "int"})
+        s.classes["product"] = ClassDef(
+            "product", {"name": "str", "launch_year": "int"}
+        )
         s.classes["part"] = ClassDef("part", {"name": "str", "unit_cost": "float"})
         s.classes["supplier"] = ClassDef("supplier", {"name": "str", "country": "str"})
         s.classes["table_blob"] = ClassDef(
-            "table_blob", {"title": "str", "payload": "str"},
-            allowed_states={"blob", "composite"})
+            "table_blob",
+            {"title": "str", "payload": "str"},
+            allowed_states={"blob", "composite"},
+        )
         s.edges["uses"] = EdgeDef("uses", {"whole": "product", "component": "part"})
-        s.edges["supplied_by"] = EdgeDef("supplied_by", {"item": "part", "source": "supplier"})
+        s.edges["supplied_by"] = EdgeDef(
+            "supplied_by", {"item": "part", "source": "supplier"}
+        )
         return s
 
     def render(self) -> str:

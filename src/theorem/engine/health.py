@@ -16,5 +16,9 @@ def scores(store: Store, node_id: str) -> dict[str, float]:
         0.3 if degree == 0 else 0.0,
     )
     staleness = min(1.0, (store.position - node.last_confirmed) / 1000)
-    return {"loss": loss, "query": query, "structure": structure,
-            "staleness": staleness}
+    return {
+        "loss": loss,
+        "query": query,
+        "structure": structure,
+        "staleness": staleness,
+    }

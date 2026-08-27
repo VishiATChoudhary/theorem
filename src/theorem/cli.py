@@ -22,7 +22,9 @@ def main(argv: list[str] | None = None) -> int:
         print(session.run(Path(args.file).read_text()))
         return 0
     if args.repl:
-        print("theorem v0. one statement per line; blank line to execute a block; ctrl-d to exit.")
+        print(
+            "theorem v0. one statement per line; blank line to execute a block; ctrl-d to exit."
+        )
         block: list[str] = []
         try:
             for line in sys.stdin:

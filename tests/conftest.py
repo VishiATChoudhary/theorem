@@ -16,8 +16,9 @@ def _node(store, cls, **props):
 
 
 def _edge(store, etype, **roles):
-    store.apply({"op": "put_edge", "id": store.next_id("edge"),
-                 "type": etype, "roles": roles})
+    store.apply(
+        {"op": "put_edge", "id": store.next_id("edge"), "type": etype, "roles": roles}
+    )
 
 
 @pytest.fixture
@@ -52,7 +53,16 @@ def fixture_store(tmp_path):
     _edge(store, "supplied_by", item=casing, source=ionix_jp)
     _edge(store, "supplied_by", item=film, source=volta)
 
-    store.ids = dict(pb=pb, sc=sc, gp=gp, cell=cell, wire=wire, film=film,
-                     casing=casing, volta=volta, ionix_kr=ionix_kr,
-                     ionix_jp=ionix_jp)
+    store.ids = dict(
+        pb=pb,
+        sc=sc,
+        gp=gp,
+        cell=cell,
+        wire=wire,
+        film=film,
+        casing=casing,
+        volta=volta,
+        ionix_kr=ionix_kr,
+        ionix_jp=ionix_jp,
+    )
     return store

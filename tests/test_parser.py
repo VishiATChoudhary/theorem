@@ -1,19 +1,15 @@
 import pytest
 
 from theorem.ast_nodes import (
-    Aggregate,
     AssertEdge,
     AssertNode,
     Clause,
     Compact,
     Continue,
     DeriveClass,
-    Distinct,
     Find,
     Flag,
     Follow,
-    GroupBy,
-    Merge,
     Refine,
     Retire,
     Return,
@@ -44,7 +40,12 @@ def test_q1_parses():
     assert f.target == "part" and f.name == "cell"
     assert f.cond == [("and", Clause(("name",), "=", "lithium cell"))]
     fo = stmts[1]
-    assert (fo.src, fo.edge, fo.role, fo.name) == ("cell", "supplied_by", "source", "sups")
+    assert (fo.src, fo.edge, fo.role, fo.name) == (
+        "cell",
+        "supplied_by",
+        "source",
+        "sups",
+    )
     ret = stmts[2]
     assert ret.cols == [("sups", "name")]
     assert ret.budget == 2000  # default
@@ -54,7 +55,13 @@ def test_q1_parses():
 def test_q2_parses():
     stmts = parse(Q2_TEXT)
     assert [type(s).__name__ for s in stmts] == [
-        "Find", "Follow", "Follow", "GroupBy", "Aggregate", "Return"]
+        "Find",
+        "Follow",
+        "Follow",
+        "GroupBy",
+        "Aggregate",
+        "Return",
+    ]
     g = stmts[3]
     assert g.col == ("sups",) and g.name == "g"
     agg = stmts[4]
@@ -70,7 +77,9 @@ def test_group_by_value_spelling():
 
 
 def test_where_and_or():
-    (f,) = parse('find part where unit_cost > 4 and unit_cost < 10 or name contains "cell" as p')
+    (f,) = parse(
+        'find part where unit_cost > 4 and unit_cost < 10 or name contains "cell" as p'
+    )
     assert f.cond[0] == ("and", Clause(("unit_cost",), ">", 4))
     assert f.cond[1] == ("and", Clause(("unit_cost",), "<", 10))
     assert f.cond[2] == ("or", Clause(("name",), "contains", "cell"))
@@ -101,7 +110,9 @@ def test_continuation_lines_join():
 
 
 def test_assert_edge():
-    (e,) = parse("assert edge supplied_by(item: gs, source: voltachem)\n  source doc:d/p3")
+    (e,) = parse(
+        "assert edge supplied_by(item: gs, source: voltachem)\n  source doc:d/p3"
+    )
     assert type(e) is AssertEdge
     assert e.edge == "supplied_by"
     assert e.role_refs == {"item": "gs", "source": "voltachem"}
@@ -118,14 +129,18 @@ def test_merge_and_distinct():
 
 
 def test_refine():
-    (r,) = parse('refine prices into part\n  with {name: col "component", unit_cost: col "eur_unit"}\n  as price_parts')
+    (r,) = parse(
+        'refine prices into part\n  with {name: col "component", unit_cost: col "eur_unit"}\n  as price_parts'
+    )
     assert type(r) is Refine
     assert r.ref == "prices" and r.into_cls == "part" and r.name == "price_parts"
     assert r.mapping == {"name": "component", "unit_cost": "eur_unit"}
 
 
 def test_compact():
-    (c,) = parse('compact old_quotes as summary_quote\n  {period: "2024", mean_cost: 3.1}')
+    (c,) = parse(
+        'compact old_quotes as summary_quote\n  {period: "2024", mean_cost: 3.1}'
+    )
     assert type(c) is Compact
     assert c.src == "old_quotes" and c.name == "summary_quote"
     assert c.props == {"period": "2024", "mean_cost": 3.1}
@@ -153,7 +168,9 @@ def test_schema_and_continue():
 
 
 def test_return_full_clause():
-    (r,) = parse("return sups.name, n_parts order by n_parts desc limit 10 budget 500 tokens after @t-42")
+    (r,) = parse(
+        "return sups.name, n_parts order by n_parts desc limit 10 budget 500 tokens after @t-42"
+    )
     assert r.cols == [("sups", "name"), ("n_parts",)]
     assert r.order_by == ("n_parts",) and r.desc
     assert r.limit == 10 and r.budget == 500 and r.after == "@t-42"
@@ -174,13 +191,16 @@ def test_bool_literal():
     assert a.props == {"takes_inventory": True}
 
 
-@pytest.mark.parametrize("bad,msg_part", [
-    ("frobnicate part as p", "unknown verb"),
-    ("find part where name = as p", "expected"),
-    ("find part where name = \"x\"", "as"),
-    ("follow a b as c", "expected"),
-    ("merge onlyone", "expected"),
-])
+@pytest.mark.parametrize(
+    "bad,msg_part",
+    [
+        ("frobnicate part as p", "unknown verb"),
+        ("find part where name = as p", "expected"),
+        ('find part where name = "x"', "as"),
+        ("follow a b as c", "expected"),
+        ("merge onlyone", "expected"),
+    ],
+)
 def test_parse_errors(bad, msg_part):
     with pytest.raises(ParseError) as e:
         parse(bad)
@@ -194,6 +214,7 @@ def test_parse_error_carries_line():
 
 
 # regression tests from adversarial review round 1
+
 
 def test_bare_word_not_a_prop_literal():
     with pytest.raises(ParseError):

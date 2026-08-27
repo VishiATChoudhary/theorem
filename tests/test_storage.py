@@ -3,8 +3,14 @@ from theorem.engine.storage import Store
 
 def put_supplier(store, name, country="DE"):
     nid = store.next_id("supplier")
-    store.apply({"op": "put_node", "id": nid, "cls": "supplier",
-                 "props": {"name": name, "country": country}})
+    store.apply(
+        {
+            "op": "put_node",
+            "id": nid,
+            "cls": "supplier",
+            "props": {"name": name, "country": country},
+        }
+    )
     return nid
 
 
@@ -18,10 +24,22 @@ def test_apply_and_read(tmp_path):
 
 def test_positions_monotonic(tmp_path):
     store = Store(tmp_path)
-    p1 = store.apply({"op": "put_node", "id": store.next_id("part"),
-                      "cls": "part", "props": {"name": "a"}})
-    p2 = store.apply({"op": "put_node", "id": store.next_id("part"),
-                      "cls": "part", "props": {"name": "b"}})
+    p1 = store.apply(
+        {
+            "op": "put_node",
+            "id": store.next_id("part"),
+            "cls": "part",
+            "props": {"name": "a"},
+        }
+    )
+    p2 = store.apply(
+        {
+            "op": "put_node",
+            "id": store.next_id("part"),
+            "cls": "part",
+            "props": {"name": "b"},
+        }
+    )
     assert p2 == p1 + 1
 
 
@@ -30,8 +48,14 @@ def test_edge_incident_both_ends(tmp_path):
     a = put_supplier(store, "VoltaChem")
     b = store.next_id("part")
     store.apply({"op": "put_node", "id": b, "cls": "part", "props": {"name": "cell"}})
-    store.apply({"op": "put_edge", "id": store.next_id("edge"), "type": "supplied_by",
-                 "roles": {"item": b, "source": a}})
+    store.apply(
+        {
+            "op": "put_edge",
+            "id": store.next_id("edge"),
+            "type": "supplied_by",
+            "roles": {"item": b, "source": a},
+        }
+    )
     assert len(store.edges[a]) == 1 and len(store.edges[b]) == 1
     assert store.edges[a][0].roles == {"item": b, "source": a}
 
@@ -72,15 +96,38 @@ def test_lineage_and_distinct_and_dup_records(tmp_path):
     store = Store(tmp_path)
     a = put_supplier(store, "A")
     b = put_supplier(store, "B")
-    store.apply({"op": "lineage", "kind": "merge", "survivor": a, "absorbed": b,
-                 "pre_states": {}})
+    store.apply(
+        {
+            "op": "lineage",
+            "kind": "merge",
+            "survivor": a,
+            "absorbed": b,
+            "pre_states": {},
+        }
+    )
     c = put_supplier(store, "C")
     store.apply({"op": "distinct", "a": a, "b": b, "reason": "different"})
-    store.apply({"op": "dup", "a": a, "b": c, "score": 0.9, "cls": "supplier",
-                 "evidence": "near name"})
+    store.apply(
+        {
+            "op": "dup",
+            "a": a,
+            "b": c,
+            "score": 0.9,
+            "cls": "supplier",
+            "evidence": "near name",
+        }
+    )
     # a distinct-suppressed pair never enters the ledger, even on replay
-    store.apply({"op": "dup", "a": a, "b": b, "score": 0.99, "cls": "supplier",
-                 "evidence": "near name"})
+    store.apply(
+        {
+            "op": "dup",
+            "a": a,
+            "b": b,
+            "score": 0.99,
+            "cls": "supplier",
+            "evidence": "near name",
+        }
+    )
     store2 = Store(tmp_path)
     assert store2.lineage[0]["kind"] == "merge"
     assert frozenset((a, b)) in store2.distinct_pairs

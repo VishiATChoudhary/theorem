@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -30,8 +31,13 @@ TEXT_PRIMARY = "#1a1a19"
 TEXT_SECONDARY = "#5f5e58"
 GRID = "#d8d7d0"
 
-AXES_LABELS = ["Overall\naccuracy", "Multi-hop\naccuracy", "1-hop\naccuracy",
-               "Syntax\nvalidity", "Token\neconomy"]
+AXES_LABELS = [
+    "Overall\naccuracy",
+    "Multi-hop\naccuracy",
+    "1-hop\naccuracy",
+    "Syntax\nvalidity",
+    "Token\neconomy",
+]
 
 
 def token_economy(mean_tokens: float | None, worst: float) -> float:
@@ -42,13 +48,22 @@ def token_economy(mean_tokens: float | None, worst: float) -> float:
 
 def vectors(results: dict) -> dict[str, list[float]]:
     gl, cy = results["theorem"], results["text2cypher"]
-    worst = max(t for t in (gl.get("mean_result_tokens"),
-                            cy.get("mean_result_tokens")) if t) * 1.25
+    worst = (
+        max(
+            t for t in (gl.get("mean_result_tokens"), cy.get("mean_result_tokens")) if t
+        )
+        * 1.25
+    )
 
     def vec(s):
-        return [s["overall"], s["multi-hop"], s["1-hop"],
-                s["syntax_validity"],
-                token_economy(s.get("mean_result_tokens"), worst)]
+        return [
+            s["overall"],
+            s["multi-hop"],
+            s["1-hop"],
+            s["syntax_validity"],
+            token_economy(s.get("mean_result_tokens"), worst),
+        ]
+
     return {"theorem": vec(gl), "text2cypher": vec(cy)}
 
 
@@ -61,8 +76,7 @@ def draw(ax, results: dict) -> None:
     ax.set_ylim(0, 100)
     ax.set_rlabel_position(180 / n)
     ax.set_yticks([25, 50, 75, 100])
-    ax.set_yticklabels(["25", "50", "75", ""], color=TEXT_SECONDARY,
-                       fontsize=8)
+    ax.set_yticklabels(["25", "50", "75", ""], color=TEXT_SECONDARY, fontsize=8)
     ax.set_xticks(angles)
     ax.set_xticklabels(AXES_LABELS, color=TEXT_PRIMARY, fontsize=9.5)
     ax.tick_params(axis="x", pad=16)
@@ -75,12 +89,18 @@ def draw(ax, results: dict) -> None:
         closed_v = values + values[:1]
         ax.plot(closed_a, closed_v, color=color, linewidth=2, label=name)
         ax.fill(closed_a, closed_v, color=color, alpha=0.12)
-        for ang, val in zip(angles, values):
-            ax.annotate(f"{val:.0f}", xy=(ang, max(val - 11, 6)), color=color,
-                        fontsize=8.5, fontweight="bold", ha="center",
-                        va="center")
+        for ang, val in zip(angles, values, strict=True):
+            ax.annotate(
+                f"{val:.0f}",
+                xy=(ang, max(val - 11, 6)),
+                color=color,
+                fontsize=8.5,
+                fontweight="bold",
+                ha="center",
+                va="center",
+            )
 
-    ax.set_title(f'{results["model"]}\n', color=TEXT_SECONDARY, fontsize=9)
+    ax.set_title(f"{results['model']}\n", color=TEXT_SECONDARY, fontsize=9)
 
 
 def main() -> None:
@@ -89,23 +109,41 @@ def main() -> None:
     all_results = [json.loads(f.read_text()) for f in files if f.exists()]
 
     fig, axes = plt.subplots(
-        1, len(all_results), figsize=(6.4 * len(all_results), 6.8),
-        subplot_kw={"projection": "polar"})
+        1,
+        len(all_results),
+        figsize=(6.4 * len(all_results), 6.8),
+        subplot_kw={"projection": "polar"},
+    )
     if len(all_results) == 1:
         axes = [axes]
     fig.patch.set_facecolor(SURFACE)
-    for ax, results in zip(axes, all_results):
+    for ax, results in zip(axes, all_results, strict=True):
         draw(ax, results)
 
     r0 = all_results[0]
-    fig.suptitle("theorem vs text2cypher, CypherBench slice "
-                 f'({r0["graph"]}, n={r0["n"]})',
-                 color=TEXT_PRIMARY, fontsize=13, y=1.0)
-    fig.text(0.5, 0.012, r0.get("slice_note", ""), ha="center",
-             color=TEXT_SECONDARY, fontsize=7)
+    fig.suptitle(
+        f"theorem vs text2cypher, CypherBench slice ({r0['graph']}, n={r0['n']})",
+        color=TEXT_PRIMARY,
+        fontsize=13,
+        y=1.0,
+    )
+    fig.text(
+        0.5,
+        0.012,
+        r0.get("slice_note", ""),
+        ha="center",
+        color=TEXT_SECONDARY,
+        fontsize=7,
+    )
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper right", frameon=False,
-               labelcolor=TEXT_PRIMARY, fontsize=9)
+    fig.legend(
+        handles,
+        labels,
+        loc="upper right",
+        frameon=False,
+        labelcolor=TEXT_PRIMARY,
+        fontsize=9,
+    )
     fig.tight_layout(rect=(0, 0.03, 1, 0.95))
 
     OUT.mkdir(exist_ok=True)

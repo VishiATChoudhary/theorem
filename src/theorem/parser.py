@@ -144,7 +144,9 @@ class _Parser:
     def expect_end(self) -> None:
         t = self.peek()
         if t is not None:
-            raise ParseError(self.line_no, f"unexpected trailing input starting at {t[1]!r}")
+            raise ParseError(
+                self.line_no, f"unexpected trailing input starting at {t[1]!r}"
+            )
 
     # ---- terminals -------------------------------------------------
 
@@ -152,8 +154,10 @@ class _Parser:
         w = self.expect_word()
         parts = tuple(w.split("."))
         if len(parts) > 3 or any(not p for p in parts):
-            raise ParseError(self.line_no, f"bad column path {w!r}: "
-                             "1 to 3 non-empty dot-separated names")
+            raise ParseError(
+                self.line_no,
+                f"bad column path {w!r}: 1 to 3 non-empty dot-separated names",
+            )
         return parts
 
     def literal(self, allow_word: bool = False) -> object:
@@ -167,7 +171,8 @@ class _Parser:
             if not text.startswith("attach:"):
                 raise ParseError(
                     self.line_no,
-                    f"{text!r} is not a value; doc: provenance only follows 'source'")
+                    f"{text!r} is not a value; doc: provenance only follows 'source'",
+                )
             return text
         if kind == "word":
             if text == "true":
@@ -186,7 +191,9 @@ class _Parser:
             return t[1]
         if t[0] == "word" and "." not in t[1]:
             return t[1]
-        raise ParseError(self.line_no, f"expected a binding name or node id, got {t[1]!r}")
+        raise ParseError(
+            self.line_no, f"expected a binding name or node id, got {t[1]!r}"
+        )
 
     def string(self) -> str:
         t = self.next()
@@ -243,9 +250,13 @@ class _Parser:
         while True:
             col = self.col()
             t = self.peek()
-            if t is None or (t[0] != "op" and not (t[0] == "word" and t[1] == "contains")):
+            if t is None or (
+                t[0] != "op" and not (t[0] == "word" and t[1] == "contains")
+            ):
                 got = t[1] if t else "end of line"
-                raise ParseError(self.line_no, f"expected a comparison operator, got {got!r}")
+                raise ParseError(
+                    self.line_no, f"expected a comparison operator, got {got!r}"
+                )
             self.i += 1
             op = t[1]
             if op not in COMPARISON_OPS:
@@ -275,7 +286,9 @@ class _Parser:
         self.next()
         t = self.next()
         if t[0] != "number" or "." in t[1]:
-            raise ParseError(self.line_no, f"expected an integer token budget, got {t[1]!r}")
+            raise ParseError(
+                self.line_no, f"expected an integer token budget, got {t[1]!r}"
+            )
         self.expect_word("tokens")
         return int(t[1])
 
@@ -285,7 +298,9 @@ class _Parser:
         self.next()
         t = self.next()
         if t[0] != "provenance":
-            raise ParseError(self.line_no, f"expected doc:/attach: provenance, got {t[1]!r}")
+            raise ParseError(
+                self.line_no, f"expected doc:/attach: provenance, got {t[1]!r}"
+            )
         return t[1]
 
     # ---- statements ------------------------------------------------
@@ -362,7 +377,9 @@ class _Parser:
             self.next()
             t = self.next()
             if t[0] != "number" or "." in t[1]:
-                raise ParseError(self.line_no, f"expected an integer limit, got {t[1]!r}")
+                raise ParseError(
+                    self.line_no, f"expected an integer limit, got {t[1]!r}"
+                )
             limit = int(t[1])
         budget = self.budget_opt()
         after = None
@@ -370,15 +387,25 @@ class _Parser:
             self.next()
             t = self.next()
             if t[0] != "position":
-                raise ParseError(self.line_no, f"expected a position like @t-42, got {t[1]!r}")
+                raise ParseError(
+                    self.line_no, f"expected a position like @t-42, got {t[1]!r}"
+                )
             after = t[1]
-        return Return(cols, order_by, desc, limit,
-                      DEFAULT_BUDGET if budget is None else budget, after)
+        return Return(
+            cols,
+            order_by,
+            desc,
+            limit,
+            DEFAULT_BUDGET if budget is None else budget,
+            after,
+        )
 
     def parse_continue(self) -> Continue:
         t = self.next()
         if t[0] != "handle":
-            raise ParseError(self.line_no, f"expected a continuation handle like @c81f, got {t[1]!r}")
+            raise ParseError(
+                self.line_no, f"expected a continuation handle like @c81f, got {t[1]!r}"
+            )
         budget = self.budget_opt()
         return Continue(t[1], DEFAULT_BUDGET if budget is None else budget)
 
@@ -415,7 +442,10 @@ class _Parser:
             if which == "source":
                 t = self.next()
                 if t[0] != "provenance":
-                    raise ParseError(self.line_no, f"expected provenance after 'prefer source', got {t[1]!r}")
+                    raise ParseError(
+                        self.line_no,
+                        f"expected provenance after 'prefer source', got {t[1]!r}",
+                    )
                 policy = f"source {t[1]}"
             else:
                 policy = "newest"

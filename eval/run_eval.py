@@ -27,8 +27,13 @@ from collections import defaultdict
 from pathlib import Path
 
 from eval.load_graph import derive_schema, load
-from eval.prompts import cypher_prompt, theorem_prompt, repair_prompt
-from theorem.engine.executor import ReadContext, count_tokens, execute_read, execute_rows
+from eval.prompts import cypher_prompt, repair_prompt, theorem_prompt
+from theorem.engine.executor import (
+    ReadContext,
+    count_tokens,
+    execute_read,
+    execute_rows,
+)
 from theorem.engine.storage import Store
 from theorem.parser import ParseError, parse
 from theorem.verifier import VerifyError, verify
@@ -40,22 +45,32 @@ CACHE = OUT / "cache"
 # Question categories expressible in theorem v0 (no union, no optional
 # match, no edge-property filters). Both conditions run on the SAME slice.
 EXPRESSIBLE = {
-    "basic_(n)", "basic_(n*)", "basic_(n)-(m0)", "basic_(n)-(m0*)",
-    "basic_(n)-(m0)-(m1*)", "basic_(n)-(m0*),(n)-(m1*)",
-    "special_three-node-groupby", "special_comparison",
+    "basic_(n)",
+    "basic_(n*)",
+    "basic_(n)-(m0)",
+    "basic_(n)-(m0*)",
+    "basic_(n)-(m0)-(m1*)",
+    "basic_(n)-(m0*),(n)-(m1*)",
+    "special_three-node-groupby",
+    "special_comparison",
 }
-MULTIHOP = {"basic_(n)-(m0)-(m1*)", "basic_(n)-(m0*),(n)-(m1*)",
-            "special_three-node-groupby"}
+MULTIHOP = {
+    "basic_(n)-(m0)-(m1*)",
+    "basic_(n)-(m0*),(n)-(m1*)",
+    "special_three-node-groupby",
+}
 
 NEO4J_CONTAINER = "theorem-eval-neo4j"
 NEO4J_AUTH = ("neo4j", "theoremeval1")
 PUBLISHED_BASELINES = {
-    "claude-3.5-sonnet": 61.6, "gpt-4o": 60.2,
+    "claude-3.5-sonnet": 61.6,
+    "gpt-4o": 60.2,
 }
 
 
 def llm(prompt: str, model: str, cache_key: str) -> str:
     import hashlib
+
     CACHE.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha1(f"{model}\n{prompt}".encode()).hexdigest()[:10]
     cache_file = CACHE / f"{cache_key}-{digest}.txt"
@@ -63,14 +78,30 @@ def llm(prompt: str, model: str, cache_key: str) -> str:
         return cache_file.read_text()
     result = subprocess.run(
         ["claude", "-p", "--model", model, "--max-turns", "1"],
-        input=prompt, capture_output=True, text=True, timeout=300)
+        input=prompt,
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
     text = _extract_query(result.stdout)
     cache_file.write_text(text)
     return text
 
 
-GL_VERBS = ("find ", "follow ", "group ", "count ", "sum ", "avg ", "min ",
-            "max ", "compute ", "return ", "continue ", "schema")
+GL_VERBS = (
+    "find ",
+    "follow ",
+    "group ",
+    "count ",
+    "sum ",
+    "avg ",
+    "min ",
+    "max ",
+    "compute ",
+    "return ",
+    "continue ",
+    "schema",
+)
 CY_STARTS = ("MATCH", "CALL", "WITH", "UNWIND", "OPTIONAL", "RETURN")
 
 
@@ -90,6 +121,7 @@ def _extract_query(raw: str) -> str:
 
 
 # ---- answer normalization and scoring ---------------------------------
+
 
 def _norm_cell(v):
     if isinstance(v, bool):
@@ -123,6 +155,7 @@ def rows_match(got, gold) -> bool:
 
 # ---- condition B: theorem -------------------------------------------
 
+
 def run_theorem(query: str, store: Store, schema) -> list[list]:
     plans = verify(parse(query), schema)
     return execute_rows(plans, store, schema)
@@ -146,47 +179,89 @@ def eval_theorem(question: dict, store: Store, schema, model: str) -> dict:
             syntax_ok = True
             error = None
         except Exception as e2:
-            return {"qid": qid, "ok": False, "syntax_ok": False,
-                    "error": str(e2), "query": query, "rows": None}
+            return {
+                "qid": qid,
+                "ok": False,
+                "syntax_ok": False,
+                "error": str(e2),
+                "query": query,
+                "rows": None,
+            }
     gold = json.loads(question["answer_json"])
     ok = rows_match(rows, gold)
     # result token cost: rendered result for the winning query
     tokens = None
     try:
-        rendered = execute_read(verify(parse(query), schema), store, schema,
-                                ReadContext())
+        rendered = execute_read(
+            verify(parse(query), schema), store, schema, ReadContext()
+        )
         tokens = count_tokens(rendered)
     except Exception:
         pass
-    return {"qid": qid, "ok": ok, "syntax_ok": syntax_ok, "query": query,
-            "rows": rows[:20], "gold": gold[:20], "result_tokens": tokens}
+    return {
+        "qid": qid,
+        "ok": ok,
+        "syntax_ok": syntax_ok,
+        "query": query,
+        "rows": rows[:20],
+        "gold": gold[:20],
+        "result_tokens": tokens,
+    }
 
 
 # ---- condition A: text2cypher on Neo4j --------------------------------
 
+
 def neo4j_available() -> bool:
-    return shutil.which("docker") is not None and subprocess.run(
-        ["docker", "info"], capture_output=True).returncode == 0
+    return (
+        shutil.which("docker") is not None
+        and subprocess.run(["docker", "info"], capture_output=True).returncode == 0
+    )
 
 
 def ensure_neo4j() -> None:
     running = subprocess.run(
         ["docker", "ps", "-q", "-f", f"name={NEO4J_CONTAINER}"],
-        capture_output=True, text=True).stdout.strip()
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     if running:
         return
     subprocess.run(["docker", "rm", "-f", NEO4J_CONTAINER], capture_output=True)
     subprocess.run(
-        ["docker", "run", "-d", "--name", NEO4J_CONTAINER,
-         "-p", "7687:7687", "-p", "7474:7474",
-         "-e", f"NEO4J_AUTH={NEO4J_AUTH[0]}/{NEO4J_AUTH[1]}",
-         "neo4j:5"], check=True, capture_output=True)
+        [
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            NEO4J_CONTAINER,
+            "-p",
+            "7687:7687",
+            "-p",
+            "7474:7474",
+            "-e",
+            f"NEO4J_AUTH={NEO4J_AUTH[0]}/{NEO4J_AUTH[1]}",
+            "neo4j:5",
+        ],
+        check=True,
+        capture_output=True,
+    )
     for _ in range(60):
         time.sleep(2)
         probe = subprocess.run(
-            ["docker", "exec", NEO4J_CONTAINER, "cypher-shell",
-             "-u", NEO4J_AUTH[0], "-p", NEO4J_AUTH[1], "RETURN 1;"],
-            capture_output=True)
+            [
+                "docker",
+                "exec",
+                NEO4J_CONTAINER,
+                "cypher-shell",
+                "-u",
+                NEO4J_AUTH[0],
+                "-p",
+                NEO4J_AUTH[1],
+                "RETURN 1;",
+            ],
+            capture_output=True,
+        )
         if probe.returncode == 0:
             return
     raise RuntimeError("neo4j container did not become ready")
@@ -204,13 +279,30 @@ def neo4j_query(cypher: str, timeout: int = 60) -> list[list]:
         f.write(cypher if cypher.rstrip().endswith(";") else cypher + ";")
         path = f.name
     try:
-        subprocess.run(["docker", "cp", path, f"{NEO4J_CONTAINER}:/tmp/q.cypher"],
-                       check=True, capture_output=True)
+        subprocess.run(
+            ["docker", "cp", path, f"{NEO4J_CONTAINER}:/tmp/q.cypher"],
+            check=True,
+            capture_output=True,
+        )
         result = subprocess.run(
-            ["docker", "exec", NEO4J_CONTAINER, "cypher-shell",
-             "-u", NEO4J_AUTH[0], "-p", NEO4J_AUTH[1],
-             "--format", "plain", "-f", "/tmp/q.cypher"],
-            capture_output=True, text=True, timeout=timeout)
+            [
+                "docker",
+                "exec",
+                NEO4J_CONTAINER,
+                "cypher-shell",
+                "-u",
+                NEO4J_AUTH[0],
+                "-p",
+                NEO4J_AUTH[1],
+                "--format",
+                "plain",
+                "-f",
+                "/tmp/q.cypher",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
     finally:
         Path(path).unlink(missing_ok=True)
     if result.returncode != 0:
@@ -278,7 +370,9 @@ def _parse_shell_cell(cell: str):
 def _cypher_literal(v) -> str:
     """JSON value -> Cypher literal (Cypher map keys are bare identifiers)."""
     if isinstance(v, dict):
-        return "{" + ", ".join(f"`{k}`: {_cypher_literal(x)}" for k, x in v.items()) + "}"
+        return (
+            "{" + ", ".join(f"`{k}`: {_cypher_literal(x)}" for k, x in v.items()) + "}"
+        )
     if isinstance(v, list):
         return "[" + ", ".join(_cypher_literal(x) for x in v) + "]"
     return json.dumps(v)
@@ -300,25 +394,28 @@ def load_neo4j(graph_json: Path) -> None:
         by_label[ent["label"]].append(props)
     for label, items in by_label.items():
         for i in range(0, len(items), 500):
-            batch = _cypher_literal(items[i:i + 500])
+            batch = _cypher_literal(items[i : i + 500])
             neo4j_query(
-                f"UNWIND {batch} AS row CREATE (n:{label}) SET n = row",
-                timeout=300)
-        neo4j_query(f"CREATE INDEX {label.lower()}_eid IF NOT EXISTS "
-                    f"FOR (n:{label}) ON (n.eid)")
+                f"UNWIND {batch} AS row CREATE (n:{label}) SET n = row", timeout=300
+            )
+        neo4j_query(
+            f"CREATE INDEX {label.lower()}_eid IF NOT EXISTS FOR (n:{label}) ON (n.eid)"
+        )
     rels = defaultdict(list)
     for rel in kg["relations"]:
-        props = {k: v for k, v in (rel.get("properties") or {}).items()
-                 if v is not None}
-        rels[rel["label"]].append(
-            {"s": rel["subj_id"], "o": rel["obj_id"], "p": props})
+        props = {
+            k: v for k, v in (rel.get("properties") or {}).items() if v is not None
+        }
+        rels[rel["label"]].append({"s": rel["subj_id"], "o": rel["obj_id"], "p": props})
     for label, items in rels.items():
         for i in range(0, len(items), 500):
-            batch = _cypher_literal(items[i:i + 500])
+            batch = _cypher_literal(items[i : i + 500])
             neo4j_query(
                 f"UNWIND {batch} AS row "
                 f"MATCH (a {{eid: row.s}}), (b {{eid: row.o}}) "
-                f"CREATE (a)-[r:{label}]->(b) SET r = row.p", timeout=600)
+                f"CREATE (a)-[r:{label}]->(b) SET r = row.p",
+                timeout=600,
+            )
 
 
 def eval_cypher(question: dict, cb_schema: dict, model: str) -> dict:
@@ -336,24 +433,40 @@ def eval_cypher(question: dict, cb_schema: dict, model: str) -> dict:
             rows = neo4j_query(retry)
             syntax_ok = True
         except Exception as e2:
-            return {"qid": qid, "ok": False, "syntax_ok": False,
-                    "error": str(e2)[:300], "query": query, "rows": None}
+            return {
+                "qid": qid,
+                "ok": False,
+                "syntax_ok": False,
+                "error": str(e2)[:300],
+                "query": query,
+                "rows": None,
+            }
     gold = json.loads(question["answer_json"])
     ok = rows_match(rows, gold)
     # comparable accounting: the full textual result each system hands the
     # agent (cypher-shell output with its header, like theorem's render)
     tokens = count_tokens(LAST_RAW_RESULT["text"])
-    return {"qid": qid, "ok": ok, "syntax_ok": syntax_ok, "query": query,
-            "rows": rows[:20], "gold": gold[:20], "result_tokens": tokens}
+    return {
+        "qid": qid,
+        "ok": ok,
+        "syntax_ok": syntax_ok,
+        "query": query,
+        "rows": rows[:20],
+        "gold": gold[:20],
+        "result_tokens": tokens,
+    }
 
 
 # ---- harness ----------------------------------------------------------
 
+
 def pick_questions(graph: str, n: int, seed: int = 7) -> list[dict]:
     tests = json.loads((DATA / "test.json").read_text())
-    pool = [t for t in tests
-            if t["graph"] == graph
-            and t["from_template"]["match_category"] in EXPRESSIBLE]
+    pool = [
+        t
+        for t in tests
+        if t["graph"] == graph and t["from_template"]["match_category"] in EXPRESSIBLE
+    ]
     by_cat = defaultdict(list)
     for t in pool:
         by_cat[t["from_template"]["match_category"]].append(t)
@@ -363,14 +476,16 @@ def pick_questions(graph: str, n: int, seed: int = 7) -> list[dict]:
     while len(picked) < min(n, len(pool)):
         for cat in cats:
             if by_cat[cat] and len(picked) < n:
-                picked.append(by_cat[cat].pop(
-                    rng.randrange(len(by_cat[cat]))))
+                picked.append(by_cat[cat].pop(rng.randrange(len(by_cat[cat]))))
     return picked
 
 
 def slice_of(question: dict) -> str:
-    return "multi-hop" if question["from_template"]["match_category"] in MULTIHOP \
+    return (
+        "multi-hop"
+        if question["from_template"]["match_category"] in MULTIHOP
         else "1-hop"
+    )
 
 
 def summarize(results: list[dict], questions: list[dict]) -> dict:
@@ -382,10 +497,10 @@ def summarize(results: list[dict], questions: list[dict]) -> dict:
         rs = [r for r in results if slice_of(by_qid[r["qid"]]) == sl]
         out[sl] = round(100 * sum(r["ok"] for r in rs) / len(rs), 1) if rs else None
         out[f"n_{sl}"] = len(rs)
-    out["syntax_validity"] = round(
-        100 * sum(r["syntax_ok"] for r in results) / total, 1) if total else 0
-    toks = [r["result_tokens"] for r in results
-            if r.get("result_tokens") is not None]
+    out["syntax_validity"] = (
+        round(100 * sum(r["syntax_ok"] for r in results) / total, 1) if total else 0
+    )
+    toks = [r["result_tokens"] for r in results if r.get("result_tokens") is not None]
     out["mean_result_tokens"] = round(sum(toks) / len(toks), 1) if toks else None
     return out
 
@@ -397,14 +512,17 @@ def main() -> None:
     ap.add_argument("--model", default="claude-haiku-4-5-20251001")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--skip-cypher", action="store_true")
-    ap.add_argument("--tag", default=None,
-                    help="suffix for the results file: results-<tag>.json")
+    ap.add_argument(
+        "--tag", default=None, help="suffix for the results file: results-<tag>.json"
+    )
     args = ap.parse_args()
     n = 3 if args.smoke else args.n
 
     questions = pick_questions(args.graph, n)
-    print(f"{len(questions)} questions "
-          f"({sum(slice_of(q) == 'multi-hop' for q in questions)} multi-hop)")
+    print(
+        f"{len(questions)} questions "
+        f"({sum(slice_of(q) == 'multi-hop' for q in questions)} multi-hop)"
+    )
 
     cb_schema = json.loads((DATA / f"{args.graph}_schema.json").read_text())
     schema = derive_schema(cb_schema)
@@ -418,7 +536,9 @@ def main() -> None:
     for i, q in enumerate(questions):
         r = eval_theorem(q, store, schema, args.model)
         gl_results.append(r)
-        print(f"[gl {i+1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}")
+        print(
+            f"[gl {i + 1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}"
+        )
 
     cy_results = []
     cypher_mode = "live"
@@ -431,17 +551,24 @@ def main() -> None:
         for i, q in enumerate(questions):
             r = eval_cypher(q, cb_schema, args.model)
             cy_results.append(r)
-            print(f"[cy {i+1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}")
+            print(
+                f"[cy {i + 1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}"
+            )
 
-    excluded_note = ("categories excluded (not expressible in theorem v0): "
-                     "union, optional-match, time-sensitive/edge-properties; "
-                     "both conditions ran on the same expressible slice")
+    excluded_note = (
+        "categories excluded (not expressible in theorem v0): "
+        "union, optional-match, time-sensitive/edge-properties; "
+        "both conditions ran on the same expressible slice"
+    )
     out = {
-        "graph": args.graph, "model": args.model, "n": len(questions),
+        "graph": args.graph,
+        "model": args.model,
+        "n": len(questions),
         "slice_note": excluded_note,
         "theorem": summarize(gl_results, questions),
-        "text2cypher": summarize(cy_results, questions) if cy_results else
-            {"mode": "published", **PUBLISHED_BASELINES},
+        "text2cypher": summarize(cy_results, questions)
+        if cy_results
+        else {"mode": "published", **PUBLISHED_BASELINES},
         "cypher_mode": cypher_mode,
         "details": {"theorem": gl_results, "text2cypher": cy_results},
     }

@@ -22,6 +22,7 @@ from .ast_nodes import (
     Distinct,
     Find,
     Flag,
+    Follow,
     GroupBy,
     Merge,
     Refine,
@@ -29,7 +30,6 @@ from .ast_nodes import (
     Return,
     SchemaStmt,
     Stmt,
-    Follow,
 )
 from .schema import Schema
 
@@ -64,8 +64,9 @@ def _suggest(name: str, options) -> str:
     return ""
 
 
-def verify(stmts: list[Stmt], schema: Schema,
-           env: dict[str, str] | None = None) -> list[Plan]:
+def verify(
+    stmts: list[Stmt], schema: Schema, env: dict[str, str] | None = None
+) -> list[Plan]:
     # binding name -> class name | "nodes" | "dup_candidates" | "class"
     #                 | "group:<col>" | "value:<agg>"
     env = dict(env) if env else {}
@@ -89,30 +90,36 @@ def _read_type(env: dict[str, str], name: str, line: int) -> str:
         raise VerifyError(
             line,
             f'"{name}" was bound in a previous request; a read pipeline '
-            f"cannot continue from it. bind it again with find/follow")
+            f"cannot continue from it. bind it again with find/follow",
+        )
     return typ
 
 
 def _check_class(schema: Schema, name: str, line: int) -> None:
     if name not in schema.classes:
         raise VerifyError(
-            line, f'unknown class "{name}".{_suggest(name, schema.classes)}')
+            line, f'unknown class "{name}".{_suggest(name, schema.classes)}'
+        )
 
 
-def _check_cond(cond: Cond, schema: Schema, env: dict[str, str],
-                target: str, line: int) -> None:
+def _check_cond(
+    cond: Cond, schema: Schema, env: dict[str, str], target: str, line: int
+) -> None:
     for _joiner, clause in cond:
         _check_col_in_context(clause.col, schema, env, target, line)
 
 
-def _check_col_in_context(col: Col, schema: Schema, env: dict[str, str],
-                          target: str, line: int) -> None:
+def _check_col_in_context(
+    col: Col, schema: Schema, env: dict[str, str], target: str, line: int
+) -> None:
     """Check a column path used in a where/order-by clause of find over `target`."""
     head = col[0]
     if target == "dup_candidates":
         if head not in DUP_CANDIDATE_PROPS:
             raise VerifyError(
-                line, f'unknown dup-candidate field "{head}".{_suggest(head, DUP_CANDIDATE_PROPS)}')
+                line,
+                f'unknown dup-candidate field "{head}".{_suggest(head, DUP_CANDIDATE_PROPS)}',
+            )
         return
     if target == "class":
         return  # schema introspection: any field allowed in v0
@@ -120,7 +127,9 @@ def _check_col_in_context(col: Col, schema: Schema, env: dict[str, str],
         if len(col) < 2 or col[1] not in HEALTH_SUBSCORES:
             sub = col[1] if len(col) > 1 else ""
             raise VerifyError(
-                line, f'unknown health subscore "{sub}".{_suggest(sub, HEALTH_SUBSCORES)}')
+                line,
+                f'unknown health subscore "{sub}".{_suggest(sub, HEALTH_SUBSCORES)}',
+            )
         return
     if head in NODE_PSEUDO_PROPS or head == "query_traffic":
         return
@@ -129,7 +138,8 @@ def _check_col_in_context(col: Col, schema: Schema, env: dict[str, str],
     props = schema.all_props(target)
     if head not in props:
         raise VerifyError(
-            line, f'unknown property "{head}" on class {target}.{_suggest(head, props)}')
+            line, f'unknown property "{head}" on class {target}.{_suggest(head, props)}'
+        )
 
 
 def _check_bound_col(col: Col, schema: Schema, env: dict[str, str], line: int) -> None:
@@ -151,7 +161,9 @@ def _check_bound_col(col: Col, schema: Schema, env: dict[str, str], line: int) -
         props = schema.all_props(typ)
         if prop not in props:
             raise VerifyError(
-                line, f'unknown property "{prop}" on class {typ}.{_suggest(prop, props)}')
+                line,
+                f'unknown property "{prop}" on class {typ}.{_suggest(prop, props)}',
+            )
 
 
 def _ref_type(ref: str, env: dict[str, str], line: int) -> str | None:
@@ -162,7 +174,7 @@ def _ref_type(ref: str, env: dict[str, str], line: int) -> str | None:
     if ref not in env:
         raise VerifyError(line, f'"{ref}" is not bound.{_suggest(ref, env)}')
     typ = env[ref]
-    return typ[len("prior:"):] if typ.startswith("prior:") else typ
+    return typ.removeprefix("prior:")
 
 
 def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
@@ -182,14 +194,16 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             _read_type(env, src, line)
             if edge not in schema.edges:
                 raise VerifyError(
-                    line, f'unknown edge type "{edge}".{_suggest(edge, schema.edges)}')
+                    line, f'unknown edge type "{edge}".{_suggest(edge, schema.edges)}'
+                )
             edef = schema.edges[edge]
             if role not in edef.roles:
                 raise VerifyError(
                     line,
                     f'unknown role "{role}" on edge {edge}; roles are '
                     + ", ".join(f"{r} ({c})" for r, c in edef.roles.items())
-                    + f".{_suggest(role, edef.roles)}")
+                    + f".{_suggest(role, edef.roles)}",
+                )
             src_cls = env[src]
             arrival_cls = edef.roles[role]
             other = edef.other_role(role)
@@ -200,12 +214,14 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                     raise VerifyError(
                         line,
                         f'type error: "{src}" is a {src_cls}, which already occupies role '
-                        f'"{role}"; to traverse {edge} from {src_cls} arrive at role "{other}"')
+                        f'"{role}"; to traverse {edge} from {src_cls} arrive at role "{other}"',
+                    )
                 if src_cls != other_cls and src_cls != arrival_cls:
                     raise VerifyError(
                         line,
                         f"type error: {edge} connects {other_cls} ({other}) to "
-                        f'{arrival_cls} ({role}); "{src}" is a {src_cls}')
+                        f'{arrival_cls} ({role}); "{src}" is a {src_cls}',
+                    )
             _check_cond(cond, schema, env, arrival_cls, line)
             _bind(env, name, arrival_cls, line)
 
@@ -219,8 +235,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
             _read_type(env, head, line)
             if env[head].startswith("value:"):
-                raise VerifyError(
-                    line, f'"{head}" is already an aggregate value')
+                raise VerifyError(line, f'"{head}" is already an aggregate value')
             # group binding -> per-group aggregate; any other binding ->
             # global aggregate over that column
             _bind(env, name, f"value:{op}", line)
@@ -245,31 +260,39 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             for prop in props:
                 if prop not in all_props:
                     raise VerifyError(
-                        line, f'unknown property "{prop}" on class {cls}.{_suggest(prop, all_props)}')
+                        line,
+                        f'unknown property "{prop}" on class {cls}.{_suggest(prop, all_props)}',
+                    )
             _bind(env, name, cls, line)
 
         case AssertEdge(edge=edge, role_refs=role_refs):
             if edge not in schema.edges:
                 raise VerifyError(
-                    line, f'unknown edge type "{edge}".{_suggest(edge, schema.edges)}')
+                    line, f'unknown edge type "{edge}".{_suggest(edge, schema.edges)}'
+                )
             edef = schema.edges[edge]
             if set(role_refs) != set(edef.roles):
                 missing = set(edef.roles) - set(role_refs)
                 extra = set(role_refs) - set(edef.roles)
                 parts = []
                 if extra:
-                    e0 = sorted(extra)[0]
+                    e0 = min(extra)
                     parts.append(f'unknown role "{e0}"{_suggest(e0, edef.roles)}')
                 if missing:
-                    parts.append(f'missing role "{sorted(missing)[0]}"')
+                    parts.append(f'missing role "{min(missing)}"')
                 raise VerifyError(line, f"edge {edge}: " + "; ".join(parts))
             for role, ref in role_refs.items():
                 typ = _ref_type(ref, env, line)
                 want = edef.roles[role]
-                if typ is not None and typ in schema.classes \
-                        and not schema.is_subclass(typ, want):
+                if (
+                    typ is not None
+                    and typ in schema.classes
+                    and not schema.is_subclass(typ, want)
+                ):
                     raise VerifyError(
-                        line, f'role {role} of {edge} takes a {want}; "{ref}" is a {typ}')
+                        line,
+                        f'role {role} of {edge} takes a {want}; "{ref}" is a {typ}',
+                    )
 
         case Merge(a=a, b=b):
             _ref_type(a, env, line)
@@ -288,8 +311,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             if src not in env:
                 raise VerifyError(line, f'"{src}" is not bound.{_suggest(src, env)}')
             typ = env[src]
-            if typ.startswith("prior:"):
-                typ = typ[len("prior:"):]
+            typ = typ.removeprefix("prior:")
             _bind(env, name, typ, line)
 
         case Retire(ref=ref) | Flag(ref=ref):
@@ -298,7 +320,9 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case DeriveClass(name=name, base=base):
             if base not in schema.classes:
                 raise VerifyError(
-                    line, f'unknown base class "{base}".{_suggest(base, schema.classes)}')
+                    line,
+                    f'unknown base class "{base}".{_suggest(base, schema.classes)}',
+                )
             if name in schema.classes:
                 raise VerifyError(line, f'class "{name}" already exists')
 

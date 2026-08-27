@@ -20,8 +20,7 @@ from pathlib import Path
 from theorem.engine.storage import Store
 from theorem.schema import ClassDef, EdgeDef, Schema
 
-TYPE_MAP = {"int": "int", "float": "float", "str": "str", "bool": "bool",
-            "date": "str"}
+TYPE_MAP = {"int": "int", "float": "float", "str": "str", "bool": "bool", "date": "str"}
 
 
 def class_name(label: str) -> str:
@@ -39,16 +38,23 @@ def derive_schema(cb_schema: dict) -> Schema:
     for ent in cb_schema["entities"]:
         props = {"name": "str"}
         for pname, ptype in ent.get("properties", {}).items():
-            props[pname] = TYPE_MAP.get(ptype.replace("list[", "").replace("]", ""), "str") \
-                if not ptype.startswith("list[") else "str"
+            props[pname] = (
+                TYPE_MAP.get(ptype.replace("list[", "").replace("]", ""), "str")
+                if not ptype.startswith("list[")
+                else "str"
+            )
         schema.classes[class_name(ent["label"])] = ClassDef(
-            name=class_name(ent["label"]), props=props)
+            name=class_name(ent["label"]), props=props
+        )
     for rel in cb_schema["relations"]:
         subj_role, obj_role = role_names(rel["subj_label"], rel["obj_label"])
         schema.edges[rel["label"]] = EdgeDef(
             name=rel["label"],
-            roles={subj_role: class_name(rel["subj_label"]),
-                   obj_role: class_name(rel["obj_label"])})
+            roles={
+                subj_role: class_name(rel["subj_label"]),
+                obj_role: class_name(rel["obj_label"]),
+            },
+        )
     return schema
 
 
@@ -84,7 +90,13 @@ def load(graph_path: str | Path, store: Store) -> dict[str, str]:
         obj = id_map.get(rel["obj_id"])
         if subj is None or obj is None:
             continue
-        records.append({"op": "put_edge", "id": store.next_id("edge"),
-                        "type": label, "roles": {subj_role: subj, obj_role: obj}})
+        records.append(
+            {
+                "op": "put_edge",
+                "id": store.next_id("edge"),
+                "type": label,
+                "roles": {subj_role: subj, obj_role: obj},
+            }
+        )
     store.bulk(records)
     return id_map

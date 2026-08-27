@@ -37,7 +37,11 @@ def test_q2_group_by_identity_not_name(fixture_store):
     # GridPack(2026): cell+casing; PowerBank(2025): cell+wire
     # cell -> VoltaChem + Ionix/KR; wire -> Ionix/KR; casing -> Ionix/JP
     # so: Ionix/KR supplies 2 distinct parts, VoltaChem 1, Ionix/JP 1
-    lines = [l for l in out.splitlines() if "," in l and "results" not in l and "columns" not in l]
+    lines = [
+        ln
+        for ln in out.splitlines()
+        if "," in ln and "results" not in ln and "columns" not in ln
+    ]
     assert lines[0] == "Ionix, 2"
     rest = set(lines[1:])
     assert rest == {"VoltaChem, 1", "Ionix, 1"}  # two Ionix rows: identity grouping
@@ -51,25 +55,38 @@ count g.sups as n
 return g.key, n order by g.key
 """
     out = run(text, fixture_store)
-    lines = [l for l in out.splitlines() if "," in l and "results" not in l and "columns" not in l]
+    lines = [
+        ln
+        for ln in out.splitlines()
+        if "," in ln and "results" not in ln and "columns" not in ln
+    ]
     assert lines == ["DE, 1", "JP, 1", "KR, 1"]
 
 
 def test_where_and_or_contains(fixture_store):
-    out = run('find part where unit_cost > 2 and name contains "cell" as p\nreturn p.name', fixture_store)
+    out = run(
+        'find part where unit_cost > 2 and name contains "cell" as p\nreturn p.name',
+        fixture_store,
+    )
     assert "lithium cell" in out and "casing" not in out
 
 
 def test_order_and_limit(fixture_store):
-    out = run("find part as p\nreturn p.name order by p.unit_cost desc limit 2", fixture_store)
-    lines = [l for l in out.splitlines()[2:] if l]
+    out = run(
+        "find part as p\nreturn p.name order by p.unit_cost desc limit 2", fixture_store
+    )
+    lines = [ln for ln in out.splitlines()[2:] if ln]
     assert lines == ["solar film", "lithium cell"]
     assert "results: 2 of 4" in out
 
 
 def test_budget_truncation_and_continue(fixture_store):
     ctx = ReadContext()
-    out = run("find part as p\nreturn p.name, p.unit_cost order by p.unit_cost budget 20 tokens", fixture_store, ctx)
+    out = run(
+        "find part as p\nreturn p.name, p.unit_cost order by p.unit_cost budget 20 tokens",
+        fixture_store,
+        ctx,
+    )
     assert "budget hit" in out
     assert "resume with: continue @c" in out
     handle = out.rsplit("continue ", 1)[1].strip()
@@ -81,12 +98,17 @@ def test_budget_truncation_and_continue(fixture_store):
 
 
 def test_empty_result(fixture_store):
-    out = run("find product where launch_year > 2030 as p\nreturn p.name", fixture_store)
+    out = run(
+        "find product where launch_year > 2030 as p\nreturn p.name", fixture_store
+    )
     assert "results: 0 of 0, complete" in out
 
 
 def test_find_nodes_any_class(fixture_store):
-    out = run("find nodes where name contains \"Ionix\" as n\nreturn n.class, n.name", fixture_store)
+    out = run(
+        'find nodes where name contains "Ionix" as n\nreturn n.class, n.name',
+        fixture_store,
+    )
     assert out.count("supplier") == 2
 
 
@@ -98,7 +120,9 @@ def test_retired_excluded(fixture_store):
 
 
 def test_incident_rendering(fixture_store):
-    out = run('find part where name = "lithium cell" as cell\nreturn cell', fixture_store)
+    out = run(
+        'find part where name = "lithium cell" as cell\nreturn cell', fixture_store
+    )
     assert 'part "lithium cell" {unit_cost: 4.2}' in out
     assert "supplied_by -> supplier" in out
     assert "uses <- product" in out
@@ -142,8 +166,8 @@ follow parts uses whole as others
 return others.name
 """
     out = run(text, fixture_store)
-    assert "GridPack" in out            # shares lithium cell
-    assert "PowerBank Pro" not in out   # backtrack over same edge excluded
+    assert "GridPack" in out  # shares lithium cell
+    assert "PowerBank Pro" not in out  # backtrack over same edge excluded
 
 
 def test_compute_minus_and_same(fixture_store):
@@ -168,9 +192,18 @@ return same_name
 def test_string_match_accent_and_case_insensitive(fixture_store):
     store = fixture_store
     nid = store.next_id("supplier")
-    store.apply({"op": "put_node", "id": nid, "cls": "supplier",
-                 "props": {"name": "José Calderón", "country": "ES"}})
-    out = run('find supplier where name = "jose calderon" as s\nreturn s.country', fixture_store)
+    store.apply(
+        {
+            "op": "put_node",
+            "id": nid,
+            "cls": "supplier",
+            "props": {"name": "José Calderón", "country": "ES"},
+        }
+    )
+    out = run(
+        'find supplier where name = "jose calderon" as s\nreturn s.country',
+        fixture_store,
+    )
     assert "ES" in out
 
 
@@ -178,8 +211,9 @@ def test_compute_same_null_errors(fixture_store):
     store = fixture_store
     for nm in ("Gap A", "Gap B"):
         nid = store.next_id("supplier")
-        store.apply({"op": "put_node", "id": nid, "cls": "supplier",
-                     "props": {"name": nm}})  # country unset
+        store.apply(
+            {"op": "put_node", "id": nid, "cls": "supplier", "props": {"name": nm}}
+        )  # country unset
     text = """\
 find supplier where name = "Gap A" as a
 find supplier where name = "Gap B" as b
@@ -187,7 +221,9 @@ compute a.country same b.country as x
 return x
 """
     import pytest as _pytest
+
     from theorem.engine.executor import ExecError
+
     with _pytest.raises(ExecError):
         run(text, fixture_store)
 
@@ -195,7 +231,10 @@ return x
 def test_nulls_sort_last_desc(fixture_store):
     store = fixture_store
     nid = store.next_id("part")
-    store.apply({"op": "put_node", "id": nid, "cls": "part",
-                 "props": {"name": "mystery part"}})  # unit_cost unset
-    out = run("find part as p\nreturn p.name order by p.unit_cost desc limit 1", fixture_store)
+    store.apply(
+        {"op": "put_node", "id": nid, "cls": "part", "props": {"name": "mystery part"}}
+    )  # unit_cost unset
+    out = run(
+        "find part as p\nreturn p.name order by p.unit_cost desc limit 1", fixture_store
+    )
     assert "solar film" in out and "mystery part" not in out

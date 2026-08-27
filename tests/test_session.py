@@ -15,7 +15,9 @@ def test_schema_statement(tmp_path):
 def test_construction_session_end_to_end(tmp_path):
     s = make_session(tmp_path)
 
-    out = s.run('assert supplier {name: "Ionix Co", country: "KR"}\n  source doc:report-08/p1 as ionix')
+    out = s.run(
+        'assert supplier {name: "Ionix Co", country: "KR"}\n  source doc:report-08/p1 as ionix'
+    )
     assert "receipt: created supplier ionix = #s-1" in out
 
     out = s.run('assert supplier {name: "Ionix"} source doc:report-08/p2 as ionix2')
@@ -25,24 +27,30 @@ def test_construction_session_end_to_end(tmp_path):
     assert "merged -> #s-1" in out
 
     # writes visible to reads, alias transparent
-    out = s.run('find supplier as sups\nreturn sups.name')
+    out = s.run("find supplier as sups\nreturn sups.name")
     assert "results: 1 of 1" in out
 
     # blob ingest + refine
     att = s.store.path / "attachments"
     att.mkdir()
     (att / "q3.csv").write_text("item,unit_eur\nanode,2.5\ncathode,3.5\n")
-    out = s.run('assert table_blob {title: "Ionix price list Q3", payload: attach:q3}\n  source doc:report-08/p4 as pricelist')
+    out = s.run(
+        'assert table_blob {title: "Ionix price list Q3", payload: attach:q3}\n  source doc:report-08/p4 as pricelist'
+    )
     assert "created table_blob pricelist" in out
 
-    out = s.run('refine pricelist into part\n  with {name: col "item", unit_cost: col "unit_eur"} as rows')
+    out = s.run(
+        'refine pricelist into part\n  with {name: col "item", unit_cost: col "unit_eur"} as rows'
+    )
     assert "-> 2 part nodes" in out
 
     out = s.run("find part as p\nreturn p.name, p.unit_cost order by p.unit_cost")
     assert "anode, 2.5" in out and "cathode, 3.5" in out
 
     # bindings from reads usable by writes in the same run
-    out = s.run('find part where unit_cost < 3 as cheap\ncompact cheap as agg {name: "cheap summary", unit_cost: 2.5}')
+    out = s.run(
+        'find part where unit_cost < 3 as cheap\ncompact cheap as agg {name: "cheap summary", unit_cost: 2.5}'
+    )
     assert "compacted 1 part nodes" in out
 
 
@@ -56,9 +64,9 @@ def test_verify_error_stops_everything(tmp_path):
 def test_flag_then_worklist(tmp_path):
     s = make_session(tmp_path)
     s.run('assert supplier {name: "X Corp", country: "DE"} as x')
-    s.run("flag #s-1 reason \"stale\"")
-    s.run("flag #s-1 reason \"stale2\"")
-    s.run("flag #s-1 reason \"stale3\"")
+    s.run('flag #s-1 reason "stale"')
+    s.run('flag #s-1 reason "stale2"')
+    s.run('flag #s-1 reason "stale3"')
     out = s.run("find nodes where health.query > 0.5 as w\nreturn w.name")
     assert "X Corp" in out
 
@@ -80,6 +88,7 @@ def test_parse_error_reported_not_raised(tmp_path):
 
 
 # regression tests from adversarial review round 1
+
 
 def test_stale_read_binding_rejected_not_empty(tmp_path):
     s = make_session(tmp_path)

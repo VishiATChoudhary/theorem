@@ -32,9 +32,11 @@ def _similarity(a: object, b: object) -> float:
 
 
 def _evidence(store: Store, a: Node, b: Node) -> str:
-    shared = [k for k in a.props
-              if not k.startswith("_") and k != "name"
-              and a.props.get(k) == b.props.get(k)]
+    shared = [
+        k
+        for k in a.props
+        if not k.startswith("_") and k != "name" and a.props.get(k) == b.props.get(k)
+    ]
     bits = [f"name {_similarity(a.props.get('name'), b.props.get('name')):.2f}"]
     if shared:
         bits.append("shared: " + ", ".join(f"{k} {a.props[k]}" for k in shared[:3]))
@@ -49,8 +51,13 @@ def _candidate(store: Store, a: Node, b: Node) -> dict | None:
     score = _similarity(a.props.get("name", a.id), b.props.get("name", b.id))
     if score < SIM_THRESHOLD:
         return None
-    return {"a": a.id, "b": b.id, "cls": a.cls, "score": round(score, 2),
-            "evidence": _evidence(store, a, b)}
+    return {
+        "a": a.id,
+        "b": b.id,
+        "cls": a.cls,
+        "score": round(score, 2),
+        "evidence": _evidence(store, a, b),
+    }
 
 
 def sync_candidates(store: Store, node: Node) -> list[dict]:
@@ -60,7 +67,10 @@ def sync_candidates(store: Store, node: Node) -> list[dict]:
     for other in store.nodes.values():
         if other.retired_at is not None or store.resolve(other.id) != other.id:
             continue
-        if other.id == node.id or block_key(other.cls, other.props.get("name", "")) != key:
+        if (
+            other.id == node.id
+            or block_key(other.cls, other.props.get("name", "")) != key
+        ):
             continue
         cand = _candidate(store, other, node)
         if cand:
@@ -84,7 +94,7 @@ def sweep(store: Store) -> int:
     found = 0
     for nodes in by_cls.values():
         for i, a in enumerate(nodes):
-            for b in nodes[i + 1:]:
+            for b in nodes[i + 1 :]:
                 cand = _candidate(store, a, b)
                 if cand:
                     before = len(store.dup_ledger)

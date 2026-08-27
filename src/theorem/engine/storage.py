@@ -58,8 +58,9 @@ class Store:
     # ---- durability ------------------------------------------------
 
     def _replay(self) -> None:
-        runs = sorted(self.path.glob("runs/run-*.json"),
-                      key=lambda p: int(p.stem.split("-")[1]))
+        runs = sorted(
+            self.path.glob("runs/run-*.json"), key=lambda p: int(p.stem.split("-")[1])
+        )
         if runs:
             data = json.loads(runs[-1].read_text())
             self.position = data["position"]
@@ -99,19 +100,36 @@ class Store:
         """Write an immutable run holding the full replayable state, truncate WAL."""
         records = []
         for n in self.nodes.values():
-            records.append({"op": "put_node", "id": n.id, "cls": n.cls,
-                            "props": n.props, "state": n.state,
-                            "origin": n.origin, "_pos": n.created_at,
-                            "_restore": {
-                                "retired_at": n.retired_at, "flags": n.flags,
-                                "traffic": n.traffic,
-                                "blob_traversals": n.blob_traversals,
-                                "conflict_count": n.conflict_count,
-                                "last_confirmed": n.last_confirmed}})
+            records.append(
+                {
+                    "op": "put_node",
+                    "id": n.id,
+                    "cls": n.cls,
+                    "props": n.props,
+                    "state": n.state,
+                    "origin": n.origin,
+                    "_pos": n.created_at,
+                    "_restore": {
+                        "retired_at": n.retired_at,
+                        "flags": n.flags,
+                        "traffic": n.traffic,
+                        "blob_traversals": n.blob_traversals,
+                        "conflict_count": n.conflict_count,
+                        "last_confirmed": n.last_confirmed,
+                    },
+                }
+            )
         for e in self.edge_index.values():
-            records.append({"op": "put_edge", "id": e.id, "type": e.type,
-                            "roles": e.roles, "_pos": e.created_at,
-                            "_restore": {"retired_at": e.retired_at}})
+            records.append(
+                {
+                    "op": "put_edge",
+                    "id": e.id,
+                    "type": e.type,
+                    "roles": e.roles,
+                    "_pos": e.created_at,
+                    "_restore": {"retired_at": e.retired_at},
+                }
+            )
         for rec in self.lineage:
             records.append({**rec, "op": "lineage", "_pos": rec.get("_pos", 0)})
         for pair in self.distinct_pairs:
@@ -120,14 +138,19 @@ class Store:
         for rec in self.dup_ledger:
             records.append({**rec, "op": "dup", "_pos": rec.get("_pos", 0)})
         for absorbed, survivor in self.aliases.items():
-            records.append({"op": "alias", "absorbed": absorbed,
-                            "survivor": survivor, "_pos": 0})
+            records.append(
+                {"op": "alias", "absorbed": absorbed, "survivor": survivor, "_pos": 0}
+            )
         run_path = self.path / "runs" / f"run-{self.position}.json"
-        run_path.write_text(json.dumps({
-            "position": self.position,
-            "id_counters": self.id_counters,
-            "records": records,
-        }))
+        run_path.write_text(
+            json.dumps(
+                {
+                    "position": self.position,
+                    "id_counters": self.id_counters,
+                    "records": records,
+                }
+            )
+        )
         self.wal_path.write_text("")
         return run_path
 
@@ -158,9 +181,14 @@ class Store:
     def _apply_to_memory(self, rec: dict, pos: int) -> None:
         op = rec["op"]
         if op == "put_node":
-            node = Node(id=rec["id"], cls=rec["cls"], props=dict(rec["props"]),
-                        state=rec.get("state", "atom"), created_at=pos,
-                        origin=rec.get("origin"))
+            node = Node(
+                id=rec["id"],
+                cls=rec["cls"],
+                props=dict(rec["props"]),
+                state=rec.get("state", "atom"),
+                created_at=pos,
+                origin=rec.get("origin"),
+            )
             node.last_confirmed = pos
             for k, v in rec.get("_restore", {}).items():
                 setattr(node, k, v)
@@ -177,8 +205,9 @@ class Store:
             if "state" in rec:
                 node.state = rec["state"]
         elif op == "put_edge":
-            edge = Edge(id=rec["id"], type=rec["type"], roles=dict(rec["roles"]),
-                        created_at=pos)
+            edge = Edge(
+                id=rec["id"], type=rec["type"], roles=dict(rec["roles"]), created_at=pos
+            )
             for k, v in rec.get("_restore", {}).items():
                 setattr(edge, k, v)
             self.edge_index[edge.id] = edge

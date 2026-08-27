@@ -33,8 +33,7 @@ from .parser import ParseError, parse
 from .schema import Schema
 from .verifier import VerifyError, verify
 
-READ_STMTS = (Find, Follow, GroupBy, Aggregate, Compute, Return, Continue,
-              SchemaStmt)
+READ_STMTS = (Find, Follow, GroupBy, Aggregate, Compute, Return, Continue, SchemaStmt)
 
 
 class Session:
@@ -50,7 +49,8 @@ class Session:
             stmts = parse(text)
             stale_env = {
                 name: typ if typ.startswith("prior:") else f"prior:{typ}"
-                for name, typ in self.type_env.items()}
+                for name, typ in self.type_env.items()
+            }
             plans = verify(stmts, self.schema, stale_env)
         except ParseError as e:
             return f"error: {e}\nnothing was executed."
@@ -65,22 +65,32 @@ class Session:
                 if isinstance(plan.stmt, READ_STMTS):
                     read_batch.append(plan)
                     if isinstance(plan.stmt, (Return, Continue, SchemaStmt)):
-                        outputs.append(execute_read(
-                            read_batch, self.store, self.schema,
-                            self.read_ctx, table))
+                        outputs.append(
+                            execute_read(
+                                read_batch,
+                                self.store,
+                                self.schema,
+                                self.read_ctx,
+                                table,
+                            )
+                        )
                         read_batch = []
                 else:
                     if read_batch:
-                        execute_read(read_batch, self.store, self.schema,
-                                     self.read_ctx, table)
+                        execute_read(
+                            read_batch, self.store, self.schema, self.read_ctx, table
+                        )
                         read_batch = []
                     self._export_bindings(table)
                     receipt = execute_write(plan.stmt, self.write_ctx)
                     outputs.append(receipt.render())
                 self.type_env = plan.binding_types
             if read_batch:
-                outputs.append(execute_read(read_batch, self.store, self.schema,
-                                            self.read_ctx, table))
+                outputs.append(
+                    execute_read(
+                        read_batch, self.store, self.schema, self.read_ctx, table
+                    )
+                )
         except (ExecError, WriteError) as e:
             outputs.append(f"error: {e}")
         self._export_bindings(table)

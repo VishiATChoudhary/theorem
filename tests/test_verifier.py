@@ -35,12 +35,12 @@ def test_unknown_class_suggests():
 
 
 def test_unknown_edge_suggests():
-    msg = err('find part as p\nfollow p supplied_byy source as s')
+    msg = err("find part as p\nfollow p supplied_byy source as s")
     assert "supplied_by" in msg and "line 2" in msg
 
 
 def test_unknown_role():
-    msg = err('find part as p\nfollow p supplied_by dest as s')
+    msg = err("find part as p\nfollow p supplied_by dest as s")
     assert "role" in msg and "source" in msg
 
 
@@ -80,11 +80,21 @@ def test_return_unbound_column():
 
 
 def test_health_columns_allowed_on_nodes():
-    verify(parse("find nodes where health.loss > 0.8 as w\nreturn w.class, w.health limit 10"), S)
+    verify(
+        parse(
+            "find nodes where health.loss > 0.8 as w\nreturn w.class, w.health limit 10"
+        ),
+        S,
+    )
 
 
 def test_dup_candidates_target():
-    verify(parse("find dup_candidates where class = supplier order by score as d\nreturn d.score"), S)
+    verify(
+        parse(
+            "find dup_candidates where class = supplier order by score as d\nreturn d.score"
+        ),
+        S,
+    )
 
 
 def test_write_bindings_thread_forward():
@@ -102,7 +112,9 @@ def test_assert_unknown_prop():
 
 
 def test_assert_edge_wrong_roles():
-    msg = err('assert part {name: "x"} as gs\nassert edge supplied_by(item: gs, target: gs)')
+    msg = err(
+        'assert part {name: "x"} as gs\nassert edge supplied_by(item: gs, target: gs)'
+    )
     assert "target" in msg
 
 
@@ -113,9 +125,16 @@ def test_derive_unknown_base():
 
 def test_subclass_valid_at_edge_role():
     from theorem.schema import ClassDef
+
     s = Schema.supply_chain()
-    s.classes["broker"] = ClassDef("broker", {"takes_inventory": "bool"},
-                                   base="supplier", status="provisional")
-    verify(parse('assert broker {name: "M", takes_inventory: true} as m\n'
-                 'assert part {name: "x", unit_cost: 1.0} as p\n'
-                 "assert edge supplied_by(item: p, source: m)"), s)
+    s.classes["broker"] = ClassDef(
+        "broker", {"takes_inventory": "bool"}, base="supplier", status="provisional"
+    )
+    verify(
+        parse(
+            'assert broker {name: "M", takes_inventory: true} as m\n'
+            'assert part {name: "x", unit_cost: 1.0} as p\n'
+            "assert edge supplied_by(item: p, source: m)"
+        ),
+        s,
+    )

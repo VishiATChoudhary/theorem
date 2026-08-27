@@ -7,9 +7,8 @@ A query builds one binding table. find seeds rows, follow extends them
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 import unicodedata
+from dataclasses import dataclass, field
 
 from ..ast_nodes import (
     Aggregate,
@@ -73,9 +72,17 @@ def _node_value(store: Store, schema: Schema, node_id: str, prop: str):
     if prop == "query_traffic":
         return node.traffic
     if prop == "lineage":
-        related = [rec for rec in store.lineage
-                   if node.id in (rec.get("survivor"), rec.get("absorbed"),
-                                  rec.get("parent"), rec.get("child"))]
+        related = [
+            rec
+            for rec in store.lineage
+            if node.id
+            in (
+                rec.get("survivor"),
+                rec.get("absorbed"),
+                rec.get("parent"),
+                rec.get("child"),
+            )
+        ]
         origin = f"origin {node.origin}; " if node.origin else ""
         return origin + f"{len(related)} lineage records"
     if prop == "health":
@@ -109,8 +116,12 @@ def _fold(v):
     Agents transliterate names; silently matching nothing is the worse
     failure mode. Numbers pass through untouched."""
     if isinstance(v, str):
-        return unicodedata.normalize("NFKD", v).encode(
-            "ascii", "ignore").decode().casefold()
+        return (
+            unicodedata.normalize("NFKD", v)
+            .encode("ascii", "ignore")
+            .decode()
+            .casefold()
+        )
     return v
 
 
@@ -160,29 +171,54 @@ def _candidate_rows(store: Store) -> list[dict]:
         pair = frozenset((store.resolve(rec["a"]), store.resolve(rec["b"])))
         if len(pair) < 2 or pair in store.distinct_pairs:
             continue  # already merged or asserted distinct
-        rows.append({"class": rec["cls"], "score": rec["score"],
-                     "a": rec["a"], "b": rec["b"],
-                     "evidence": rec.get("evidence", "")})
+        rows.append(
+            {
+                "class": rec["cls"],
+                "score": rec["score"],
+                "a": rec["a"],
+                "b": rec["b"],
+                "evidence": rec.get("evidence", ""),
+            }
+        )
     return rows
 
 
 def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
     name = stmt.name
+
+    def _dict_getter(row):
+        return lambda col: row[name].get(col[0])
+
     if stmt.target == "dup_candidates":
-        pool = [{name: rec, **{}} for rec in _candidate_rows(store)]
-        getter = lambda row: (lambda col: row[name].get(col[0]))
+        pool = [{name: rec} for rec in _candidate_rows(store)]
+        getter = _dict_getter
     elif stmt.target == "class":
-        pool = [{name: {"name": c.name, "status": c.status, "base": c.base,
-                        "quota": c.quota}} for c in schema.classes.values()]
-        getter = lambda row: (lambda col: row[name].get(col[0]))
+        pool = [
+            {
+                name: {
+                    "name": c.name,
+                    "status": c.status,
+                    "base": c.base,
+                    "quota": c.quota,
+                }
+            }
+            for c in schema.classes.values()
+        ]
+        getter = _dict_getter
     else:
         if stmt.target == "nodes":
             nodes = [n for n in store.nodes.values()]
         else:
             nodes = [n for n in store.nodes.values() if n.cls == stmt.target]
-        pool = [{name: n.id} for n in nodes
-                if n.retired_at is None and store.resolve(n.id) == n.id]
-        getter = lambda row: (lambda col: _first_prop(store, schema, row[name], col))
+        pool = [
+            {name: n.id}
+            for n in nodes
+            if n.retired_at is None and store.resolve(n.id) == n.id
+        ]
+
+        def getter(row):
+            return lambda col: _first_prop(store, schema, row[name], col)
+
     rows = [r for r in pool if _eval_cond(store, schema, stmt.cond, getter(r))]
     if stmt.order_by is not None:
         rows = _sorted_rows(rows, lambda r: getter(r)(stmt.order_by), stmt.desc)
@@ -204,8 +240,7 @@ def _sorted_rows(rows, key, desc: bool):
     """Sort with None values always LAST, in both directions."""
     present = [r for r in rows if key(r) is not None]
     missing = [r for r in rows if key(r) is None]
-    return sorted(present, key=lambda r: _sort_key(key(r)),
-                  reverse=desc) + missing
+    return sorted(present, key=lambda r: _sort_key(key(r)), reverse=desc) + missing
 
 
 def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
@@ -228,13 +263,21 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             if edge.id in row.get("__edges__", ()):
                 continue  # trail semantics: an edge instance is used once per row
             if stmt.cond and not _eval_cond(
-                    store, schema, stmt.cond,
-                    lambda col: _first_prop(store, schema, dst, col)):
+                store,
+                schema,
+                stmt.cond,
+                lambda col, dst=dst: _first_prop(store, schema, dst, col),
+            ):
                 continue
             touched.add(src_id)
             touched.add(dst)
-            new_rows.append({**row, stmt.name: dst,
-                             "__edges__": row.get("__edges__", ()) + (edge.id,)})
+            new_rows.append(
+                {
+                    **row,
+                    stmt.name: dst,
+                    "__edges__": (*row.get("__edges__", ()), edge.id),
+                }
+            )
     for nid in touched:
         blob = 1 if store.nodes[nid].state == "blob" else 0
         store.apply({"op": "traffic", "id": nid, "n": 1, "blob": blob})
@@ -260,8 +303,9 @@ def _agg_compute(op: str, values: list):
     raise ExecError(f"unknown aggregate {op}")
 
 
-def _global_aggregate(stmt: Aggregate, table: Table, store: Store,
-                      schema: Schema) -> None:
+def _global_aggregate(
+    stmt: Aggregate, table: Table, store: Store, schema: Schema
+) -> None:
     """Aggregate over a plain binding column: collapses the table to one row."""
     prop = stmt.col[1] if len(stmt.col) > 1 else None
     raw = [row.get(stmt.col[0]) for row in table.rows]
@@ -337,8 +381,9 @@ def _fmt(v) -> str:
 
 def _render_node_block(store: Store, schema: Schema, node_id: str) -> list[str]:
     node = store.nodes[store.resolve(node_id)]
-    shown = {k: v for k, v in node.props.items()
-             if k != "name" and not k.startswith("_")}
+    shown = {
+        k: v for k, v in node.props.items() if k != "name" and not k.startswith("_")
+    }
     props = ", ".join(f"{k}: {_fmt(v)}" for k, v in shown.items())
     name = node.props.get("name") or node.props.get("title") or node.id
     lines = [f'{node.cls} "{name}"' + (f" {{{props}}}" if props else "")]
@@ -346,7 +391,7 @@ def _render_node_block(store: Store, schema: Schema, node_id: str) -> list[str]:
         if edge.retired_at is not None:
             continue
         roles = list(edge.roles.items())
-        (subj_role, subj_id), (obj_role, obj_id) = roles[0], roles[1]
+        (_, subj_id), (_, obj_id) = roles[0], roles[1]
         subj_id, obj_id = store.resolve(subj_id), store.resolve(obj_id)
         if subj_id == node.id:
             other = store.nodes[obj_id]
@@ -359,17 +404,22 @@ def _render_node_block(store: Store, schema: Schema, node_id: str) -> list[str]:
     return lines
 
 
-def _serialize(store: Store, schema: Schema, stmt: Return, table: Table,
-               ctx: ReadContext) -> str:
-    incident = any(len(c) == 1 and table.rows and isinstance(
-        table.rows[0].get(c[0]), str) and table.rows[0][c[0]] in store.nodes
-        for c in stmt.cols)
+def _serialize(
+    store: Store, schema: Schema, stmt: Return, table: Table, ctx: ReadContext
+) -> str:
+    incident = any(
+        len(c) == 1
+        and table.rows
+        and isinstance(table.rows[0].get(c[0]), str)
+        and table.rows[0][c[0]] in store.nodes
+        for c in stmt.cols
+    )
 
     rows = table.rows
     if stmt.order_by is not None:
         rows = _sorted_rows(
-            rows, lambda r: _col_value(store, schema, r, stmt.order_by),
-            stmt.desc)
+            rows, lambda r: _col_value(store, schema, r, stmt.order_by), stmt.desc
+        )
     total = len(rows)
     if stmt.limit is not None:
         rows = rows[: stmt.limit]
@@ -389,14 +439,23 @@ def _serialize(store: Store, schema: Schema, stmt: Return, table: Table,
     else:
         header_cols = "columns: " + ", ".join(".".join(c) for c in stmt.cols)
         for row in rows:
-            blocks.append(", ".join(
-                _fmt(_col_value(store, schema, row, col)) for col in stmt.cols))
+            blocks.append(
+                ", ".join(
+                    _fmt(_col_value(store, schema, row, col)) for col in stmt.cols
+                )
+            )
 
     return _emit(blocks, total, stmt.budget, header_cols, ctx)
 
 
-def _emit(blocks: list[str], total: int, budget: int,
-          header_cols: str | None, ctx: ReadContext, already_shown: int = 0) -> str:
+def _emit(
+    blocks: list[str],
+    total: int,
+    budget: int,
+    header_cols: str | None,
+    ctx: ReadContext,
+    already_shown: int = 0,
+) -> str:
     shown = []
     used = 0
     overhead = 60 + (len(header_cols) if header_cols else 0)
@@ -407,7 +466,7 @@ def _emit(blocks: list[str], total: int, budget: int,
             break
         shown.append(block)
         used += cost
-    remaining = blocks[len(shown):]
+    remaining = blocks[len(shown) :]
     n_shown = len(shown)
     status = "complete" if not remaining else "budget hit"
     header = f"results: {already_shown + n_shown} of {total}, {status}"
@@ -416,10 +475,17 @@ def _emit(blocks: list[str], total: int, budget: int,
         out_lines.append(header_cols)
     out_lines.extend(shown)
     if remaining:
-        handle = ctx.register({"blocks": remaining, "total": total,
-                               "header_cols": header_cols,
-                               "shown": already_shown + n_shown})
-        out_lines.append(f"truncated: {len(remaining)} more. resume with: continue {handle}")
+        handle = ctx.register(
+            {
+                "blocks": remaining,
+                "total": total,
+                "header_cols": header_cols,
+                "shown": already_shown + n_shown,
+            }
+        )
+        out_lines.append(
+            f"truncated: {len(remaining)} more. resume with: continue {handle}"
+        )
     return "\n".join(out_lines)
 
 
@@ -431,14 +497,20 @@ def _compute(stmt: Compute, table: Table, store: Store, schema: Schema) -> None:
             if left is None or right is None:
                 raise ExecError(
                     f"compute same: {'.'.join(stmt.left if left is None else stmt.right)} "
-                    "is unset; cannot compare a missing value")
+                    "is unset; cannot compare a missing value"
+                )
             row[stmt.name] = _fold(left) == _fold(right)
             continue
-        if not isinstance(left, (int, float)) or not isinstance(right, (int, float)) \
-                or isinstance(left, bool) or isinstance(right, bool):
+        if (
+            not isinstance(left, (int, float))
+            or not isinstance(right, (int, float))
+            or isinstance(left, bool)
+            or isinstance(right, bool)
+        ):
             raise ExecError(
                 f"compute {stmt.op} needs numbers; got "
-                f"{type(left).__name__} and {type(right).__name__}")
+                f"{type(left).__name__} and {type(right).__name__}"
+            )
         if stmt.op == "plus":
             row[stmt.name] = left + right
         elif stmt.op == "minus":
@@ -469,8 +541,13 @@ def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> No
         raise ExecError(f"cannot run {type(stmt).__name__} in a read pipeline")
 
 
-def execute_read(plans: list[Plan], store: Store, schema: Schema,
-                 ctx: ReadContext, table: Table | None = None) -> str:
+def execute_read(
+    plans: list[Plan],
+    store: Store,
+    schema: Schema,
+    ctx: ReadContext,
+    table: Table | None = None,
+) -> str:
     if table is None:
         table = Table()
     output: list[str] = []
@@ -482,9 +559,16 @@ def execute_read(plans: list[Plan], store: Store, schema: Schema,
             payload = ctx.continuations.pop(stmt.handle, None)
             if payload is None:
                 raise ExecError(f"unknown continuation handle {stmt.handle}")
-            output.append(_emit(payload["blocks"], payload["total"], stmt.budget,
-                                payload["header_cols"], ctx,
-                                already_shown=payload["shown"]))
+            output.append(
+                _emit(
+                    payload["blocks"],
+                    payload["total"],
+                    stmt.budget,
+                    payload["header_cols"],
+                    ctx,
+                    already_shown=payload["shown"],
+                )
+            )
         elif isinstance(stmt, SchemaStmt):
             output.append(schema.render())
         else:
@@ -506,16 +590,21 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
             if stmt.order_by is not None:
                 rows = _sorted_rows(
                     rows,
-                    lambda r: _col_value(store, schema, r, stmt.order_by),
-                    stmt.desc)
+                    lambda r, stmt=stmt: _col_value(store, schema, r, stmt.order_by),
+                    stmt.desc,
+                )
             if stmt.limit is not None:
                 rows = rows[: stmt.limit]
+
             def plain(v):
                 if isinstance(v, str) and v in store.nodes:
                     return store.nodes[v].props.get("name", v)
                 return v
-            rows_out = [[plain(_col_value(store, schema, r, col))
-                         for col in stmt.cols] for r in rows]
+
+            rows_out = [
+                [plain(_col_value(store, schema, r, col)) for col in stmt.cols]
+                for r in rows
+            ]
         elif isinstance(stmt, SchemaStmt):
             continue
         else:
