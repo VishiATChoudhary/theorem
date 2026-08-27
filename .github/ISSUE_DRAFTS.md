@@ -79,3 +79,18 @@ Implement the read barrier (or reject the clause until implemented) and add an L
 
 **24. Retired nodes accepted by write verbs; subclass follow checks; duplicate prop keys** `verifier` `engine`
 `retire`/`flag`/`merge` accept already-retired targets. `follow` rejects subclass bindings that edge roles accept. Duplicate keys in props/mappings silently keep the last.
+
+**25. Attachment containment: symlinked attachments dir and TOCTOU** `security` `engine`
+If `db/attachments` is itself a symlink pointing outside the db, the resolved containment root moves with it; there is also a check-then-open race. Consider `os.path.realpath` on the parent db dir, `O_NOFOLLOW`, or documenting the trust model (db dir is user-controlled local state).
+
+**26. Legacy WAL records without `_pos` double-apply after an old-format snapshot crash** `engine` `migration`
+Records written before v0.1.0 carry no `_pos`; a crash between snapshot and truncate replays them twice. Only affects pre-release databases; document or add a one-shot migration.
+
+**27. Verify-time quota is unenforceable; a verified program can exceed a provisional quota mid-execution** `verifier` `semantics`
+501 asserts into a derived class all verify (the verifier has no store access) and execution stops at 500, contradicting "partial execution never happens" for this one guard. Options: count asserts per class at verify time against store count passed in, or reclassify quota as a runtime-only guard in the spec.
+
+**28. Folding drops meaning-bearing combining marks in some scripts** `semantics` `docs`
+Devanagari nukta (क vs क़) folds equal by design of combining-mark stripping. Document the limitation in the spec's string-matching section; revisit with script-aware folding if it bites real users.
+
+**29. WAL property test gaps** `testing`
+The crash-recovery property uses only idempotent put_node records and never snapshots, so `_pos`-skip logic and non-idempotent double-apply are untested paths; the budget property permits over-budget output whenever truncation text appears. Strengthen both.

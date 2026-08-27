@@ -217,6 +217,70 @@ def test_empty_table_not_resurrected(sess):
     assert "results: 0 of 0" in out
 
 
+# ---- seeded flag must reset between read batches in one run()
+
+
+def test_seeded_resets_across_read_batches(sess):
+    sess.run('assert part {name: "bolt", unit_cost: 1.0} as b')
+    out = sess.run(
+        "find product as missing\nreturn missing.name\nfind part as p\nreturn p.name"
+    )
+    assert "bolt" in out
+
+
+# ---- fold handles non-decomposing Latin letters (transliteration promise)
+
+
+def test_fold_turkish_and_polish_letters():
+    from theorem.engine.text import fold
+
+    assert fold("I") == fold("ı") == "i"  # noqa: RUF001
+    assert fold("Łódź") == fold("Lodz")
+
+
+# ---- dedup must use the same folding as the executor
+
+
+def test_dedup_cjk_names_not_false_candidates(sess):
+    sess.run('assert supplier {name: "北京", country: "CN"} as a')
+    out = sess.run('assert supplier {name: "東京", country: "JP"} as b')
+    assert "dup candidates" not in out
+
+
+def test_dedup_accent_only_difference_is_candidate(sess):
+    sess.run('assert supplier {name: "Résumé", country: "FR"} as a')
+    out = sess.run('assert supplier {name: "Resume", country: "FR"} as b')
+    assert "dup candidates" in out
+
+
+# ---- compact props are verified like assert props
+
+
+def test_compact_unknown_prop_rejected(sess):
+    sess.run('assert part {name: "bolt", unit_cost: 1.0} as b')
+    out = sess.run("find part as p\ncompact p as c {not_a_prop: 1}")
+    assert "nothing was executed" in out
+
+
+def test_compact_wrong_literal_type_rejected(sess):
+    sess.run('assert part {name: "bolt", unit_cost: 1.0} as b')
+    out = sess.run("find part as p\ncompact p as c {name: 123, unit_cost: 1.0}")
+    assert "nothing was executed" in out
+
+
+# ---- derive: durable record lands before the live schema mutates
+
+
+def test_derive_schema_unchanged_if_store_apply_fails(sess, monkeypatch):
+    def boom(record):
+        raise RuntimeError("disk full")
+
+    monkeypatch.setattr(sess.store, "apply", boom)
+    out = sess.run("derive class gadget from product with {x: int}")
+    assert "internal error" in out
+    assert "gadget" not in sess.schema.classes
+
+
 # ---- attach references must not escape the attachments directory
 
 

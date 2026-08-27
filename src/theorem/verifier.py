@@ -354,11 +354,21 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             _check_class(schema, into_cls, line)
             _bind(env, name, into_cls, line)
 
-        case Compact(src=src, name=name):
+        case Compact(src=src, name=name, props=cprops):
             if src not in env:
                 raise VerifyError(line, f'"{src}" is not bound.{_suggest(src, env)}')
             typ = env[src]
             typ = typ.removeprefix("prior:")
+            if typ in schema.classes:
+                all_props = schema.all_props(typ)
+                for prop, value in cprops.items():
+                    if prop not in all_props:
+                        raise VerifyError(
+                            line,
+                            f'unknown property "{prop}" on class {typ}.'
+                            f"{_suggest(prop, all_props)}",
+                        )
+                    _check_literal_type(value, all_props[prop], prop, typ, line)
             _bind(env, name, typ, line)
 
         case Retire(ref=ref) | Flag(ref=ref):
@@ -387,7 +397,11 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             from .schema import ClassDef
 
             schema.classes[name] = ClassDef(
-                name=name, props=dict(dprops), base=base, status="provisional"
+                name=name,
+                props=dict(dprops),
+                base=base,
+                status="provisional",
+                quota=500,  # keep verify-time staging identical to execution
             )
 
         case SchemaStmt():

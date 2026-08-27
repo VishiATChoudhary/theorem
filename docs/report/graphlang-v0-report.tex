@@ -371,7 +371,7 @@ Each write verb is a function from a verified statement and a write context (sto
 
 \subsection{Session and CLI}
 
-The session facade parses, verifies with the persistent typing environment, routes statement runs to the read or write executor, threads read bindings into the write environment (so \texttt{compact} can consume a \texttt{find}), and converts every error class into agent-readable text ending in \texttt{nothing was executed.} where applicable. The CLI runs \texttt{.gl} files or an interactive REPL against a database directory.
+The session facade parses, verifies with the persistent typing environment, routes statement runs to the read or write executor, threads read bindings into the write environment (so \texttt{compact} can consume a \texttt{find}), and converts every error class into agent-readable text ending in \texttt{nothing was executed.} where applicable. The CLI runs \texttt{.thm} files or an interactive REPL against a database directory.
 
 %======================================================================
 \section{Development methodology}\label{sec:method}

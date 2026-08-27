@@ -409,13 +409,8 @@ def _flag(stmt: Flag, ctx: WriteContext) -> Receipt:
 
 def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
     schema = ctx.schema
-    schema.classes[stmt.name] = ClassDef(
-        name=stmt.name,
-        props=dict(stmt.props),
-        base=stmt.base,
-        status="provisional",
-        quota=PROVISIONAL_QUOTA,
-    )
+    # durable record FIRST: if the append fails, the live schema must not
+    # hold a class that would silently vanish on restart
     pos = ctx.store.apply(
         {
             "op": "lineage",
@@ -423,7 +418,15 @@ def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
             "child": stmt.name,
             "parent": stmt.base,
             "props": stmt.props,
+            "quota": PROVISIONAL_QUOTA,
         }
+    )
+    schema.classes[stmt.name] = ClassDef(
+        name=stmt.name,
+        props=dict(stmt.props),
+        base=stmt.base,
+        status="provisional",
+        quota=PROVISIONAL_QUOTA,
     )
     lines = [
         f"receipt: class {stmt.name} provisional at @t-{pos}",

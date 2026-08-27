@@ -7,7 +7,6 @@ A query builds one binding table. find seeds rows, follow extends them
 
 from __future__ import annotations
 
-import unicodedata
 from dataclasses import dataclass, field
 
 from ..ast_nodes import (
@@ -27,6 +26,7 @@ from ..schema import Schema
 from ..verifier import Plan
 from . import health
 from .storage import Store
+from .text import fold
 
 TOKEN_DIVISOR = 4
 
@@ -113,19 +113,10 @@ def _col_value(store: Store, schema: Schema, row: dict, col: Col):
 
 
 def _fold(v):
-    """Agent-friendly string normalization: casefold + strip accents.
+    """Agent-friendly string normalization (shared with dedup; see text.py).
     Agents transliterate names; silently matching nothing is the worse
     failure mode. Numbers pass through untouched."""
-    if isinstance(v, str):
-        # Unicode compatibility caseless matching (NFKD∘casefold twice), then
-        # strip combining marks. The double pass is required for idempotence:
-        # NFKD can emit new cased characters (e.g. math-script capital A -> 'A'). Stripping via
-        # ascii-encode instead would delete every non-Latin script, collapsing
-        # all CJK/Cyrillic/etc. strings to "" and making them compare equal.
-        s = unicodedata.normalize("NFKD", v.casefold())
-        s = unicodedata.normalize("NFKD", s.casefold())
-        return "".join(c for c in s if not unicodedata.combining(c))
-    return v
+    return fold(v)
 
 
 def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> bool:

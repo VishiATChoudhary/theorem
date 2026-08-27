@@ -95,6 +95,10 @@ class Session:
                             )
                         )
                         read_batch = []
+                        # a return closes the pipeline; the next batch's
+                        # first find reseeds instead of crossing with an
+                        # empty (or stale) table
+                        table.seeded = False
                 else:
                     if read_batch:
                         execute_read(

@@ -6,16 +6,16 @@ run via sweep()). System detects, agent resolves.
 from __future__ import annotations
 
 import difflib
-import re
 
 from .storage import Node, Store
+from .text import norm_name
 
 SIM_THRESHOLD = 0.85
 BLOCK_PREFIX_LEN = 4
 
 
 def _norm(name: object) -> str:
-    return re.sub(r"[^a-z0-9]", "", str(name).casefold())
+    return norm_name(name)
 
 
 def block_key(cls: str, name: object) -> str:
