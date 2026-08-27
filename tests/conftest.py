@@ -1,7 +1,7 @@
 import pytest
 
-from graphlang.engine.storage import Store
-from graphlang.schema import Schema
+from theorem.engine.storage import Store
+from theorem.schema import Schema
 
 
 @pytest.fixture

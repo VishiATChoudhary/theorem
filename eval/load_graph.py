@@ -1,4 +1,4 @@
-"""Load a CypherBench simplekg graph + schema into a GraphLang Session.
+"""Load a CypherBench simplekg graph + schema into a theorem Session.
 
 Deterministic schema derivation rules (documented for reproducibility):
 - Node class name = entity label, lowercased (Team -> team).
@@ -17,8 +17,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from graphlang.engine.storage import Store
-from graphlang.schema import ClassDef, EdgeDef, Schema
+from theorem.engine.storage import Store
+from theorem.schema import ClassDef, EdgeDef, Schema
 
 TYPE_MAP = {"int": "int", "float": "float", "str": "str", "bool": "bool",
             "date": "str"}

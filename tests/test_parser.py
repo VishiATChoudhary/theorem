@@ -1,6 +1,6 @@
 import pytest
 
-from graphlang.ast_nodes import (
+from theorem.ast_nodes import (
     Aggregate,
     AssertEdge,
     AssertNode,
@@ -19,7 +19,7 @@ from graphlang.ast_nodes import (
     Return,
     SchemaStmt,
 )
-from graphlang.parser import ParseError, parse
+from theorem.parser import ParseError, parse
 
 Q1_TEXT = """\
 find part where name = "lithium cell" as cell

@@ -1,4 +1,4 @@
-"""Command-line entry: run a .gl file or an interactive REPL against a db path."""
+"""Command-line entry: run a .thm file or an interactive REPL against a db path."""
 
 from __future__ import annotations
 
@@ -11,9 +11,9 @@ from .session import Session
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="graphlang")
-    ap.add_argument("file", nargs="?", help="a .gl program to run")
-    ap.add_argument("--db", default=".graphlang-db", help="database directory")
+    ap = argparse.ArgumentParser(prog="theorem")
+    ap.add_argument("file", nargs="?", help="a .thm program to run")
+    ap.add_argument("--db", default=".theorem-db", help="database directory")
     ap.add_argument("--repl", action="store_true", help="interactive session")
     args = ap.parse_args(argv)
 
@@ -22,7 +22,7 @@ def main(argv: list[str] | None = None) -> int:
         print(session.run(Path(args.file).read_text()))
         return 0
     if args.repl:
-        print("graphlang v0. one statement per line; blank line to execute a block; ctrl-d to exit.")
+        print("theorem v0. one statement per line; blank line to execute a block; ctrl-d to exit.")
         block: list[str] = []
         try:
             for line in sys.stdin:

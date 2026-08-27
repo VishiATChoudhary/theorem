@@ -2,7 +2,7 @@
 
 Condition A: text2cypher, matching CypherBench's zero-shot setup (schema
 in their JSON format plus the question).
-Condition B: GraphLang grammar prompting (compact grammar, worked
+Condition B: theorem grammar prompting (compact grammar, worked
 examples, live schema render).
 Both prompts demand raw query text only, no markdown fences.
 """
@@ -11,10 +11,10 @@ from __future__ import annotations
 
 import json
 
-from graphlang.schema import Schema
+from theorem.schema import Schema
 
 GRAPHLANG_TUTORIAL = """\
-You write queries in GraphLang, a line-oriented graph query language.
+You write queries in theorem, a line-oriented graph query language.
 
 Rules:
 - One operation per line. Every line binds its result to a name with `as`.
@@ -132,12 +132,12 @@ return others.name
 """
 
 
-def graphlang_prompt(schema: Schema, question: str) -> str:
+def theorem_prompt(schema: Schema, question: str) -> str:
     return (
         f"{GRAPHLANG_TUTORIAL}\n"
         f"Live schema (classes with properties, edges with roles):\n"
         f"{schema.render()}\n\n"
-        f"Write a single GraphLang query answering the question.\n"
+        f"Write a single theorem query answering the question.\n"
         f"Output ONLY the query text, no explanation, no code fences.\n\n"
         f"Question: {question}\n"
     )

@@ -1,7 +1,7 @@
-from graphlang.engine.executor import ReadContext, execute_read
-from graphlang.parser import parse
-from graphlang.schema import Schema
-from graphlang.verifier import verify
+from theorem.engine.executor import ReadContext, execute_read
+from theorem.parser import parse
+from theorem.schema import Schema
+from theorem.verifier import verify
 
 S = Schema.supply_chain()
 
@@ -187,7 +187,7 @@ compute a.country same b.country as x
 return x
 """
     import pytest as _pytest
-    from graphlang.engine.executor import ExecError
+    from theorem.engine.executor import ExecError
     with _pytest.raises(ExecError):
         run(text, fixture_store)
 

@@ -1,4 +1,4 @@
-"""Tokenizer and recursive-descent parser for GraphLang.
+"""Tokenizer and recursive-descent parser for theorem.
 
 Line-oriented: one statement per logical line. A physical line starting
 with whitespace continues the previous logical line. Lines whose first

@@ -1,10 +1,10 @@
 import pytest
 
-from graphlang.engine.executor import ReadContext, execute_read
-from graphlang.engine.writes import WriteContext, execute_write
-from graphlang.parser import parse
-from graphlang.schema import Schema
-from graphlang.verifier import verify
+from theorem.engine.executor import ReadContext, execute_read
+from theorem.engine.writes import WriteContext, execute_write
+from theorem.parser import parse
+from theorem.schema import Schema
+from theorem.verifier import verify
 
 
 @pytest.fixture
@@ -149,7 +149,7 @@ def test_derive_similar_class_note(wctx):
 
 
 def test_merge_prefer_source_neither_matches_errors(wctx):
-    from graphlang.engine.writes import WriteError
+    from theorem.engine.writes import WriteError
     a, b = wctx.store.ids["ionix_kr"], wctx.store.ids["ionix_jp"]
     plans = verify(parse(f"merge {a}, {b} prefer source doc:nowhere"), wctx.schema)
     with pytest.raises(WriteError):
@@ -157,7 +157,7 @@ def test_merge_prefer_source_neither_matches_errors(wctx):
 
 
 def test_self_merge_error_suggests_dup_candidate(wctx):
-    from graphlang.engine.writes import WriteError
+    from theorem.engine.writes import WriteError
     # identical re-assert: candidate lands in ledger, binding points at new node
     run_writes('assert supplier {name: "Volta Chem GmbH", country: "DE"} as v1', wctx)
     run_writes('assert supplier {name: "Volta Chem GmbH", country: "DE"} as v1x', wctx)

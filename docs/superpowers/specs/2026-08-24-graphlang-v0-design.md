@@ -1,3 +1,5 @@
+> Historical note (2026-08-27): the language described here as "GraphLang" was renamed to **theorem** (lowercase) before open-source launch. Text kept as written.
+
 # GraphLang v0 Design Spec
 
 Working name: **GraphLang** (final name TBD; nothing depends on it). File extension `.gl`, Python package `graphlang`.

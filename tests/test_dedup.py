@@ -1,4 +1,4 @@
-from graphlang.engine import dedup
+from theorem.engine import dedup
 
 
 def test_block_key_normalizes():

@@ -1,7 +1,7 @@
-from graphlang.engine import health
-from graphlang.engine.executor import ReadContext, execute_read
-from graphlang.parser import parse
-from graphlang.verifier import verify
+from theorem.engine import health
+from theorem.engine.executor import ReadContext, execute_read
+from theorem.parser import parse
+from theorem.verifier import verify
 
 
 def test_fresh_node_healthy(fixture_store):

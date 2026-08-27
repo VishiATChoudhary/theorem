@@ -4,5 +4,5 @@ __pycache__/
 .venv/
 eval/data/
 eval/out/cache/
-.graphlang-db/
+.theorem-db/
 eval/out/db-*/

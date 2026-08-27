@@ -1,5 +1,5 @@
-from graphlang.schema import Schema
-from graphlang.session import Session
+from theorem.schema import Schema
+from theorem.session import Session
 
 
 def make_session(tmp_path):

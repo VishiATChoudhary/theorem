@@ -2,8 +2,8 @@
  "graph": "nba",
  "model": "claude-haiku-4-5-20251001",
  "n": 60,
- "slice_note": "categories excluded (not expressible in GraphLang v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
- "graphlang": {
+ "slice_note": "categories excluded (not expressible in theorem v0): union, optional-match, time-sensitive/edge-properties; both conditions ran on the same expressible slice",
+ "theorem": {
   "overall": 98.3,
   "n": 60,
   "multi-hop": 96.0,
@@ -25,7 +25,7 @@
  },
  "cypher_mode": "live",
  "details": {
-  "graphlang": [
+  "theorem": [
    {
     "qid": "2e2c70f0-7a57-4aa8-89d6-459d45cfb643",
     "ok": true,

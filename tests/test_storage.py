@@ -1,4 +1,4 @@
-from graphlang.engine.storage import Store
+from theorem.engine.storage import Store
 
 
 def put_supplier(store, name, country="DE"):

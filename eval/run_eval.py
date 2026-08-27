@@ -1,4 +1,4 @@
-"""CypherBench slice eval: GraphLang grammar-prompting vs text2cypher.
+"""CypherBench slice eval: theorem grammar-prompting vs text2cypher.
 
 Both conditions use the same model, the same questions, and one repair
 retry on execution error. Scoring is execution accuracy: normalized
@@ -27,17 +27,17 @@ from collections import defaultdict
 from pathlib import Path
 
 from eval.load_graph import derive_schema, load
-from eval.prompts import cypher_prompt, graphlang_prompt, repair_prompt
-from graphlang.engine.executor import ReadContext, count_tokens, execute_read, execute_rows
-from graphlang.engine.storage import Store
-from graphlang.parser import ParseError, parse
-from graphlang.verifier import VerifyError, verify
+from eval.prompts import cypher_prompt, theorem_prompt, repair_prompt
+from theorem.engine.executor import ReadContext, count_tokens, execute_read, execute_rows
+from theorem.engine.storage import Store
+from theorem.parser import ParseError, parse
+from theorem.verifier import VerifyError, verify
 
 DATA = Path(__file__).parent / "data"
 OUT = Path(__file__).parent / "out"
 CACHE = OUT / "cache"
 
-# Question categories expressible in GraphLang v0 (no union, no optional
+# Question categories expressible in theorem v0 (no union, no optional
 # match, no edge-property filters). Both conditions run on the SAME slice.
 EXPRESSIBLE = {
     "basic_(n)", "basic_(n*)", "basic_(n)-(m0)", "basic_(n)-(m0*)",
@@ -47,8 +47,8 @@ EXPRESSIBLE = {
 MULTIHOP = {"basic_(n)-(m0)-(m1*)", "basic_(n)-(m0*),(n)-(m1*)",
             "special_three-node-groupby"}
 
-NEO4J_CONTAINER = "graphlang-eval-neo4j"
-NEO4J_AUTH = ("neo4j", "graphlangeval1")
+NEO4J_CONTAINER = "theorem-eval-neo4j"
+NEO4J_AUTH = ("neo4j", "theoremeval1")
 PUBLISHED_BASELINES = {
     "claude-3.5-sonnet": 61.6, "gpt-4o": 60.2,
 }
@@ -121,28 +121,28 @@ def rows_match(got, gold) -> bool:
     return norm_rows(got) == norm_rows(gold)
 
 
-# ---- condition B: GraphLang -------------------------------------------
+# ---- condition B: theorem -------------------------------------------
 
-def run_graphlang(query: str, store: Store, schema) -> list[list]:
+def run_theorem(query: str, store: Store, schema) -> list[list]:
     plans = verify(parse(query), schema)
     return execute_rows(plans, store, schema)
 
 
-def eval_graphlang(question: dict, store: Store, schema, model: str) -> dict:
+def eval_theorem(question: dict, store: Store, schema, model: str) -> dict:
     q = question["nl_question"]
     qid = question["qid"]
-    prompt = graphlang_prompt(schema, q)
+    prompt = theorem_prompt(schema, q)
     query = llm(prompt, model, f"gl-{qid}")
     syntax_ok, error = True, None
     try:
-        rows = run_graphlang(query, store, schema)
+        rows = run_theorem(query, store, schema)
     except (ParseError, VerifyError, Exception) as e:
         syntax_ok = False
         error = str(e)
         retry = llm(prompt + "\n" + repair_prompt(query, error), model, f"gl-{qid}-r")
         query = retry
         try:
-            rows = run_graphlang(retry, store, schema)
+            rows = run_theorem(retry, store, schema)
             syntax_ok = True
             error = None
         except Exception as e2:
@@ -198,7 +198,7 @@ LAST_RAW_RESULT = {"text": ""}
 def neo4j_query(cypher: str, timeout: int = 60) -> list[list]:
     """Run cypher via cypher-shell, parse its output rows. The raw textual
     output (what an agent would actually receive, header line included) is
-    kept in LAST_RAW_RESULT for token accounting comparable to GraphLang's
+    kept in LAST_RAW_RESULT for token accounting comparable to theorem's
     rendered output."""
     with tempfile.NamedTemporaryFile("w", suffix=".cypher", delete=False) as f:
         f.write(cypher if cypher.rstrip().endswith(";") else cypher + ";")
@@ -341,7 +341,7 @@ def eval_cypher(question: dict, cb_schema: dict, model: str) -> dict:
     gold = json.loads(question["answer_json"])
     ok = rows_match(rows, gold)
     # comparable accounting: the full textual result each system hands the
-    # agent (cypher-shell output with its header, like GraphLang's render)
+    # agent (cypher-shell output with its header, like theorem's render)
     tokens = count_tokens(LAST_RAW_RESULT["text"])
     return {"qid": qid, "ok": ok, "syntax_ok": syntax_ok, "query": query,
             "rows": rows[:20], "gold": gold[:20], "result_tokens": tokens}
@@ -416,7 +416,7 @@ def main() -> None:
 
     gl_results = []
     for i, q in enumerate(questions):
-        r = eval_graphlang(q, store, schema, args.model)
+        r = eval_theorem(q, store, schema, args.model)
         gl_results.append(r)
         print(f"[gl {i+1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}")
 
@@ -433,17 +433,17 @@ def main() -> None:
             cy_results.append(r)
             print(f"[cy {i+1}/{len(questions)}] {'OK ' if r['ok'] else 'MISS'} {q['nl_question'][:70]}")
 
-    excluded_note = ("categories excluded (not expressible in GraphLang v0): "
+    excluded_note = ("categories excluded (not expressible in theorem v0): "
                      "union, optional-match, time-sensitive/edge-properties; "
                      "both conditions ran on the same expressible slice")
     out = {
         "graph": args.graph, "model": args.model, "n": len(questions),
         "slice_note": excluded_note,
-        "graphlang": summarize(gl_results, questions),
+        "theorem": summarize(gl_results, questions),
         "text2cypher": summarize(cy_results, questions) if cy_results else
             {"mode": "published", **PUBLISHED_BASELINES},
         "cypher_mode": cypher_mode,
-        "details": {"graphlang": gl_results, "text2cypher": cy_results},
+        "details": {"theorem": gl_results, "text2cypher": cy_results},
     }
     OUT.mkdir(parents=True, exist_ok=True)
     name = f"results-{args.tag}.json" if args.tag else "results.json"

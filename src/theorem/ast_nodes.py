@@ -1,4 +1,4 @@
-"""AST node definitions for GraphLang statements.
+"""AST node definitions for theorem statements.
 
 Col is a tuple of dotted path segments: ("sups", "name") for sups.name.
 Cond is a list of (joiner, Clause) pairs; the first joiner is always "and".

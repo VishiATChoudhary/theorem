@@ -1,10 +1,10 @@
 import json
 
 from eval.load_graph import derive_schema, load, role_names
-from graphlang.engine.executor import ReadContext, execute_read
-from graphlang.engine.storage import Store
-from graphlang.parser import parse
-from graphlang.verifier import verify
+from theorem.engine.executor import ReadContext, execute_read
+from theorem.engine.storage import Store
+from theorem.parser import parse
+from theorem.verifier import verify
 
 MINI_SCHEMA = {
     "name": "mini",

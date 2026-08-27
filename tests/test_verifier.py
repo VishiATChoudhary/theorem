@@ -1,8 +1,8 @@
 import pytest
 
-from graphlang.parser import parse
-from graphlang.schema import Schema
-from graphlang.verifier import VerifyError, verify
+from theorem.parser import parse
+from theorem.schema import Schema
+from theorem.verifier import VerifyError, verify
 
 S = Schema.supply_chain()
 
@@ -112,7 +112,7 @@ def test_derive_unknown_base():
 
 
 def test_subclass_valid_at_edge_role():
-    from graphlang.schema import ClassDef
+    from theorem.schema import ClassDef
     s = Schema.supply_chain()
     s.classes["broker"] = ClassDef("broker", {"takes_inventory": "bool"},
                                    base="supplier", status="provisional")

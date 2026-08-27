@@ -1,4 +1,4 @@
-"""Spider (radar) diagram of eval results: GraphLang vs text2cypher.
+"""Spider (radar) diagram of eval results: theorem vs text2cypher.
 
 Axes: overall EX accuracy, multi-hop EX, 1-hop EX, syntax validity, and
 result token economy (normalized inverse of mean result tokens: fewer
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 
 OUT = Path(__file__).parent / "out"
 
-SERIES_COLORS = {"GraphLang": "#2a78d6", "text2cypher": "#eb6834"}
+SERIES_COLORS = {"theorem": "#2a78d6", "text2cypher": "#eb6834"}
 SURFACE = "#fcfcfb"
 TEXT_PRIMARY = "#1a1a19"
 TEXT_SECONDARY = "#5f5e58"
@@ -41,7 +41,7 @@ def token_economy(mean_tokens: float | None, worst: float) -> float:
 
 
 def vectors(results: dict) -> dict[str, list[float]]:
-    gl, cy = results["graphlang"], results["text2cypher"]
+    gl, cy = results["theorem"], results["text2cypher"]
     worst = max(t for t in (gl.get("mean_result_tokens"),
                             cy.get("mean_result_tokens")) if t) * 1.25
 
@@ -49,7 +49,7 @@ def vectors(results: dict) -> dict[str, list[float]]:
         return [s["overall"], s["multi-hop"], s["1-hop"],
                 s["syntax_validity"],
                 token_economy(s.get("mean_result_tokens"), worst)]
-    return {"GraphLang": vec(gl), "text2cypher": vec(cy)}
+    return {"theorem": vec(gl), "text2cypher": vec(cy)}
 
 
 def draw(ax, results: dict) -> None:
@@ -98,7 +98,7 @@ def main() -> None:
         draw(ax, results)
 
     r0 = all_results[0]
-    fig.suptitle("GraphLang vs text2cypher, CypherBench slice "
+    fig.suptitle("theorem vs text2cypher, CypherBench slice "
                  f'({r0["graph"]}, n={r0["n"]})',
                  color=TEXT_PRIMARY, fontsize=13, y=1.0)
     fig.text(0.5, 0.012, r0.get("slice_note", ""), ha="center",
