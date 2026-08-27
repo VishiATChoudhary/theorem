@@ -6,3 +6,6 @@ eval/data/
 eval/out/cache/
 .theorem-db/
 eval/out/db-*/
+site/
+dist/
+.hypothesis/

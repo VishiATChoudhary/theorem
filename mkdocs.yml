@@ -1,0 +1,44 @@
+site_name: theorem
+site_description: A graph language agents can't get wrong. Every query verified whole before it runs.
+site_url: https://vishiatchoudhary.github.io/theorem/
+repo_url: https://github.com/VishiATChoudhary/theorem
+repo_name: VishiATChoudhary/theorem
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+  features:
+    - navigation.sections
+    - navigation.footer
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Tutorial: tutorial.md
+  - Language spec: language-spec.md
+  - Benchmarks: benchmarks.md
+  - Why not Cypher?: why-not-cypher.md
+
+exclude_docs: |
+  superpowers/
+  report/
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - tables
+  - attr_list

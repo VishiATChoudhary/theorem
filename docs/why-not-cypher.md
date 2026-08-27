@@ -1,0 +1,33 @@
+# Why not Cypher? Won't better models fix it?
+
+The obvious objection to theorem is that model progress will dissolve it: wait a generation or two, and frontier models will write Cypher well enough that a new language is pointless. The objection deserves a direct answer, because the evidence, ours and the field's, runs the other way. This page condenses Section 7 of the [technical report](https://github.com/VishiATChoudhary/theorem/blob/main/docs/report/graphlang-v0-report.pdf).
+
+## Scaling has had two years and has not delivered
+
+Between late 2024 and mid 2026 the frontier advanced from Claude 3.5 Sonnet and GPT-4o to Claude Opus 4.8 and GPT-5.5, several major model generations. Cypher generation did not move with it. Text2GraphQuery-Bench (Feb 2026, arXiv 2602.11745) evaluates exactly these newest models: 51.2% Cypher execution accuracy for Claude Opus 4.8 and 53.3% for GPT-5.5 zero-shot, rising only to 57.6% and 55.3% few-shot. On the hardest query tier, GPT-5.5 falls to 19.1% zero-shot.
+
+Our own benchmark is a live second data point: text2cypher with Sonnet 5 (71.7%) is no better than with the far smaller Haiku 4.5 (73.3%), while switching the *language* moved both models twenty-plus points overall and thirty-plus on multi-hop. Model scaling is flat on this task; language design is not. Dedicated Cypher repair-and-triage systems were still being published in June 2026 (CYGNET, arXiv 2606.04645), which is not what an about-to-be-solved problem looks like.
+
+## The reason it stays flat is structural: corpus, not capacity
+
+Text2GraphQuery-Bench's sharpest finding: a fine-tuned 8B model matches or exceeds the newest frontier models zero-shot on graph query generation. Unfamiliarity with the language, not model capacity, is the barrier. Accuracy across query languages tracks training-corpus size, not language quality (arXiv 2411.05521), which is why GQL, the new ISO standard, benchmarks *worse* than Cypher despite being a cleaner language.
+
+This has a consequence the objection misses: even a model that mastered every Cypher idiom on GitHub has never seen *your* schema. Production schemas are out-of-corpus by definition, and schema hallucination is a per-deployment problem no amount of pretraining removes. theorem's answer is structural rather than statistical: the vocabulary of legal classes, edges, roles, and properties is derived from the live schema and enforced at verification, so day-one correctness on an unseen schema is a property of the system, not of the corpus.
+
+## When syntax errors fall, the surviving errors are the dangerous ones
+
+As supervision increases, syntax errors drop sharply while error mass shifts toward semantic and logical categories: aggregation mistakes, DISTINCT misuse, schema-linking and filter errors. This is the worst possible failure profile for an autonomous agent, because a semantically wrong Cypher query is usually still *valid*: it executes, returns plausible rows or a confident empty set, and nothing downstream knows.
+
+theorem is aimed at precisely this residue: implicit grouping is inexpressible, identity-versus-value grouping is a spelling difference, direction does not exist, aggregation is staged and named, and the verifier converts an entire class of would-be silent failures into corrective errors that state `nothing was executed.` A model that never makes a syntax error still benefits from a language in which the remaining mistakes are loud.
+
+## A perfect Cypher generator still lacks the agent surface
+
+Suppose the objection wins completely and some future model writes flawless Cypher. What it writes flawless Cypher *against* is a database that answers "1 row affected." Nothing in Cypher, GQL, or their engines provides what agent construction workloads need: provenance-carrying writes, receipts that surface duplicate candidates at write time, an explicit merge/distinct resolution dialogue, lineage that makes merges unwindable, granularity verbs, temporal retirement, queryable health, or token-budgeted results with declared counts and continuations.
+
+The 2026 agent-memory landscape confirms nobody else is building this surface: production systems still ingest episodically through LLM extraction pipelines, and Mem0 removed its graph variant after finding it lost on recall while running three times slower at twice the token cost. Those are write-surface and economics failures, not generation failures, and model quality does not touch them. The read side has the same economics: an identical knowledge graph costs 2,645 tokens as an edge list and 13,503 as JSON-LD (arXiv 2504.07087), and accuracy collapses with textual distance between related facts (arXiv 2410.01985). What the database prints is a property of the database.
+
+## Even for a perfect generator, the economics invert
+
+Our results show a small, cheap model using theorem outperforming a frontier model writing Cypher (98.3% vs 71.7%). Agent fleets run on small models because they issue thousands of queries; a language that moves reliable graph access down-market is worth more than a frontier model that matches it at many times the price.
+
+Canonical forms add a compounding benefit that *improves* as generation improves: when there is exactly one way to write each operation, correct agents produce byte-identical queries. That makes plan caching trivial and agent behavior auditable. The better the models get, the more of their output can be cached, verified, and trusted, but only in a language canonical enough to make equality meaningful.
