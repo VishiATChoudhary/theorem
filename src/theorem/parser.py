@@ -166,6 +166,8 @@ class _Parser:
         if kind == "string":
             return _unquote(text)
         if kind == "number":
+            if len(text.lstrip("-").split(".")[0]) > 15:
+                raise ParseError(self.line_no, f"number literal {text!r} is too large")
             return float(text) if "." in text else int(text)
         if kind == "provenance":
             if not text.startswith("attach:"):
@@ -280,17 +282,25 @@ class _Parser:
             desc = True
         return col, desc
 
+    def _int(self, t: tuple[str, str], what: str, minimum: int) -> int:
+        if t[0] != "number" or "." in t[1]:
+            raise ParseError(self.line_no, f"expected an integer {what}, got {t[1]!r}")
+        if len(t[1].lstrip("-")) > 12:
+            raise ParseError(self.line_no, f"{what} {t[1]!r} is too large")
+        value = int(t[1])
+        if value < minimum:
+            raise ParseError(
+                self.line_no, f"{what} must be at least {minimum}, got {value}"
+            )
+        return value
+
     def budget_opt(self) -> int | None:
         if not self.at_word("budget"):
             return None
         self.next()
-        t = self.next()
-        if t[0] != "number" or "." in t[1]:
-            raise ParseError(
-                self.line_no, f"expected an integer token budget, got {t[1]!r}"
-            )
+        value = self._int(self.next(), "token budget", 1)
         self.expect_word("tokens")
-        return int(t[1])
+        return value
 
     def source_opt(self) -> str | None:
         if not self.at_word("source"):
@@ -310,7 +320,9 @@ class _Parser:
         method = getattr(self, f"parse_{verb}", None)
         if verb in AGG_VERBS:
             stmt = self.parse_aggregate(verb)
-        elif method is None:
+        elif method is None or verb == "aggregate":
+            # "aggregate" would resolve to the internal parse_aggregate
+            # helper, which needs an op; it is not a verb itself
             raise ParseError(self.line_no, f"unknown verb {verb!r}")
         else:
             stmt = method()
@@ -375,12 +387,7 @@ class _Parser:
         limit = None
         if self.at_word("limit"):
             self.next()
-            t = self.next()
-            if t[0] != "number" or "." in t[1]:
-                raise ParseError(
-                    self.line_no, f"expected an integer limit, got {t[1]!r}"
-                )
-            limit = int(t[1])
+            limit = self._int(self.next(), "limit", 0)
         budget = self.budget_opt()
         after = None
         if self.at_word("after"):

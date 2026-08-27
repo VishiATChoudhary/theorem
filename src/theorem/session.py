@@ -40,9 +40,29 @@ class Session:
     def __init__(self, path: str | Path, schema: Schema):
         self.store = Store(path)
         self.schema = schema
+        self._restore_derived_classes()
         self.read_ctx = ReadContext()
         self.write_ctx = WriteContext(store=self.store, schema=schema)
         self.type_env: dict[str, str] = {}
+
+    def _restore_derived_classes(self) -> None:
+        """derive class is durable via its lineage record; rebuild the schema
+        entries a previous process created, or restarts orphan their data."""
+        from .schema import ClassDef
+
+        for rec in self.store.lineage:
+            if rec.get("kind") != "derive_class":
+                continue
+            name = rec["child"]
+            if name in self.schema.classes:
+                continue
+            self.schema.classes[name] = ClassDef(
+                name=name,
+                props=dict(rec.get("props", {})),
+                base=rec.get("parent"),
+                status="provisional",
+                quota=rec.get("quota", 500),
+            )
 
     def run(self, text: str) -> str:
         try:
@@ -93,6 +113,9 @@ class Session:
                 )
         except (ExecError, WriteError) as e:
             outputs.append(f"error: {e}")
+        except Exception as e:
+            # that run() always returns a message, never a raw traceback
+            outputs.append(f"internal error: {type(e).__name__}: {e}")
         self._export_bindings(table)
         return "\n".join(o for o in outputs if o)
 

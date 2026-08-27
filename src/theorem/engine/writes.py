@@ -88,10 +88,14 @@ def _quota_check(ctx: WriteContext, cls: str) -> None:
 
 def _load_attachment(ctx: WriteContext, ref: str) -> list[dict]:
     key = ref.split(":", 1)[1]
-    path = ctx.store.path / "attachments" / f"{key}.csv"
+    attach_dir = (ctx.store.path / "attachments").resolve()
+    path = (attach_dir / f"{key}.csv").resolve()
+    if not path.is_relative_to(attach_dir):
+        raise WriteError(f"attachment key {key!r} escapes the attachments directory")
     if not path.exists():
         raise WriteError(f"attachment {ref} not found at {path}")
-    with path.open() as f:
+    # utf-8-sig: a BOM would otherwise become part of the first header name
+    with path.open(encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
 
@@ -262,6 +266,10 @@ def _merge(stmt: Merge, ctx: WriteContext) -> Receipt:
 def _distinct(stmt: Distinct, ctx: WriteContext) -> Receipt:
     a = ctx.resolve_ref(stmt.a)
     b = ctx.resolve_ref(stmt.b)
+    if a == b:
+        raise WriteError(
+            f"distinct needs two different nodes; both refs resolve to {a}"
+        )
     pos = ctx.store.apply({"op": "distinct", "a": a, "b": b, "reason": stmt.reason})
     ctx.store.dup_ledger[:] = [
         r

@@ -59,6 +59,7 @@ class Table:
     # group binding name -> (key col, key kind "identity"|"value")
     group_meta: dict[str, tuple[Col, str]] = field(default_factory=dict)
     grouped: bool = False  # rows are group-rows after first aggregate
+    seeded: bool = False  # a find has run; an empty table means zero rows
 
 
 def _node_value(store: Store, schema: Schema, node_id: str, prop: str):
@@ -116,14 +117,14 @@ def _fold(v):
     Agents transliterate names; silently matching nothing is the worse
     failure mode. Numbers pass through untouched."""
     if isinstance(v, str):
-        # casefold BEFORE stripping accents: casefold('ß') == 'ss', but
-        # NFKD+ascii-ignore deletes 'ß' outright, so the reverse order
-        # makes upper/lower forms of the same word fold differently.
-        return (
-            unicodedata.normalize("NFKD", v.casefold())
-            .encode("ascii", "ignore")
-            .decode()
-        )
+        # Unicode compatibility caseless matching (NFKD∘casefold twice), then
+        # strip combining marks. The double pass is required for idempotence:
+        # NFKD can emit new cased characters (e.g. '𝓐' -> 'A'). Stripping via
+        # ascii-encode instead would delete every non-Latin script, collapsing
+        # all CJK/Cyrillic/etc. strings to "" and making them compare equal.
+        s = unicodedata.normalize("NFKD", v.casefold())
+        s = unicodedata.normalize("NFKD", s.casefold())
+        return "".join(c for c in s if not unicodedata.combining(c))
     return v
 
 
@@ -530,7 +531,10 @@ def _compute(stmt: Compute, table: Table, store: Store, schema: Schema) -> None:
 def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> None:
     if isinstance(stmt, Find):
         found = _find_rows(stmt, store, schema)
-        table.rows = _cross(table.rows, found) if table.rows else found
+        # A seeded-but-empty table means an earlier find matched zero rows;
+        # the cross product must stay empty rather than restart from `found`.
+        table.rows = _cross(table.rows, found) if table.seeded else found
+        table.seeded = True
     elif isinstance(stmt, Follow):
         _follow(stmt, table, store, schema)
     elif isinstance(stmt, GroupBy):

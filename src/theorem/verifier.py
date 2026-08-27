@@ -6,7 +6,9 @@ nearest-name suggestions, and always end with "nothing was executed."
 
 from __future__ import annotations
 
+import copy
 import difflib
+import re
 from dataclasses import dataclass
 
 from .ast_nodes import (
@@ -69,6 +71,10 @@ def verify(
 ) -> list[Plan]:
     # binding name -> class name | "nodes" | "dup_candidates" | "class"
     #                 | "group:<col>" | "value:<agg>"
+    # Verification runs against a copy of the schema so that `derive class`
+    # can stage its new class for later statements in the same program
+    # without mutating the live schema before execution.
+    schema = copy.deepcopy(schema)
     env = dict(env) if env else {}
     plans: list[Plan] = []
     for stmt in stmts:
@@ -139,6 +145,27 @@ def _check_col_in_context(
     if head not in props:
         raise VerifyError(
             line, f'unknown property "{head}" on class {target}.{_suggest(head, props)}'
+        )
+
+
+def _check_literal_type(
+    value: object, declared: str, prop: str, cls: str, line: int
+) -> None:
+    """Literal props must match the schema's declared type at verify time."""
+    if isinstance(value, bool):
+        ok = declared == "bool"
+    elif isinstance(value, int):
+        ok = declared in ("int", "float")
+    elif isinstance(value, float):
+        ok = declared == "float"
+    else:  # str (includes attach:/doc: refs, resolved at write time)
+        ok = declared == "str"
+    if not ok:
+        got = type(value).__name__
+        raise VerifyError(
+            line,
+            f'property "{prop}" on class {cls} is declared {declared}, '
+            f"got a {got} literal",
         )
 
 
@@ -233,9 +260,28 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             head = col[0]
             if head not in env:
                 raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
-            _read_type(env, head, line)
-            if env[head].startswith("value:"):
+            typ = _read_type(env, head, line)
+            if typ.startswith("value:"):
                 raise VerifyError(line, f'"{head}" is already an aggregate value')
+            if typ.startswith("group:") and len(col) > 1:
+                # g.<member>: the member must be a bound pipeline column
+                member = col[1]
+                if member not in env:
+                    raise VerifyError(
+                        line,
+                        f'"{member}" is not a bound column of the group.'
+                        f"{_suggest(member, env)}",
+                    )
+            elif len(col) > 1:
+                _check_bound_col(col, schema, env, line)
+                if op in ("sum", "avg") and typ in schema.classes:
+                    declared = schema.all_props(typ).get(col[1])
+                    if declared in ("str", "bool"):
+                        raise VerifyError(
+                            line,
+                            f'{op} needs a numeric property; "{col[1]}" on '
+                            f"class {typ} is {declared}",
+                        )
             # group binding -> per-group aggregate; any other binding ->
             # global aggregate over that column
             _bind(env, name, f"value:{op}", line)
@@ -257,12 +303,13 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case AssertNode(cls=cls, props=props, name=name):
             _check_class(schema, cls, line)
             all_props = schema.all_props(cls)
-            for prop in props:
+            for prop, value in props.items():
                 if prop not in all_props:
                     raise VerifyError(
                         line,
                         f'unknown property "{prop}" on class {cls}.{_suggest(prop, all_props)}',
                     )
+                _check_literal_type(value, all_props[prop], prop, cls, line)
             _bind(env, name, cls, line)
 
         case AssertEdge(edge=edge, role_refs=role_refs):
@@ -317,7 +364,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case Retire(ref=ref) | Flag(ref=ref):
             _ref_type(ref, env, line)
 
-        case DeriveClass(name=name, base=base):
+        case DeriveClass(name=name, base=base, props=dprops):
             if base not in schema.classes:
                 raise VerifyError(
                     line,
@@ -325,6 +372,23 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 )
             if name in schema.classes:
                 raise VerifyError(line, f'class "{name}" already exists')
+            if not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+                raise VerifyError(
+                    line,
+                    f'class name "{name}" must be a lowercase identifier '
+                    "(node ids derive from it)",
+                )
+            if name in SPECIAL_TARGETS:
+                raise VerifyError(
+                    line, f'"{name}" is a reserved find target and cannot be a class'
+                )
+            # stage into the verify-time schema copy so later statements in
+            # this program can use the class; execution re-derives it live
+            from .schema import ClassDef
+
+            schema.classes[name] = ClassDef(
+                name=name, props=dict(dprops), base=base, status="provisional"
+            )
 
         case SchemaStmt():
             pass

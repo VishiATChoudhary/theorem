@@ -13,6 +13,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+class StoreError(Exception):
+    """Durable-state problem: corrupt WAL/run file or invalid record."""
+
+
 @dataclass
 class Node:
     id: str
@@ -62,34 +66,75 @@ class Store:
             self.path.glob("runs/run-*.json"), key=lambda p: int(p.stem.split("-")[1])
         )
         if runs:
-            data = json.loads(runs[-1].read_text())
+            try:
+                data = json.loads(runs[-1].read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                raise StoreError(
+                    f"corrupt run file {runs[-1].name}: {e}. "
+                    "The file was likely torn by a crash mid-snapshot; "
+                    "remove it to fall back to the previous run + WAL."
+                ) from e
             self.position = data["position"]
             self.id_counters = data["id_counters"]
             for rec in data["records"]:
                 self._apply_to_memory(rec, rec["_pos"])
+        base = self.position  # records at or below this are in the snapshot
         if self.wal_path.exists():
-            # A crash mid-append leaves a torn final line. Replay the longest
-            # valid prefix, then truncate the file to it so the next append
-            # starts on a clean line boundary.
-            valid_bytes = 0
-            with self.wal_path.open("rb") as f:
-                for line in f:
-                    if not line.endswith(b"\n"):
-                        break
-                    try:
-                        rec = json.loads(line)
-                    except json.JSONDecodeError:
-                        break
-                    self.position += 1
-                    self._apply_to_memory(rec, self.position)
-                    valid_bytes += len(line)
-            if valid_bytes < self.wal_path.stat().st_size:
+            # Parse every line first. A single invalid line is only
+            # recoverable when it is the torn TAIL of the file (crash
+            # mid-append); an invalid line followed by valid records means
+            # real corruption, and truncating would delete committed data.
+            raw_lines = self.wal_path.read_bytes().splitlines(keepends=True)
+            parsed: list[dict | None] = []
+            for line in raw_lines:
+                if not line.endswith(b"\n"):
+                    parsed.append(None)
+                    continue
+                try:
+                    parsed.append(json.loads(line))
+                except (json.JSONDecodeError, UnicodeDecodeError):
+                    parsed.append(None)
+            if None in parsed:
+                first_bad = parsed.index(None)
+                if any(p is not None for p in parsed[first_bad + 1 :]):
+                    raise StoreError(
+                        f"corrupt WAL: line {first_bad + 1} of "
+                        f"{self.wal_path} is unreadable but valid records "
+                        "follow it. Refusing to truncate; repair manually."
+                    )
+                # torn tail: drop it and truncate to the valid prefix
+                valid_bytes = sum(len(line) for line in raw_lines[:first_bad])
+                parsed = parsed[:first_bad]
                 with self.wal_path.open("r+b") as f:
                     f.truncate(valid_bytes)
+            for rec in parsed:
+                # If a crash hit between snapshot() writing the run file and
+                # truncating the WAL, WAL records are already baked into the
+                # run; their recorded _pos tells us to skip them.
+                rec_pos = rec.get("_pos")
+                if rec_pos is not None and rec_pos <= base:
+                    continue
+                self.position += 1
+                self._apply_to_memory(rec, self.position)
+
+    def _validate(self, record: dict) -> None:
+        """Reject records that would poison the WAL: they must be appliable."""
+        op = record.get("op")
+        if op in ("patch_node", "retire", "flag", "traffic"):
+            if record.get("id") not in self.nodes:
+                raise StoreError(f"{op}: unknown node {record.get('id')!r}")
+        elif op == "retire_edge":
+            if record.get("id") not in self.edge_index:
+                raise StoreError(f"retire_edge: unknown edge {record.get('id')!r}")
+        elif op == "put_node":
+            if not isinstance(record.get("props"), dict):
+                raise StoreError("put_node: props must be an object")
 
     def apply(self, record: dict) -> int:
         """Append to WAL, apply to memory, return the new position."""
-        with self.wal_path.open("a") as f:
+        self._validate(record)
+        record = {**record, "_pos": self.position + 1}
+        with self.wal_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
         self.position += 1
         self._apply_to_memory(record, self.position)
@@ -97,8 +142,10 @@ class Store:
 
     def bulk(self, records: list[dict]) -> int:
         """Append many records in one WAL write. Returns the final position."""
-        with self.wal_path.open("a") as f:
+        with self.wal_path.open("a", encoding="utf-8") as f:
             for record in records:
+                self._validate(record)
+                record = {**record, "_pos": self.position + 1}
                 f.write(json.dumps(record) + "\n")
                 self.position += 1
                 self._apply_to_memory(record, self.position)
@@ -146,6 +193,8 @@ class Store:
         for rec in self.lineage:
             records.append({**rec, "op": "lineage", "_pos": rec.get("_pos", 0)})
         for pair in self.distinct_pairs:
+            if len(pair) != 2:  # defensive: self-pairs collapse to one element
+                continue
             a, b = sorted(pair)
             records.append({"op": "distinct", "a": a, "b": b, "reason": "", "_pos": 0})
         for rec in self.dup_ledger:
@@ -155,15 +204,19 @@ class Store:
                 {"op": "alias", "absorbed": absorbed, "survivor": survivor, "_pos": 0}
             )
         run_path = self.path / "runs" / f"run-{self.position}.json"
-        run_path.write_text(
+        # write-then-rename so a crash mid-write never leaves a torn run file
+        tmp_path = run_path.with_suffix(".json.tmp")
+        tmp_path.write_text(
             json.dumps(
                 {
                     "position": self.position,
                     "id_counters": self.id_counters,
                     "records": records,
                 }
-            )
+            ),
+            encoding="utf-8",
         )
+        tmp_path.rename(run_path)
         self.wal_path.write_text("")
         return run_path
 
@@ -193,6 +246,17 @@ class Store:
 
     def _apply_to_memory(self, rec: dict, pos: int) -> None:
         op = rec["op"]
+        # Replay resilience: a record referencing a node/edge that never
+        # materialized (partial multi-record write before a crash) is
+        # skipped rather than crashing the constructor. Live writes are
+        # validated up front in apply(), so this only fires during replay.
+        if (
+            op in ("patch_node", "retire", "flag", "traffic")
+            and rec.get("id") not in self.nodes
+        ):
+            return
+        if op == "retire_edge" and rec.get("id") not in self.edge_index:
+            return
         if op == "put_node":
             node = Node(
                 id=rec["id"],
