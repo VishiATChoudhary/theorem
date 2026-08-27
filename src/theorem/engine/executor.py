@@ -119,7 +119,7 @@ def _fold(v):
     if isinstance(v, str):
         # Unicode compatibility caseless matching (NFKD∘casefold twice), then
         # strip combining marks. The double pass is required for idempotence:
-        # NFKD can emit new cased characters (e.g. '𝓐' -> 'A'). Stripping via
+        # NFKD can emit new cased characters (e.g. math-script capital A -> 'A'). Stripping via
         # ascii-encode instead would delete every non-Latin script, collapsing
         # all CJK/Cyrillic/etc. strings to "" and making them compare equal.
         s = unicodedata.normalize("NFKD", v.casefold())

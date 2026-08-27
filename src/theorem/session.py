@@ -113,7 +113,7 @@ class Session:
                 )
         except (ExecError, WriteError) as e:
             outputs.append(f"error: {e}")
-        except Exception as e:
+        except Exception as e:  # the REPL/agent contract is
             # that run() always returns a message, never a raw traceback
             outputs.append(f"internal error: {type(e).__name__}: {e}")
         self._export_bindings(table)
