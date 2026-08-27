@@ -1,12 +1,33 @@
 [project]
 name = "theorem"
 version = "0.1.0"
-description = "Add your description here"
+description = "A graph query and construction language for AI agents. Every query verified whole before it runs."
+readme = "README.md"
+license = "Apache-2.0"
 authors = [
     { name = "VishiATChoudhary", email = "vishisht.choudhary@tum.de" }
 ]
 requires-python = ">=3.11"
 dependencies = []
+keywords = ["graph", "query-language", "ai-agents", "llm", "knowledge-graph", "cypher-alternative"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development :: Interpreters",
+]
+
+[project.urls]
+Homepage = "https://github.com/VishiATChoudhary/theorem"
+Repository = "https://github.com/VishiATChoudhary/theorem"
+Issues = "https://github.com/VishiATChoudhary/theorem/issues"
+
+[project.scripts]
+theorem = "theorem.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.9.15,<0.10.0"]
