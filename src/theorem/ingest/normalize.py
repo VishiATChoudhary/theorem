@@ -4,7 +4,7 @@ import io
 import json
 from pathlib import Path
 
-from .envelope import Envelope, Media, Table
+from .envelope import Anchor, Envelope, Media, Table
 from .sniff import sniff
 
 
@@ -118,12 +118,32 @@ def normalize(data: bytes, filename: str) -> Envelope:
 
     if fmt == "pdf":
         try:
-            spec = importlib.util.find_spec("theorem.extras.pdf")
-        except (ModuleNotFoundError, ValueError):
-            spec = None
-        if spec is None:
-            raise IngestError("PDF support requires: pip install 'theorem[pdf]'")
-        raise IngestError("PDF handler not yet implemented (Task 8)")
+            import pdfplumber
+        except ImportError as e:
+            raise IngestError("PDF support needs: pip install theorem[pdf]") from e
+        env = Envelope(meta={"format": "pdf", "filename": filename})
+        parts: list[str] = []
+        offset = 0
+        with pdfplumber.open(io.BytesIO(data)) as pdf:
+            env.meta["pages"] = len(pdf.pages)
+            for i, page in enumerate(pdf.pages, start=1):
+                env.anchors.append(Anchor(offset=offset, page=i))
+                text = page.extract_text() or ""
+                parts.append(text)
+                offset += len(text) + 2
+                for t_i, rows in enumerate(page.extract_tables()):
+                    if not rows or not rows[0]:
+                        continue
+                    header = [str(h or f"col{j}") for j, h in enumerate(rows[0])]
+                    dict_rows = [
+                        {header[j]: str(c or "") for j, c in enumerate(r)}
+                        for r in rows[1:]
+                    ]
+                    env.tables.append(
+                        Table(name=f"p{i}t{t_i}", rows=dict_rows, origin=f"page {i}")
+                    )
+        env.body = "\n\n".join(parts)
+        return env
 
     if fmt == "docx" or fmt == "xlsx" or fmt == "pptx":
         try:

@@ -26,6 +26,10 @@ Homepage = "https://github.com/VishiATChoudhary/theorem"
 Repository = "https://github.com/VishiATChoudhary/theorem"
 Issues = "https://github.com/VishiATChoudhary/theorem/issues"
 
+[project.optional-dependencies]
+pdf = ["pdfplumber>=0.11"]
+office = ["python-docx>=1.1", "openpyxl>=3.1", "python-pptx>=1.0"]
+
 [project.scripts]
 theorem = "theorem.cli:main"
 
