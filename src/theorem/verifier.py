@@ -21,6 +21,7 @@ from .ast_nodes import (
     Cond,
     Continue,
     DeriveClass,
+    DeriveEdge,
     Distinct,
     Find,
     Flag,
@@ -33,7 +34,7 @@ from .ast_nodes import (
     SchemaStmt,
     Stmt,
 )
-from .schema import Schema
+from .schema import EdgeDef, Schema
 
 # Pseudo-columns available on any node binding in return/where clauses.
 NODE_PSEUDO_PROPS = {"class", "health", "lineage", "id", "state"}
@@ -403,6 +404,23 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 status="provisional",
                 quota=500,  # keep verify-time staging identical to execution
             )
+
+        case DeriveEdge(name=name, roles=roles):
+            if name in schema.edges:
+                raise VerifyError(line, f'edge "{name}" already exists')
+            if not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+                raise VerifyError(
+                    line, f'edge name "{name}" must be a lowercase identifier'
+                )
+            if len(roles) != 2:
+                raise VerifyError(line, f"edge {name} needs exactly two roles")
+            for cls in roles.values():
+                if cls not in schema.classes:
+                    raise VerifyError(
+                        line, f'unknown class "{cls}".{_suggest(cls, schema.classes)}'
+                    )
+            # stage into the verify-time schema copy, like DeriveClass
+            schema.edges[name] = EdgeDef(name, dict(roles))
 
         case SchemaStmt():
             pass

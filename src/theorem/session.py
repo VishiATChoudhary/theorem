@@ -40,29 +40,34 @@ class Session:
     def __init__(self, path: str | Path, schema: Schema):
         self.store = Store(path)
         self.schema = schema
-        self._restore_derived_classes()
+        self._restore_derived_schema()
         self.read_ctx = ReadContext()
         self.write_ctx = WriteContext(store=self.store, schema=schema)
         self.type_env: dict[str, str] = {}
 
-    def _restore_derived_classes(self) -> None:
-        """derive class is durable via its lineage record; rebuild the schema
-        entries a previous process created, or restarts orphan their data."""
-        from .schema import ClassDef
+    def _restore_derived_schema(self) -> None:
+        """derive class/edge are durable via their lineage records; rebuild
+        the schema entries a previous process created, or restarts orphan
+        their data."""
+        from .schema import ClassDef, EdgeDef
 
         for rec in self.store.lineage:
-            if rec.get("kind") != "derive_class":
-                continue
-            name = rec["child"]
-            if name in self.schema.classes:
-                continue
-            self.schema.classes[name] = ClassDef(
-                name=name,
-                props=dict(rec.get("props", {})),
-                base=rec.get("parent"),
-                status="provisional",
-                quota=rec.get("quota", 500),
-            )
+            kind = rec.get("kind")
+            if kind == "derive_class":
+                name = rec["child"]
+                if name in self.schema.classes:
+                    continue
+                self.schema.classes[name] = ClassDef(
+                    name=name,
+                    props=dict(rec.get("props", {})),
+                    base=rec.get("parent"),
+                    status="provisional",
+                    quota=rec.get("quota", 500),
+                )
+            elif kind == "derive_edge":
+                self.schema.edges.setdefault(
+                    rec["name"], EdgeDef(rec["name"], dict(rec["roles"]))
+                )
 
     def run(self, text: str) -> str:
         try:

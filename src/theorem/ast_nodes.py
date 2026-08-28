@@ -146,5 +146,11 @@ class DeriveClass(Stmt):
 
 
 @dataclass
+class DeriveEdge(Stmt):
+    name: str
+    roles: dict[str, str]  # role name -> class name, exactly two
+
+
+@dataclass
 class SchemaStmt(Stmt):
     pass

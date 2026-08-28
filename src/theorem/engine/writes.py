@@ -15,6 +15,7 @@ from ..ast_nodes import (
     AssertNode,
     Compact,
     DeriveClass,
+    DeriveEdge,
     Distinct,
     Flag,
     Merge,
@@ -22,7 +23,7 @@ from ..ast_nodes import (
     Retire,
     Stmt,
 )
-from ..schema import ClassDef, Schema
+from ..schema import ClassDef, EdgeDef, Schema
 from . import dedup
 from .storage import Store
 
@@ -444,6 +445,22 @@ def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
     return Receipt(lines)
 
 
+def _derive_edge(stmt: DeriveEdge, ctx: WriteContext) -> Receipt:
+    schema = ctx.schema
+    # durable record FIRST: if the append fails, the live schema must not
+    # hold an edge that would silently vanish on restart
+    pos = ctx.store.apply(
+        {
+            "op": "lineage",
+            "kind": "derive_edge",
+            "name": stmt.name,
+            "roles": stmt.roles,
+        }
+    )
+    schema.edges[stmt.name] = EdgeDef(stmt.name, dict(stmt.roles))
+    return Receipt([f"receipt: edge {stmt.name} declared at @t-{pos}"])
+
+
 def execute_write(stmt: Stmt, ctx: WriteContext) -> Receipt:
     match stmt:
         case AssertNode():
@@ -464,5 +481,7 @@ def execute_write(stmt: Stmt, ctx: WriteContext) -> Receipt:
             return _flag(stmt, ctx)
         case DeriveClass():
             return _derive(stmt, ctx)
+        case DeriveEdge():
+            return _derive_edge(stmt, ctx)
         case _:
             raise WriteError(f"not a write statement: {type(stmt).__name__}")

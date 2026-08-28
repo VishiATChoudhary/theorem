@@ -20,6 +20,7 @@ from .ast_nodes import (
     Cond,
     Continue,
     DeriveClass,
+    DeriveEdge,
     Distinct,
     Find,
     Flag,
@@ -492,7 +493,28 @@ class _Parser:
         self.expect_word("reason")
         return Flag(ref, self.string())
 
-    def parse_derive(self) -> DeriveClass:
+    def parse_derive(self) -> Stmt:
+        if self.at_word("edge"):
+            self.next()
+            name = self.expect_name()
+            self.expect_punct("(")
+            roles: dict[str, str] = {}
+            while True:
+                role = self.expect_name()
+                self.expect_punct(":")
+                roles[role] = self.expect_name()
+                t = self.peek()
+                if t == ("punct", ","):
+                    self.i += 1
+                    continue
+                self.expect_punct(")")
+                break
+            if len(roles) != 2:
+                raise ParseError(
+                    self.line_no,
+                    f"derive edge {name} needs exactly two roles, got {len(roles)}",
+                )
+            return DeriveEdge(name, roles)
         self.expect_word("class")
         name = self.expect_name()
         self.expect_word("from")
