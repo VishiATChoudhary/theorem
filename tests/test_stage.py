@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from theorem.ingest.chunk import split
@@ -36,6 +38,14 @@ def test_stage_sha_dedup(sess):
     r1 = stage(sess, env, "a.md", raw)
     r2 = stage(sess, env, "a.md", raw)
     assert r2.existing and r2.doc_id == r1.doc_id
+
+
+def test_pdf_pages_prop_matches_page_count(sess):
+    pytest.importorskip("pdfplumber")
+    raw = (Path(__file__).parent / "fixtures" / "mini.pdf").read_bytes()
+    env = normalize(raw, "mini.pdf")
+    r = stage(sess, env, "mini.pdf", raw)
+    assert sess.store.nodes[r.doc_id].props["pages"] == 1
 
 
 def test_staged_table_is_refinable(sess):

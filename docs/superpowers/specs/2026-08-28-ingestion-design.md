@@ -138,3 +138,4 @@ Each step lands green (ruff + pytest) before the next; steps 1-5 need no API key
 - The extraction budget check runs pre-runner (spent so far plus the estimated prompt cost), not after the call returns, so a call that would exceed the cap never fires.
 - Structure staging (stage 2) bypasses the dedup pipeline and class quotas by design: document/chunk/table/media nodes are structural, not entities, and are never subject to entity-resolution or instance caps.
 - The `follow` verifier is now subclass-aware, accepting a subclass at an edge role typed to its base (needed for `piece` at the `part_of` roles).
+- HTML and YAML normalizers, VLM OCR, and image captioning are deferred to a follow-up plan; the format matrix rows for those remain design targets, not implemented behavior.

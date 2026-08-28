@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from .chunk import split
 from .envelope import Envelope
@@ -41,6 +43,14 @@ class StageReceipt:
 
     def render(self) -> str:
         return "\n".join(self.lines)
+
+
+def _sanitize(name: str) -> str:
+    """Keep [A-Za-z0-9._-], replace everything else with _, so a crafted
+    table/sheet name can't escape the attachments directory."""
+    name = Path(name).name
+    name = re.sub(r"[^A-Za-z0-9._-]", "_", name)
+    return name.lstrip(".") or "unnamed"
 
 
 def _origin_page(origin: str) -> int:
@@ -79,6 +89,9 @@ def stage(session, envelope: Envelope, filename: str, raw: bytes) -> StageReceip
 
     chunks = split(envelope.body, envelope.anchors)
     max_page = max((page for _, page in chunks), default=0)
+    page_count = envelope.meta.get("pages")
+    if page_count is None:
+        page_count = max_page + 1 if chunks else 0
     mime = MIME_BY_FORMAT.get(
         envelope.meta.get("format", ""), "application/octet-stream"
     )
@@ -92,7 +105,7 @@ def stage(session, envelope: Envelope, filename: str, raw: bytes) -> StageReceip
             "props": {
                 "title": filename,
                 "mime": mime,
-                "pages": max_page + 1 if chunks else 0,
+                "pages": page_count,
                 "sha256": digest,
             },
             "state": "atom",
@@ -123,7 +136,7 @@ def stage(session, envelope: Envelope, filename: str, raw: bytes) -> StageReceip
     attach_dir.mkdir(parents=True, exist_ok=True)
     for table in envelope.tables:
         page = _origin_page(table.origin)
-        key = f"{sha8}-{table.name}"
+        key = f"{sha8}-{_sanitize(table.name)}"
         fieldnames = list(table.rows[0].keys()) if table.rows else []
         with (attach_dir / f"{key}.csv").open("w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)

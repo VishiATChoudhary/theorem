@@ -99,6 +99,17 @@ def test_extract_runs_against_staged_doc(server, monkeypatch):
     assert "stopped_early" in data
 
 
+def test_extract_unknown_agent_returns_json_error(server):
+    _, uploaded = _post(server, "/upload?name=n.md", body=b"# T\n\nhello world")
+    doc_id = uploaded["doc_id"]
+
+    status, data = _post(
+        server, f"/extract?doc={quote(doc_id, safe='')}&agent=nonexistent-cli-name"
+    )
+    assert status == 400
+    assert "error" in data
+
+
 def test_playbook_guided_proposes_then_applies(server, monkeypatch):
     import demo.upload_server as us
 

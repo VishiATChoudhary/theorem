@@ -74,6 +74,24 @@ class Session:
                 if name in self.schema.classes:
                     self.schema.classes[name].status = "deprecated"
 
+        # The "playbook" tag on a derive_class/derive_edge record is set by
+        # mutating the in-memory lineage dict at apply time and is never
+        # itself written to the WAL; only the separate playbook_link record
+        # (kind, playbook, names) is durable. Re-derive the tag from those
+        # links so a restart doesn't silently drop playbook ownership.
+        playbook_by_name: dict[str, str] = {}
+        for rec in self.store.lineage:
+            if rec.get("kind") == "playbook_link":
+                for name in rec.get("names", []):
+                    playbook_by_name[name] = rec["playbook"]
+        for rec in self.store.lineage:
+            kind = rec.get("kind")
+            if kind not in ("derive_class", "derive_edge") or "playbook" in rec:
+                continue
+            name = rec["child"] if kind == "derive_class" else rec["name"]
+            if name in playbook_by_name:
+                rec["playbook"] = playbook_by_name[name]
+
     def run(self, text: str) -> str:
         try:
             stmts = parse(text)

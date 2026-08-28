@@ -55,6 +55,23 @@ def test_extract_failure_flags_document(staged):
     assert "query" in out  # flag landed -> health.query nonzero renders
 
 
+def test_extract_uses_stored_focus(staged):
+    sess, doc = staged
+    sess.store.apply(
+        {
+            "op": "patch_node",
+            "id": doc,
+            "props": {"_focus": "Prioritize launch dates. Ignore boilerplate."},
+        }
+    )
+    good = (
+        'assert supplier {name: "VoltaChem", country: "DE"} source doc:note.md#p0 as s1'
+    )
+    runner = ScriptedRunner([good])
+    extract(sess, doc, runner)
+    assert "Prioritize launch dates." in runner.prompts[0]
+
+
 def test_extract_budget_stops(staged):
     sess, doc = staged
     r = extract(sess, doc, ScriptedRunner([]), budget=1)

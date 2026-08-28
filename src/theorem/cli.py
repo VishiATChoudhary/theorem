@@ -11,8 +11,10 @@ from .ingest.normalize import IngestError, normalize
 from .ingest.playbook import compile_playbook
 from .ingest.runners import RunnerError, get_runner
 from .ingest.stage import stage
+from .parser import ParseError
 from .schema import Schema
 from .session import Session
+from .verifier import VerifyError
 
 
 def _handle_ingest(argv: list[str]) -> int:
@@ -43,13 +45,17 @@ def _handle_ingest(argv: list[str]) -> int:
             except RunnerError as e:
                 print(f"error: {e}", file=sys.stderr)
                 return 1
-            extract_receipt = extract(
-                session,
-                stage_receipt.doc_id,
-                runner,
-                budget=args.budget,
-                focus="",
-            )
+            try:
+                extract_receipt = extract(
+                    session,
+                    stage_receipt.doc_id,
+                    runner,
+                    budget=args.budget,
+                    focus="",
+                )
+            except RunnerError as e:
+                print(f"error: {e}", file=sys.stderr)
+                return 1
             print(extract_receipt.render())
 
         return 0
@@ -99,7 +105,7 @@ def _handle_playbook(argv: list[str]) -> int:
             )
             print(playbook_receipt.render())
             return 0 if not playbook_receipt.aborted else 1
-        except (IngestError, Exception) as e:
+        except (IngestError, ParseError, VerifyError, RuntimeError, RunnerError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
 

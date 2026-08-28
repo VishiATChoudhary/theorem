@@ -120,29 +120,36 @@ def normalize(data: bytes, filename: str) -> Envelope:
             import pdfplumber
         except ImportError as e:
             raise IngestError("PDF support needs: pip install theorem[pdf]") from e
-        env = Envelope(meta={"format": "pdf", "filename": filename})
-        parts: list[str] = []
-        offset = 0
-        with pdfplumber.open(io.BytesIO(data)) as pdf:
-            env.meta["pages"] = len(pdf.pages)
-            for i, page in enumerate(pdf.pages, start=1):
-                env.anchors.append(Anchor(offset=offset, page=i))
-                text = page.extract_text() or ""
-                parts.append(text)
-                offset += len(text) + 2
-                for t_i, rows in enumerate(page.extract_tables()):
-                    if not rows or not rows[0]:
-                        continue
-                    header = [str(h or f"col{j}") for j, h in enumerate(rows[0])]
-                    dict_rows = [
-                        {header[j]: str(c or "") for j, c in enumerate(r)}
-                        for r in rows[1:]
-                    ]
-                    env.tables.append(
-                        Table(name=f"p{i}t{t_i}", rows=dict_rows, origin=f"page {i}")
-                    )
-        env.body = "\n\n".join(parts)
-        return env
+        try:
+            env = Envelope(meta={"format": "pdf", "filename": filename})
+            parts: list[str] = []
+            offset = 0
+            with pdfplumber.open(io.BytesIO(data)) as pdf:
+                env.meta["pages"] = len(pdf.pages)
+                for i, page in enumerate(pdf.pages, start=1):
+                    env.anchors.append(Anchor(offset=offset, page=i))
+                    text = page.extract_text() or ""
+                    parts.append(text)
+                    offset += len(text) + 2
+                    for t_i, rows in enumerate(page.extract_tables()):
+                        if not rows or not rows[0]:
+                            continue
+                        header = [str(h or f"col{j}") for j, h in enumerate(rows[0])]
+                        dict_rows = [
+                            {header[j]: str(c or "") for j, c in enumerate(r)}
+                            for r in rows[1:]
+                        ]
+                        env.tables.append(
+                            Table(
+                                name=f"p{i}t{t_i}", rows=dict_rows, origin=f"page {i}"
+                            )
+                        )
+            env.body = "\n\n".join(parts)
+            return env
+        except IngestError:
+            raise
+        except Exception as e:
+            raise IngestError(f"cannot parse pdf: {e}") from e
 
     if fmt == "docx":
         return _normalize_docx(data, filename)
@@ -168,120 +175,31 @@ def _normalize_docx(data: bytes, filename: str) -> Envelope:
     except ImportError as e:
         raise IngestError(_OFFICE_EXTRA_MESSAGE) from e
 
-    doc = docx.Document(io.BytesIO(data))
-    body_lines: list[str] = []
-    tables: list[Table] = []
-    table_idx = 0
-
-    for child in doc.element.body.iterchildren():
-        if child.tag == qn("w:p"):
-            para = Paragraph(child, doc)
-            text = para.text
-            if not text:
-                continue
-            style_name = para.style.name if para.style else ""
-            if style_name.startswith("Heading"):
-                level_str = style_name.replace("Heading", "").strip()
-                level = int(level_str) if level_str.isdigit() else 1
-                body_lines.append(f"{'#' * level} {text}")
-            else:
-                body_lines.append(text)
-        elif child.tag == qn("w:tbl"):
-            table_idx += 1
-            docx_table = DocxTable(child, doc)
-            rows_data = docx_table.rows
-            if not rows_data:
-                continue
-            header = [cell.text for cell in rows_data[0].cells]
-            rows = []
-            for row in rows_data[1:]:
-                cells = [cell.text for cell in row.cells]
-                rows.append(
-                    {
-                        header[j]: str(cells[j])
-                        for j in range(min(len(header), len(cells)))
-                    }
-                )
-            tables.append(Table(name=f"table{table_idx}", rows=rows, origin=""))
-
-    images: list[Media] = []
-    for rel_id, rel in doc.part.rels.items():
-        if "image" in rel.reltype:
-            image_part = rel.target_part
-            images.append(
-                Media(
-                    data=image_part.blob,
-                    format=image_part.content_type.split("/")[-1],
-                    meta={"bytes": len(image_part.blob)},
-                    origin=rel_id,
-                )
-            )
-
-    return Envelope(
-        body="\n\n".join(body_lines),
-        tables=tables,
-        images=images,
-        meta={"format": "docx", "filename": filename},
-    )
-
-
-def _normalize_xlsx(data: bytes, filename: str) -> Envelope:
     try:
-        import openpyxl
-    except ImportError as e:
-        raise IngestError(_OFFICE_EXTRA_MESSAGE) from e
+        doc = docx.Document(io.BytesIO(data))
+        body_lines: list[str] = []
+        tables: list[Table] = []
+        table_idx = 0
 
-    wb = openpyxl.load_workbook(io.BytesIO(data), data_only=True, read_only=True)
-    tables: list[Table] = []
-    for ws in wb.worksheets:
-        rows_iter = ws.iter_rows(values_only=True)
-        try:
-            header_row = next(rows_iter)
-        except StopIteration:
-            continue
-        header = [
-            str(h) if h is not None else f"col{i}" for i, h in enumerate(header_row)
-        ]
-        rows = []
-        for row in rows_iter:
-            rows.append(
-                {
-                    header[i]: ("" if v is None else str(v))
-                    for i, v in enumerate(row)
-                    if i < len(header)
-                }
-            )
-        tables.append(Table(name=ws.title, rows=rows, origin=f"sheet {ws.title}"))
-
-    return Envelope(
-        body="",
-        tables=tables,
-        meta={"format": "xlsx", "filename": filename},
-    )
-
-
-def _normalize_pptx(data: bytes, filename: str) -> Envelope:
-    try:
-        import pptx
-        from pptx.enum.shapes import MSO_SHAPE_TYPE
-    except ImportError as e:
-        raise IngestError(_OFFICE_EXTRA_MESSAGE) from e
-
-    prs = pptx.Presentation(io.BytesIO(data))
-    body_lines: list[str] = []
-    tables: list[Table] = []
-    images: list[Media] = []
-    table_idx = 0
-
-    for slide_idx, slide in enumerate(prs.slides, start=1):
-        body_lines.append(f"# Slide {slide_idx}")
-        for shape in slide.shapes:
-            if shape.has_text_frame and shape.text_frame.text:
-                body_lines.append(shape.text_frame.text)
-            if shape.has_table:
+        for child in doc.element.body.iterchildren():
+            if child.tag == qn("w:p"):
+                para = Paragraph(child, doc)
+                text = para.text
+                if not text:
+                    continue
+                style_name = para.style.name if para.style else ""
+                if style_name.startswith("Heading"):
+                    level_str = style_name.replace("Heading", "").strip()
+                    level = int(level_str) if level_str.isdigit() else 1
+                    body_lines.append(f"{'#' * level} {text}")
+                else:
+                    body_lines.append(text)
+            elif child.tag == qn("w:tbl"):
                 table_idx += 1
-                shape_table = shape.table
-                rows_data = list(shape_table.rows)
+                docx_table = DocxTable(child, doc)
+                rows_data = docx_table.rows
+                if not rows_data:
+                    continue
                 header = [cell.text for cell in rows_data[0].cells]
                 rows = []
                 for row in rows_data[1:]:
@@ -292,34 +210,132 @@ def _normalize_pptx(data: bytes, filename: str) -> Envelope:
                             for j in range(min(len(header), len(cells)))
                         }
                     )
-                tables.append(
-                    Table(
-                        name=f"table{table_idx}",
-                        rows=rows,
-                        origin=f"slide {slide_idx}",
-                    )
-                )
-            if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
-                image = shape.image
+                tables.append(Table(name=f"table{table_idx}", rows=rows, origin=""))
+
+        images: list[Media] = []
+        for rel_id, rel in doc.part.rels.items():
+            if "image" in rel.reltype:
+                image_part = rel.target_part
                 images.append(
                     Media(
-                        data=image.blob,
-                        format=image.ext,
-                        meta={"bytes": len(image.blob)},
-                        origin=f"slide {slide_idx}",
+                        data=image_part.blob,
+                        format=image_part.content_type.split("/")[-1],
+                        meta={"bytes": len(image_part.blob)},
+                        origin=rel_id,
                     )
                 )
-        if slide.has_notes_slide:
-            notes_text = slide.notes_slide.notes_text_frame.text
-            if notes_text:
-                body_lines.append(f"Notes: {notes_text}")
 
-    return Envelope(
-        body="\n\n".join(body_lines),
-        tables=tables,
-        images=images,
-        meta={"format": "pptx", "filename": filename},
-    )
+        return Envelope(
+            body="\n\n".join(body_lines),
+            tables=tables,
+            images=images,
+            meta={"format": "docx", "filename": filename},
+        )
+    except Exception as e:
+        raise IngestError(f"cannot parse docx: {e}") from e
+
+
+def _normalize_xlsx(data: bytes, filename: str) -> Envelope:
+    try:
+        import openpyxl
+    except ImportError as e:
+        raise IngestError(_OFFICE_EXTRA_MESSAGE) from e
+
+    try:
+        wb = openpyxl.load_workbook(io.BytesIO(data), data_only=True, read_only=True)
+        tables: list[Table] = []
+        for ws in wb.worksheets:
+            rows_iter = ws.iter_rows(values_only=True)
+            try:
+                header_row = next(rows_iter)
+            except StopIteration:
+                continue
+            header = [
+                str(h) if h is not None else f"col{i}" for i, h in enumerate(header_row)
+            ]
+            rows = []
+            for row in rows_iter:
+                rows.append(
+                    {
+                        header[i]: ("" if v is None else str(v))
+                        for i, v in enumerate(row)
+                        if i < len(header)
+                    }
+                )
+            tables.append(Table(name=ws.title, rows=rows, origin=f"sheet {ws.title}"))
+
+        return Envelope(
+            body="",
+            tables=tables,
+            meta={"format": "xlsx", "filename": filename},
+        )
+    except Exception as e:
+        raise IngestError(f"cannot parse xlsx: {e}") from e
+
+
+def _normalize_pptx(data: bytes, filename: str) -> Envelope:
+    try:
+        import pptx
+        from pptx.enum.shapes import MSO_SHAPE_TYPE
+    except ImportError as e:
+        raise IngestError(_OFFICE_EXTRA_MESSAGE) from e
+
+    try:
+        prs = pptx.Presentation(io.BytesIO(data))
+        body_lines: list[str] = []
+        tables: list[Table] = []
+        images: list[Media] = []
+        table_idx = 0
+
+        for slide_idx, slide in enumerate(prs.slides, start=1):
+            body_lines.append(f"# Slide {slide_idx}")
+            for shape in slide.shapes:
+                if shape.has_text_frame and shape.text_frame.text:
+                    body_lines.append(shape.text_frame.text)
+                if shape.has_table:
+                    table_idx += 1
+                    shape_table = shape.table
+                    rows_data = list(shape_table.rows)
+                    header = [cell.text for cell in rows_data[0].cells]
+                    rows = []
+                    for row in rows_data[1:]:
+                        cells = [cell.text for cell in row.cells]
+                        rows.append(
+                            {
+                                header[j]: str(cells[j])
+                                for j in range(min(len(header), len(cells)))
+                            }
+                        )
+                    tables.append(
+                        Table(
+                            name=f"table{table_idx}",
+                            rows=rows,
+                            origin=f"slide {slide_idx}",
+                        )
+                    )
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                    image = shape.image
+                    images.append(
+                        Media(
+                            data=image.blob,
+                            format=image.ext,
+                            meta={"bytes": len(image.blob)},
+                            origin=f"slide {slide_idx}",
+                        )
+                    )
+            if slide.has_notes_slide:
+                notes_text = slide.notes_slide.notes_text_frame.text
+                if notes_text:
+                    body_lines.append(f"Notes: {notes_text}")
+
+        return Envelope(
+            body="\n\n".join(body_lines),
+            tables=tables,
+            images=images,
+            meta={"format": "pptx", "filename": filename},
+        )
+    except Exception as e:
+        raise IngestError(f"cannot parse pptx: {e}") from e
 
 
 def _is_homogeneous_list_of_dicts(obj: list) -> bool:

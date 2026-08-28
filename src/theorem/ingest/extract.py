@@ -49,6 +49,25 @@ def _doc_chunks(session, doc_id: str) -> list:
     return chunks
 
 
+def _latest_focus(session) -> str:
+    """Find the most recently set `_focus` prop on any document node (last
+    set by a playbook compile), so extraction picks it up without the
+    caller having to thread it through explicitly."""
+    store = session.store
+    best = ""
+    best_pos = -1
+    for node in store.nodes.values():
+        if node.cls != "document":
+            continue
+        focus = node.props.get("_focus")
+        if not focus:
+            continue
+        if node.last_confirmed > best_pos:
+            best_pos = node.last_confirmed
+            best = focus
+    return best
+
+
 def _header(session, focus: str) -> str:
     parts = [
         "Read the chunk of text below and emit a theorem program that "
@@ -70,6 +89,8 @@ def extract(
     budget: int = 50_000,
     focus: str = "",
 ) -> ExtractReceipt:
+    if not focus:
+        focus = _latest_focus(session)
     receipt = ExtractReceipt()
     header = _header(session, focus)
 

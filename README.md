@@ -50,7 +50,7 @@ One line, one step, one name. Reading it top to bottom is the whole mental model
 
 ## Ingest anything
 
-Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: PDFs, docx/xlsx/pptx, HTML, JSON/YAML, and markdown all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
+Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: markdown, text, CSV, JSON/JSONL, PDFs, docx/xlsx/pptx, and images (stored with metadata) all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
 
 ```bash
 pip install "theorem[pdf,office]"

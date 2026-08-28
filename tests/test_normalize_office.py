@@ -55,6 +55,12 @@ def _fake_ooxml_bytes(member: str) -> bytes:
     return buf.getvalue()
 
 
+def test_docx_corrupt_zip_raises_ingest_error():
+    pytest.importorskip("docx")
+    with pytest.raises(IngestError, match="cannot parse docx"):
+        normalize(_fake_ooxml_bytes("word/document.xml"), "d.docx")
+
+
 def test_docx_without_extra_names_the_extra(monkeypatch):
     monkeypatch.setitem(sys.modules, "docx", None)
     with pytest.raises(IngestError, match=r"theorem\[office\]"):

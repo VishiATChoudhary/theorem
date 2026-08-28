@@ -80,6 +80,26 @@ def test_focus_stored(sess, tmp_path):
     assert "launch dates" in node.props["_focus"].lower()
 
 
+def test_deprecation_survives_restart(tmp_path):
+    db = tmp_path / "db"
+    sess1 = Session(db, Schema.supply_chain())
+    compile_playbook(sess1, _pb(tmp_path), One(RESPONSE), confirm=lambda s: True)
+
+    sess2 = Session(db, Schema.supply_chain())
+    without_edgeclass = (
+        RESPONSE.replace(
+            "derive class competitor from entity with {hq_country: str} quota 50\n",
+            "",
+        )
+        .replace("derive edge competes_with", "derive edge rivals_with")
+        .replace("us: competitor, them: competitor", "us: supplier, them: supplier")
+    )
+    compile_playbook(
+        sess2, _pb(tmp_path), One(without_edgeclass), confirm=lambda s: True
+    )
+    assert sess2.schema.classes["competitor"].status == "deprecated"
+
+
 def test_manual_derive_not_annexed_by_playbook(sess, tmp_path):
     sess.run("derive class handmade from entity with {}")
     r1 = compile_playbook(sess, _pb(tmp_path), One(RESPONSE), confirm=lambda s: True)

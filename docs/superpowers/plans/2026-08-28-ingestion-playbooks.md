@@ -70,11 +70,23 @@ def __post_init__(self):
     b.setdefault("piece", ClassDef("piece", {}))
     b.setdefault(
         "document",
-        ClassDef("document", {"title": "str", "mime": "str", "pages": "int", "sha256": "str"}),
+        ClassDef(
+            "document", {"title": "str", "mime": "str", "pages": "int", "sha256": "str"}
+        ),
     )
-    b.setdefault("chunk", ClassDef("chunk", {"text": "str", "page": "int", "ord": "int"}, base="piece"))
-    b.setdefault("media", ClassDef("media", {"caption": "str", "format": "str", "page": "int"}, base="piece"))
-    self.edges.setdefault("part_of", EdgeDef("part_of", {"piece": "piece", "whole": "document"}))
+    b.setdefault(
+        "chunk",
+        ClassDef("chunk", {"text": "str", "page": "int", "ord": "int"}, base="piece"),
+    )
+    b.setdefault(
+        "media",
+        ClassDef(
+            "media", {"caption": "str", "format": "str", "page": "int"}, base="piece"
+        ),
+    )
+    self.edges.setdefault(
+        "part_of", EdgeDef("part_of", {"piece": "piece", "whole": "document"})
+    )
 ```
 
 If Schema is NOT a dataclass (check first), add the same lines at the end of its `__init__`. In `supply_chain()`, change the `table_blob` ClassDef to pass `base="piece"`.
@@ -319,7 +331,9 @@ def test_deprecation_survives_restart(tmp_path):
 ```python
 def deprecate_class(session, name: str) -> str:
     cdef = session.schema.classes[name]
-    pos = session.store.apply({"op": "lineage", "kind": "deprecate_class", "name": name})
+    pos = session.store.apply(
+        {"op": "lineage", "kind": "deprecate_class", "name": name}
+    )
     cdef.status = "deprecated"
     return f"receipt: class {name} deprecated at @t-{pos}; existing nodes kept, new asserts rejected"
 ```
@@ -529,6 +543,7 @@ def test_split_respects_headings_and_cap():
     chunks = split(body, [])
     assert len(chunks) >= 3  # A splits by cap, B separate
     from theorem.engine.executor import count_tokens
+
     assert all(count_tokens(t) <= 600 for t, _ in chunks)
 
 
@@ -554,7 +569,7 @@ def test_staged_table_is_refinable(sess):
     env = normalize(raw, "parts.csv")
     r = stage(sess, env, "parts.csv", raw)
     out = sess.run(
-        f'refine {r.doc_table_ids[0]} into part with '
+        f"refine {r.doc_table_ids[0]} into part with "
         f'{{name: col "name", unit_cost: col "unit_cost"}} as np'
     )
     assert "refined" in out
@@ -693,7 +708,8 @@ def test_docx_headings_tables():
     t = d.add_table(rows=2, cols=2)
     t.rows[0].cells[0].text, t.rows[0].cells[1].text = "name", "cost"
     t.rows[1].cells[0].text, t.rows[1].cells[1].text = "bolt", "1.0"
-    buf = io.BytesIO(); d.save(buf)
+    buf = io.BytesIO()
+    d.save(buf)
     env = normalize(buf.getvalue(), "r.docx")
     assert "# Big Title" in env.body and "Some prose." in env.body
     assert env.tables[0].rows == [{"name": "bolt", "cost": "1.0"}]
@@ -701,9 +717,13 @@ def test_docx_headings_tables():
 
 def test_xlsx_sheets_to_tables():
     openpyxl = pytest.importorskip("openpyxl")
-    wb = openpyxl.Workbook(); ws = wb.active; ws.title = "Sales"
-    ws.append(["region", "amount"]); ws.append(["EU", 42])
-    buf = io.BytesIO(); wb.save(buf)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Sales"
+    ws.append(["region", "amount"])
+    ws.append(["EU", 42])
+    buf = io.BytesIO()
+    wb.save(buf)
     env = normalize(buf.getvalue(), "s.xlsx")
     assert env.tables[0].name == "Sales"
     assert env.tables[0].rows == [{"region": "EU", "amount": "42"}]
@@ -715,7 +735,8 @@ def test_pptx_slides_and_notes():
     slide = p.slides.add_slide(p.slide_layouts[1])
     slide.shapes.title.text = "Pitch"
     slide.placeholders[1].text = "First bullet"
-    buf = io.BytesIO(); p.save(buf)
+    buf = io.BytesIO()
+    p.save(buf)
     env = normalize(buf.getvalue(), "d.pptx")
     assert "# Slide 1" in env.body and "Pitch" in env.body
 ```
@@ -830,7 +851,9 @@ def staged(tmp_path):
 
 def test_extract_happy_path(staged):
     sess, doc = staged
-    good = 'assert supplier {name: "VoltaChem", country: "DE"} source doc:note.md#p0 as s1'
+    good = (
+        'assert supplier {name: "VoltaChem", country: "DE"} source doc:note.md#p0 as s1'
+    )
     r = extract(sess, doc, ScriptedRunner([good]))
     assert r.chunks_done == 1 and r.chunks_failed == 0
     out = sess.run("find supplier as s\nreturn s.name")
@@ -1014,7 +1037,9 @@ import threading
 
 import pytest
 
-from demo.upload_server import make_server  # refactor main() to expose make_server(db, port=0)
+from demo.upload_server import (
+    make_server,
+)  # refactor main() to expose make_server(db, port=0)
 
 
 @pytest.fixture

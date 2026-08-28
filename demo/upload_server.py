@@ -353,7 +353,11 @@ class Handler(BaseHTTPRequestHandler):
         except RunnerError as e:
             self._json(400, {"error": str(e)})
             return
-        receipt = extract(self.session, doc_id, runner)
+        try:
+            receipt = extract(self.session, doc_id, runner)
+        except RunnerError as e:
+            self._json(400, {"error": str(e)})
+            return
         self._json(
             200,
             {
@@ -387,7 +391,7 @@ class Handler(BaseHTTPRequestHandler):
         if unhinged:
             try:
                 receipt = compile_playbook(self.session, path, runner, unhinged=True)
-            except (ParseError, VerifyError, RuntimeError) as e:
+            except (ParseError, VerifyError, RuntimeError, RunnerError) as e:
                 self._json(400, {"error": str(e)})
                 return
             self._json(
@@ -406,7 +410,7 @@ class Handler(BaseHTTPRequestHandler):
             receipt = compile_playbook(
                 self.session, path, cap, unhinged=False, confirm=lambda text: False
             )
-        except (ParseError, VerifyError) as e:
+        except (ParseError, VerifyError, RunnerError) as e:
             self._json(400, {"error": str(e)})
             return
         blocks = {tag: text.strip() for tag, text in BLOCK_RE.findall(cap.output)}
@@ -439,7 +443,7 @@ class Handler(BaseHTTPRequestHandler):
         replay = _ReplayRunner(program_output)
         try:
             receipt = compile_playbook(self.session, path, replay, unhinged=True)
-        except (ParseError, VerifyError, RuntimeError) as e:
+        except (ParseError, VerifyError, RuntimeError, RunnerError) as e:
             self._json(400, {"error": str(e)})
             return
         self._json(
