@@ -238,13 +238,16 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
             other_cls = edef.roles[other]
             if src_cls in schema.classes and arrival_cls != other_cls:
                 # heterogeneous edge: the source must sit at the other role
-                if src_cls != other_cls and src_cls == arrival_cls:
+                # (a subclass of the role's class counts as sitting there)
+                at_other = schema.is_subclass(src_cls, other_cls)
+                at_arrival = schema.is_subclass(src_cls, arrival_cls)
+                if not at_other and at_arrival:
                     raise VerifyError(
                         line,
                         f'type error: "{src}" is a {src_cls}, which already occupies role '
                         f'"{role}"; to traverse {edge} from {src_cls} arrive at role "{other}"',
                     )
-                if src_cls != other_cls and src_cls != arrival_cls:
+                if not at_other and not at_arrival:
                     raise VerifyError(
                         line,
                         f"type error: {edge} connects {other_cls} ({other}) to "
