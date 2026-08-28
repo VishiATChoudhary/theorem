@@ -89,6 +89,10 @@ Design rules taken from the failure-mode literature:
 - CLI: `theorem ingest file.pdf --db ./db [--extract] [--budget 20000]`.
 - Upload demo: upload triggers normalize+stage synchronously (fast, deterministic); the receipt in the UI shows chunk/table/media counts with page anchors; an "extract" button per document runs stage 3 and streams receipts including dup candidates.
 
+## Repo layout decision (2026-08-28)
+
+Monorepo for now: ingestion lives at `src/theorem/ingest/` with optional extras, demo app stays in `demo/`. Revisit after launch: the clean split is a separate `theorem-ingest` repo depending on `theorem` via pip (NOT a git submodule); only the built-in ingestion classes would remain in core. Nothing in this design blocks that move: ingest code touches the engine exclusively through `Session` and the schema built-ins.
+
 ## Engine/language changes required
 
 1. Built-in ingestion classes + `part_of` edge in every schema (schema.py), like `table_blob` today.
