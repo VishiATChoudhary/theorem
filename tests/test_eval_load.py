@@ -78,7 +78,16 @@ MINI_KG = {
 
 def test_derive_schema():
     schema = derive_schema(MINI_SCHEMA)
-    assert set(schema.classes) == {"team", "player", "person"}
+    assert set(schema.classes) == {
+        "team",
+        "player",
+        "person",
+        "entity",
+        "piece",
+        "document",
+        "chunk",
+        "media",
+    }
     assert schema.classes["team"].props["name"] == "str"
     assert schema.classes["team"].props["inception_year"] == "int"
     assert schema.classes["team"].props["owners"] == "str"  # lists join to str

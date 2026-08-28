@@ -29,7 +29,7 @@ def test_q2_verifies():
 
 def test_unknown_class_suggests():
     msg = err('find vendor where name = "x" as v')
-    assert "did you mean" in msg and "supplier" in msg
+    assert "unknown class" in msg and "vendor" in msg
     assert msg.rstrip().endswith("nothing was executed.")
     assert "line 1" in msg
 

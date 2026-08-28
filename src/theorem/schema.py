@@ -34,6 +34,35 @@ class Schema:
     classes: dict[str, ClassDef] = field(default_factory=dict)
     edges: dict[str, EdgeDef] = field(default_factory=dict)
 
+    def __post_init__(self):
+        b = self.classes
+        b.setdefault("entity", ClassDef("entity", {"name": "str"}))
+        b.setdefault("piece", ClassDef("piece", {}))
+        b.setdefault(
+            "document",
+            ClassDef(
+                "document",
+                {"title": "str", "mime": "str", "pages": "int", "sha256": "str"},
+            ),
+        )
+        b.setdefault(
+            "chunk",
+            ClassDef(
+                "chunk", {"text": "str", "page": "int", "ord": "int"}, base="piece"
+            ),
+        )
+        b.setdefault(
+            "media",
+            ClassDef(
+                "media",
+                {"caption": "str", "format": "str", "page": "int"},
+                base="piece",
+            ),
+        )
+        self.edges.setdefault(
+            "part_of", EdgeDef("part_of", {"piece": "piece", "whole": "document"})
+        )
+
     def is_subclass(self, cls: str, base: str) -> bool:
         """True when cls is base or derives (transitively) from base."""
         cdef = self.classes.get(cls)
@@ -67,6 +96,7 @@ class Schema:
         s.classes["table_blob"] = ClassDef(
             "table_blob",
             {"title": "str", "payload": "str"},
+            base="piece",
             allowed_states={"blob", "composite"},
         )
         s.edges["uses"] = EdgeDef("uses", {"whole": "product", "component": "part"})
