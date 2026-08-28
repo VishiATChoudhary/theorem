@@ -78,3 +78,21 @@ def test_focus_stored(sess, tmp_path):
     r = compile_playbook(sess, _pb(tmp_path), One(RESPONSE), confirm=lambda s: True)
     node = sess.store.nodes[r.doc_id]
     assert "launch dates" in node.props["_focus"].lower()
+
+
+def test_manual_derive_not_annexed_by_playbook(sess, tmp_path):
+    sess.run("derive class handmade from entity with {}")
+    r1 = compile_playbook(sess, _pb(tmp_path), One(RESPONSE), confirm=lambda s: True)
+    assert "handmade" not in r1.applied
+
+    without_edgeclass = (
+        RESPONSE.replace(
+            "derive class competitor from entity with {hq_country: str} quota 50\n", ""
+        )
+        .replace("derive edge competes_with", "derive edge rivals_with")
+        .replace("us: competitor, them: competitor", "us: supplier, them: supplier")
+    )
+    compile_playbook(
+        sess, _pb(tmp_path), One(without_edgeclass), confirm=lambda s: True
+    )
+    assert sess.schema.classes["handmade"].status != "deprecated"

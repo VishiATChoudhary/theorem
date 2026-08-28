@@ -148,7 +148,12 @@ def compile_playbook(
         )
         return receipt
 
-    session.run(program)
+    before = store.position
+    result = session.run(program)
+    if "nothing was executed" in result or result.startswith("error:"):
+        raise RuntimeError(
+            f"playbook {doc_id}: apply of the verified program failed:\n{result}"
+        )
 
     new_names = {
         stmt.name for stmt in stmts if isinstance(stmt, (DeriveClass, DeriveEdge))
@@ -156,6 +161,8 @@ def compile_playbook(
 
     linked_names: list[str] = []
     for rec in store.lineage:
+        if rec.get("_pos", 0) <= before:
+            continue
         if rec.get("kind") in ("derive_class", "derive_edge") and "playbook" not in rec:
             name = rec["child"] if rec["kind"] == "derive_class" else rec["name"]
             rec["playbook"] = doc_id
