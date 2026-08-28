@@ -1,7 +1,7 @@
 # theorem ingestion: non-CSV documents into the graph
 
 Date: 2026-08-28
-Status: draft for review
+Status: implemented (demo branch, 2026-08-28)
 Branch: demo (builds on the upload interface)
 Research: three-agent sweep (extraction tooling, doc-to-KG pipelines, format landscape), 2026-08-28. Key sources cited inline.
 
@@ -131,3 +131,10 @@ Monorepo for now: ingestion lives at `src/theorem/ingest/` with optional extras,
 7. VLM OCR + image captioning extra.
 
 Each step lands green (ruff + pytest) before the next; steps 1-5 need no API keys anywhere.
+
+## Deviations
+
+- JSON arrays with overlapping keys across elements become a single union-column table rather than being rejected or split.
+- The extraction budget check runs pre-runner (spent so far plus the estimated prompt cost), not after the call returns, so a call that would exceed the cap never fires.
+- Structure staging (stage 2) bypasses the dedup pipeline and class quotas by design: document/chunk/table/media nodes are structural, not entities, and are never subject to entity-resolution or instance caps.
+- The `follow` verifier is now subclass-aware, accepting a subclass at an edge role typed to its base (needed for `piece` at the `part_of` roles).

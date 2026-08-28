@@ -1,7 +1,7 @@
 # Playbooks: natural-language use cases compiled to theorem schemas
 
 Date: 2026-08-28
-Status: draft for review
+Status: implemented (demo branch, 2026-08-28)
 Parent spec: `2026-08-28-ingestion-design.md` (playbooks are its schema-source answer)
 
 ## Concept
@@ -107,3 +107,9 @@ Direction (recorded, not designed): each playbook owns its database; an enterpri
 3. Deprecation status + verifier checks.
 4. Compiler prompt + Runner integration + guided/unhinged CLI flow.
 5. Demo UI pane.
+
+## Deviations
+
+- Recompile's deprecation scan walks any playbook-linked lineage, not just the diff against the immediately prior compile, matching the one-playbook-per-db v0 model.
+- Lineage tagging is scoped to records actually written by the current apply, not the whole live schema, so unrelated classes never pick up a spurious playbook link.
+- A second verify failure on the one repair retry is not swallowed: it propagates as an exception, which the CLI catches and prints, rather than being silently absorbed.

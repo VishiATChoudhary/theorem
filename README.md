@@ -48,6 +48,16 @@ return sups.name, n_parts order by n_parts desc budget 2000 tokens
 
 One line, one step, one name. Reading it top to bottom is the whole mental model.
 
+## Ingest anything
+
+Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: PDFs, docx/xlsx/pptx, HTML, JSON/YAML, and markdown all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
+
+```bash
+pip install "theorem[pdf,office]"
+theorem ingest report.pdf --db ./db
+theorem playbook compile playbook.md --db ./db --agent claude
+```
+
 ## Why agents stop failing
 
 - **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result.
