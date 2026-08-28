@@ -170,7 +170,7 @@ def stage(session, envelope: Envelope, filename: str, raw: bytes) -> StageReceip
 
     lines = [
         f"receipt: staged {filename} = {doc_id}",
-        f"  chunks: {len(chunks)}, tables: {len(doc_table_ids)}, media: {media_count}",
+        f"  document: 1, chunks: {len(chunks)}, tables: {len(doc_table_ids)}, media: {media_count}",
     ]
     return StageReceipt(
         doc_id=doc_id,
