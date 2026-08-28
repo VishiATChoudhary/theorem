@@ -57,8 +57,8 @@ Principles from the sweep: classical parser first, VLM only for pages the parser
 
 The Envelope lands as structure nodes using existing engine machinery. New **built-in ingestion classes** joined to every schema (like `table_blob` today):
 
-- `document` {title, mime, pages, sha256} — one per upload, state `blob`
-- `chunk` {text, page, ord} — body split on heading/paragraph boundaries (~200-800 tokens; small chunks improve graph fidelity per the GraphRAG literature, size is the main cost lever)
+- `document` {title, mime, pages, sha256} — one per upload, state `blob`. Re-uploading identical bytes (sha256 match) returns the existing document node with an "already ingested" receipt; no duplicate subgraphs.
+- `chunk` {text, page, ord} — body split heading-first, no overlap, hard cap ~600 tokens (~2.4 KB). Text is stored **inline in node props**: the cap keeps WAL growth at ~1.2x of ingested text, `where text contains ...` keeps working, and `snapshot()` compaction is the pressure valve. A pointer-store variant (text on disk, node holds a ref) is a listed follow-up for multi-GB corpora, not v0.
 - `table_blob` — existing class; each Table becomes one, `attach:` payload, refinable today
 - `media` {caption, format, page} — images; caption empty until stage 3
 
@@ -82,6 +82,19 @@ Design rules taken from the failure-mode literature:
 - **Two-model split** (nano-graphrag): extraction on a small model (the benchmark says Haiku-class models write near-perfect theorem), captioning/summaries on the same or cheaper tier.
 - **Cross-chunk relations**: chunk-local extraction misses them (arXiv 2510.20345). v0 accepts this and documents it; the doc-level second pass is a listed follow-up.
 - **Cost ceiling**: `ingest ... budget N tokens` caps total LLM spend per document; hitting the cap stops extraction with staged structure intact and a receipt saying how far it got. Reference numbers: LightRAG ~1.65k tokens/chunk/call, GraphRAG ~3.4k over 5 calls; Gemini-Flash-class OCR <$0.001/page, Mistral OCR $2-4/1k pages.
+
+### Agent wiring: the Runner protocol
+
+All LLM touchpoints (stage-3 extraction, playbook compilation per `2026-08-28-playbook-design.md`, image captioning) go through one abstraction:
+
+```python
+class Runner(Protocol):
+    def run(self, prompt: str) -> str: ...
+```
+
+Shipped adapters, selected with `--agent <name>`: `claude` (`claude -p` subprocess, the eval-harness pattern), `codex` (`codex exec`), `copilot` (CLI), `cursor` (`cursor-agent`), `api` (direct Anthropic/OpenAI HTTP using the user's key from `THEOREM_API_KEY`). Library callers can pass any callable. No adapter is a hard dependency; subprocess adapters need only the respective CLI on PATH. The eval harness migrates to Runner later (tracked, not in scope).
+
+Extraction-time `derive class` proposals from the agent are OFF in v0: the playbook is the schema path; out-of-schema entities are verifier rejections by design.
 
 ### Surface
 
