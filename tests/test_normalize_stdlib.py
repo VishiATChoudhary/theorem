@@ -39,3 +39,13 @@ def test_binary_rejected():
 def test_pdf_without_extra_names_the_extra():
     with pytest.raises(IngestError, match=r"theorem\[pdf\]"):
         normalize(b"%PDF-1.7", "d.pdf")
+
+
+def test_json_overlapping_keys_union():
+    env = normalize(b'[{"a": "1", "b": "2"}, {"a": "3"}]', "d.json")
+    assert env.body == ""
+    assert len(env.tables) == 1
+    assert set(env.tables[0].rows[0].keys()) == {"a", "b"}
+    assert set(env.tables[0].rows[1].keys()) == {"a", "b"}
+    assert env.tables[0].rows[0] == {"a": "1", "b": "2"}
+    assert env.tables[0].rows[1] == {"a": "3", "b": ""}

@@ -119,51 +119,70 @@ def normalize(data: bytes, filename: str) -> Envelope:
     if fmt == "pdf":
         try:
             spec = importlib.util.find_spec("theorem.extras.pdf")
-            if spec is None:
-                raise IngestError("PDF support requires: pip install 'theorem[pdf]'")
         except (ModuleNotFoundError, ValueError):
-            raise IngestError(
-                "PDF support requires: pip install 'theorem[pdf]'"
-            ) from None
+            spec = None
+        if spec is None:
+            raise IngestError("PDF support requires: pip install 'theorem[pdf]'")
         raise IngestError("PDF handler not yet implemented (Task 8)")
 
     if fmt == "docx" or fmt == "xlsx" or fmt == "pptx":
         try:
             spec = importlib.util.find_spec("theorem.extras.office")
-            if spec is None:
-                raise IngestError(
-                    "Office format support requires: pip install 'theorem[office]'"
-                )
         except (ModuleNotFoundError, ValueError):
+            spec = None
+        if spec is None:
             raise IngestError(
                 "Office format support requires: pip install 'theorem[office]'"
-            ) from None
+            )
         raise IngestError("Office handler not yet implemented (Task 9)")
 
     raise IngestError(f"Unknown format: {fmt}")
 
 
 def _is_homogeneous_list_of_dicts(obj: list) -> bool:
-    """Check if a list is homogeneous (all dicts with identical or overlapping keys)."""
+    """Check if a list is homogeneous: all dicts with scalar values and overlapping keys.
+
+    Overlapping means keys share at least one common key or are identical.
+    Non-scalar values (lists, dicts, etc.) return False to keep as body.
+    """
     if not obj or not all(isinstance(item, dict) for item in obj):
         return False
 
     if len(obj) == 1:
-        return True
+        return all(_is_scalar(v) for v in obj[0].values())
 
-    first_keys = set(obj[0].keys())
-    for item in obj[1:]:
-        if set(item.keys()) != first_keys:
+    all_keys = set()
+    for item in obj:
+        if not all(_is_scalar(v) for v in item.values()):
+            return False
+        all_keys.update(item.keys())
+
+    if not all_keys:
+        return False
+
+    for item in obj:
+        item_keys = set(item.keys())
+        if not item_keys.intersection(all_keys):
             return False
 
     return True
 
 
+def _is_scalar(value) -> bool:
+    """Check if a value is a scalar (str, int, float, bool, None)."""
+    return isinstance(value, (str, int, float, bool, type(None)))
+
+
 def _dictlist_to_rows(obj: list) -> list[dict[str, str]]:
-    """Convert list of dicts to rows with string values."""
+    """Convert list of dicts to rows with string values, union keys, fill missing with empty string."""
+    all_keys = set()
+    for item in obj:
+        if isinstance(item, dict):
+            all_keys.update(item.keys())
+
     rows = []
     for item in obj:
         if isinstance(item, dict):
-            row = {k: str(v) for k, v in item.items()}
+            row = {k: str(item.get(k, "")) for k in all_keys}
             rows.append(row)
     return rows
