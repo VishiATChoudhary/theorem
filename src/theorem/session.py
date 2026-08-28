@@ -69,6 +69,10 @@ class Session:
                 self.schema.edges.setdefault(
                     rec["name"], EdgeDef(rec["name"], dict(rec["roles"]))
                 )
+            elif kind == "deprecate_class":
+                name = rec["name"]
+                if name in self.schema.classes:
+                    self.schema.classes[name].status = "deprecated"
 
     def run(self, text: str) -> str:
         try:

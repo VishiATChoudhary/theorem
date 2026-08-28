@@ -13,7 +13,7 @@ class ClassDef:
     props: dict[str, str]  # prop name -> type name: str|int|float|bool
     base: str | None = None
     allowed_states: set[str] = field(default_factory=lambda: set(GRANULARITY_STATES))
-    status: str = "stable"  # stable | provisional
+    status: str = "stable"  # stable | provisional | deprecated
     quota: int | None = None
     dedup_threshold: float | None = None
 

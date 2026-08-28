@@ -465,6 +465,15 @@ def _derive_edge(stmt: DeriveEdge, ctx: WriteContext) -> Receipt:
     return Receipt([f"receipt: edge {stmt.name} declared at @t-{pos}"])
 
 
+def deprecate_class(session, name: str) -> str:
+    cdef = session.schema.classes[name]
+    pos = session.store.apply(
+        {"op": "lineage", "kind": "deprecate_class", "name": name}
+    )
+    cdef.status = "deprecated"
+    return f"receipt: class {name} deprecated at @t-{pos}; existing nodes kept, new asserts rejected"
+
+
 def execute_write(stmt: Stmt, ctx: WriteContext) -> Receipt:
     match stmt:
         case AssertNode():

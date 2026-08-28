@@ -303,6 +303,11 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
 
         case AssertNode(cls=cls, props=props, name=name):
             _check_class(schema, cls, line)
+            if schema.classes[cls].status == "deprecated":
+                raise VerifyError(
+                    line,
+                    f'class "{cls}" is deprecated (playbook change); existing data remains queryable',
+                )
             all_props = schema.all_props(cls)
             for prop, value in props.items():
                 if prop not in all_props:
