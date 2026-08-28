@@ -375,7 +375,9 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case Retire(ref=ref) | Flag(ref=ref):
             _ref_type(ref, env, line)
 
-        case DeriveClass(name=name, base=base, props=dprops):
+        case DeriveClass(
+            name=name, base=base, props=dprops, quota=dquota, dedup=ddedup
+        ):
             if base not in schema.classes:
                 raise VerifyError(
                     line,
@@ -402,7 +404,8 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 props=dict(dprops),
                 base=base,
                 status="provisional",
-                quota=500,  # keep verify-time staging identical to execution
+                quota=dquota or 500,  # keep verify-time staging identical to execution
+                dedup_threshold=ddedup,
             )
 
         case DeriveEdge(name=name, roles=roles):

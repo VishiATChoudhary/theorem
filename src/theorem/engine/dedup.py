@@ -43,13 +43,15 @@ def _evidence(store: Store, a: Node, b: Node) -> str:
     return "; ".join(bits)
 
 
-def _candidate(store: Store, a: Node, b: Node) -> dict | None:
+def _candidate(
+    store: Store, a: Node, b: Node, threshold: float = SIM_THRESHOLD
+) -> dict | None:
     if a.id == b.id or a.cls != b.cls:
         return None
     if frozenset((a.id, b.id)) in store.distinct_pairs:
         return None
     score = _similarity(a.props.get("name", a.id), b.props.get("name", b.id))
-    if score < SIM_THRESHOLD:
+    if score < threshold:
         return None
     return {
         "a": a.id,
@@ -60,7 +62,9 @@ def _candidate(store: Store, a: Node, b: Node) -> dict | None:
     }
 
 
-def sync_candidates(store: Store, node: Node) -> list[dict]:
+def sync_candidates(
+    store: Store, node: Node, threshold: float = SIM_THRESHOLD
+) -> list[dict]:
     """Blocking stage: same class + same normalized-name prefix."""
     key = block_key(node.cls, node.props.get("name", ""))
     out = []
@@ -72,7 +76,7 @@ def sync_candidates(store: Store, node: Node) -> list[dict]:
             or block_key(other.cls, other.props.get("name", "")) != key
         ):
             continue
-        cand = _candidate(store, other, node)
+        cand = _candidate(store, other, node, threshold=threshold)
         if cand:
             out.append(cand)
     return out

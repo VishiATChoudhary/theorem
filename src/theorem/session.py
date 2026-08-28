@@ -63,6 +63,7 @@ class Session:
                     base=rec.get("parent"),
                     status="provisional",
                     quota=rec.get("quota", 500),
+                    dedup_threshold=rec.get("dedup"),
                 )
             elif kind == "derive_edge":
                 self.schema.edges.setdefault(

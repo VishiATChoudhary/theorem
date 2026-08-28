@@ -126,7 +126,8 @@ def _assert_node(stmt: AssertNode, ctx: WriteContext) -> Receipt:
         props["_rows"] = rows
     pos = store.apply(record)
     ctx.env[stmt.name] = nid
-    cands = dedup.sync_candidates(store, store.nodes[nid])
+    threshold = ctx.schema.classes[stmt.cls].dedup_threshold or dedup.SIM_THRESHOLD
+    cands = dedup.sync_candidates(store, store.nodes[nid], threshold=threshold)
     dedup.record(store, cands)
     display = [
         {**c, "name": store.nodes[c["a"]].props.get("name", c["a"])} for c in cands
@@ -412,6 +413,7 @@ def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
     schema = ctx.schema
     # durable record FIRST: if the append fails, the live schema must not
     # hold a class that would silently vanish on restart
+    quota = stmt.quota or PROVISIONAL_QUOTA
     pos = ctx.store.apply(
         {
             "op": "lineage",
@@ -419,7 +421,8 @@ def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
             "child": stmt.name,
             "parent": stmt.base,
             "props": stmt.props,
-            "quota": PROVISIONAL_QUOTA,
+            "quota": quota,
+            "dedup": stmt.dedup,
         }
     )
     schema.classes[stmt.name] = ClassDef(
@@ -427,11 +430,12 @@ def _derive(stmt: DeriveClass, ctx: WriteContext) -> Receipt:
         props=dict(stmt.props),
         base=stmt.base,
         status="provisional",
-        quota=PROVISIONAL_QUOTA,
+        quota=quota,
+        dedup_threshold=stmt.dedup,
     )
     lines = [
         f"receipt: class {stmt.name} provisional at @t-{pos}",
-        f"  quota: {PROVISIONAL_QUOTA} instances; promotion needs stable use + dedup review",
+        f"  quota: {quota} instances; promotion needs stable use + dedup review",
     ]
     similar = difflib.get_close_matches(
         stmt.name, [c for c in schema.classes if c != stmt.name], n=1, cutoff=0.7

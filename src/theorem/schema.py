@@ -15,6 +15,7 @@ class ClassDef:
     allowed_states: set[str] = field(default_factory=lambda: set(GRANULARITY_STATES))
     status: str = "stable"  # stable | provisional
     quota: int | None = None
+    dedup_threshold: float | None = None
 
 
 @dataclass

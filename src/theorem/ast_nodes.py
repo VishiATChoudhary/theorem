@@ -143,6 +143,8 @@ class DeriveClass(Stmt):
     name: str
     base: str
     props: dict[str, str]  # prop name -> type name (str|int|float|bool)
+    quota: int | None = None
+    dedup: float | None = None
 
 
 @dataclass

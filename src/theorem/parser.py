@@ -236,6 +236,9 @@ class _Parser:
     def propdecls(self) -> dict[str, str]:
         self.expect_punct("{")
         out: dict[str, str] = {}
+        if self.peek() == ("punct", "}"):
+            self.i += 1
+            return out
         while True:
             key = self.expect_name()
             self.expect_punct(":")
@@ -520,7 +523,27 @@ class _Parser:
         self.expect_word("from")
         base = self.expect_name()
         self.expect_word("with")
-        return DeriveClass(name, base, self.propdecls())
+        props = self.propdecls()
+        quota: int | None = None
+        dedup: float | None = None
+        while self.at_word("quota") or self.at_word("dedup"):
+            clause = self.next()[1]
+            if clause == "quota":
+                quota = self._int(self.next(), "quota", 1)
+            else:
+                t = self.next()
+                if t[0] != "number":
+                    raise ParseError(
+                        self.line_no, f"expected a dedup threshold, got {t[1]!r}"
+                    )
+                value = float(t[1])
+                if not (0 < value <= 1):
+                    raise ParseError(
+                        self.line_no,
+                        f"dedup threshold must be in (0, 1], got {value}",
+                    )
+                dedup = value
+        return DeriveClass(name, base, props, quota=quota, dedup=dedup)
 
     def parse_schema(self) -> SchemaStmt:
         return SchemaStmt()
