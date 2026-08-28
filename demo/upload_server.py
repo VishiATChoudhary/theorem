@@ -23,8 +23,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from theorem.schema import Schema  # noqa: E402
-from theorem.session import Session  # noqa: E402
+from theorem.schema import Schema
+from theorem.session import Session
 
 MAX_BYTES = 50 * 1024 * 1024  # 50 MB per file
 
