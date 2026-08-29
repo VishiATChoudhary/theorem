@@ -425,6 +425,29 @@ def report(model: str, strict: bool = True) -> None:
     def ex_of(rs):
         return round(sum(r["ex"] for r in rs) / len(rs), 4) if rs else None
 
+    # Two v0 data-model gaps make some questions unreachable no matter
+    # what query the model writes: list[str] properties load as
+    # comma-joined strings (so a list-valued gold cell can never match),
+    # and edge properties are not loaded at all (so gold queries that
+    # filter on r0.<prop> cannot be expressed). Counted from the data
+    # rather than asserted, so the ceiling sits next to the score.
+    import re as _re
+
+    scored = {r["qid"] for r in all_results}
+    list_gold, edge_prop = set(), set()
+    for q in questions_for():
+        if q["qid"] not in scored:
+            continue
+        if any(
+            isinstance(c, list)
+            for row in json.loads(q["answer_json"])
+            for c in (row if isinstance(row, list) else [row])
+        ):
+            list_gold.add(q["qid"])
+        if _re.search(r"\br\d+\.\w+", q["gold_cypher"]):
+            edge_prop.add(q["qid"])
+    unreachable = list_gold | edge_prop
+
     summary = {
         "benchmark": "CypherBench test set (megagonlabs/cypherbench)",
         "protocol": (
@@ -447,6 +470,20 @@ def report(model: str, strict: bool = True) -> None:
         "held_out_n": sum(r["graph"] != "nba" for r in all_results),
         "executable_pct": round(
             sum(r["executable"] for r in all_results) / n, 4
+        ),
+        "structurally_unreachable": {
+            "list_valued_gold": len(list_gold),
+            "needs_edge_properties": len(edge_prop),
+            "total": len(unreachable),
+            "pct_of_scored": round(100 * len(unreachable) / n, 1),
+            "note": (
+                "theorem v0 loads list[str] properties as comma-joined "
+                "strings and loads no edge properties, so these questions "
+                "cannot be answered regardless of the query written"
+            ),
+        },
+        "ex_excluding_unreachable": ex_of(
+            [r for r in all_results if r["qid"] not in unreachable]
         ),
         "by_graph": {
             g: ex_of([r for r in all_results if r["graph"] == g]) for g in by("graph")
