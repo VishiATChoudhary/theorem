@@ -76,16 +76,35 @@ def llm(prompt: str, model: str, cache_key: str) -> str:
     cache_file = CACHE / f"{cache_key}-{digest}.txt"
     if cache_file.exists():
         return cache_file.read_text()
-    result = subprocess.run(
-        ["claude", "-p", "--model", model, "--max-turns", "1"],
-        input=prompt,
-        capture_output=True,
-        text=True,
-        timeout=300,
-    )
-    text = _extract_query(result.stdout)
-    cache_file.write_text(text)
-    return text
+    # A failed CLI call (rate limit, transport error) must never be cached
+    # as if it were the model's answer: that would silently score as a miss
+    # and be indistinguishable from a real one on re-runs.
+    last = ""
+    for attempt in range(5):
+        try:
+            result = subprocess.run(
+                ["claude", "-p", "--model", model, "--max-turns", "1"],
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+        except subprocess.TimeoutExpired:
+            last = "timeout"
+            time.sleep(5 * 2**attempt)
+            continue
+        if result.returncode != 0 or not result.stdout.strip():
+            last = f"rc={result.returncode} stderr={result.stderr.strip()[:200]}"
+            time.sleep(5 * 2**attempt)
+            continue
+        text = _extract_query(result.stdout)
+        if not text.strip():
+            last = f"empty after extraction from {result.stdout.strip()[:200]!r}"
+            time.sleep(5 * 2**attempt)
+            continue
+        cache_file.write_text(text)
+        return text
+    raise RuntimeError(f"llm call failed after 5 attempts ({cache_key}): {last}")
 
 
 GL_VERBS = (

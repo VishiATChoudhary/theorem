@@ -283,6 +283,30 @@ def _group(stmt: GroupBy, table: Table, store: Store, schema: Schema) -> None:
     table.group_meta[stmt.name] = (stmt.col, kind)
 
 
+def _dedup(values: list) -> list:
+    """Order-preserving dedup in linear time.
+
+    Hashable values go through a set; unhashable ones (list-valued
+    properties) fall back to a linear scan over just those. Equality
+    semantics match a plain `in` test, since a set membership test still
+    compares with == after the hash lookup.
+    """
+    seen: set = set()
+    seen_unhashable: list = []
+    out = []
+    for v in values:
+        try:
+            if v in seen:
+                continue
+            seen.add(v)
+        except TypeError:
+            if v in seen_unhashable:
+                continue
+            seen_unhashable.append(v)
+        out.append(v)
+    return out
+
+
 def _agg_compute(op: str, values: list):
     if op == "count":
         return len(values)
@@ -304,11 +328,7 @@ def _global_aggregate(
     prop = stmt.col[1] if len(stmt.col) > 1 else None
     raw = [row.get(stmt.col[0]) for row in table.rows]
     if stmt.distinct:
-        seen = []
-        for v in raw:
-            if v not in seen:
-                seen.append(v)
-        raw = seen
+        raw = _dedup(raw)
     values = []
     for v in raw:
         if prop is not None and isinstance(v, str) and v in store.nodes:
@@ -351,11 +371,7 @@ def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> N
         members = row[f"__members_{gname}"]
         raw = [m.get(member) for m in members]
         if stmt.distinct:
-            seen = []
-            for v in raw:
-                if v not in seen:
-                    seen.append(v)
-            raw = seen
+            raw = _dedup(raw)
         values = []
         for v in raw:
             if prop is not None and isinstance(v, str) and v in store.nodes:
