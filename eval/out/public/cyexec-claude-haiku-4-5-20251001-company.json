@@ -1,0 +1,2448 @@
+[
+ {
+  "qid": "ec629349-03ee-4273-8a1a-8e63e7d5416c",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Russia\"}), (c)-[:hasBoardMember]->(p:Person) RETURN p.name, COUNT(DISTINCT c) AS company_count ORDER BY p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "de8db4ea-7c7b-438e-81f1-50625f6ed2ad",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)<-[:foundedBy]-(c:Company)-[:hasBoardMember]->(p) WHERE p.date_of_death > date('1940-05-05') RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "fb1c2211-aaf4-478a-b662-7c7f145843e0",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)<-[:foundedBy]-(c:Company)-[:hasBoardMember]->(p) WHERE NOT \"Austria\" IN p.country_of_citizenship RETURN p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f321016e-9987-41d7-bc22-408e09ec7377",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (agrofert:Company {name: \"Agrofert\"})-[:hasBoardMember]->(person:Person) MATCH (company:Company)-[:hasCEO]->(person) RETURN company.name, COUNT(DISTINCT person) as ceo_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b4dc9707-9e05-4a21-b9bf-ca104b12ed8e",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:hasCEO]->(normanWelsh:Person {name: \"Norman Welsh\"}) MATCH (c)-[:hasCEO]->(person:Person) RETURN person.name, COUNT(DISTINCT c) as company_count GROUP BY person.name ORDER BY company_count DESC",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n"
+ },
+ {
+  "qid": "87e3ee59-713e-4680-b3aa-2602cfbd3c0f",
+  "category": "special_optional-match",
+  "query": "MATCH (viacom:Company {name: \"Viacom\"})-[:foundedBy]->(founder:Person) OPTIONAL MATCH (ceoCompany:Company)-[:hasCEO]->(founder) RETURN founder.name, count(DISTINCT ceoCompany)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1b64800c-e1b6-4227-8319-d80288b85362",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (company:Company {name: \"Global Market Insite\"})-[:foundedBy]->(person:Person), (company)-[:hasCEO]->(person) RETURN person.name, person.country_of_citizenship",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "06a7285f-4e63-4063-ad67-bacda45623fe",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (p:Person {name: \"Jason Jones\"})<-[:foundedBy]-(c:Company)-[:basedIn]->(country:Country {name: \"United States of America\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "497b2c40-c7f8-4c01-a277-e6e2ce8b6459",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:operatesIn]->(:Industry {name: \"publishing\"}) OR (c)-[:hasCEO]->(:Person {name: \"Nancy McKinstry\"}) RETURN count(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e1d62dfa-bd82-4e27-8348-fee338a05752",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"Mercedes-AMG\"})-[rel:hasCEO]->(p:Person) WHERE rel.start_year <= 1999 AND (rel.end_year >= 1999 OR rel.end_year IS NULL) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cce3e0f6-aeaf-4a24-bc34-24bc0327af26",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"John Alexander Thain\"}) RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "885ff11b-d708-451e-80e4-493fdff56895",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"Best Buy\"})-[rel:hasBoardMember]->(p:Person) WHERE rel.start_year <= 2009 AND (rel.end_year >= 2009 OR rel.end_year IS NULL) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dac46171-f5ec-4da4-9b64-b16c50231cd5",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (subsidiary:Company {name: 'Novo Nordisk (Germany)'})-[:subsidiaryOf]->(parent:Company) RETURN parent.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "02d9ea12-735c-4b19-a71e-d62313e1eb15",
+  "category": "special_comparison",
+  "query": "MATCH (c1:Company {name: \"Fresenius Kabi\"})-[:basedIn]->(country1:Country {name: \"United States\"}), (c2:Company {name: \"Plaza & Jan\u00e9s\"}) RETURN CASE WHEN c1.launch_year > c2.launch_year THEN c1.name ELSE c2.name END",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "45f852bc-4ee8-4233-b36e-d3584f6b63a2",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"Canada\"}), (c)-[:operatesIn]->(ind:Industry) RETURN ind.name, count(DISTINCT c) ORDER BY ind.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d987b804-24f6-4734-9100-b9ff4b2716c6",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (company:Company)-[:operatesIn]->(industry:Industry {name: \"Footwear\"}), (company)-[:foundedBy]->(founder:Person) RETURN DISTINCT founder.name, founder.gender",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "7195c29e-78fa-42c2-96c5-6e837d0f8506",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (company:Company)-[hasCEO]->(ceo:Person {name: \"Neal Harmon\"}), (company)-[subsidiaryOf]->(parent:Company {name: \"VidAngel\"}) RETURN company.name, company.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "bf6089e4-cc8f-4218-86b4-6a85d1eb9ef5",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (boeing:Company {name: \"Boeing\"})-[:hasBoardMember]->(person:Person)<-[:hasBoardMember]-(company:Company) WHERE company.name <> \"Boeing\" RETURN company.name, COUNT(DISTINCT person) as shared_board_members ORDER BY shared_board_members DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2de41510-aef6-4d3c-a90d-febc402f60ff",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (country:Country {name: \"Czech Republic\"})<-[:basedIn]-(company:Company)-[:hasCEO]->(person:Person) RETURN DISTINCT person.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e0f80706-4e91-492a-9269-9b082f8f3ea2",
+  "category": "special_optional-match",
+  "query": "MATCH (parent:Company {name: 'Liberty Media'})<-[:subsidiaryOf]-(subsidiary:Company) OPTIONAL MATCH (subsidiary)-[:hasBoardMember]->(member:Person) RETURN subsidiary.name, COUNT(DISTINCT member) as board_member_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "912c80df-b3d3-4873-9b31-ccd3e1d5e84e",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasBoardMember]->(p:Person {name: \"Charles Prince\"}) WHERE r.start_year <= 2006 AND (r.end_year >= 2006 OR r.end_year IS NULL) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "aa2123ed-884e-483c-a769-0d6ed93bf6b0",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (meta:Company {name: \"Meta Platforms\"})<-[:subsidiaryOf]-(sub:Company)-[:operatesIn]->(industry:Industry {name: \"video game\"}) RETURN sub.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "07db2eb1-ea95-42a4-ab69-45f44fbe569f",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"academic publishing\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3ac487b6-9f39-4dfe-a5fa-78d54347c97f",
+  "category": "basic_(n)",
+  "query": "MATCH (c:Country) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0df54707-df68-4abb-aee6-fe3a3e929238",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:basedIn]->(:Country {name: \"Italy\"}) OR (c)-[:operatesIn]->(:Industry {name: \"ferrous metallurgy\"}) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b7c7d9df-34e6-4267-8945-d0b9b3a8908b",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Tikhon Bernstam\"})<-[:foundedBy]-(company:Company)-[:subsidiaryOf]->(parentCompany:Company) RETURN parentCompany.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2186ba3e-a8bd-4362-b159-9a9afd3b82f6",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Marie-Etienne Nitot\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3e815bd2-daee-4999-94b7-09f4154eae0f",
+  "category": "special_optional-match",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"Groupe Flammarion\"}) OPTIONAL MATCH (subsidiary)<-[:foundedBy]-(founder:Person) RETURN subsidiary.name, COUNT(DISTINCT founder) as founder_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1491baf3-9f2b-4839-b048-91331a40e3ef",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasBoardMember]->(p:Person {name: \"Bret Taylor\"}) WHERE r.end_year IS NULL RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "40078186-50d6-40a7-8238-de00317f7243",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (ge:Company {name: \"General Electric\"})-[:hasBoardMember]->(person:Person)<-[:foundedBy]-(company:Company) RETURN DISTINCT company.name, company.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0c0632d7-f6ec-4358-aff0-acaf20702c74",
+  "category": "basic_(n*)",
+  "query": "MATCH (p:Person {name: \"Paul Stone\"}) RETURN p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "190ffdab-74a0-49cf-bdf3-0291a6a51214",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[hasCEO]->(p:Person) RETURN COUNT(DISTINCT p)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2c59ae92-faeb-4ded-b7e6-65c1cba134ed",
+  "category": "special_union",
+  "query": "MATCH (c:Company) OPTIONAL MATCH (c)-[:hasCEO]->(ceo:Person {name: \"Andreas Sommer\"}) OPTIONAL MATCH (c)-[:foundedBy]->(founder:Person {name: \"Ita Wegman\"}) WHERE ceo IS NOT NULL OR founder IS NOT NULL RETURN count(c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "bc8aed5c-fb6d-4f55-aae2-2f64bea028f8",
+  "category": "basic_(n*)",
+  "query": "MATCH (c:Company {name: \"PENAM\"}) RETURN c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8536d1ef-cb04-4bc6-8f9a-4aff1279dc0f",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person) RETURN p.name ORDER BY p.date_of_birth DESC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "00ec91ca-2f65-4eb3-9da7-2e3aa46220d1",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(:Person {name: \"Gunnar Hordvik\"}) RETURN c.name UNION MATCH (c:Company)-[:subsidiaryOf]->(:Company {name: \"EMI\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "414df7ab-7e3f-4eda-9621-30d922b3e9ac",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Bardel Entertainment\"})-[:operatesIn]->(ind:Industry)<-[:operatesIn]-(c2:Company) WHERE c1.name <> c2.name RETURN DISTINCT c2.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e57cf025-2507-4ce2-af6b-b2eb2037d3f7",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"United States of America\"}), (c)-[:hasBoardMember]->(:Person {name: \"Hiro Kamezawa\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "02873c87-09f4-44f5-a1ee-08834d82a91c",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Gerald Johnson\"}), (c)-[:operatesIn]->(i:Industry {name: \"mechanical engineering\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1638b795-c406-450d-a391-a52f2cbaaaec",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (company:Company)-[:operatesIn]->(industry:Industry {name: \"tyre\"}), (company)-[:hasCEO]->(ceo:Person) RETURN DISTINCT ceo.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f62f09d8-7e16-4c01-a8a8-ebac7d043c24",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)<-[:hasCEO]-(company1:Company), (p:Person)<-[:foundedBy]-(company2:Company) UNWIND p.country_of_citizenship AS country RETURN DISTINCT country",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3959d772-3747-40b0-af01-bfb05af43e1a",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN c.name ORDER BY c.launch_year ASC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "81e6aa53-fdd2-4720-a5a7-912d53f9b7a6",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (subsidiary:Company {name: 'Novo Nordisk (Germany)'})-[:subsidiaryOf]->(parent:Company) RETURN parent.name, parent.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3cba287f-5604-40f8-a4dc-6ffffa387a78",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:basedIn]->(:Country {name: \"United States of America\"}) OR EXISTS { MATCH (mg:Company {name: \"Mentor Graphics\"})-[:basedIn]->(:Country {name: \"Hungary\"}), (mg)-[:subsidiaryOf]->(c) } RETURN count(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d8da9215-fcc1-447d-8750-5b27abe69f5b",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"United States of America\"}) OPTIONAL MATCH (subsidiary:Company)-[:subsidiaryOf]->(c) RETURN c.name, COUNT(DISTINCT subsidiary) GROUP BY c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n "
+ },
+ {
+  "qid": "6a6299a7-86eb-497e-8f57-958a0f0d7290",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"BFM DICI Haute-Provence\"})-[:basedIn]->(country:Country) RETURN country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9ae96d58-9382-4d41-aeda-6a6837b0b249",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (ph:Person {name: \"Peter Henry\"})<-[:hasBoardMember]-(comp:Company)-[:hasCEO]->(ceo:Person) RETURN ceo.name, COUNT(comp) as company_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0416ddca-12b6-4d60-a9ad-a8ec7ad52b83",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN c.name ORDER BY c.launch_year DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "02635eb5-1b26-413f-9f24-d3250ba78792",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE EXISTS((c)-[:hasBoardMember]->(:Person {name: \"Gerald Hassell\"})) OR EXISTS((c)-[:foundedBy]->(:Person {name: \"Ralph J. Roberts\"})) RETURN COUNT(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "124f4453-1040-4c3f-88d0-e0b4f42ac567",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:operatesIn]->(:Industry {name: \"television\"}) RETURN c.name UNION MATCH (c:Company)-[:basedIn]->(:Country {name: \"Australia\"}) RETURN c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "33e53558-5934-4c21-889c-e274ce76cf23",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person), (c:Company)-[:hasBoardMember]->(p:Person) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0bd58550-5faf-4377-9165-6f43930b1cfd",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (uk:Country {name: \"United Kingdom\"})<-[:basedIn]-(company:Company)-[:basedIn]->(country:Country) WHERE country.name <> \"United Kingdom\" RETURN country.name, COUNT(DISTINCT company) as company_count ORDER BY country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "11bba117-15f6-4144-8d19-2e25e0d568fe",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (parent:Company {name: \"Czech Media Invest\"})<-[:subsidiaryOf]-(subsidiary:Company)<-[:hasBoardMember]-(person:Person) RETURN person.name, COUNT(DISTINCT subsidiary) AS company_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "715bd562-f67a-4013-81bf-f738406035dc",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (gs:Company {name: \"Goldman Sachs\"})-[:hasBoardMember]->(p:Person), (dell:Company {name: \"Dell Inc.\"})-[:hasBoardMember]->(p) RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d26c0538-21b7-4e94-8597-845df745d43d",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (p:Person {name: \"Richard E. Snyder\"})<-[:hasCEO]-(c:Company)-[:basedIn]->(country:Country {name: \"United States of America\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e3ad72d9-b44c-42af-947a-a73aa118bbfc",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:subsidiaryOf]->(:Company {name: \"HSBC\"}) OR (c)-[:basedIn]->(:Country {name: \"Singapore\"}) RETURN count(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2cbad489-8031-49bb-b828-9a2d30372d5c",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (parent:Company {name: \"Interscope Records\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:foundedBy]->(founder:Person {name: \"Vincent Herbert\"}) RETURN subsidiary.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e74576fb-26f3-4047-99b2-e283654fcdc5",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(siriusXM:Company {name: \"Sirius XM\"}), (subsidiary)-[:foundedBy]->(founder:Person) RETURN founder.name, COUNT(subsidiary) ORDER BY founder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9fc52494-794b-42cf-b95c-c98703f7609a",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9bcb3289-7528-4ef2-82dc-aafbc6cda901",
+  "category": "special_optional-match",
+  "query": "MATCH (parent:Company {name: \"Nederlandse Spoorwegen\"})<-[:subsidiaryOf]-(subsidiary:Company) OPTIONAL MATCH (subsidiary)<-[:subsidiaryOf]-(grandchild:Company) RETURN subsidiary.name, COUNT(grandchild) as count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c2cba9ba-a55c-4fa0-8d60-0cae23a19c26",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (yasir:Person {name: \"Yasir Al-Rumayyan\"})<-[:hasBoardMember]-(company:Company)<-[:hasBoardMember]-(person:Person) WHERE person.name <> \"Yasir Al-Rumayyan\" UNWIND person.country_of_citizenship AS country RETURN DISTINCT country",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5b23659d-f8e1-4146-90dd-6b671e5326d1",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"IT service management\"}) WITH c MATCH (c)-[:operatesIn]->(allIndustries:Industry) RETURN c.name, COUNT(DISTINCT allIndustries) as industryCount",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c29cfa66-1f09-40ff-9f7f-6da36f197959",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Howard Miller Clock Company\"})-[:basedIn]->(country:Country), (c2:Company {name: \"Dynetics\"})-[:basedIn]->(country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bbbf6cf5-5092-4944-b4bb-68d88bd4c7f7",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Republic of Ireland\"}) OPTIONAL MATCH (c)-[:operatesIn]->(i:Industry) WITH c.name AS company_name, COUNT(i) AS industry_count RETURN company_name, industry_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "09ccedb5-edbf-43c2-9367-6e58d986eda8",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i1:Industry), (c)-[:operatesIn]->(i2:Industry) WHERE i1.name = \"phonographic\" AND i2.name = \"music\" RETURN c.name ORDER BY c.launch_year ASC LIMIT 1",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "deba817d-c314-4847-958d-4f008e2723ce",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(:Person {name: \"Sergey Brin\"}) OR (:Company {name: \"Jambool\"})-[:subsidiaryOf]->(c:Company) RETURN COUNT(DISTINCT c)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'OR': expected\n  \"(\"\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n  \"UNION\"\n  \"UNWI"
+ },
+ {
+  "qid": "b4a05eea-ab31-4e46-a8d1-6b805db9db7d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Patricia Barbizet\"})<-[:hasBoardMember]-(company:Company)<-[:subsidiaryOf]-(subsidiary:Company) RETURN subsidiary.name, subsidiary.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "539bc7d0-bc54-4d3c-b0c1-cffbaa1bcf08",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person) WHERE p.name IN [\"Jan Nordlund\", \"Stefan Enberg\"] RETURN c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2fe721d8-b7d6-4dea-9578-5f29890874a3",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person {name: \"Marianne Laigneau\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5f37cc43-7c93-4e9e-807d-43d711f179a2",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"Italy\"}), (c)-[:hasCEO]->(p:Person) RETURN p.name, count(c) as num_companies",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3e276f48-8bd4-419a-90a6-f84d5aa530fa",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (mario:Person {name: \"Mario Rossetti\"})<-[:hasCEO]-(subsidiary:Company)<-[:subsidiaryOf]-(parent:Company) RETURN min(parent.launch_year)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "bb499491-c5e3-4ddd-bc2b-a9e807a12fdc",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "973ebbf2-b6a1-4a54-b207-0a73a8722916",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (founder:Person {name: \"Simon Rogerson\"})<-[:foundedBy]-(company:Company)-[:hasCEO]->(ceo:Person) RETURN DISTINCT ceo.name, ceo.country_of_citizenship",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "86dd923f-94b2-49ab-969a-a4c871e4f3e7",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry) WHERE i.name = \"public relations\" AND c.launch_year > 1927 RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c9ccbba0-6f2a-43b4-9991-0f61ed0f4141",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"Bertelsmann\"}), (subsidiary)-[:hasBoardMember]->(person:Person {name: \"Alfred Hugenberg\"}) RETURN subsidiary.name, subsidiary.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e7d6c426-f3dd-4d39-8aed-32e06be95e6e",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (emi:Company {name: \"EMI\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:basedIn]->(country:Country) RETURN country.name, COUNT(subsidiary) as count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ea8ddbe3-0fdc-463d-a83f-d682c121ead9",
+  "category": "special_optional-match",
+  "query": "MATCH (person:Person)<-[:hasCEO]-(github:Company {name: \"GitHub Inc.\"}) WITH person MATCH (person)<-[:hasCEO]-(companies:Company) RETURN person.name, COUNT(DISTINCT companies) AS num_companies",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ba17b87a-7866-4845-8e62-497992ad0611",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3c2dfb06-1020-44f2-9e04-8364c228d768",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)<-[:hasBoardMember]-(c1:Company), (p)<-[:hasCEO]-(c2:Company) RETURN DISTINCT p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "671114b4-ab35-4a48-8653-025711332702",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"Best Buy\"})-[r:hasBoardMember]->(p:Person) WHERE r.end_year IS NULL RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5fb709d0-f406-496f-9fe9-728359e932a4",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Amy Chang\"}), (c)-[:operatesIn]->(i:Industry) RETURN c.name, count(DISTINCT i)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c3fa52d1-ce21-4659-bd60-ea8c4e7c0fe2",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE EXISTS((c)-[:operatesIn]->(:Industry {name: \"phonographic\"})) OR EXISTS((c)-[:subsidiaryOf]->(:Company {name: \"Sony (United Kingdom)\"})) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "4da8006e-5c4a-4632-b3bd-a774cfddd82a",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Richard K. Davis\"}) WITH c MATCH (c)-[:hasCEO]->(ceo:Person) WITH c, COUNT(DISTINCT ceo) as ceo_count RETURN c.name, ceo_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0bcecd63-440e-413f-a2fa-dde2a4df1d5a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (company:Company)-[:operatesIn]->(industry:Industry {name: \"jewelry\"}), (company)-[:basedIn]->(country:Country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "47449fbb-ef29-4980-a994-c2aee30a22e7",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Paul Desmarais, Jr.\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "14c72f2e-097e-4073-9348-3e90e49c1b4a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (cdp:Company {name: \"CDP Reti\"})-[:hasCEO]->(ceo:Person), (other:Company)-[:hasCEO]->(ceo:Person) WHERE other.name <> \"CDP Reti\" RETURN DISTINCT other.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6f1c2b7d-6599-4a83-8e56-6e011e3ce7a2",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (pd:Company {name: \"Parke-Davis\"})-[:operatesIn]->(ind:Industry) MATCH (c:Company)-[:operatesIn]->(ind) WHERE c.name <> \"Parke-Davis\" RETURN c.name, COUNT(DISTINCT ind) as industry_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "741f0d90-0394-4fb7-a0c2-c35d99076dad",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:hasCEO]->(:Person {name: \"Bob Swan\"}) OR (c)-[:operatesIn]->(:Industry {name: \"electrical\"}) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "248750ab-0b65-4bc3-95fc-237e11f3756c",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (emmett:Person {name: \"Emmett Shear\"})<-[:foundedBy]-(company:Company)-[:foundedBy]->(cofounder:Person) WHERE cofounder.date_of_birth.year > 1982 AND cofounder.name <> \"Emmett Shear\" RETURN DISTINCT cofounder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1f1053a4-5998-4d1d-b476-dd473114462e",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(m:Person {name: 'Meg Whitman'}) MATCH (c)-[:hasBoardMember]->(p:Person) WHERE p.name <> 'Meg Whitman' RETURN p.name, COUNT(DISTINCT c) AS num_companies ORDER BY num_companies DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "74c680d7-c6cf-4d6b-a710-54ba212e7249",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (company:Company)-[:hasBoardMember]->(person:Person {name: \"John Alexander Thain\"}) RETURN company.name, company.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "590b6f3b-c9f8-4195-9a79-941c3681d1e6",
+  "category": "special_optional-match",
+  "query": "MATCH (audi:Company {name: \"Audi AG\"})<-[:subsidiaryOf]-(subsidiary:Company) OPTIONAL MATCH (subsidiary)-[:hasBoardMember]->(boardMember:Person) RETURN subsidiary.name, COUNT(DISTINCT boardMember)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c4a2b200-6838-4788-80e3-0a8b5ed45fe1",
+  "category": "special_optional-match",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(ibm:Company {name: \"IBM\"}) OPTIONAL MATCH (subsidiary)<-[:foundedBy]-(founder:Person) RETURN subsidiary.name, COUNT(founder)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "aa009880-8ea4-4052-a375-9dbdf4db97dc",
+  "category": "special_optional-match",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(vw:Company {name: \"Volkswagen Group\"}) OPTIONAL MATCH (subsidiary)-[:hasCEO]->(ceo:Person) RETURN subsidiary.name, COUNT(DISTINCT ceo)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1ad45fec-5651-4467-81d1-6f239823a01f",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Campbell Soup Company\"})-[:hasCEO]->(p:Person) RETURN p.name, p.date_of_death",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b4134040-03fe-4397-8ee4-92ed1c009c46",
+  "category": "special_time-sensitive",
+  "query": "MATCH (gm:Company {name: \"General Motors\"})-[r:hasBoardMember]->(person:Person) WHERE r.end_year IS NULL RETURN person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4fd4c383-5ff8-4f06-ae87-f0feca39e032",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Mexico\"}), (c)-[:operatesIn]->(industry:Industry {name: \"Banking\"}) RETURN c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0545330c-2fcb-48ff-87c9-edccff07d506",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"Electronics\"}), (c)-[:basedIn]->(country:Country) RETURN country.name, count(c) as count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3f131350-952d-4e16-acb4-1b63fc1f4977",
+  "category": "special_comparison",
+  "query": "MATCH (c1:Company {name: \"On2 Technologies\"}), (c2:Company {name: \"LaCie\"}) RETURN c1.launch_year - c2.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "01fa1a43-2752-42bd-8e99-720b4e8204cf",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(:Person {name: \"Makoto Uchida\"}), (:Company {name: \"Nissan New Zealand\"})-[:subsidiaryOf]->(c) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2f9bf3ae-fb6a-4bf4-b332-7ef7ad665cc3",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Oakpont Professionals\"})-[:foundedBy]->(p:Person), (c2:Company {name: \"Oakpont\"})-[:hasBoardMember]->(p) RETURN p.name, p.date_of_birth",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3fd22626-7a61-4ce7-b541-0a7a1691d88e",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (adobe:Company {name: \"Adobe\"})-[:hasBoardMember]->(p:Person), (eli_lilly:Company {name: \"Eli Lilly and Company\"})-[:hasCEO]->(p) RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ecb885df-4581-4fd5-ad3d-59dd0d2bba8e",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry) WHERE LOWER(i.name) CONTAINS 'rail' OPTIONAL MATCH (c)-[:hasCEO]->(p:Person) RETURN c.name, COUNT(DISTINCT p) as ceo_count",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'LOWER' (line 1, column 53 (offset: 52))\n\"MATCH (c:Company)-[:operatesIn]->(i:Industry) WHERE LOWER(i.name) CONTAINS 'rail' OPTIONAL MATCH (c)-[:hasCEO]->(p:Person) RETURN c.name, COUNT(DISTINCT p) as c"
+ },
+ {
+  "qid": "7c517d2c-759a-4b8c-9281-9c274d39336a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company)-[:basedIn]->(country:Country {name: \"Australia\"}) RETURN subsidiary.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "6206308a-d233-42fe-93e7-ff4b66fab0dc",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(parent:Company {name: \"SIE Worldwide Studios\"}), (c)-[:hasCEO]->(ceo:Person {name: \"Andy Gavin\"}) RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "13d87e42-7866-49ac-b252-6382037154bf",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (company:Company)-[:operatesIn]->(:Industry {name: \"payment card\"}), (company)-[:hasBoardMember]->(person:Person) RETURN person.name, COUNT(company) AS num_companies",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "87cf03a4-3c75-4ead-80c5-33ca0665c77b",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"phonographic\"}) OPTIONAL MATCH (c)-[:hasCEO]->(p:Person) RETURN c.name, COUNT(DISTINCT p) as ceo_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "88276312-ced2-4070-8196-878e5ca9a85c",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"Republic of Ireland\"}), (c)-[:operatesIn]->(i:Industry) RETURN i.name, count(c) as company_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "45222c42-dc8a-4143-9e32-b5f2ce69e04b",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Nathan Blecharczyk\"}), (c)-[:operatesIn]->(i:Industry {name: \"business travel\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a7adc553-7912-4f20-b4f2-93adea4f595a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"United States of America\"}), (c)-[:hasCEO]->(:Person {name: \"Ramon Laguarta\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ba410a3f-b7e3-477d-b1d8-fd4873d15358",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Irene Dorner\"})<-[:hasBoardMember]-(company:Company)-[:basedIn]->(country:Country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5a31825e-63f5-400a-8492-ed4f45208bd5",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"France\"}) RETURN MIN(c.launch_year)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e223a46d-65d5-41c8-a447-22393427358b",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person) WHERE p.name IN [\"Thierry Desmarest\", \"Marcel Champin\"] RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bdec44f3-7bf3-44c8-b3ba-19688d861b13",
+  "category": "special_comparison",
+  "query": "MATCH (c1:Company {name: \"Fresenius Kabi\"})-[:basedIn]->(country:Country {name: \"United States\"}) MATCH (c2:Company {name: \"Plaza & Jan\u00e9s\"}) RETURN c1.launch_year - c2.launch_year AS launch_year_difference",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ecd981d6-fdd7-489d-9c3c-536edc72c6f3",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasCEO]->(p:Person {name: \"David M. Solomon\"}) WHERE r.end_year IS NULL RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "03db6dec-9420-45da-a26b-dcb2c812fde5",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (p:Person {name: \"Marie-Etienne Nitot\"})<-[:foundedBy]-(c:Company) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1a13170f-30a5-44af-97c7-85b25ba51a4b",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: 'media and entertainment'}) OPTIONAL MATCH (c)-[:foundedBy]->(p:Person) RETURN c.name, COUNT(p) as founder_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0ac2448e-578c-4999-becc-39991d78bc60",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Sandra Lerner\"}), (okena:Company {name: \"Okena\"})-[:subsidiaryOf]->(c) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f7a809e8-9427-4d65-bc60-1aaa91a91bb7",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:basedIn]->(:Country {name: \"United States of America\"}) OR (c)-[:foundedBy]->(:Person {name: \"Mike Lazzo\"}) RETURN count(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a1734bac-b2a3-4b03-84d9-7b7e29bad544",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Henry A. Clark\"}), (p2:Person {name: \"Harvey Samuel Firestone\"}) RETURN CASE WHEN p1.date_of_death > p2.date_of_death THEN p1.name ELSE p2.name END",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f1920b13-eac6-446b-8aa2-7bb28a809d38",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c1:Company)-[:hasBoardMember]->(p:Person), (c2:Company)-[:hasCEO]->(p) WITH DISTINCT p RETURN p.name ORDER BY p.date_of_death DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0f4fd088-c972-46f7-b024-93506e5b9579",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (:Company)-[:hasBoardMember]->(p:Person) RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "c54d214d-4fc4-4cd5-9d1f-a131a173f90d",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company {name: \"Vista Equity Partners\"})-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN p.name, p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c6f6de57-9a90-4888-84e5-a2cb93ff042b",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(:Company {name: \"Twinkl\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a26fa1a8-6f9a-4f0c-9500-69b2c4d9de8a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (parent:Company {name: \"HSBC\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:foundedBy]->(founder:Person) RETURN founder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cc275fb4-1ce0-485d-92dc-0ed4835668b2",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c1:Company)-[:foundedBy]->(p:Person), (c2:Company)-[:hasCEO]->(p) RETURN DISTINCT p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "967d18fe-342f-439d-b80a-9dd712babcf3",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (high_moon:Company {name: \"High Moon Studios\"})-[:subsidiaryOf]->(parent:Company)<-[:foundedBy]-(founder:Person) RETURN founder.name ORDER BY founder.date_of_birth DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2cf29bd3-e77f-447e-b1db-179df8760500",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(:Company {name: \"H. J. Heinz Company\"}), (subsidiary)-[:basedIn]->(country:Country) RETURN country.name, COUNT(subsidiary) AS company_count ORDER BY country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0925c786-386d-4cd9-b16b-b08293477de8",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) WHERE p.place_of_birth <> 'Taipei' RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8e350335-b73f-469b-9d66-a11b7b5c1724",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"The Coca-Cola Company\"}) RETURN subsidiary.name ORDER BY subsidiary.launch_year DESC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2d542a3f-2321-4a1d-b7c9-913f528979b2",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"mobile phone\"}), (c)-[:basedIn]->(country:Country) RETURN c.name, COUNT(DISTINCT country) AS country_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "afbceadf-4db2-4a88-a68d-f896df98bba6",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person {name: \"Heinrich von Pierer\"}), (c)-[:hasBoardMember]->(boardMember:Person) RETURN boardMember.name, COUNT(DISTINCT c) as companyCount",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "66fd3d1d-dcce-4a0b-a250-eff0c5c515a3",
+  "category": "special_union",
+  "query": "MATCH (oakpont:Company {name: \"Oakpont\"})<-[:foundedBy]-(founder:Person) WITH collect(DISTINCT founder) AS founders MATCH (bell:Company {name: \"Bell Resources\"})<-[:hasBoardMember]-(boardMember:Person) WITH founders, collect(DISTINCT boardMember) AS boardMembers UNWIND (founders + boardMembers) AS person RETURN count(DISTINCT person)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1c41eb5f-64cb-4aec-92dc-91fdd544a81f",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Twinkl\"})-[:foundedBy]->(p:Person {place_of_birth: \"Huntingdon\"}) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cc549a59-3462-4334-bd71-346c27e86efa",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"John Alexander Thain\"}), (c)<-[:foundedBy]-(founder:Person) RETURN founder.name, COUNT(c) as num_companies GROUP BY founder.name ORDER BY founder.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n"
+ },
+ {
+  "qid": "0a92e71c-a013-4c45-91ea-3ee38405f622",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (nai:Company {name: \"Norwegian Air International\"})-[:hasCEO]->(ceo:Person), (other:Company)-[:hasCEO]->(ceo:Person) WHERE other.name <> \"Norwegian Air International\" RETURN other.name, COUNT(DISTINCT ceo) AS ceo_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7da7ccc4-182d-463f-a470-f8e46b613fbd",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person) WHERE p.name IN [\"Gaurdie Banister\", \"Samuel R. Allen\"] RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "424337b3-93c9-43e9-9c7e-1151c7602cf5",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[r:hasCEO]->(p:Person {name: \"Marianne Laigneau\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "53686a8c-e0de-47c2-8316-3ca7da972137",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (person:Person {name: \"Doug McMillon\"}), (company:Company)-[:hasCEO]->(person), (company)-[:operatesIn]->(industry:Industry) RETURN industry.name, COUNT(company) as company_count ORDER BY industry.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6e16e751-1501-420d-99d2-7c64b9b282c5",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: 'Film'}) WITH c OPTIONAL MATCH (c)-[:hasBoardMember]->(p:Person) WITH c, COUNT(DISTINCT p) as boardMemberCount RETURN c.name, boardMemberCount",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a715c952-35fc-47db-91a4-2e93daf5f6d0",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (parent:Company) <-[:subsidiaryOf]- (subsidiary:Company) -[:basedIn]-> (country:Country {name: \"Canada\"}) RETURN parent.name, count(distinct subsidiary) as count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9de1defd-a5f9-4edb-bb42-158e36b4b67c",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Latvijas G\u0101ze\"})-[:subsidiaryOf]->(parent:Company)<-[:subsidiaryOf]-(sister:Company) WHERE sister.name <> \"Latvijas G\u0101ze\" RETURN distinct sister.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c046ec8b-7573-4d4d-bbb2-b0181b8f7564",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country{name:\"Russia\"}), (c)-[:basedIn]->(:Country{name:\"Netherlands\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f88aa75d-839c-4b8a-9d43-3bc6af1e1435",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"hotel\"}) OPTIONAL MATCH (c)-[:basedIn]->(country:Country) WITH c, COUNT(DISTINCT country) AS country_count RETURN c.name, country_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "958f158c-0b0b-425a-b265-9514ab5304dc",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Risa Lavizzo-Mourey\"}) MATCH (c)-[:hasCEO]->(ceo:Person) RETURN c.name, COUNT(DISTINCT ceo) AS ceo_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "eae02bd8-5daa-4d17-86ff-37c42caccbcc",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (company:Company)-[:hasBoardMember]->(person:Person {name: \"Roberto Set\u00fabal\"}), (company)-[:foundedBy]->(founder:Person) RETURN founder.name, count(company) ORDER BY founder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "eaa0ccd8-2bcb-4f4d-95d9-607e2c0fcee9",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (founder:Person {name: \"Marcel Renault\"})<-[:foundedBy]-(company:Company)-[:hasBoardMember]->(boardMember:Person) RETURN boardMember.name, COUNT(DISTINCT company) as company_count ORDER BY boardMember.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d6aa121b-59b4-4892-a087-d5806cacf86a",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Russia\"}) OPTIONAL MATCH (c)-[:hasBoardMember]->(p:Person) RETURN c.name, count(distinct p) as num_board_members",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a026714f-5101-454e-9e22-62a83cc8677a",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Republic of Ireland\"}) OPTIONAL MATCH (c)-[:hasCEO]->(person:Person) RETURN c.name, COUNT(DISTINCT person) as num_ceos",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "d8573cb2-9190-4a5a-8f34-a5842e3770f7",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company {name: \"Disney Platform Distribution\"})-[:subsidiaryOf]->(parent:Company)-[:basedIn]->(country:Country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dc1e77c8-5cbf-41be-b43c-519cc3e5de17",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"3SHAPE HOLDING\"})-[:hasBoardMember]->(person:Person), (c2:Company {name: \"3Shape\"})-[:foundedBy]->(person) RETURN person.name ORDER BY person.date_of_death DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f4df21ed-8607-4729-b29c-ae0e82609998",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Foxconn\"})-[:operatesIn]->(i:Industry) RETURN i.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "863ed1a1-cdde-40f9-b3e7-8b8e00532cd2",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (country:Country {name: \"Czech Republic\"})<-[:basedIn]-(company:Company)-[:hasBoardMember]->(person:Person) RETURN person.name, COUNT(DISTINCT company) AS company_count GROUP BY person.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n"
+ },
+ {
+  "qid": "4ccdeb92-482d-4709-a7e5-5e0d3974f661",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Campbell Soup Company\"})-[:hasCEO]->(p:Person) RETURN p.name, p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "add4e8e9-4369-467e-89bb-b506d8809a01",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN c.name ORDER BY c.launch_year DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e9679f39-5777-4451-842d-7893ea63ca31",
+  "category": "special_optional-match",
+  "query": "MATCH (nike:Company {name: \"Nike\"})-[:hasBoardMember]->(person:Person) OPTIONAL MATCH (person)<-[:hasCEO]-(ceo_company:Company) WITH person, COUNT(DISTINCT ceo_company) as ceo_count RETURN person.name, ceo_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "625ba586-61df-402a-97dd-4f176e9ded1f",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (att:Company {name: \"AT&T\"})-[:hasCEO]->(person:Person), (company:Company)-[:hasBoardMember]->(person) WHERE company <> att RETURN DISTINCT company.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "787b92f5-b202-49e2-b3bf-cf457d556d08",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:hasCEO]->(:Person {name: \"Stefan Hartung\"}) OR (c)<-[:subsidiaryOf]-(:Company {name: \"Bosch (China) Investment\"}) RETURN COUNT(DISTINCT c.name)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "27b81596-acf4-4923-a8fd-fd778c96cb0d",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Seznam.cz\"})-[:hasCEO]->(p:Person {date_of_birth: date(\"1974-02-07\")}) RETURN p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "edbd21b5-5437-4fb9-93f3-1edb37624385",
+  "category": "special_union",
+  "query": "MATCH (p:Person) WHERE EXISTS {(:Company {name: \"Ford Motor Company\"})-[:hasBoardMember]->(p)} OR EXISTS {(:Company {name: \"Deere & Company\"})-[:hasCEO]->(p)} RETURN COUNT(DISTINCT p)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8d040b56-10a7-4104-b16b-aa69f7ea285a",
+  "category": "special_optional-match",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"GE Healthcare\"}) MATCH (subsidiary)-[:operatesIn]->(industry:Industry) WITH subsidiary, COUNT(DISTINCT industry) as industry_count RETURN subsidiary.name, industry_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e9588566-08f0-4473-81e6-67e507817fcf",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN c.name ORDER BY c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "11000304-015e-45bb-b4fb-65cc56032c5a",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (lampiris:Company {name: \"Lampiris\"})-[:subsidiaryOf]->(parent:Company) RETURN parent.name, parent.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a6dc38a4-24b2-42f0-8447-6f389b493b2b",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person), (c)-[:operatesIn]->(i:Industry) WHERE p.place_of_birth = \"Addis Ababa\" AND i.name = \"leisure\" RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "7b252520-76d1-4a07-b093-aa4ba26cec63",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"France\"}) RETURN count(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7ed69b7c-0044-4032-95ec-db7e88ef892d",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(:Person {name: \"Samuel Whitbread\"}) RETURN c.name UNION MATCH (c:Company)-[:hasCEO]->(:Person {name: \"Alison Brittain\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ff2bb410-dd91-4c93-99d1-dd0225719065",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Tennman Records\"})-[:foundedBy]->(p:Person) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f341a916-bdf5-4093-884b-2411fc06f4c8",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (subsidiary:Company) -[:subsidiaryOf]-> (parentCompany:Company), (subsidiary) -[:operatesIn]-> (:Industry {name: \"human resource management\"}) RETURN DISTINCT parentCompany.name, parentCompany.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "021ca5cd-4a8d-4727-886e-8e395c05b070",
+  "category": "special_optional-match",
+  "query": "MATCH (cisco:Company {name: \"Cisco\"})-[:hasBoardMember]->(person:Person) OPTIONAL MATCH (company:Company)-[:hasCEO]->(person) RETURN person.name, COUNT(DISTINCT company) as ceo_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "306b87df-181e-4c0f-aa48-c55f9a6d5a71",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c1:Company {name: 'CCH'})-[:operatesIn]->(ind:Industry)<-[:operatesIn]-(c2:Company {name: 'Adobe'}) RETURN ind.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "25c56dbc-eede-4790-81b9-75a831ad9d5a",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"General Motors\"})-[r:hasBoardMember]->(p:Person) WHERE r.start_year <= 2015 AND (r.end_year IS NULL OR r.end_year >= 2015) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4ab75f05-52ab-40d9-a9c9-cce0f8370ad5",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:hasBoardMember]-(p:Person) WHERE c.name IN [\"Cisco\", \"General Motors\"] RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b95fa3cb-2444-46fe-85b0-65e3f207cbba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(:Person {name: \"David C. Page\"}), (c)-[:hasCEO]->(:Person {name: \"Indra Nooyi\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "24efe50a-745f-40bb-9bd8-7a1e24627952",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (gm:Company {name: \"General Motors\"})-[:hasCEO]->(ceo:Person)<-[:hasBoardMember]-(company:Company) RETURN company.name, COUNT(DISTINCT ceo)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "22436bd9-9dbd-438b-b228-b2b557b8abd8",
+  "category": "special_optional-match",
+  "query": "MATCH (mapbox:Company {name: \"Mapbox\"})-[:hasBoardMember]->(person:Person) WITH person OPTIONAL MATCH (company:Company)-[:foundedBy]->(person) RETURN person.name, COUNT(company) as founded_companies_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3a178fc9-2d5b-4a69-b837-bb6fcb98ff4d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (rr:Company {name: \"Rolls-Royce (Sweden)\"})-[:subsidiaryOf]->(owner:Company)-[:hasBoardMember]->(member:Person) RETURN DISTINCT member.name, member.place_of_birth",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "690c2eda-b3b0-4713-a5ff-bd683ee6adf7",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"General Electric\"})-[r:hasCEO]->(p:Person) WHERE r.start_year <= 2001 AND (r.end_year IS NULL OR r.end_year >= 2001) RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "10ade952-81a8-46db-b52a-00f84416b169",
+  "category": "special_optional-match",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"Mitsubishi\"}) OPTIONAL MATCH (subsidiary)-[:hasCEO]->(ceo:Person) WITH subsidiary.name as companyName, COUNT(DISTINCT ceo) as ceoCount RETURN companyName, ceoCount",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f6d1bff9-f639-4e2f-abc6-4213074941a0",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p1:Person {name: \"Jeffrey O. Henley\"}), (c)-[:hasBoardMember]->(p2:Person {name: \"Larry Ellison\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "445b1ddc-822c-4184-89e5-ab990e5a78ce",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (fiat:Company {name: \"Fiat\"})-[:hasCEO]->(person:Person), (abarth:Company {name: \"Abarth\"})-[:hasCEO]->(person) RETURN DISTINCT person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ed37f200-41c2-4d93-a971-401352e2c025",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (frigidaire:Company {name: \"Frigidaire\"})-[:foundedBy]->(founder:Person) MATCH (founder)-[:foundedBy]->(company:Company) WHERE company.name <> \"Frigidaire\" RETURN company.name, COUNT(DISTINCT founder) AS founder_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "19b30258-105a-4f6d-938a-125c2f49fcbc",
+  "category": "special_comparison",
+  "query": "MATCH (c1:Company {name: \"On2 Technologies\"}), (c2:Company {name: \"LaCie\"}) RETURN c1.launch_year = c2.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "83498c30-4e85-4464-ba3b-5f1c9ca3587d",
+  "category": "basic_(n)",
+  "query": "MATCH (i:Industry) RETURN COUNT(i)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b21a1191-dc66-48e1-9a44-a3e3d7c95521",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"academic publishing\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f7c67d64-d025-48f5-91fc-ca3b7e4bf917",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[ceo:hasCEO]->(p:Person {name: \"Jack J. Pelton\"}) WHERE ceo.start_year <= 2003 AND (ceo.end_year IS NULL OR ceo.end_year >= 2003) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ff3a6f58-d65f-4a2d-a396-46f6124910a3",
+  "category": "special_union",
+  "query": "MATCH (c1:Company)-[:subsidiaryOf]->(marvel:Company {name: \"Marvel Entertainment\"}) RETURN c1.name UNION MATCH (marvel2:Company {name: \"Marvel Music\"})-[:subsidiaryOf]->(c2:Company) RETURN c2.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: All sub queries in an UNION must have the same return column names (line 1, column 100 (offset: 99))\n\"MATCH (c1:Company)-[:subsidiaryOf]->(marvel:Company {name: \"Marvel Entertainment\"}) RETURN c1.name UNION MATCH (marve"
+ },
+ {
+  "qid": "d50e2be9-3b27-457f-843d-9417fecb322b",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (company:Company {name: \"Soci\u00e9t\u00e9 G\u00e9n\u00e9rale\"})-[:hasBoardMember]->(person:Person) RETURN person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1283418d-3c85-4f65-a4cb-36c4ef2e040d",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN c.name ORDER BY c.launch_year DESC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "af8cd776-900f-40fb-a2f0-d2767d6c230a",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Dan Schulman\"}), (p2:Person {name: \"Ivo Luka\u010dovi\u010d\"}) RETURN CASE WHEN p1.date_of_birth > p2.date_of_birth THEN p1.name ELSE p2.name END",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9f6dd7cb-ecf8-4e12-8895-2ce5dd99af9f",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (industry:Industry {name: \"petroleum\"})<-[:operatesIn]-(company:Company)-[:hasCEO]->(person:Person) RETURN person.name, COUNT(DISTINCT company) AS companyCount",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "eec06131-e73b-4c9a-8dfb-2e87dfbcdf93",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (founder:Person {name: \"Mark Zuckerberg\"})<-[:foundedBy]-(company:Company)-[:hasBoardMember]->(boardMember:Person) RETURN DISTINCT boardMember.name ORDER BY boardMember.date_of_birth DESC LIMIT 1",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: boardMember (line 1, column 164 (offset: 163))\n\"MATCH (founder:Person {name: \"Mark Zuckerberg\"})<"
+ },
+ {
+  "qid": "08393b1e-fb2f-4e4d-8347-12ea158d7f18",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (founder:Person {name: \"Henry A. Wallace\"})<-[:foundedBy]-(c1:Company)-[:subsidiaryOf]->(:Company {name: \"DuPont\"}) RETURN c1.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "92a5464c-39f5-426c-8e55-a102e2d4da31",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (boeing:Company {name: \"Boeing\"})-[:hasBoardMember]->(person:Person)<-[:hasCEO]-(company:Company) RETURN DISTINCT company.name ORDER BY company.launch_year DESC",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: company (line 1, column 143 (offset: 142))\n\"MATCH (boeing:Company {name: \"Boeing\"})-[:hasBoardMem"
+ },
+ {
+  "qid": "838f793b-9c54-4d68-8b29-9b6b5cd71018",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(bk:Person {name: \"Brian Krzanich\"}), (c:Company)-[:hasBoardMember]->(lbt:Person {name: \"Lip-Bu Tan\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a288930b-bd6e-454f-8fcb-c503e2db2116",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"Software\"}), (c)-[:hasCEO]->(p:Person {name: \"Juha Varelius\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "9804e2ab-2d58-443b-88a7-9d0b4e075679",
+  "category": "special_union",
+  "query": "MATCH (c:Company {name: \"Walmart\"})-[:hasCEO|:foundedBy]->(p:Person) RETURN COUNT(DISTINCT p)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2679df13-6bc5-4496-ac74-e199d0d34237",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(parent:Company {name: \"J Sainsbury\"}) RETURN c.name UNION MATCH (c:Company)-[:hasCEO]->(ceo:Person {name: \"Mike Coupe\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c626da0a-e50e-4baf-b32e-699e46c4f9c2",
+  "category": "basic_(n)",
+  "query": "MATCH (p:Person) WHERE p.date_of_birth > date('1962-04-21') RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1775f131-5f12-46f4-8d4b-03bd4e9cc408",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"J\u00e9r\u00f4me Hatt\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dea3ec7e-0283-4659-8d5e-0299342c3313",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (p:Person {name: \"John Mackey\"})<-[:hasCEO]-(c:Company)-[:basedIn]->(country:Country) RETURN country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "74846319-13fa-4710-a111-d3821571dc33",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (company:Company {name: \"Seznam.cz\"})-[:hasCEO]->(person:Person) RETURN DISTINCT person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "aeb309ff-883c-48f8-94d4-89c204a97928",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (company:Company)-[:hasCEO]->(person:Person {name: \"Nancy McKinstry\"}) RETURN company.name, company.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4b8ca04a-157a-4be4-9226-71a596b60d75",
+  "category": "special_union",
+  "query": "MATCH (c:Company {name: \"ADOR\"})-[:operatesIn]->(i:Industry) WITH COLLECT(DISTINCT i.name) as ind1 OPTIONAL MATCH (p:Person {name: \"Siengdee Thaweesuk\"})<-[:foundedBy|hasCEO|hasBoardMember]-(c2:Company)-[:operatesIn]->(i2:Industry) WITH ind1 + COLLECT(DISTINCT i2.name) as all_ind UNWIND all_ind as industry RETURN COUNT(DISTINCT industry)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Aggregation column contains implicit grouping expressions. For example, in 'RETURN n.a, n.a + n.b + count(*)' the aggregation expression 'n.a + n.b + count(*)' includes the implicit grouping key 'n.b'. It may be possibl"
+ },
+ {
+  "qid": "7c55f84b-1c38-476a-bfca-d88cfad00872",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Netherlands\"}) WHERE c.launch_year > 1969 RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e25f2bd5-6397-4d88-9bec-e6c420d3fdf0",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Christine E. Seidman\"}), (p2:Person {name: \"Wojciech Jasi\u0144ski\"}) RETURN p1.gender, p2.gender",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "efc78fed-b6f6-4c09-bf81-98e0bccc732e",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (parent:Company {name: \"3SHAPE HOLDING\"})<-[:subsidiaryOf]-(subsidiary:Company) MATCH (subsidiary)-[:hasBoardMember]->(person:Person) RETURN person.name, COUNT(DISTINCT subsidiary) AS company_count ORDER BY person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a48a7b03-22d5-47bc-8474-07da46092b4a",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Lampiris\"})-[:subsidiaryOf]->(parent:Company) RETURN parent.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "39d87753-bd2c-431d-b1b3-214f6ac62a3b",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: 'public relations'}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "761bd65a-2c68-465a-adbd-d090c3e9f6df",
+  "category": "basic_(n*)",
+  "query": "MATCH (p:Person {name: \"Henry VIII of England\"}) RETURN p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d699c67d-36d8-4de2-b60a-d44f2f0b25ee",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (courr\u00e8ges:Company {name: \"Courr\u00e8ges\"})-[:foundedBy]->(founder:Person) MATCH (company:Company)-[:hasCEO]->(founder) RETURN company.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f5214fcc-a9ca-4731-bcd3-77b835fcdd73",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasCEO]->(p) RETURN c.name ORDER BY c.launch_year ASC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "51b402a0-0b70-4a2a-9c35-e7807aa11bde",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Czech News Center\"})-[:hasBoardMember]->(p:Person) WHERE p.date_of_death IS NOT NULL RETURN p.name ORDER BY p.date_of_death DESC",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a1a09629-854f-49c6-9f61-b1b386a5fe28",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person {name: \"Nancy McKinstry\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f90e4cf5-b89a-4221-af1e-050ac57b1088",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:operatesIn]->(:Industry {name: \"logistics\"}) OR (c)-[:hasBoardMember]->(:Person {name: \"Christiana Smith Shi\"}) RETURN count(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a5d6d345-19d5-45f2-8e38-2540bb3d6a7b",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(b:Person {name: \"Bob Chapek\"}) MATCH (c)-[:foundedBy]->(r:Person {name: \"Roy O. Disney\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "51afe929-430e-4983-bd86-c44a99d4b6c3",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (p:Person {name: \"Jason Kapalka\"})<-[:foundedBy]-(c:Company)-[:basedIn]->(country:Country) RETURN country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "14133f73-936a-474a-bcac-f9713b86d64d",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Tennman Records\"})-[:foundedBy]->(p:Person) RETURN p.name, p.place_of_birth",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6d7b192c-31a7-4e6f-b711-98dd7486456c",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person) UNWIND p.country_of_citizenship AS country RETURN DISTINCT country",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7c0bcad4-b4fd-408a-85ba-809403fdd14c",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)<-[:subsidiaryOf]-(:Company) RETURN min(c.launch_year)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "95808a43-4615-4ef8-9c34-77228ca5a42f",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company {name: \"Hewlett Packard Enterprise\"})-[:hasCEO]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN DISTINCT p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3fc2caf3-9ea2-4499-bb50-462398ae0832",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person), (c)-[:hasBoardMember]->(p) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "b2ee29bf-2c22-4073-861e-78c19a6f6b98",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (hp:Company {name: \"HP Inc.\"})-[:hasBoardMember]->(person:Person) MATCH (other:Company)-[:hasBoardMember]->(person) WHERE other.name <> \"HP Inc.\" RETURN COUNT(DISTINCT other)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5f809d30-bc44-48e3-b4b9-69d8e4730069",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(ceo:Person {name: \"Doug McMillon\"}) MATCH (c)-[:hasBoardMember]->(member:Person) RETURN member.name ORDER BY member.date_of_death DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "44840930-74b3-491e-a497-4042e8e4fd74",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (company:Company)-[:hasCEO]->(person:Person)<-[:hasBoardMember]-(company) RETURN person.name ORDER BY person.date_of_birth DESC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3b8ca48a-6257-4e6b-9dbe-3f78bb4c5ccf",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Owen D. Young\"}) RETURN c.name UNION MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"electronics\"}) RETURN c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3dd8a5ec-d3bb-41c1-aae9-0a8248869e0e",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"Netherlands\"}), (c)-[:subsidiaryOf]->(:Company {name: \"Fremantle\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "37838f6b-fa4b-413c-995e-2704923428b4",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"chemical\"}) OPTIONAL MATCH (c)-[:hasBoardMember]->(p:Person) RETURN c.name, COUNT(DISTINCT p) as board_member_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "31435361-3fd3-4170-8864-2639a525f663",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(:Industry {name: \"entertainment\"}), (:Company {name: \"Disney Digital Network\"})-[:subsidiaryOf]->(c) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "bc289113-8860-4ee8-ad43-5ee181b9f0c9",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (klm:Company {name: \"KLM\"})-[:foundedBy]->(founder:Person) MATCH (company:Company)-[:hasBoardMember]->(founder) RETURN DISTINCT company.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7e0e4c89-fc6f-4640-813c-ca283995ad7c",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (founder:Person {name: \"James E. Casey\"})<-[:foundedBy]-(company:Company)-[:hasBoardMember]->(boardMember:Person) RETURN boardMember.name, COUNT(DISTINCT company) AS numberOfCompanies ORDER BY numberOfCompanies DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f3eac1ef-e7dc-4f69-a9f0-e897941ee7df",
+  "category": "special_optional-match",
+  "query": "MATCH (gazprom:Company {name: \"Gazprom\"})<-[:subsidiaryOf]-(subsidiary:Company) OPTIONAL MATCH (subsidiary)-[:basedIn]->(country:Country) RETURN subsidiary.name, COUNT(DISTINCT country) as country_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3eba86fe-65e3-423e-9587-ff5b720fae63",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (p:Person {name: \"Jean-Fran\u00e7ois van Boxmeer\"})<-[:hasCEO]-(c:Company)-[:foundedBy]->(founder:Person) RETURN DISTINCT founder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "99883807-31c1-45ba-8ea3-6d123104d6aa",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"England\"}), (c)-[:foundedBy]->(founder:Person) RETURN DISTINCT founder.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f19d78a8-3900-40f7-90d4-9daab5fa71f4",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person {name: \"Jacob Schram\"}) WITH c OPTIONAL MATCH (c)-[:basedIn]->(country:Country) WITH c, COUNT(DISTINCT country) as countryCount RETURN c.name, countryCount",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "407fe4c2-5898-48f4-9a51-0834d70c90d6",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:hasBoardMember]->(:Person {name: \"Harvey C. Jones\"}) OR (c)-[:operatesIn]->(:Industry {name: \"Semiconductor\"}) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2929ac5c-8d9d-43eb-8576-d4a11c8888dc",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(:Company) WHERE c.launch_year < 1868 RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "13b5cb85-2166-4885-8bc1-90765e8291b3",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(parent:Company {name: \"Sony Corporation of America\"}), (child:Company {name: \"Sony Music Entertainment (Norway) AS\"})-[:subsidiaryOf]->(c) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bb268815-79bc-40ea-92d7-2399df4e5f52",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (garmin:Company {name: \"Garmin\"})-[:basedIn]->(uk:Country {name: \"United Kingdom\"}), (garmin)-[:subsidiaryOf]->(parent:Company), (parent)-[:operatesIn]->(industry:Industry) RETURN count(DISTINCT industry)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "49bdb60c-4461-4cfb-90e8-fceb30cc594c",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:basedIn]->(:Country {name: \"France\"}), (c:Company)-[:foundedBy]->(p:Person) RETURN p.name, COUNT(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b4e1e75c-f2ac-43f5-b80c-198e07e9d962",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (wba:Company {name: \"Walgreens Boots Alliance\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:hasCEO]->(person:Person) RETURN person.name, COUNT(DISTINCT subsidiary) AS subsidiary_count GROUP BY person.name ORDER BY subsidiary_count DESC",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n"
+ },
+ {
+  "qid": "ea38815f-8cbd-480f-8e06-719473ca815c",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(Company {name: \"Ericsson\"}), (subsidiary)-[:basedIn]->(Country {name: \"Netherlands\"}) RETURN DISTINCT subsidiary.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4c2870fb-cab3-4bf7-9af3-c1ad670ad82a",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company), (subsidiary)-[:basedIn]->(country:Country) WHERE country.name = \"People's Republic of China\" RETURN parent.name, COUNT(subsidiary) as subsidiaryCount",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "fb80af6f-5b66-479e-9f43-328301620844",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:operatesIn]->(i:Industry {name: \"mass media\"}) OR (c)-[:foundedBy]->(p:Person {name: \"Mark Palmer\"}) RETURN DISTINCT c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: PatternExpressions are not allowed to introduce new variables: 'i'. (line 1, column 45 (offset: 44))\n\"MATCH (c:Company) WHERE (c)-[:operatesIn]->(i:Industry {name: \"mass media\"}) OR (c)-[:foundedBy]->(p:Person {name: \"M"
+ },
+ {
+  "qid": "2e39e08a-74ba-4ea6-99a1-aa225bd6c601",
+  "category": "basic_(n)",
+  "query": "MATCH (c:Country) RETURN count(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a0890037-fe8c-4f32-9047-e9208deac1a1",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (parent:Company)<-[:subsidiaryOf]-(subsidiary:Company)-[:operatesIn]->(industry:Industry {name: \"metal\"}) RETURN parent.name, count(subsidiary) as subsidiary_count ORDER BY parent.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5077d056-a6cc-40e9-a710-61dc71e4020f",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Soci\u00e9t\u00e9 G\u00e9n\u00e9rale\"})-[:hasBoardMember]->(p:Person) WHERE p.place_of_birth <> \"Saint-Dizier\" RETURN p.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d1a818d8-c5b8-4324-965a-1f82d68b5290",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (sub1:Company {name: \"Renault Korea Motors\"})-[:subsidiaryOf]->(parent:Company), (sub2:Company {name: \"Nissan Motor Co. Ltd.\"})-[:subsidiaryOf]->(parent) RETURN parent.name ORDER BY parent.launch_year ASC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "704bc9ba-8893-4d9a-b1ec-171820aee089",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company), (subsidiary)-[:hasBoardMember]->(person:Person {name: \"Daniel Yohannes\"})\nRETURN parent.name, count(subsidiary)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bd477daa-97e1-4aae-9681-5219fdf0f616",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:hasBoardMember]->(:Person {name: \"Andrej Babi\u0161\"}) OR (c)-[:subsidiaryOf]->(:Company {name: \"Agrofert\"}) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b8b1816a-9554-417b-852e-eee881220a56",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Charles Edelstenne\"}), (p2:Person {name: \"Alessandro Perrone\"}) RETURN p1.gender, p2.gender",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "6cd0562a-320f-43d8-aca0-283cebc08c6c",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(steve:Person {name: \"Steve Jobs\"}) MATCH (c)-[:hasBoardMember]->(bob:Person {name: \"Bob Iger\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d5bf7668-3d2c-4177-9519-17c9e41408cb",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasCEO]->(p:Person {name: \"Hartmut Mehdorn\"}) WHERE r.start_year <= 2009 AND (r.end_year >= 2009 OR r.end_year IS NULL) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c23fab93-43c0-4999-a8f8-ade5a499c95b",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Marie Krogh\"}), (p2:Person {name: \"Ron W. Miller\"}) RETURN CASE WHEN p1.date_of_death > p2.date_of_death THEN p1.name ELSE p2.name END",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "02f54e34-79f3-400a-948e-bf9159e01757",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (wkh:Company {name: \"Wolters Kluwer Health\"})-[:subsidiaryOf]->(parent:Company)<-[:hasCEO]-(ceo:Person) RETURN DISTINCT ceo.name, ceo.date_of_death",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "117b7783-3f8f-41fc-80b4-13e324ec8be7",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"retail\"}), (c)-[:hasBoardMember]->(p:Person {name: \"Tim Cook\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9f6ad178-b6e1-465a-b74b-8b09eada5392",
+  "category": "basic_(n)",
+  "query": "MATCH (i:Industry) RETURN i.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1ad683f1-eec9-4e87-9b70-b318f2d86871",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person) WHERE c.name IN [\"Hewlett-Packard\", \"HP Software Division\"] RETURN p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3cefbff8-7f42-4732-9671-614c9bc13d36",
+  "category": "basic_(n*)",
+  "query": "MATCH (p:Person {name: \"Henry VIII\"}) RETURN p.place_of_birth",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "9baed7ec-7ddc-4ec3-9478-f923d9d546be",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(:Company) RETURN c.name ORDER BY c.launch_year DESC LIMIT 1",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "39e81bc6-0578-4ee3-8fd3-1fa7feaa19d2",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (chrys:Company {name: \"Chrysler UK\"})-[:subsidiaryOf]->(y:Company)-[:subsidiaryOf]->(x:Company) RETURN DISTINCT x.name, x.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2c38874b-8840-41de-904c-37f55180bf3f",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (tesla:Company {name: \"Tesla, Inc.\"})-[:hasBoardMember]->(person:Person)<-[:foundedBy]-(company:Company) RETURN company.name, count(DISTINCT person)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2e70e22a-0c4c-439a-83cf-5255946e2a2c",
+  "category": "special_comparison",
+  "query": "MATCH (p1:Person {name: \"Kurt Kokhauge Larsen\"}), (p2:Person {name: \"Pavel Baudi\u0161\"}) RETURN CASE WHEN p1.date_of_birth > p2.date_of_birth THEN p1.name ELSE p2.name END",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f3e21893-b017-4196-b768-0a1a5309e136",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (p:Person {name: \"James A. Bell\"})<-[:hasCEO]-(c:Company)-[:operatesIn]->(i:Industry) RETURN DISTINCT i.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a8ed414d-86b8-4f2d-a1ef-2c45df64661c",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(:Company {name: \"Raffles Hotels & Resorts\"}), (subsidiary)-[:operatesIn]->(:Industry {name: \"hospitality\"}) RETURN subsidiary.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2fb9895a-9d0c-4d0e-979e-a2f7d08c3b5b",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"The Coca-Cola Company\"}) RETURN subsidiary.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c79bb91e-9503-423f-a27c-f3885678d233",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (country:Country {name: \"Australia\"})<-[:basedIn]-(company:Company)-[:hasBoardMember]->(person:Person) RETURN DISTINCT person.name ORDER BY person.date_of_birth DESC",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: person (line 1, column 147 (offset: 146))\n\"MATCH (country:Country {name: \"Australia\"})<-[:basedIn"
+ },
+ {
+  "qid": "1f158d4b-018f-4114-981c-fb342b6c09da",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Lexicon\"})-[:operatesIn]->(i:Industry) RETURN i.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8bd0e5a9-3249-4d40-a644-e67c46f0b6ec",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (dell:Company {name: \"Dell Technologies\"})<-[:subsidiaryOf]-(x:Company)<-[:subsidiaryOf]-(y:Company) RETURN DISTINCT y.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1e0ebdc5-49e6-48b7-b003-691b73db68e8",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasBoardMember]->(p:Person) WHERE p.name = 'Leslie Ireland' AND r.start_year <= 2017 AND (r.end_year IS NULL OR r.end_year >= 2017) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9d420c42-6091-4156-9b1b-6800cfa12e46",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Broderbund\"})-[:hasCEO]->(p:Person)<-[:foundedBy]-(c2:Company) RETURN c2.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a7ffce64-54b5-4060-a7ca-6a49fd025431",
+  "category": "special_optional-match",
+  "query": "MATCH (company:Company {name: \"Bell Resources\"})-[:hasBoardMember]->(person:Person) MATCH (otherCompany:Company)-[:hasBoardMember]->(person) RETURN person.name, COUNT(DISTINCT otherCompany) as company_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6b9ba352-ef40-4369-a190-dfe05535d311",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE EXISTS((c)-[:hasBoardMember]->(:Person {name: \"Anthony Earley\"})) OR EXISTS((c)-[:hasCEO]->(:Person {name: \"John S. Gray\"})) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "369d5217-3a31-4a40-95a5-1ad4f1f934ce",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Czech News Center\"})-[:hasBoardMember]->(p:Person) RETURN DISTINCT p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b62fed42-34e8-4022-8832-27e32be02440",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (bobby:Person {name: \"Bobby Kotick\"})<-[:hasBoardMember]-(company:Company)-[:hasCEO]->(ceo:Person) RETURN ceo.name AS CEO, COUNT(DISTINCT company) AS number_of_companies ORDER BY number_of_companies DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0ccccb03-0a5a-4f35-ab76-b662092e1385",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Brazil\"}), (c)-[:operatesIn]->(ind:Industry) RETURN COUNT(DISTINCT ind)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "61c195a2-25f3-4032-8cbc-bb3f7f5efa3d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (p:Person {name: \"Harry Williams\"})<-[:foundedBy]-(c:Company)-[:operatesIn]->(i:Industry) RETURN DISTINCT i.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6fe727c9-1eaf-4e20-8722-0091b13674a5",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"Foxconn\"})-[:operatesIn]->(i:Industry) RETURN count(i)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9806f0e6-1564-4f96-8451-7254d3065fd2",
+  "category": "special_union",
+  "query": "MATCH (c:Company {name: \"Merck & Co.\"})-[:hasCEO|hasBoardMember]->(p:Person) RETURN COUNT(DISTINCT p)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a70cd53a-0378-46d3-a2a0-2602950ada5a",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person), (c)-[:hasCEO]->(p) RETURN count(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6bd8db0f-a8de-41ae-bcb6-5d228232d2e6",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (apple:Company {name: \"Apple\"})-[:hasBoardMember]->(boardMember:Person)<-[:hasBoardMember]-(otherCompany:Company) WHERE apple <> otherCompany RETURN otherCompany.name, count(DISTINCT boardMember)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3f1b708f-8f19-4bb8-8f78-3871014cc94b",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:operatesIn]->(:Industry {name: \"media\"}) RETURN DISTINCT c.name UNION MATCH (c:Company)-[:subsidiaryOf]->(:Company {name: \"Sky Mobile\"}) RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "85a880a7-ebdd-4f0a-a287-d48a5f8ceea1",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (lionsgate:Company {name: \"Lionsgate\"})-[:foundedBy]->(founder:Person)<-[:foundedBy]-(company:Company) RETURN company.name, company.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9bcfeff8-ed71-4c85-b9aa-58781f547668",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Rich Hume\"}), (c)-[:basedIn]->(:Country {name: \"United States of America\"}) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1aa4b119-bbee-44db-8003-22bf2c993f01",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Steve Jobs\"}) RETURN c.name UNION MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Jerry York\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6751b307-29e0-4bd9-96ff-490556768479",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (company:Company)-[:hasBoardMember]->(person:Person {name: \"Bobby Mehta\"}), (company)-[:subsidiaryOf]->(parent:Company {name: \"Sears\"}) RETURN company.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d4c18c0d-8778-4ab2-8bdb-d6a121f8ef0e",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"petroleum extraction\"}), (c)-[:hasBoardMember]->(p:Person) RETURN p.name, count(distinct c) as company_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a53ce8b0-7581-49e8-b8f6-63a80d702fce",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Italy\"}), (c)-[:operatesIn]->(industry:Industry {name: \"retail\"}) RETURN c.name ORDER BY c.launch_year DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b320b0cc-708c-448c-bcaa-350614681b46",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (parent:Company) <- [subsidiaryOf] - (:Company) WHERE parent.launch_year < 1907 RETURN DISTINCT parent.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5cd76710-ab3b-4043-8c2a-7250b5120315",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Switzerland\"}), (c:Company)-[:foundedBy]->(person:Person {name: \"Georges Favre-Jacot\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1dd8d0f7-4b23-47a6-856b-20d969e1a089",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (ceo:Person {name: \"Albert Bourla\"})<-[:hasCEO]-(company:Company) MATCH (company)-[:hasBoardMember]->(boardMember:Person) RETURN boardMember.name, COUNT(DISTINCT company) AS numberOfCompanies ORDER BY boardMember.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "09f5519d-65c4-4ae0-b9b4-07536d44071b",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Georg von Arco\"})<-[:hasBoardMember]-(company:Company)-[:subsidiaryOf]->(parent:Company) RETURN parent.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b76a7eaf-0872-40b0-87dc-f94fe9b9da52",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c1:Company {name: \"Mandalay Television\"})-[:foundedBy]->(p:Person) MATCH (c2:Company {name: \"Mandalay Entertainment\"})-[:foundedBy]->(p) RETURN p.name, p.date_of_birth",
+  "executable": false,
+  "ex": 0.0,
+  "error": "TypeError: Unhashable type: <class 'neo4j.time.Date'>"
+ },
+ {
+  "qid": "b7aa6d83-68c1-4302-85ee-b905d6a43b9f",
+  "category": "special_optional-match",
+  "query": "MATCH (mcd:Company {name: \"McDonald's\"})-[:hasCEO]->(ceo:Person) OPTIONAL MATCH (company:Company)-[:hasBoardMember]->(ceo) RETURN ceo.name, COUNT(DISTINCT company) AS board_member_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "56905c19-d016-4e3c-9fb7-0025360a50f0",
+  "category": "special_time-sensitive",
+  "query": "MATCH (company:Company {name: \"SpaceX\"})-[rel:hasCEO]->(ceo:Person) WHERE rel.end_year IS NULL RETURN ceo.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ff81d2fb-ac19-435c-9406-43834a716426",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Hersch Klaff\"}), (ush:Company {name: \"United Supermarkets\"})-[:subsidiaryOf]->(c) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "96b9f7b0-8274-46c7-bd44-5cff496b4e4d",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company {name: \"Teva Pharmaceutical Industries Ltd.\"})-[r:hasCEO]->(p:Person) WHERE r.end_year IS NULL RETURN p.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1a4c818d-94b7-4844-ac92-20dfe8c37c09",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[rel:hasBoardMember]->(p:Person {name: \"Leslie Ireland\"}) WHERE NOT EXISTS(rel.end_year) OR rel.end_year >= 2026 RETURN c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: The property existence syntax `... exists(variable.property)` is no longer supported. Please use `variable.property IS NOT NULL` instead. (line 1, column 87 (offset: 86))\n\"MATCH (c:Company)-[rel:hasBoardMember]->(p:Pers"
+ },
+ {
+  "qid": "a7795415-7623-488f-99be-85a98448d298",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person)<-[:hasCEO]-(c) RETURN DISTINCT c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7a6dfb56-d525-458c-a5e2-4a5d239d83f7",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)-[:foundedBy]->(c:Company), (p)-[:hasBoardMember]->(c) UNWIND p.country_of_citizenship AS country RETURN DISTINCT country",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "508e08bb-21b7-48b5-b298-447bdf08c7f9",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country {name: \"Australia\"}) OPTIONAL MATCH (c)-[:hasCEO]->(ceo:Person) RETURN c.name, COUNT(DISTINCT ceo) as ceo_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "99c790c3-eb58-4150-84ad-b70352f3fb7f",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (parent:Company {name: \"Disney Platform Distribution\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:basedIn]->(country:Country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f182b8e8-6646-49e7-8f3c-e8690507fd6e",
+  "category": "special_union",
+  "query": "MATCH (c:Company {name: \"Saxo Bank A/S\"}) MATCH (c)-[:foundedBy|hasCEO]->(p:Person) RETURN count(DISTINCT p)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d40efc57-e0a1-442a-aecf-b99f82ec4fd2",
+  "category": "special_optional-match",
+  "query": "MATCH (company:Company)-[:hasCEO]->(:Person {name: \"Sundar Pichai\"}), (company)-[:foundedBy]->(founder:Person) WITH company, COUNT(DISTINCT founder) as founder_count RETURN company.name, founder_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "afbe4589-ee5f-49ae-83d6-ca58f6f5ee45",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p1:Person {name: \"Hiroto Saikawa\"}), (c)-[:hasCEO]->(p2:Person {name: \"Carlos Ghosn\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "709be390-d676-4801-9d5a-8711393431b6",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Leon Black\"}), (c)-[:hasCEO]->(p) RETURN c.name, c.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1664a71e-65ab-4109-8075-c67717ddeb61",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (p:Person {name: \"Paul Desmarais, Jr.\"})<-[r:hasBoardMember]-(c:Company) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "46db3c98-bf69-4019-a74b-ba7965b5e498",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (industry:Industry {name: \"human resource management\"})<-[:operatesIn]-(parentCompany:Company)<-[:subsidiaryOf]-(subsidiaryCompany:Company) RETURN subsidiaryCompany.name, subsidiaryCompany.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "60d7383c-7ef8-4d63-9cb3-46f89b88142f",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry) WHERE i.name IN [\"powertrain technology\", \"electrical\"] RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "91b2a21e-1ba8-464f-b9c2-c75f6a550934",
+  "category": "special_time-sensitive",
+  "query": "MATCH (c:Company)-[r:hasCEO]->(p:Person {name: \"Jamie Dimon\"}) WHERE r.end_year IS NULL OR r.end_year >= 2026 RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1ff5cd1e-bd91-47e4-9345-df0f0f1f0866",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:operatesIn]->(i:Industry {name: \"ice cream manufacturing\"}) OPTIONAL MATCH (subsidiary:Company)-[:subsidiaryOf]->(c) RETURN c.name, count(subsidiary)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "94f34a34-6804-4ec0-b223-5948b3bf9f90",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (founder:Person {name: \"Larry Rossy\"})<-[:foundedBy]-(parentCompany:Company)<-[:subsidiaryOf]-(subsidiaryCompany:Company) RETURN subsidiaryCompany.name, subsidiaryCompany.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bf36e2e0-c1bf-4dc1-a412-685e1cc3de7d",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:hasCEO]->(p:Person {name: \"Jack Rogers\"}) RETURN c.name UNION MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"William R. Johnson\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "60d51302-c070-4981-a0ad-93488ddbf28c",
+  "category": "special_optional-match",
+  "query": "MATCH (:Company {name: \"Berkshire Hathaway\"})-[:hasBoardMember]->(p:Person) OPTIONAL MATCH (fc:Company)-[:foundedBy]->(p) WITH p, COUNT(fc) as founded_count RETURN p.name, founded_count",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "343feec2-8db2-4d40-8259-841bed2193af",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Vivek Sankaran\"})<-[:hasBoardMember]-(company:Company)-[:operatesIn]->(industry:Industry) RETURN DISTINCT industry.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f6589e7a-72df-4434-a9bb-bf9441013224",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(drake:Person {name: \"Drake\"}), (c)-[:foundedBy]->(person40:Person {name: \"40\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "847405aa-4feb-4d64-97d9-6670ba228994",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:subsidiaryOf]->(:Company {name: \"Adidas AG\"}) OR (c)-[:operatesIn]->(:Industry {name: \"textile\"}) RETURN count(c)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "6f00bdcb-92c8-44fb-986d-628bf17925ab",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasCEO]->(ceo:Person {name: \"Bel\u00e9n Garijo\"}), (c)-[:foundedBy]->(founder:Person {name: \"Heinrich Emanuel Merck\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "65d50423-560c-4e58-b251-40c4b3a5b221",
+  "category": "special_optional-match",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Jerry Perenchio\"}), (c)-[:operatesIn]->(i:Industry) RETURN c.name, COUNT(i) GROUP BY c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n "
+ },
+ {
+  "qid": "2d5f45d6-7302-4e9d-93a1-d8c0e5bbe970",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"J\u00e9r\u00f4me Hatt\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5845e6b2-a6dc-4e5e-b77d-b8f2597f71b8",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (dw:Company {name: \"DreamWorks\"})-[:foundedBy]->(founder:Person) MATCH (company:Company)-[:foundedBy]->(founder:Person) WHERE company.name <> \"DreamWorks\" RETURN company.name, count(founder) as founder_count ORDER BY company.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "becaf6a1-ca37-4fa6-84a2-a7df4d49f8ed",
+  "category": "special_optional-match",
+  "query": "MATCH (gs:Company {name: \"Goldman Sachs\"})-[:hasBoardMember]->(person:Person) WITH person MATCH (person)<-[:hasBoardMember]-(company:Company) RETURN person.name, COUNT(DISTINCT company) as num_board_positions",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d205b276-24c9-46da-8371-5eb7d66bc227",
+  "category": "special_union",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company) WHERE parent.name IN [\"Redcats\", \"Ginori 1735\"] RETURN COUNT(DISTINCT subsidiary)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "441978ae-792f-4cfd-a424-7cd7df922fb6",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (founder:Person {name: \"Samuel van den Bergh\"})<-[:foundedBy]-(company:Company)-[:hasCEO]->(ceo:Person) RETURN ceo.name, count(DISTINCT company) AS company_count ORDER BY company_count DESC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5fc35b8e-6709-4c09-a15a-d310a8a10812",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE EXISTS((c)-[:hasCEO]-(:Person {name: \"Ji\u0159\u00ed Pat\u00e1k\"})) OR EXISTS((c)-[:basedIn]-(:Country {name: \"Czech Republic\"})) RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9ddbb18e-d7a0-4470-8a7b-5088de749d50",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (c:Company)-[:foundedBy]->(p:Person {name: \"Juan Jos\u00e9 Mart\u00ednez Garc\u00eda\"}), (c)-[:operatesIn]->(i:Industry {name: \"computer security\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "786f37e3-24a4-461e-8af3-388123946a7a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (company:Company)-[:hasBoardMember]->(timCook:Person {name: \"Tim Cook\"}), (company)-[:hasCEO]->(ceo:Person) RETURN ceo.name ORDER BY ceo.date_of_death ASC",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "56f2bee1-d2dc-43ba-8578-c42e9f3b7423",
+  "category": "basic_(n)=(m0)",
+  "query": "MATCH (p:Person)<-[:hasCEO]-(c1:Company), (p)<-[:hasBoardMember]-(c2:Company) RETURN DISTINCT p.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "40b0f323-6204-440c-bbd2-fdfc49236cac",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (parent:Company)<-[:subsidiaryOf]-(subsidiary:Company)-[:basedIn]-(country:Country) WHERE country.name = 'Australia' RETURN DISTINCT parent.name, parent.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c6532a5f-a982-4c5f-9f62-315e0b455b19",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(p:Person {name: \"Roberto Set\u00fabal\"}), (c)-[:foundedBy]->(founder:Person) RETURN DISTINCT founder.gender",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6f29c4d0-b503-4a84-8709-88c75b96ae33",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (parent:Company)-[:basedIn]->(:Country {name: 'Switzerland'}), (child:Company)-[:subsidiaryOf]->(parent), (child)-[:basedIn]->(country:Country) RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "89cd216c-d3a1-45bd-ac19-0576c780d524",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[r:hasBoardMember]->(:Person) RETURN DISTINCT c.name ORDER BY c.launch_year DESC",
+  "executable": false,
+  "ex": 0.0,
+  "error": "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: In a WITH/RETURN with DISTINCT or an aggregation, it is not possible to access variables declared before the WITH/RETURN: c (line 1, column 81 (offset: 80))\n\"MATCH (c:Company)-[r:hasBoardMember]->(:Person) RETURN DISTIN"
+ },
+ {
+  "qid": "5b50eed7-aec5-4ea3-86d1-c8cc3df9fbfe",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(:Company {name: \"Take-Two Interactive\"}) RETURN DISTINCT c.name UNION MATCH (c:Company)-[:foundedBy]->(:Person {name: \"Sam Houser\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9ab4b2ef-76a5-4347-aa36-c6a7c582a901",
+  "category": "basic_(n)-(m0*)",
+  "query": "MATCH (c:Company {name: \"\u0160koda Praha\"})-[:basedIn]->(country:Country) RETURN country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "37d8e851-2887-469e-99f9-b157f896c042",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:hasCEO]->(:Person {name: \"Tidjane Thiam\"}) OR (c)-[:subsidiaryOf]->(:Company {name: \"UBS\"}) RETURN COUNT(c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6ffcced3-8c31-4c1d-87c6-55e0a3968ed5",
+  "category": "special_union",
+  "query": "MATCH (p:Person {name: \"Thomas Horton\"}), (s:Company {name: \"Compagnia Generale di Elettricit\u00e0\"}), (c:Company) WHERE EXISTS {(c)-[:hasBoardMember]->(p)} OR EXISTS {(c)-[:subsidiaryOf]->(s)} RETURN COUNT(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4ddc7773-f941-4ff5-9698-fcb7aa79dd70",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:basedIn]->(country:Country) WHERE c.name IN [\"Agrofert\", \"Amazon Logistic Prague\"] RETURN DISTINCT country.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "579daba2-039d-441b-973c-f24b6d1702e1",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (c:Company)-[:operatesIn]->(:Industry {name: \"Educational Technology\"}) WITH DISTINCT c MATCH (c)-[:operatesIn]->(i:Industry) RETURN COUNT(DISTINCT i)",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "706d5649-1b1a-4f49-8641-da3401e33fed",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "MATCH (child:Company {name: \"Domino's Pizza Group plc\"})-[:subsidiaryOf]->(parent:Company), (parent)-[:basedIn]->(country:Country {name: \"United States of America\"}) RETURN parent.name, parent.launch_year",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7e89005b-6c44-4500-b8fc-1fb4308e37c7",
+  "category": "special_union",
+  "query": "MATCH (c:Company) WHERE (c)-[:foundedBy]->(:Person {name: \"Eytan Elbaz\"}) OR (c)-[:basedIn]->(:Country {name: \"United States of America\"}) RETURN count(DISTINCT c)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b9844f8a-7631-4dcc-880a-a5b9324dd02b",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (person:Person {name: \"Ulrich Bez\"})<-[:hasCEO]-(company:Company)<-[:subsidiaryOf]-(subsidiary:Company) RETURN COUNT(DISTINCT subsidiary)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "87182236-df83-42e0-b386-17f37bf7a1ab",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (dreamhaven:Company {name: \"Dreamhaven\"})<-[:hasCEO]-(ceo:Person)<-[:foundedBy]-(founded:Company) RETURN founded.name, count(DISTINCT ceo) as founder_count",
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f28ee977-8f4b-4487-b431-c42029f5b10c",
+  "category": "special_union",
+  "query": "MATCH (p:Person) WHERE exists((p)<-[:hasBoardMember]-(:Company {name: \"Bell Resources\"})) OR exists((p)<-[:foundedBy]-(:Company {name: \"Bell Property Group\"})) RETURN count(p)",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7098d5c2-e219-4a8a-a40b-c345e821ac1a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (Company {name: \"2K Games\"})<-[:subsidiaryOf]-(subsidiary:Company)-[:operatesIn]->(industry:Industry) RETURN DISTINCT industry.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d9117bb2-c81a-434c-ba3a-9e385cecfd86",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "MATCH (subsidiary:Company)-[:subsidiaryOf]->(parent:Company {name: \"Vinci\"}), (subsidiary)-[:hasCEO]->(ceo:Person) RETURN ceo.name, ceo.place_of_birth",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1f3bf1ca-f6da-462c-8195-1c40a45b4993",
+  "category": "special_three-node-groupby",
+  "query": "MATCH (company:Company)-[:hasBoardMember]->(kjeld:Person {name: \"Kjeld Kirk Kristiansen\"}), (company)-[:hasBoardMember]->(person:Person) WHERE person <> kjeld RETURN person.name, COUNT(DISTINCT company) as num_companies ORDER BY person.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4689eeee-6cb9-4785-b16f-f69646773b26",
+  "category": "special_union",
+  "query": "MATCH (c:Company)-[:subsidiaryOf]->(:Company {name: \"DuPont\"}) RETURN c.name UNION MATCH (c:Company)-[:hasBoardMember]->(:Person {name: \"Ajaypal Singh Banga\"}) RETURN c.name",
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "49847861-43ef-45ee-8796-a315f611a75c",
+  "category": "basic_(n)-(m0)",
+  "query": "MATCH (c:Company)-[:hasBoardMember]->(:Person) RETURN MAX(c.launch_year)",
+  "executable": true,
+  "ex": 1.0
+ }
+]

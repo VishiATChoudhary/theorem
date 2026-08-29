@@ -78,6 +78,7 @@ def main() -> None:
 
     gl, gl_missing = load("exec", model)
     cy, cy_missing = load("cyexec", model)
+    sw, sw_missing = load("setwise", model)
     if not gl:
         raise SystemExit("no theorem results yet")
 
@@ -104,81 +105,147 @@ def main() -> None:
     )
     w("")
 
-    w("## Headline")
+    w("## Result")
     w("")
-    w(f"| Metric | Value |")
-    w(f"| --- | --- |")
-    w(f"| Execution accuracy, full test set | **{pct(ex(gl))}%** |")
     held = [r for r in gl if r["graph"] != "nba"]
-    w(f"| Execution accuracy, held-out graphs only | **{pct(ex(held))}%** |")
-    w(f"| Executable queries | {pct(sum(r['executable'] for r in gl) / len(gl))}% |")
-    w(f"| Questions scored | {len(gl)} of {total_q} |")
-    if gl_missing:
-        w(f"| Graphs not yet run | {', '.join(gl_missing)} |")
-    w("")
     w(
-        "The held-out figure excludes the `nba` graph. theorem's prompt "
-        "was written while iterating on `nba`, so that graph is the one "
-        "the system has effectively seen; the other six are untouched. "
-        "Quote the held-out number."
-    )
-    w("")
-
-    w("## Comparison")
-    w("")
-    w(
-        "The published baselines in Table 3 of the paper were run on 2024 "
-        "models, so placing a theorem number beside them cannot separate "
-        "the query language from the model. The first row below is a "
-        "control: the official zero-shot text2cypher setup, same prompt, "
-        "same questions, same comparator, same model as the theorem run."
+        f"**theorem v0 scores {pct(ex(gl))}% execution accuracy on the "
+        f"full test set. The same model writing Cypher scores "
+        f"{pct(ex(cy))}%.** theorem is behind text2cypher by "
+        f"{100 * (ex(cy) - ex(gl)):.1f} points on this benchmark, and it "
+        "is behind the 2024 baselines the paper published as well."
     )
     w("")
     w("| System | Model | EX (%) | Executable (%) |")
     w("| --- | --- | --- | --- |")
-    w(
-        f"| **theorem** | {model} | **{pct(ex(gl))}** | "
-        f"{pct(sum(r['executable'] for r in gl) / len(gl))} |"
-    )
     if cy:
-        note = "" if not cy_missing else f" (partial: {len(cy)} questions)"
         w(
-            f"| text2cypher{note} | {model} | {pct(ex(cy))} | "
+            f"| text2cypher | {model} | {pct(ex(cy))} | "
             f"{pct(sum(r['executable'] for r in cy) / len(cy))} |"
         )
-    for name, ex_pct, exec_pct in PUBLISHED:
+    for name, ex_pct, exec_pct in PUBLISHED[:2]:
         w(f"| text2cypher (published) | {name} | {ex_pct:.2f} | {exec_pct:.2f} |")
+    if sw:
+        w(
+            f"| theorem, set-valued `return` | {model} | {pct(ex(sw))} | "
+            f"{pct(sum(r['executable'] for r in sw) / len(sw))} |"
+        )
+    w(
+        f"| **theorem, as it ships** | {model} | **{pct(ex(gl))}** | "
+        f"{pct(sum(r['executable'] for r in gl) / len(gl))} |"
+    )
+    for name, ex_pct, exec_pct in PUBLISHED[2:]:
+        w(f"| text2cypher (published) | {name} | {ex_pct:.2f} | {exec_pct:.2f} |")
+    w("")
+    w(
+        f"Excluding `nba`, the one graph theorem's prompt was written "
+        f"against, theorem scores {pct(ex(held))}% over "
+        f"{len(held)} questions. The gap is not an artifact of that graph."
+    )
+    w("")
+    w(
+        "The published baselines were run on 2024 models, so they cannot "
+        "separate the query language from the model. The text2cypher row "
+        "at the top is the control that can: official zero-shot prompt, "
+        "same questions, same comparator, same model, graphs loaded from "
+        "the same files."
+    )
+    w("")
+
+    w("## Where the gap comes from")
+    w("")
+    lost = sum(1 - r["ex"] for r in gl)
+    dedup_gain = (ex(sw) - ex(gl)) * len(gl) if sw else 0
+    accounted = dedup_gain + sum(
+        1 - r["ex"]
+        for r in gl
+        if r["category"]
+        in ("special_union", "special_optional-match", "special_time-sensitive")
+    )
+    w(
+        f"theorem loses {lost:.0f} of {len(gl)} questions. "
+        f"{100 * accounted / lost:.0f}% of those losses are one bug and "
+        "three missing features, not a broad inability to express the "
+        "questions."
+    )
+    w("")
+    w(
+        "**Duplicate rows.** theorem's prompt tells the model "
+        '"results are sets: duplicates do not matter", but neither the '
+        "engine's rendering path nor its row output deduplicates. A "
+        "correct query for \"which airports have flights departed from\" "
+        "returns one row per accident rather than one per airport, and "
+        "the benchmark's comparator rejects on row count before it "
+        "compares anything. Re-scoring the same queries with `return` "
+        f"deduplicating on the bindings it projects lifts theorem from "
+        f"{pct(ex(gl))}% to {pct(ex(sw))}% and needs no change to any "
+        "query. The language's documented semantics and its "
+        "implementation disagree, and the implementation is the one that "
+        "is wrong."
+    )
+    w("")
+    w(
+        "**No `union`.** 310 questions ask for one set or another. "
+        "theorem v0 has no way to combine two result sets, and scores "
+        f"{pct(ex([r for r in gl if r['category'] == 'special_union']))}% "
+        "on them against text2cypher's "
+        f"{pct(ex([r for r in cy if r['category'] == 'special_union']))}%."
+    )
+    w("")
+    w(
+        "**No optional match and no edge properties.** 268 questions "
+        "need a left join and 60 need to filter on a relationship's own "
+        "properties. v0 supports neither."
+    )
+    w("")
+    w(
+        "Where theorem is ahead, it is ahead on the shapes it was "
+        "designed for: grouped counting and per-entity comparison."
+    )
     w("")
 
     w("## By graph")
     w("")
-    w("| Graph | Questions | theorem EX (%) |" + (" text2cypher EX (%) |" if cy else ""))
-    w("| --- | --- | --- |" + (" --- |" if cy else ""))
+    head = "| Graph | Questions | theorem EX (%) |"
+    sep = "| --- | --- | --- |"
+    if sw:
+        head += " theorem, set `return` (%) |"
+        sep += " --- |"
+    if cy:
+        head += " text2cypher EX (%) |"
+        sep += " --- |"
+    w(head)
+    w(sep)
     for g in TEST_GRAPHS:
         rows = [r for r in gl if r["graph"] == g]
         if not rows:
             continue
-        line = f"| {g}{' *(tuned on)*' if g == 'nba' else ''} | {len(rows)} | {pct(ex(rows))} |"
+        line = (
+            f"| {g}{' *(tuned on)*' if g == 'nba' else ''} | "
+            f"{len(rows)} | {pct(ex(rows))} |"
+        )
+        if sw:
+            line += f" {pct(ex([r for r in sw if r['graph'] == g]))} |"
         if cy:
-            crows = [r for r in cy if r["graph"] == g]
-            line += f" {pct(ex(crows))} |"
+            line += f" {pct(ex([r for r in cy if r['graph'] == g]))} |"
         w(line)
     w("")
 
     w("## By question category")
     w("")
-    w("| Category | Questions | theorem EX (%) |" + (" text2cypher EX (%) |" if cy else ""))
-    w("| --- | --- | --- |" + (" --- |" if cy else ""))
+    w("| Category | Questions | theorem EX (%) | text2cypher EX (%) | Delta |")
+    w("| --- | --- | --- | --- | --- |")
     seen = {r["category"] for r in gl}
     for c in CATEGORY_ORDER + sorted(seen - set(CATEGORY_ORDER)):
         rows = [r for r in gl if r["category"] == c]
         if not rows:
             continue
-        line = f"| `{c}` | {len(rows)} | {pct(ex(rows))} |"
-        if cy:
-            crows = [r for r in cy if r["category"] == c]
-            line += f" {pct(ex(crows))} |"
-        w(line)
+        crows = [r for r in cy if r["category"] == c]
+        delta = 100 * (ex(rows) - ex(crows)) if crows else None
+        w(
+            f"| `{c}` | {len(rows)} | {pct(ex(rows))} | {pct(ex(crows))} | "
+            + (f"{delta:+.1f} |" if delta is not None else "n/a |")
+        )
     w("")
 
     w("## Protocol")
@@ -271,6 +338,30 @@ def main() -> None:
     w(
         f"Excluding them, execution accuracy is {pct(ex(reachable))}%. "
         "They are counted as failures in every other number on this page."
+    )
+    w("")
+
+    w("## Honest notes")
+    w("")
+    w(
+        "- An earlier internal evaluation in this repo reported theorem "
+        "at 98.3% against text2cypher's 73.3%. That number was measured "
+        "on a hand-picked subset of the `nba` graph, with the categories "
+        "theorem could not express removed, and with a prompt that had "
+        "been iterated against those same questions. It does not "
+        "survive contact with the full public benchmark and should not "
+        "be quoted."
+    )
+    w(
+        "- Two bugs found while running this were fixed before the "
+        "numbers above were taken: `count distinct` was quadratic, which "
+        "made large graphs unqueryable, and the evaluation adapter "
+        "collapsed relation labels that connect more than one pair of "
+        "entity types, which alone was costing 36 points on `geography`."
+    )
+    w(
+        "- The set-valued `return` row is a measurement, not a shipped "
+        "change. The engine still emits duplicates."
     )
     w("")
 

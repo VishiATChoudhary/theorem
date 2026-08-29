@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -50,6 +51,11 @@ from eval.run_public import (
 CONTAINER = "cypherbench-eval"
 BOLT_PORT = 17687
 AUTH = ("neo4j", "cypherbencheval1")
+HEAP = os.environ.get("CB_NEO4J_HEAP", "3G")
+PAGECACHE = os.environ.get("CB_NEO4J_PAGECACHE", "1G")
+# Graphs whose JSON the image's in-container importer cannot parse within
+# the Docker VM; these are streamed in from the host instead.
+HOST_LOADED = {"geography", "politics", "movie"}
 
 NL2CYPHER_PROMPT_DEFAULT = """Translate the question to Cypher query based on the schema of a Neo4j knowledge graph.
 - Output the Cypher query in a single line, without any additional output or explanation. Do not wrap the query with any formatting like ```.
@@ -146,20 +152,94 @@ def stop_container() -> None:
     subprocess.run(["docker", "rm", "-f", CONTAINER], capture_output=True)
 
 
-def start_graph(graph: str) -> None:
+def _stub_for(graph: str) -> Path:
+    """An empty graph with the real schema, for the image to import.
+
+    The image's own importer parses the whole JSON into pydantic objects
+    and gets OOM-killed inside the Docker VM on the three largest graphs.
+    Feeding it an empty graph and streaming the real one in from the host
+    keeps the same Neo4j engine while moving the parse to the machine that
+    has the memory for it.
+    """
+    stub = Path("/tmp") / f"cb_stub_{graph}.json"
+    schema = json.loads((DATA / f"{graph}_schema.json").read_text())
+    stub.write_text(json.dumps({"schema": schema, "entities": [], "relations": []}))
+    return stub
+
+
+def load_from_host(driver, graph: str, batch: int = 5000) -> None:
+    """Stream a simplekg JSON into an empty Neo4j over bolt."""
+    kg = json.loads((DATA / f"{graph}_simplekg.json").read_text())
+    by_label: dict[str, list[dict]] = {}
+    for ent in kg["entities"]:
+        props = {"eid": ent["eid"], "name": ent.get("name") or ent["eid"]}
+        for k, v in (ent.get("properties") or {}).items():
+            if v is not None:
+                props[k] = v
+        by_label.setdefault(ent["label"], []).append(props)
+    with driver.session(database="neo4j") as s:
+        for label in by_label:
+            s.run(f"CREATE INDEX IF NOT EXISTS FOR (n:{label}) ON (n.eid)")
+        for label, items in by_label.items():
+            for i in range(0, len(items), batch):
+                s.run(
+                    f"UNWIND $rows AS row CREATE (n:{label}) SET n = row",
+                    rows=items[i : i + batch],
+                )
+            print(f"    {label}: {len(items)} nodes", flush=True)
+        s.run("CALL db.awaitIndexes(600)")
+        # Group by endpoint labels as well as relation type: the eid
+        # indexes are per-label, so a label-free MATCH would scan every
+        # node for every row. The endpoint label is the eid prefix.
+        rels: dict[tuple[str, str, str], list[dict]] = {}
+        for rel in kg["relations"]:
+            props = {
+                k: v for k, v in (rel.get("properties") or {}).items() if v is not None
+            }
+            key = (
+                rel["label"],
+                rel["subj_id"].split("#")[0],
+                rel["obj_id"].split("#")[0],
+            )
+            rels.setdefault(key, []).append(
+                {"s": rel["subj_id"], "o": rel["obj_id"], "p": props}
+            )
+        for (label, subj_label, obj_label), items in rels.items():
+            for i in range(0, len(items), batch):
+                s.run(
+                    f"UNWIND $rows AS row "
+                    f"MATCH (a:{subj_label} {{eid: row.s}}), "
+                    f"(b:{obj_label} {{eid: row.o}}) "
+                    f"CREATE (a)-[r:{label}]->(b) SET r = row.p",
+                    rows=items[i : i + batch],
+                )
+            print(
+                f"    {label} ({subj_label}->{obj_label}): {len(items)} edges",
+                flush=True,
+            )
+        n = s.run("MATCH (n) RETURN count(n) AS c").single()["c"]
+        m = s.run("MATCH ()-[r]->() RETURN count(r) AS c").single()["c"]
+    print(f"[{graph}] host-loaded {n} nodes, {m} edges", flush=True)
+
+
+def start_graph(graph: str, host_load: bool = False) -> None:
     """Host one graph with the official loader image and wait for it."""
     stop_container()
-    graph_path = (DATA / f"{graph}_simplekg.json").resolve()
+    graph_path = (
+        _stub_for(graph) if host_load else (DATA / f"{graph}_simplekg.json")
+    ).resolve()
     subprocess.run(
         [
             "docker", "run", "-d", "--name", CONTAINER,
             "-v", f"{graph_path}:/init/graph.json",
             "-p", f"{BOLT_PORT}:7687",
             "-e", f"NEO4J_AUTH={AUTH[0]}/{AUTH[1]}",
-            # Must fit the Docker VM (7.6G here); Neo4j refuses to start
-            # if heap + pagecache exceeds physical memory.
-            "-e", "NEO4J_server_memory_heap_max__size=4G",
-            "-e", "NEO4J_server_memory_pagecache_size=1G",
+            # Must fit the Docker VM alongside the image's own Python
+            # importer, which holds the whole graph JSON in memory. Neo4j
+            # taking 5G of a 7.6G VM got the container OOM-killed (exit
+            # 137) on the three largest graphs before it finished loading.
+            "-e", f"NEO4J_server_memory_heap_max__size={HEAP}",
+            "-e", f"NEO4J_server_memory_pagecache_size={PAGECACHE}",
             "megagonlabs/neo4j-with-loader:2.4",
         ],
         check=True,
@@ -168,7 +248,7 @@ def start_graph(graph: str) -> None:
     print(f"[{graph}] container started, waiting for load ...", flush=True)
 
 
-def connect(timeout_s: int = 3600):
+def connect(timeout_s: int = 3600, expect_empty: bool = False):
     """Wait for the graph to finish loading, then return a driver.
 
     The loader image imports the JSON on first boot, so a successful
@@ -191,6 +271,8 @@ def connect(timeout_s: int = 3600):
             time.sleep(5)
     if driver is None:
         raise RuntimeError("neo4j never became reachable")
+    if expect_empty:
+        return driver
     last, stable = -1, 0
     while time.time() < deadline:
         with driver.session() as s:
@@ -228,8 +310,13 @@ def exec_graph(graph: str, model: str) -> None:
     done = {r["qid"] for r in results}
     questions = questions_for(graph)
 
-    start_graph(graph)
-    driver = connect()
+    # The image's importer cannot fit the largest graphs in the Docker VM,
+    # so those are loaded from the host instead.
+    host_load = graph in HOST_LOADED
+    start_graph(graph, host_load=host_load)
+    driver = connect(expect_empty=host_load)
+    if host_load:
+        load_from_host(driver, graph)
     try:
         for q in questions:
             if q["qid"] in done or q["qid"] not in queries:

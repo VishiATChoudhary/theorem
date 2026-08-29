@@ -1,0 +1,2930 @@
+[
+ {
+  "qid": "5ccda891-9f3c-4787-993c-0c72e07de25c",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Natara River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_lake_country lake where area_km2 < 390000 as l\nreturn l.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "21e88819-1f35-47d5-afad-c37d695d916a",
+  "category": "basic_(n)",
+  "query": "find country as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 217
+ },
+ {
+  "qid": "bcf9c30f-8b53-40a1-9929-f72f6a550eea",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lake Sartlan\" as l1\nfind lake where name = \"Lake Sasykkol\" as l2\ncompute l1.vertical_depth_m minus l2.vertical_depth_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "3949691f-bb9a-4370-96d6-ff814338a439",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Armenia\" as c\nfollow c locatedIn_lake_country lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 36
+ },
+ {
+  "qid": "ac09e4a1-a550-433e-9887-ceda1bdf235f",
+  "category": "special_three-node-groupby",
+  "query": "find country where name = \"India\" as c\nfollow c locatedIn_mountain_country mountain as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\ngroup by mr as g\ncount distinct g.m as count\nreturn mr.name, count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 27
+ },
+ {
+  "qid": "b5008120-4da6-436e-9126-d03ade046464",
+  "category": "special_optional-match",
+  "query": "find river where name = \"Arauca River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by c as g\ncount distinct g.db as basin_count\nreturn c.name, basin_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "78d0c54c-4c8d-4b25-8ac4-102bde2737cc",
+  "category": "basic_(n)",
+  "query": "find ocean as o\nreturn o.name, o.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "c0d6549e-da7b-4b3a-8737-7cd3804c69b1",
+  "category": "special_three-node-groupby",
+  "query": "find country where name = \"Spain\" as sp\nfollow sp locatedIn_drainagebasin_country drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\ngroup by c as g\ncount distinct g.db as n\nreturn c.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 20
+ },
+ {
+  "qid": "a0410766-d52a-470c-9985-5df41f3fb36f",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_river subj as source\nmin r.discharge_m3_s as lowest\nreturn lowest",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "18135e58-986b-48e7-99d8-b2b6f58b3cf9",
+  "category": "special_union",
+  "query": "find country where name = \"Kazakhstan\" as c\nfollow c flowsThrough river as r1\nfind drainagebasin where name = \"Irtysh\" as db\nfollow db partOf_river_drainagebasin river as r2\nreturn r1.name, r2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "7fcb7800-241f-417b-8fbb-a488f42fd1f6",
+  "category": "special_optional-match",
+  "query": "find mountain where name = \"Kula Kangri\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by c as g\ncount distinct g.db as count_db\nreturn c.name, count_db",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "077c9102-73f4-4cca-b7d6-bb22af5a6274",
+  "category": "special_three-node-groupby",
+  "query": "find river where name = \"Bobrovka River\" as b\nfollow b flowsInto_river_river obj as r1\nfollow r1 flowsInto_river_river obj as r2\ngroup by r2 as g\ncount distinct g.r1 as tributaries_flowing_in\nreturn r2.name, tributaries_flowing_in",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "f144451a-4252-4231-919f-ed0945ca8ee6",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river where length_km >= 800 as r\nfollow r flowsThrough country where name = \"People's Republic of China\" as c\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "9f0b4e4d-b509-49b3-8668-61673c82dd55",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Dongting Lake\" as dongting\nfollow dongting flowsInto_river_lake river as river1\nfollow river1 flowsInto_river_river subj as river2\nreturn river2.name order by river2.length_km desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 22
+ },
+ {
+  "qid": "d3341309-52c9-4f93-a2e6-765d7c9651f0",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountainrange where name = \"Karakoram\" as k\nfollow k partOf_mountainrange_mountainrange subj as m1\nfollow m1 partOf_mountainrange_mountainrange subj as m2\nreturn m2.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f259f797-dea9-409d-abd0-700760444999",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountainrange where name = \"Andes\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m\nreturn m.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2659
+ },
+ {
+  "qid": "942ddefb-08fb-4dcd-9cfa-e860b86580fa",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"Tobol\" as db\nfollow db partOf_river_drainagebasin river as r\ncount distinct r as n\nreturn n",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "fa961143-bbcf-4097-b19c-4baa891f21da",
+  "category": "special_three-node-groupby",
+  "query": "find drainagebasin where name = \"Ob Basin\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsThrough country as c\ngroup by c as g\ncount distinct g.r as river_count\nreturn c.name, river_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "edf7b048-f5f4-42cf-abe2-7a7105a0555a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Brunei\" as brunei\nfollow brunei locatedIn_country_continent continent as c\nfollow c locatedIn_country_continent country as countries\nmin countries.area_km2 as smallest_area\nreturn smallest_area",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "4c611739-8e47-433e-9ad0-3cd83de5ae40",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"Europe\" as cont\nfollow cont locatedIn_country_continent country as c\nfollow c locatedIn_country_continent continent as all_conts\ngroup by c as g\ncount distinct g.all_conts as num_continents\nreturn c.name, num_continents",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 7
+ },
+ {
+  "qid": "be389d22-3ea3-46a4-a067-24aacfa77375",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Quebrada Pan de Az\u00facar\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_mountain_country mountain where name = \"Socompa\" as m\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "0fa14f0f-5bec-45eb-b75d-e3c024ac12a3",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Kasba Lake\" as kasba\nfollow kasba partOf_lake_drainagebasin drainagebasin as db\nfollow db partOf_lake_drainagebasin lake where name != \"Kasba Lake\" as other_lake\nreturn other_lake.name, other_lake.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 120
+ },
+ {
+  "qid": "03710b9c-8a9d-4092-b37d-4705f7960c1d",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Honduras\" as c\nfollow c locatedIn_country_continent continent as cont\nreturn cont.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "862944dc-2b4e-4c83-aba4-398b5f4d7c46",
+  "category": "special_union",
+  "query": "find continent where name = \"Asia\" as cont\nfollow cont locatedIn_country_continent country as c_asia\nfind mountain where name = \"Sickle Moon Peak\" as m\nfollow m locatedIn_mountain_country country as c_peak\nreturn c_asia.name, c_peak.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 55
+ },
+ {
+  "qid": "b1dca115-36c5-4a6d-a6b9-8ac44e6379cc",
+  "category": "basic_(n*)",
+  "query": "find river where name = \"Saladillo Stream\" as r\nreturn r.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "1f764f5e-097c-42ce-be4d-712c9251e695",
+  "category": "special_union",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r1\nfind drainagebasin where name = \"Lena\" as db\nfollow db partOf_river_drainagebasin river as r2\ngroup by r1 as g1\ncount distinct g1 as n1\ngroup by r2 as g2\ncount distinct g2 as n2\ncompute n1 plus n2 as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "IndexError: tuple index out of range"
+ },
+ {
+  "qid": "1cbfb720-1ed3-4343-9243-b5a72d1f04e7",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Gangotri Group\" or name = \"Annapurna\" as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\ngroup by mr as g\ncount distinct g.m as cnt\nreturn g.key order by cnt desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "7f34ced0-7245-4e45-9cc3-6f1f22d6912c",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"L\u00e9man\" as db\nfollow db partOf_lake_drainagebasin lake as l\nreturn l.name, l.vertical_depth_m",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "5e6940c4-5e17-4347-9796-3d7ed2a71054",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Mun River\" as mun\nfollow mun flowsInto_river_river obj as target\nfollow target flowsThrough country where name = \"Myanmar\" as c\nreturn target.name, target.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "66d2f407-717f-475f-a82d-2684cadde907",
+  "category": "special_three-node-groupby",
+  "query": "find country where name = \"Cameroon\" as cameroon\nfollow cameroon locatedIn_drainagebasin_country drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c2\ngroup by c2 as g\ncount distinct g.db as n\nreturn c2.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 21
+ },
+ {
+  "qid": "e3839236-baca-4c7b-b792-249fe052be84",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Avalanche Peak II\" as m1\nfollow m1 locatedIn_mountain_country country as c\nfollow c locatedIn_mountain_country mountain where name = \"Sakram\" as m2\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b4769263-4623-41c7-a9e8-93000b7efce9",
+  "category": "basic_(n)-(m0)",
+  "query": "find continent as c\nfollow c locatedIn_country_continent country as co\ncount distinct c as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a2910ebe-77ed-48ce-952c-5639de26d04a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Bolshaya Taychinka\" as bt\nfollow bt flowsInto_river_river obj as target\nfollow target flowsInto_river_river subj as others\nreturn others.name, others.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 85
+ },
+ {
+  "qid": "d96ced22-b55e-4c1b-b32d-6f9a774a53a2",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country as c\nreturn c.name order by c.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "44a49d29-c1b2-4f75-bf8c-017975610503",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Southern Ocean\" as o1\nfind ocean where name = \"Indian Ocean\" as o2\ncompute o1.area_km2 minus o2.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "745aa6a4-781e-45cc-8d47-978f92d5481d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Lake Teletskoe\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_lake_country lake as lakes\nmax lakes.area_km2 as max_area\nreturn max_area",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "755d89e2-ffed-4e83-838c-7aa62c461b6d",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Southern Ocean\" or name = \"Indian Ocean\" as o\nreturn o.name order by o.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "db94421f-5bf9-4a4a-ac9c-066c66cbecc6",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountainrange where name = \"Saltoro Mountains\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m\ncount distinct m as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "54ecff59-235d-4183-b74d-27b2880266be",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Peru\" as peru\nfollow peru locatedIn_mountain_country mountain as m\nfollow m locatedIn_mountain_country country as c\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 12
+ },
+ {
+  "qid": "7eca53b0-8f43-4d3a-87d6-9d20ed25aa5c",
+  "category": "special_comparison",
+  "query": "find drainagebasin where name = \"Abarkuh\u2013Sirjan Basin\" or name = \"Rh\u00f4ne basin\" as b\nreturn b.name order by b.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "57f9ab1b-6a75-4675-9bdd-073355050389",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Atbarah River\" as atbarah\nfollow atbarah flowsInto_river_river subj as tributary\nreturn tributary.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "c3b8b137-41a1-45af-8b58-f9889f2325b4",
+  "category": "basic_(n)-(m0)",
+  "query": "find drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name order by c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1647
+ },
+ {
+  "qid": "5f2d6d46-ba37-494b-b0f0-636b5d4f780d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Yuan River\" as r\nfollow r flowsInto_river_lake lake as l\nfollow l locatedIn_lake_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a88b4dbc-48fd-4087-aa03-162c3ec71915",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Xiang River\" as r\nfollow r flowsInto_river_lake lake as l\nfollow l locatedIn_lake_country country where name = \"People's Republic of China\" as c\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "5703b245-3e3f-4a30-bcb9-2c23c90c02d5",
+  "category": "special_union",
+  "query": "find ocean where name = \"Atlantic Ocean\" as ao\nfollow ao flowsInto_river_ocean river as r1\ncount distinct r1 as c1\nfind country where name = \"Democratic Republic of the Congo\" as drc\nfollow drc flowsThrough river as r2\ncount distinct r2 as c2\nfind river as r3\nfollow r3 flowsInto_river_ocean ocean where name = \"Atlantic Ocean\" as o\nfollow r3 flowsThrough country where name = \"Democratic Republic of the Congo\" as drc_check\ncount distinct r3 as c3\ncompute c1 plus c2 as sum\ncompute sum minus c3 as answer\nreturn answer",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column c1"
+ },
+ {
+  "qid": "54a13721-310f-42d4-b9c5-da9d4072beef",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountain where name = \"Terich Mir\" as m\nfollow m locatedIn_mountain_country country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e2309ba6-753f-49c6-a2c6-904792168718",
+  "category": "basic_(n*)",
+  "query": "find mountain where name = \"Trisul\" as m\nreturn m.elevation_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e03914fb-882d-4c21-a8c7-cadfedc5bf86",
+  "category": "special_optional-match",
+  "query": "find mountainrange where name = \"Severnyy Tanymas\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m\nfollow m locatedIn_mountain_country country as c\ngroup by m as g\ncount distinct g.c as country_count\nreturn m.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 29
+ },
+ {
+  "qid": "53688371-731b-4a0d-b1d2-af3405be8c18",
+  "category": "special_union",
+  "query": "find country where name = \"Democratic Republic of the Congo\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nfind river where name = \"Tshopo River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"db\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "ec1874cf-318d-44d9-90d0-0cfa93357d7d",
+  "category": "special_optional-match",
+  "query": "find river where name = \"Anabar River\" as r\nfollow r flowsInto_river_ocean ocean as o\nfollow o flowsInto_river_ocean river as r_all\ngroup by o as g\ncount distinct g.r_all as num_rivers\nreturn o.name, num_rivers",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "a92cec08-79ca-457e-a572-b7ee5bfa84f5",
+  "category": "special_optional-match",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 6
+ },
+ {
+  "qid": "0c482d3f-02c8-4be3-9204-c20b12a48c4e",
+  "category": "special_comparison",
+  "query": "find river where name = \"Anerava River\" as r1\nfind river where name = \"Menkere River\" as r2\ncompute r1.length_km minus r2.length_km as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "081e13fa-7bec-4dcf-94e6-ee3d38962938",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find drainagebasin where name = \"Bug Basin\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_lake_country lake where area_km2 > 200 as l\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "f2ff594d-ebbd-4a28-afaf-6f8fca757015",
+  "category": "special_three-node-groupby",
+  "query": "find mountain where name = \"Chopicalqui\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_lake_country lake as l\ngroup by l as g\ncount distinct g.c as num_countries\nreturn l.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 850
+ },
+ {
+  "qid": "1ab6cb26-4424-433d-82df-978caf0eed5b",
+  "category": "special_union",
+  "query": "find lake where name = \"Lac la Ronge\" as l\nfollow l locatedIn_lake_country country as c1\nfind drainagebasin where name contains \"Rivi\u00e8re du Li\u00e8vre\" as b\nfollow b locatedIn_drainagebasin_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "5430d203-868a-4b48-9c18-e0873c089511",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Amazon\" as amazon\nfollow amazon flowsInto_river_ocean ocean as o\nfollow o flowsInto_river_ocean river where name = \"Hamza\" as r\nreturn o.name, o.avg_vertical_depth_m",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "7926da80-d841-48ba-944d-051b221bf21d",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Bolshoy Kunyak\" as r1\nfollow r1 flowsThrough country as c1\nfind river where name = \"Katiss\" as r2\nfollow r2 flowsThrough country as c2 where c2.name = c1.name\nreturn c1.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 4: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "3dd6480e-1d5e-43fb-98f4-11e8dc731116",
+  "category": "special_three-node-groupby",
+  "query": "find river where name = \"Malaya Pikhtovaya River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_country_continent continent as cont\ngroup by cont as g\ncount distinct g.c as country_count\nreturn cont.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "d634e657-5d2b-44aa-baa1-76ddd8ba1b0f",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Zheng River\" as zheng\nfollow zheng flowsInto_river_river obj as r\nfollow r flowsInto_river_lake lake where name = \"Dongting Lake\" as l\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "ebf05021-cfaa-41f7-8752-0cc2a82765b2",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country as c\nfollow c locatedIn_lake_country lake where name = \"Lake Keret\" as keret\nfollow c flowsThrough river where name = \"Prorvinskaya River\" as prov\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "38a20e1f-2254-431a-ba7c-bb592a744e4d",
+  "category": "basic_(n*)",
+  "query": "find river where name = \"Guamu\u00e9s River\" as r\nreturn r.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "c01315f4-a328-40d7-9256-c67718d06d9b",
+  "category": "basic_(n)",
+  "query": "find river as r\nmax r.length_km as max_length\nreturn max_length",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "853863e9-31df-4206-a838-99738bf44583",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_ocean ocean as o\nreturn o.area_km2 order by o.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "2360b9a9-168e-4ebc-9398-ac3b09475dd2",
+  "category": "special_optional-match",
+  "query": "find lake where name = \"Lake Albert\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by c as g\ncount distinct g.db as n\nreturn c.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "e2e3d0a0-75cd-4922-bd83-817780d7f067",
+  "category": "special_union",
+  "query": "find river where name contains \"Lancang\" or name contains \"Mangpa\" as r\nfollow r flowsThrough country as c\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\ncount distinct c as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "1d242cfe-46c5-4fc9-8137-a13223a5ce71",
+  "category": "special_three-node-groupby",
+  "query": "find drainagebasin where name = \"Bug Basin\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_lake_country lake as l\ngroup by l as g\ncount distinct g.c as country_count\nreturn l.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1852
+ },
+ {
+  "qid": "b81e49bc-519a-400a-a5d7-bc169d051637",
+  "category": "special_comparison",
+  "query": "find country where name = \"Republic of Ireland\" or name = \"Turkey\" as c\nreturn c.name order by c.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "632156e3-7e15-48eb-82a8-b0c6918f2216",
+  "category": "special_union",
+  "query": "find lake where name = \"Okanagan Lake\" or name = \"Lake Michigan\u2013Huron\" as l\nfollow l locatedIn_lake_country country as c\ncount distinct c as num_countries\nreturn num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e6575d39-8025-40eb-80f4-08bf925e5878",
+  "category": "special_union",
+  "query": "find lake as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nfollow l locatedIn_lake_country country as c where db.name = \"Ob Basin\" or c.name = \"Kazakhstan\"\ncount distinct l as cnt\nreturn cnt",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "e5282147-98fb-4165-a843-9890a0a65f84",
+  "category": "basic_(n)-(m0)",
+  "query": "find continent as c\nfollow c locatedIn_country_continent country as co\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 200
+ },
+ {
+  "qid": "4d4a75cb-6449-424e-aaba-1ff7057f0dd9",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river as r\nfollow r flowsThrough country where name = \"Cameroon\" as cam\nfollow r flowsThrough country where name != \"Cameroon\" as other\nreturn other.name order by other.area_km2 desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 17
+ },
+ {
+  "qid": "ef301c0c-a112-407a-ad38-080b0df99e80",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Nanga Parbat\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_country_continent continent where name = \"Asia\" as cont\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "0fbf259e-1399-4d48-a560-6548a2e91e7c",
+  "category": "basic_(n)",
+  "query": "find mountainrange as mr\ncount distinct mr as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "3008f4e0-c6ab-4562-b101-56824082f3d4",
+  "category": "special_union",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r1\nfind river where name = \"Kyuelenke River\" as k\nfollow k flowsInto_river_river obj as r2\nreturn r1.name, r2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "86d32f7f-36cd-4757-9e60-fb39d2f3ac7c",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Nile River\" as r\nfollow r flowsInto_river_ocean ocean as o\nreturn o.name, o.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "07ccbdc9-a24a-4ad6-a01d-0eacb52d0ae8",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain as m\nfollow m partOf_mountain_mountainrange mountainrange where name = \"Himalayas\" as h\nfollow m partOf_mountain_mountainrange mountainrange where name = \"Gurans Himal\" as g\nreturn m.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "94555092-24af-45b9-9f74-f715aa5c2f64",
+  "category": "basic_(n*)",
+  "query": "find drainagebasin where name = \"Sava Basin\" as db\nreturn db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b40148c3-95d3-419a-b20c-5253705c8cdf",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Irtysh\" as b\nfollow b partOf_river_drainagebasin river as r\nfollow r flowsThrough country where name = \"Russia\" as c\nreturn r.name order by r.length_km",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "5103be93-e84f-4ad3-962d-0a17634201b4",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Chinchey\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c flowsThrough river as r\nreturn r.name, r.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 115
+ },
+ {
+  "qid": "4c28238c-6fca-4243-aa0e-86f5394520f1",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 4297
+ },
+ {
+  "qid": "2c437202-16c5-4c22-b36e-1ae1277b5e4b",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Tajikistan\" as c\nfollow c locatedIn_mountain_country mountain as m\nfollow m locatedIn_mountain_country country as c_all\ngroup by m as g\ncount distinct g.c_all as country_count\nreturn m.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 23
+ },
+ {
+  "qid": "75d53e0a-7572-41fd-a682-90b5c03688ec",
+  "category": "special_optional-match",
+  "query": "find ocean where name = \"Arctic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 853
+ },
+ {
+  "qid": "f8f87dac-12e1-415a-b513-aa6735fd2632",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Devistan II\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_lake_country lake as l\nmin l.vertical_depth_m as min_depth\nreturn min_depth",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "6f7d04e8-a2b3-4547-8609-2f0f6f327e57",
+  "category": "special_three-node-groupby",
+  "query": "find mountain where name = \"Chaudhara\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_lake_country lake as l\ngroup by l as g\ncount distinct g.c as num_countries\nreturn g.l.name, num_countries",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column g.l.name"
+ },
+ {
+  "qid": "e77aa33c-e1f2-4047-9d98-19bb3896369f",
+  "category": "special_union",
+  "query": "find river where name = \"Tongdian River\" as t\nfollow t flowsInto_river_river obj as parent\nfind country where name = \"Vietnam\" as v\nfollow v flowsThrough river as vietnam_river\nreturn parent.name, vietnam_river.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 54
+ },
+ {
+  "qid": "74d0ee4a-db37-4c89-b514-08f0898f9ce4",
+  "category": "special_three-node-groupby",
+  "query": "find lake where name = \"Beloye Lake\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_country_continent continent as cont\ngroup by cont as g\ncount distinct g.c as country_count\nreturn cont.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "49203673-e7a7-48ea-84bb-ff404871aa20",
+  "category": "special_comparison",
+  "query": "find river where name = \"Olyokma\" as r1\nfind river where name = \"Kasai\" as r2\ncompute r1.discharge_m3_s minus r2.discharge_m3_s as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "756f6196-1b94-4674-9b9e-4623d044faa6",
+  "category": "special_three-node-groupby",
+  "query": "find lake where name = \"Lake Sartlan\" as sartlan\nfollow sartlan locatedIn_lake_country country as sartlan_country\nfollow sartlan_country locatedIn_drainagebasin_country drainagebasin as basin\ngroup by basin as g\ncount distinct g.sartlan_country as num_countries\nreturn basin.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 39
+ },
+ {
+  "qid": "262dad9e-5c1d-4aa7-9387-e56b4375c876",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Lena\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsInto_river_ocean ocean where name = \"Atlantic Ocean\" as o\nreturn r.name, r.length_km",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "dd68bcce-7d0c-4eaf-8d33-382fda35cf5a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Panjal Range\" or name = \"Lapche Kang II\" as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\ngroup by mr as g\ncount distinct g.m as cnt\nreturn g.key order by cnt desc",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "338d0b0d-4ab9-4690-a946-6036438226a0",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Pool Malebo\" as lake\nfollow lake partOf_lake_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c where name = \"Rwanda\"\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "f6ca9b5a-4e60-4fa8-9018-a24ba13ce075",
+  "category": "special_union",
+  "query": "find continent where name = \"Africa\" as af\nfollow af locatedIn_country_continent country as c1\nfind lake where name = \"Lake Ngami\" as l\nfollow l locatedIn_lake_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 55
+ },
+ {
+  "qid": "39966ca0-0ab4-4ef9-bf3b-6ac46f97208a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Kasai River\" as kasai\nfollow kasai flowsInto_river_river subj as tributaries\nfollow tributaries partOf_river_drainagebasin drainagebasin as basins\nreturn basins.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 13
+ },
+ {
+  "qid": "8d30af25-46ff-4541-b310-c5067f68e0f7",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Posyrya\" as posyrya\nfollow posyrya flowsInto_river_river obj as target\nfollow target partOf_river_drainagebasin drainagebasin as db where name = \"Tobol\"\nreturn target.name, target.length_km",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "8b14ae44-657a-4aab-881c-050bebd2351f",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Democratic Republic of the Congo\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\ngroup by l as g\ncount distinct g.db as count_basins\nreturn l.name, count_basins",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 11
+ },
+ {
+  "qid": "b6c0fb68-f151-4907-9c88-b28b1a4d9070",
+  "category": "basic_(n*)",
+  "query": "find ocean where name = \"Arctic Ocean\" as o\nreturn o.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "585d1a28-c707-43db-b22d-e72face3b3f1",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find continent where name = \"Africa\" as c\nfollow c locatedIn_country_continent country as ctry\nfollow ctry flowsThrough river as r\ncount distinct r as num_rivers\nreturn num_rivers",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "fcd8094f-b973-4f38-b020-cd31f7effddf",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Polsky Buerak\" as pb\nfollow pb flowsInto_river_river obj as target_river\nfollow target_river flowsThrough country as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "3e06e1ab-e7e6-4582-a33b-b662c44d443c",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Tobol\" as tobol\nfollow tobol partOf_river_drainagebasin river as r\nfind river where name = \"Netva\" as netva\nfollow netva flowsInto_river_river subj as r\ncount distinct r as answer\nreturn answer",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"r\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "82045ffe-ec01-4a57-bc8d-edcb7c8cd16d",
+  "category": "special_union",
+  "query": "find continent where name = \"Europe\" or name = \"Asia\" as c\nfollow c locatedIn_country_continent country as co\nreturn co.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 109
+ },
+ {
+  "qid": "65c8a37a-2a9f-4cf5-98e0-4dacd428f7e2",
+  "category": "special_comparison",
+  "query": "find river where name = \"Bandeya\" or name = \"Sultunka\" as r\nreturn r.name order by r.length_km desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "2a57b762-22ee-4195-9258-225090e0d998",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Baqui\u00e1 Preto River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_country_continent continent where name = \"South America\" as cont\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f0354ebd-986a-4e60-bf2c-485e230c1024",
+  "category": "special_union",
+  "query": "find lake where name = \"Kuybyshev Reservoir\" as l\nfollow l locatedIn_lake_country country as c1\nfind river where name = \"Scherbakovka River\" as r\nfollow r flowsThrough country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "375cd55e-b9bb-4123-9237-03a74131376c",
+  "category": "basic_(n)-(m0*)",
+  "query": "find continent where name = \"Oceania\" as c\nfollow c locatedIn_country_continent country as country\nreturn country.name, country.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "266adbd5-e795-4dc8-ab4f-6b376c5f5f3a",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Sangha River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "305ce2dc-8c45-4a7c-a320-10b0b37ae75e",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Franklin D. Roosevelt Lake\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin where name = \"Ogeechee River basin\" as db\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "2a041d74-b551-4777-b9fa-1fcbf9441df9",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Republic of the Congo\" as c\nfollow c flowsThrough river as r\nreturn r.name, r.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 20
+ },
+ {
+  "qid": "fd715d82-f406-4e4e-a736-e917f544ab3a",
+  "category": "special_union",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c locatedIn_mountain_country mountain as m1\nfind mountainrange where name = \"Daxue Mountains\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m2\nreturn m1.name, m2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 5580
+ },
+ {
+  "qid": "8af9505d-3015-405c-a5d1-c9426e59b9c8",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Amp\u00e8re\" as ampere\nfollow ampere flowsInto_river_river obj as intermediate\nfollow intermediate flowsInto_river_river obj where name = \"Iguazu\" as final\nreturn intermediate.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "aaa09220-ba55-4a36-be3d-537943d78e0e",
+  "category": "special_union",
+  "query": "find lake where name = \"Lake Tai\" as l\nfollow l locatedIn_lake_country country as c\nfind mountain where name = \"Sepu Kangri\" as m\nfollow m locatedIn_mountain_country country as c\ncount distinct c.name as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "da1e688a-b6fe-4a68-bff8-2aa636740de2",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Sangha River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "37fd4b3e-036c-4a78-938e-10f7d08b6e72",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r2\nfollow r2 flowsInto_river_river subj as r1\nreturn r1.name order by r1.length_km limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "23d72957-8cc8-480a-b886-a68a0dd24a05",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Nottaway\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_lake_country lake where name = \"Selwyn Lake\" as l\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "36c544c8-7274-4fde-97d3-0eb5b1b218cd",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"South America\" as c\nfollow c locatedIn_country_continent country as country\nfollow country flowsThrough river as r\ngroup by country as g\ncount distinct g.r as river_count\nreturn country.name, river_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 11
+ },
+ {
+  "qid": "d4055ce9-0133-49c5-bed9-e4472f10b026",
+  "category": "special_optional-match",
+  "query": "find mountainrange where name = \"Karakoram\" as karakoram\nfollow karakoram partOf_mountainrange_mountainrange subj as mr\nfollow mr partOf_mountainrange_mountainrange subj as sub_mr\ngroup by mr as g\ncount distinct g.sub_mr as count\nreturn mr.name, count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "eb45a364-0902-4f6e-8b96-81d247a246df",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"Don\" as db\nfollow db partOf_lake_drainagebasin lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "119f03b4-441e-4cca-ae57-720666c8ba5d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Cameroon\" as cameroon\nfollow cameroon locatedIn_lake_country lake as l\nfollow l locatedIn_lake_country country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 4
+ },
+ {
+  "qid": "620b3e10-8eb7-4dab-933a-992b4bb8a3d9",
+  "category": "special_union",
+  "query": "find country where name = \"Burundi\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nfind lake where name = \"Lake Bangweulu\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"db\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "8c9b5ae9-9474-4e56-b5e9-51e3ae7c8f4e",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"Tagus Basin\" as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name order by c.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "577c7978-237a-4b53-8033-ca50a87b4c5a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Kwango River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfind lake where name = \"Lake Mai-Ndombe\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"db\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "aa6a132d-f296-4e20-8471-728ff27e28bc",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Saint Lawrence River basin\" as db\nfollow db locatedIn_drainagebasin_country country as c1\nfind drainagebasin where name = \"Batiscanie\" as b\nfollow b locatedIn_drainagebasin_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "a5563210-24de-4116-a159-c2343916209a",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"Don\" as db\nfollow db partOf_lake_drainagebasin lake as l\nreturn l.name, l.vertical_depth_m",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "33cfed10-4af1-4f9e-b9a5-802bde57fdc5",
+  "category": "basic_(n)",
+  "query": "find drainagebasin as d\nreturn d.name order by d.area_km2 limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8eac1d22-1eb1-436b-8bdf-76fc58d5f7ef",
+  "category": "special_optional-match",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r1\nfollow r1 flowsInto_river_river subj as r2\ngroup by r1 as g\ncount distinct g.r2 as count_in\nreturn r1.name, count_in",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1066
+ },
+ {
+  "qid": "f8f393d6-c374-4c58-88e4-6473dcd0f474",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Pacific\" or name = \"Indian\" as o\nreturn o.name order by o.avg_vertical_depth_m desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "bc1497fd-34c2-4bd9-a43f-97f9adc2835f",
+  "category": "special_union",
+  "query": "find mountain where name = \"Gul Lasht Zom\" or name = \"Choricho\" as m\nfollow m locatedIn_mountain_country country as c\ncount distinct c as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "d4a8f064-21d6-436f-ba26-91c0a6fb8ed7",
+  "category": "special_comparison",
+  "query": "find drainagebasin where name = \"Abarkuh\u2013Sirjan Basin\" as b1\nfind drainagebasin where name = \"Rh\u00f4ne basin\" as b2\ncompute b1.area_km2 minus b2.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "649485dd-9f85-4def-88bc-21adffd85b7d",
+  "category": "special_union",
+  "query": "find country where name = \"Brazil\" as c\nfollow c flowsThrough river as r1\nfind river where name = \"Apa River\" as apa\nfollow apa flowsInto_river_river subj as r2\ncount distinct r1 as n1\ncount distinct r2 as n2\ncompute n1 plus n2 as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column n1"
+ },
+ {
+  "qid": "af436329-6afe-4543-a71d-1946515b5d81",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Playgreen Lake\" as l\nfollow l locatedIn_lake_country country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "551c120e-7747-4336-97be-f23cd015ce7b",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Nerda\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "0d94ec68-0d91-419d-b49e-ef882e3b4d25",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r\nfollow r flowsThrough country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 6
+ },
+ {
+  "qid": "82f5df7e-3a49-4420-9a39-9840e7286c08",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountainrange where name = \"Andes\" as andes\nfollow andes partOf_mountain_mountainrange mountain as m\nmin m.elevation_m as min_elev\nreturn min_elev",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "cbda4a6c-eed4-4325-9edd-0a64dcfc3b5a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Tayma River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country where name = \"Russia\" as c\nreturn db.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "f02edb8c-3134-4f29-8f76-6bb5de71fadf",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"United States of America\" as us\nfollow us locatedIn_drainagebasin_country drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 23
+ },
+ {
+  "qid": "cbbb5218-1e74-4f05-b8f7-ff4d6650938b",
+  "category": "special_optional-match",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l flowsInto_river_lake river as r\ngroup by l as g\ncount g.r as river_count\nreturn l.name, river_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 22
+ },
+ {
+  "qid": "919d774a-197d-42ad-b0ed-dde4d0411833",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 195
+ },
+ {
+  "qid": "ca1686be-d8b7-48ba-9249-b125ee8e7179",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Democratic Republic of the Congo\" as c\nfollow c flowsThrough river as r_source\nfollow r_source flowsInto_river_river obj as r_receiver\nreturn r_receiver.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 95
+ },
+ {
+  "qid": "ce25e06e-7cb9-40ae-b317-f9158a7e5f41",
+  "category": "special_optional-match",
+  "query": "find mountainrange where name = \"Pamir Mountains\" as pamir\nfollow pamir partOf_mountainrange_mountainrange subj as subrange\nfollow subrange partOf_mountain_mountainrange mountain as m\ngroup by subrange as g\ncount g.m as mountain_count\nreturn subrange.name, mountain_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 15
+ },
+ {
+  "qid": "79a7b433-defe-40f0-888d-f0fd0ad0e2f5",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountain where name = \"Terich Mir\" as m\nfollow m locatedIn_mountain_country country as c\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "92aa524c-9068-48c5-bf39-c6f87ec221c4",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find drainagebasin where name = \"Siahkuh\u2013Zarrin\u2013Sorkh Basin\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as other_db\nreturn other_db.name, other_db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 13
+ },
+ {
+  "qid": "d0f18ee6-250a-4e20-a2ac-b91581db6b92",
+  "category": "basic_(n)-(m0*)",
+  "query": "find ocean where name = \"Arctic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 854
+ },
+ {
+  "qid": "119f744a-ccb9-4f65-ba4f-684fe09cde1b",
+  "category": "special_union",
+  "query": "find mountain where name = \"Mount Jitchu Drake\" or name = \"Cholatse\" as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\ncount distinct mr as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "64515040-e01f-42e0-a8aa-454cd6123935",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Orinoco\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsInto_river_river subj as incoming\ngroup by r as g\ncount distinct g.incoming as incoming_count\nreturn r.name, incoming_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "b5609f90-d8a5-4de2-aa88-4c365ed51075",
+  "category": "basic_(n*)",
+  "query": "find lake where name = \"Frobisher Lake\" as l\nreturn l.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "74244d3c-b7b4-4b41-91a6-33c542cde208",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Russia\" as c\nfollow c flowsThrough river as r\nfollow r partOf_river_drainagebasin drainagebasin where area_km2 >= 1900000 as db\nreturn db.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 3676
+ },
+ {
+  "qid": "ce23daeb-dc6d-4a92-ad7a-f69b5ad3179d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Lake Mweru\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 13
+ },
+ {
+  "qid": "c7e6e5d6-7a33-4b62-b1df-5f45ad5e05bb",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Taygusa River\" as r\nfollow r flowsThrough country as c\nfind lake where name = \"Lake J\u00e4nisj\u00e4rvi\" as l\nfollow l locatedIn_lake_country country as c\nreturn c.name, c.area_km2",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "634b1a5c-2951-4285-8b1a-2fb757d2c4af",
+  "category": "special_three-node-groupby",
+  "query": "find drainagebasin where name = \"Vorskla River Basin\" as vorskla\nfollow vorskla locatedIn_drainagebasin_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.c as country_count\nreturn db.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 38
+ },
+ {
+  "qid": "a5d3187b-eb17-4693-a374-c3fc32393f9f",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find continent where name = \"Europe\" as europe\nfollow europe locatedIn_country_continent country as c\nfollow c locatedIn_country_continent continent where name = \"Asia\" as asia\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "a5d834eb-f5b5-4a5f-b5b1-88193de45819",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Sava Basin\" as sb\nfollow sb locatedIn_drainagebasin_country country as c\nfollow c locatedIn_lake_country lake as l\ngroup by c as g\ncount g.l as lake_count\nreturn c.name, lake_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 4
+ },
+ {
+  "qid": "cd6dd4f6-30c9-4cf1-bd75-ee104ae65bff",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Armenia\" as c\nfollow c locatedIn_lake_country lake as l\nreturn l.name, l.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 36
+ },
+ {
+  "qid": "91e2c425-8006-4153-8199-1eb159a6ded2",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Tobol\" as db\nfollow db partOf_river_drainagebasin river as r_tobol\ncount distinct r_tobol as c_tobol\nfind river where name = \"Netva\" as netva\nfollow netva flowsInto_river_river subj as r_netva\ncount distinct r_netva as c_netva\nfind drainagebasin where name = \"Tobol\" as db2\nfollow db2 partOf_river_drainagebasin river as r_both\nfollow r_both flowsInto_river_river obj where name = \"Netva\" as netva2\ncount distinct r_both as c_overlap\ncompute c_tobol plus c_netva as sum_rough\ncompute sum_rough minus c_overlap as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column c_tobol"
+ },
+ {
+  "qid": "7ecfda12-dab6-43a4-b15a-24d308d2291f",
+  "category": "basic_(n*)",
+  "query": "find ocean where name = \"Indian Ocean\" as o\nreturn o.max_vertical_depth_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e70abc37-1bbb-4b43-be3d-b3326331d89a",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Spain\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c2\ngroup by db as g\ncount distinct g.c2 as country_count\nreturn db.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 8
+ },
+ {
+  "qid": "014630c9-24d8-4e9f-a629-de0bc77d30cb",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Casa de Piedra Reservoir\" as lake\nfollow lake locatedIn_lake_country country as c\nfollow c flowsThrough river as r\nreturn r.name order by r.discharge_m3_s desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 134
+ },
+ {
+  "qid": "e4f98d02-f314-4971-9128-76f7e07c1169",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country where name = \"Zambia\" as c\nreturn r.name, r.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "44b665fc-d80e-4bdd-becc-077b2b2ed360",
+  "category": "special_comparison",
+  "query": "find mountain where name = \"Kharchakund\" or name = \"Denali\" as m\nreturn m.name order by m.elevation_m desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "41275b23-5018-4cd9-8354-cb5eb64bb29f",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Playgreen Lake\" as l\nfollow l locatedIn_lake_country country as c\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "5bec4534-e2b1-416a-9b05-912090e94368",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Antofalla\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 21
+ },
+ {
+  "qid": "11e9ca71-aef3-4f9e-8bb8-29caa9ddf2fa",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Gods Lake\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as d\nreturn d.name, d.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8035c85d-6aad-4eea-af6d-185160b944be",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"L\u00e9man\" as leman\nfollow leman locatedIn_drainagebasin_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin where name = \"Rh\u00f4ne\" as rhone\navg c.area_km2 as avg_area\nreturn avg_area",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "15778502-7a49-4a7c-9837-133047db5b36",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountainrange where name = \"Panjal Range\" as pr\nfollow pr partOf_mountain_mountainrange mountain where elevation_m < 6300 as m\nfollow m locatedIn_mountain_country country where name = \"India\" as c\nreturn m.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 7
+ },
+ {
+  "qid": "595377ea-253d-4df4-a51b-69861a30a849",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Niyap River\" as niyap\nfollow niyap flowsInto_river_river subj as incoming\nreturn incoming.name, incoming.discharge_m3_s",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "97bfc54c-d65f-4238-92c4-24bc1ac94e5a",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find drainagebasin where name = \"Adriatic Sea\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_country_continent continent as cont\nreturn cont.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "b6db5500-1b1d-4971-abab-a1a19cc0cf1e",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Pacific\" or name = \"Indian\" as o\nreturn o.name order by o.max_vertical_depth_m desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "d6ea4f8c-b1e9-4381-91e4-4c334ba10b57",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Ecuador\" as c\nfollow c flowsThrough river as r\nfollow r flowsThrough country as countries\ngroup by r as g\ncount distinct g.countries as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 22
+ },
+ {
+  "qid": "e4f50961-eb5c-491f-a86d-0e6288e19e4c",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountainrange where name = \"Pamir Mountains\" as pamir\nfollow pamir partOf_mountainrange_mountainrange subj as subrange\nfollow subrange partOf_mountain_mountainrange mountain as m\nreturn m.name order by m.elevation_m limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "937960b0-405e-4b46-ae54-7e64dc90eb03",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountain where name = \"Uja Tirche\" as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\nreturn mr.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "925c872b-d8a1-43d7-a8f1-c22719200843",
+  "category": "special_three-node-groupby",
+  "query": "find mountain as m\nfollow m locatedIn_mountain_country country where name = \"India\" as c\ngroup by c as g\ncount distinct g.m as num\nreturn c.name, num",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b7e1cb57-0bfc-4d9a-aa56-430ef00d9a5f",
+  "category": "special_comparison",
+  "query": "find river where name = \"Anerava\" or name = \"Menkere\" as r\nreturn r.name order by r.length_km desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "182cbc90-fdb3-42ef-8b5a-87da7b954deb",
+  "category": "special_union",
+  "query": "find river where name = \"Tura\" as tura\nfollow tura flowsInto_river_river subj as incoming\nfind river where name = \"Chyornaya\" as chyornaya\nfollow chyornaya flowsInto_river_river obj as outgoing\ncount distinct incoming.name as n_in\ncount distinct outgoing.name as n_out\ncompute n_in plus n_out as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column n_in"
+ },
+ {
+  "qid": "13eb831a-b148-45f1-a4c2-2f583ed6d924",
+  "category": "special_three-node-groupby",
+  "query": "find mountain where name = \"Namcha Barwa\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c flowsThrough river as r\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 565
+ },
+ {
+  "qid": "347c3926-6d3d-4dfa-9151-f461b498756c",
+  "category": "special_union",
+  "query": "find mountain where name = \"Rimo Muztagh\" or name = \"South Ghujerab Mountains\" as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\nreturn mr.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "d05a6310-cd64-4ff8-89f2-85eba377364b",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country as c\nfollow c locatedIn_mountain_country mountain where name = \"Pik Przhevalsky\" as m\nfollow c flowsThrough river where name = \"Dashui Qu\" as r\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "7376c7c7-1a30-4d29-92a4-7fce00cb3982",
+  "category": "special_three-node-groupby",
+  "query": "find drainagebasin where name = \"Orinoco Basin\" as ob\nfollow ob locatedIn_drainagebasin_country country as c\nfollow c flowsThrough river as r\ngroup by r as g\ncount distinct g.c as num_countries\nreturn g.r.name, num_countries",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column g.r.name"
+ },
+ {
+  "qid": "35a91fe9-6aba-4f9d-bbb3-be95a8813290",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Lake Kisale\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "56c63afc-6a2d-4068-8b45-a70627f24a51",
+  "category": "basic_(n)-(m0*)",
+  "query": "find continent where name = \"South America\" as c\nfollow c locatedIn_country_continent country as ctry\nreturn ctry.name order by ctry.area_km2 desc",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 12
+ },
+ {
+  "qid": "ba0c5aec-a73a-4d05-80f0-fded20e8d2ba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain as m\nfollow m locatedIn_mountain_country country where name = \"Argentina\" as c_arg\nfollow m locatedIn_mountain_country country where name = \"Chile\" as c_chi\nreturn m.name order by m.elevation_m limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "713e538e-8c46-4907-8cce-f2022389e195",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountainrange where name = \"Principal Cordillera\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m\nfollow m locatedIn_mountain_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "88dbe4ca-8a3a-433d-bcd4-978b465b8bf7",
+  "category": "basic_(n*)",
+  "query": "find mountain where name = \"Gorbunova\" as m\nreturn m.elevation_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8543c234-4ba2-40b2-8ec2-b5adcb46e1ff",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Topky\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f7f604df-4a50-4e93-9f41-390d0d574b87",
+  "category": "special_union",
+  "query": "find country where name = \"Montenegro\" or name = \"Egypt\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ncount distinct db as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f0569af4-d044-47a1-9fd9-0b300ec7c035",
+  "category": "special_comparison",
+  "query": "find country where name = \"Republic of Ireland\" as ireland\nfind country where name = \"Turkey\" as turkey\ncompute turkey.area_km2 minus ireland.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "36142220-fe13-46d9-820a-612571ec0ed9",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country where name = \"Turkmenistan\" as c1\nfollow c1 locatedIn_lake_country lake as l\nfind country where name = \"Kazakhstan\" as c2\nfollow c2 locatedIn_lake_country lake as l\nreturn l.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"l\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "06b08de6-1c51-4f0d-ac7c-3ec4f370526b",
+  "category": "special_union",
+  "query": "find river where name = \"Gulin River\" as r\nfollow r flowsThrough country as c1\nfind mountain where name = \"Mount Everest\" as m\nfollow m locatedIn_mountain_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 4
+ },
+ {
+  "qid": "0cefc609-5ade-420c-9d83-e265b2d8670c",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lake Pontchartrain\" as l1\nfind lake where name = \"Lake P\u00e1tzcuaro\" as l2\ncompute l1.vertical_depth_m minus l2.vertical_depth_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "57269213-a394-4a28-bf11-ec20ccc14667",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Ottawa River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db partOf_lake_drainagebasin lake as l\nfollow l locatedIn_lake_country country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 236
+ },
+ {
+  "qid": "84dd3dc1-640a-4d1b-ae68-f717c17d549b",
+  "category": "special_union",
+  "query": "find river as r\nfollow r flowsThrough country where name = \"Uganda\" as c\nfind river as r\nfollow r flowsInto_river_ocean ocean where name = \"Atlantic Ocean\" as o\ncount distinct r as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"r\" is already bound in line 3\nnothing was executed."
+ },
+ {
+  "qid": "185bd48b-66b7-4b46-98f3-a72d58eb4dab",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Posyrya\" as posyrya\nfollow posyrya flowsInto_river_river subj where length_km >= 14 as candidate\nfollow candidate partOf_river_drainagebasin drainagebasin where name = \"Tobol\" as db\nreturn candidate.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "3fbf062e-ce79-4c74-aa21-4488c94d9805",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin as db\nfollow db locatedIn_drainagebasin_country country where name = \"Israel\" as c1\nfollow db locatedIn_drainagebasin_country country where name = \"Tunisia\" as c2\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "fdf028ff-2d51-4b6b-bcfd-5c74cd48836b",
+  "category": "special_comparison",
+  "query": "find drainagebasin where name = \"Congo\" as cb\nfind drainagebasin where name = \"Tobol\" as tb\ncompute cb.area_km2 minus tb.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "2d60149f-156f-4b88-b0c1-beb03e5fb79f",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_ocean ocean as o\nreturn o.name order by o.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 5989
+ },
+ {
+  "qid": "c1a427aa-d88f-482d-b0f1-eddea78b5913",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"Africa\" as c\nfollow c locatedIn_country_continent country as ctry\nfollow ctry flowsThrough river as r\ngroup by ctry as g\ncount g.r as river_count\nreturn ctry.name, river_count order by ctry.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 51
+ },
+ {
+  "qid": "7c939177-630c-47e6-b8fa-9fda8818094f",
+  "category": "special_union",
+  "query": "find continent where name = \"Asia\" as asia\nfollow asia locatedIn_country_continent country as countries_in_asia\ncount distinct countries_in_asia as asia_count\nfind river where name = \"Karabolka River\" as kar_river\nfollow kar_river flowsThrough country as countries_with_kar\ncount distinct countries_with_kar as kar_count\nfind continent where name = \"Asia\" as asia2\nfollow asia2 locatedIn_country_continent country as c\nfollow c flowsThrough river where name = \"Karabolka River\" as r\ncount distinct c as both_count\ncompute asia_count plus kar_count as total\ncompute total minus both_count as union_count\nreturn union_count",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column asia_count"
+ },
+ {
+  "qid": "284ea379-7344-4cb3-8d66-c5e34aef97a7",
+  "category": "basic_(n)-(m0*)",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nmax r.length_km as max_length\nreturn max_length",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "287f030e-2028-4ed4-a280-a51e4747a928",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Pacific Ocean\" as p\nfind ocean where name = \"Indian Ocean\" as i\ncompute p.avg_vertical_depth_m minus i.avg_vertical_depth_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "1481a5e2-e322-46b0-8fb1-66a07634c2e9",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lake Pontchartrain\" or name = \"Lake P\u00e1tzcuaro\" as l\nreturn l.name order by l.vertical_depth_m desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f6fd570e-d98a-4236-a024-2274cc1c9906",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Khyargas Nuur\" as lake1\nfind lake where name = \"Lac la Ronge\" as lake2\ncompute lake1.area_km2 minus lake2.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "826816dc-610a-486f-98f3-9c5a51420d90",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Irtysh basin\" as db\nfollow db locatedIn_drainagebasin_country country as c1\ncount distinct c1.name as n1\nfind lake where name = \"Lake Keta\" as lk\nfollow lk locatedIn_lake_country country as c2\ncount distinct c2.name as n2\ncompute n1 plus n2 as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column n1"
+ },
+ {
+  "qid": "f37ccd22-8652-42bd-9171-b30ec1dccc5b",
+  "category": "special_union",
+  "query": "find country where name = \"Iran\" as c\nfollow c locatedIn_lake_country lake as l_iran\nfind drainagebasin where name = \"Namak Lake Basin\" as db\nfollow db partOf_lake_drainagebasin lake as l_basin\nfind country where name = \"Iran\" as c2\nfollow c2 locatedIn_lake_country lake as l\nfollow l partOf_lake_drainagebasin drainagebasin where name = \"Namak Lake Basin\" as db2\ncount distinct l_iran as n_iran\ncount distinct l_basin as n_basin\ncount distinct l as n_both\ncompute n_iran plus n_basin as temp\ncompute temp minus n_both as result\nreturn result",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column n_iran"
+ },
+ {
+  "qid": "3da44adc-f94b-40c1-a80b-0a4661b93dcb",
+  "category": "special_three-node-groupby",
+  "query": "find river where name = \"Ucayali\" as ucayali\nfollow ucayali flowsThrough country as shared_country\nfollow shared_country flowsThrough river where name != \"Ucayali\" as river_in_country\ngroup by river_in_country as g\ncount distinct g.shared_country as num_countries\nreturn g.river_in_country.name, num_countries",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "2db66c1c-4c3a-4eaa-91d5-eca7fed913a5",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country as c\nfollow c locatedIn_drainagebasin_country drainagebasin where name = \"Tobol\" as db\nfollow c flowsThrough river where name = \"Yemnaya\" as r\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "4b51fd4e-3f71-4e54-8032-aeda8abc461e",
+  "category": "basic_(n)-(m0*)",
+  "query": "find ocean where name = \"Arctic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nreturn r.name, r.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 854
+ },
+ {
+  "qid": "101f9725-fc7c-49f9-805e-cf6ce7296dc0",
+  "category": "special_union",
+  "query": "find mountainrange where name = \"Pamir Mountains\" as pmr\nfollow pmr partOf_mountain_mountainrange mountain as m\nfind country where name = \"People's Republic of China\" as c\nfollow c locatedIn_mountain_country mountain as m\ncount distinct m as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"m\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "8bf273cc-4efb-4748-8d2a-575e688bcbbb",
+  "category": "special_optional-match",
+  "query": "find lake where name = \"Supung Lake\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_mountain_country mountain as m\ngroup by c as g\ncount distinct g.m as mountain_count\nreturn c.name, mountain_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "4cc31ccf-4db3-4501-88ed-7e55b754aef8",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"South Henik Lake\" or name = \"Tulemalu Lake\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "dcd9b12f-ed02-420e-b52e-fb1cd64db624",
+  "category": "special_union",
+  "query": "find mountainrange where name = \"Kunlun Mountains\" or name = \"Arkatag Shan\" as mr\nfollow mr partOf_mountain_mountainrange mountain as m\nreturn m.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 7
+ },
+ {
+  "qid": "b5d9e958-2306-4614-9cc6-db9453896dee",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Lake Kisale\" as l\nfollow l locatedIn_lake_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"locatedIn_lake_drainagebasin\". did you mean: partOf_lake_drainagebasin, locatedIn_drainagebasin_country? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "be35e6e4-448c-4873-a313-d56840279d5a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountainrange where name = \"Karakoram\" as karakoram\nfollow karakoram partOf_mountainrange_mountainrange subj as mr\nfollow mr partOf_mountain_mountainrange mountain where name = \"Saser Kangri II\" as skII\nreturn mr.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "31421fdb-434b-422a-b331-28f68d70e509",
+  "category": "special_three-node-groupby",
+  "query": "find continent where name = \"Africa\" as cont\nfollow cont locatedIn_country_continent country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.c as num_countries\nreturn db.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 27
+ },
+ {
+  "qid": "31c5b998-60fb-4452-9b65-d4f00674ab4f",
+  "category": "special_union",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c flowsThrough river as r\nfind lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r2\nreturn r.name, r2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 3390
+ },
+ {
+  "qid": "af30508f-f2d3-48e9-89c7-5a3f61c4deae",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country where name = \"Russia\" as r\nfollow r locatedIn_country_continent continent as c\nfollow c locatedIn_country_continent country where name = \"Italy\" as other\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "75f80b9b-947a-427b-b41b-7ee4a9d30424",
+  "category": "special_comparison",
+  "query": "find river where name = \"Tokko\" or name = \"Tyukyan\" as r\nreturn r.name order by r.discharge_m3_s desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8fbd2f97-1e06-4ed8-9cdb-e3e0beb384ae",
+  "category": "special_optional-match",
+  "query": "find river where name = \"Negro River\" as negro\nfollow negro flowsInto_river_river subj as tributaries\nfollow tributaries flowsThrough country as c\ngroup by tributaries as g\ncount distinct g.c as country_count\nreturn tributaries.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 8
+ },
+ {
+  "qid": "703cd711-bb28-4662-a4c0-b19c7f3bd38d",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"Rwanda\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nfollow db partOf_river_drainagebasin river as r\nmax r.discharge_m3_s as max_discharge\nreturn max_discharge",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "12ac749f-f75a-4cce-ba24-81e42ca37836",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Namibia\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "3b036b53-f525-47bc-94d2-6502285f41da",
+  "category": "basic_(n)",
+  "query": "find country as c\nreturn c.name order by c.area_km2 limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "d58283c0-4a03-4312-aa00-d06f7a7d0353",
+  "category": "special_union",
+  "query": "find mountain where name = \"Kalurong\" as m\nfollow m locatedIn_mountain_country country as c1\nfind lake where name = \"Hulun Lake\" as l\nfollow l locatedIn_lake_country country as c2\ncount distinct c1 as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a2418db6-bb9d-40c3-8958-dca5e73f6cf6",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Pangong Tso\" as p\nfollow p locatedIn_lake_country country as c\nfollow c locatedIn_mountain_country mountain as m where m.name = \"Lunpo Gangri\"\nreturn c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "0ade7608-8096-42f9-85bb-289ed29240bd",
+  "category": "special_union",
+  "query": "find lake where name = \"Novosibirsk Reservoir\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db_lake\nfind river where name = \"Noska River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db_river\nreturn db_lake.name, db_river.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "2bfa34be-f069-4421-8274-16acfa926d03",
+  "category": "special_union",
+  "query": "find mountain where name = \"Nevado Tres Cruces\" as m\nfollow m locatedIn_mountain_country country as country\nfind lake where name = \"Salar de Talar\" as l\nfollow l locatedIn_lake_country country as country\ncount distinct country as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"country\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "33479160-73e4-4f60-b201-0112810043ed",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Cho Polu\" as m1\nfollow m1 partOf_mountain_mountainrange mountainrange as mr\nfollow mr partOf_mountain_mountainrange mountain as m2 where name = \"Mount Gya\"\nreturn mr.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "7b9d866f-d379-40e9-a4fa-57a42079cf90",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Kwango River\" as kwango\nfollow kwango flowsInto_river_river subj as r_inflow\nfollow r_inflow partOf_river_drainagebasin drainagebasin where name = \"Congo\" as congo_db\ncount distinct r_inflow as n\nreturn n",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "3c242824-4d16-40ab-a462-51416d94f141",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Nile\" as nile\nfollow nile flowsInto_river_ocean ocean as o\nfollow o flowsInto_river_ocean river as others\nreturn others.name order by others.discharge_m3_s",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 3128
+ },
+ {
+  "qid": "f8396467-140b-4e81-ac07-2d100be3317a",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Ob Basin\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as num_countries\nreturn r.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3004
+ },
+ {
+  "qid": "15f523b1-48f9-45bf-a7aa-0ab41b8536ee",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Vyazovka\" or name = \"Tura\" as source\nfollow source flowsInto_river_river river as target\ngroup by target as g\ncount distinct g.source as num_sources\nreturn g.key order by num_sources desc",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"river\" on edge flowsInto_river_river; roles are subj (river), obj (river). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "831e26ee-e2e2-4f2f-b879-b40e5b46206d",
+  "category": "special_comparison",
+  "query": "find river where name = \"Tokko\" as r1\nfind river where name = \"Tyukyan\" as r2\ncompute r1.discharge_m3_s minus r2.discharge_m3_s as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e84ca995-53df-47e1-bfde-3d9b906b7b31",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Yuan River\" as r\nfollow r flowsInto_river_lake lake as l\nfollow l flowsInto_river_lake river as others\nreturn others.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "8e089bf2-6b9f-435c-b3de-c32e75755b30",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Nanbang River\" as r\nfollow r flowsThrough country as c1\nfind mountain where name = \"Urdok III\" as m\nfollow m locatedIn_mountain_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "844f577d-7db8-43ee-8462-7511171a6ef9",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Atyus River\" as atyus\nfollow atyus partOf_river_drainagebasin drainagebasin as basin\nfollow basin partOf_river_drainagebasin river as others\nreturn others.name order by others.length_km desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "eddfc73f-f7c7-4f83-884d-85cc8cf95823",
+  "category": "special_optional-match",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsInto_river_river subj as incoming\ngroup by r as g\ncount distinct g.incoming as count\nreturn r.name, count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 401
+ },
+ {
+  "qid": "d02ac5a8-caf7-4a56-add4-2aa035f57862",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c flowsThrough river as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 34
+ },
+ {
+  "qid": "d9e2ed74-a64d-40b5-b84f-985fa7a6a412",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Keyzes River\" as keyzes\nfollow keyzes flowsInto_river_river subj as tributary\nfollow tributary flowsThrough country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "1d827f96-9fb3-4886-9fc2-59517355a102",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Namtso\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_country_continent continent as cont\nreturn cont.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "96f73226-3656-458e-8f6e-357af4c956ab",
+  "category": "special_three-node-groupby",
+  "query": "find mountain where name = \"Loenpo Gang\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.c as country_count\nreturn db.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 11
+ },
+ {
+  "qid": "13fc8202-e21c-47e0-b2b3-7da07d283649",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name, l.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 4297
+ },
+ {
+  "qid": "2c868b54-1d3c-4cb9-8574-09494890f1a7",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Yellow River Basin\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 27
+ },
+ {
+  "qid": "fd9bdf80-58f4-4e5e-9e4f-0faa48f445d0",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Cajari River\" as cajari\nfollow cajari flowsInto_river_river river as r\nfollow r flowsInto_river_ocean ocean where name = \"Atlantic Ocean\" as atlantic\nreturn r.name, r.length_km",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"river\" on edge flowsInto_river_river; roles are subj (river), obj (river). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "ee934e1b-ed0d-43da-ba30-fcc8e00221bc",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as source\nfollow source flowsInto_river_river obj as target\ncount distinct target as num_rivers_with_inflow\nreturn num_rivers_with_inflow",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "91160bff-0a32-429e-aa98-0f7e9c696a72",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Lake Texcoco\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_country_continent continent where name = \"North America\" as cont\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a5ca65a1-559b-42d2-9468-5cf0ef81d5fd",
+  "category": "basic_(n*)",
+  "query": "find ocean where name = \"Indian Ocean\" as o\nreturn o.avg_vertical_depth_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "32beac7d-a829-4d4c-8794-6195b1a483aa",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Chipiriri River\" as r\nfollow r flowsThrough country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "99bcabcb-7a34-4971-83e1-02bcbf68727f",
+  "category": "special_union",
+  "query": "find river where name = \"Balda River\" or name = \"Krush River\" as r\nfollow r flowsThrough country as c\ncount distinct c as total\nreturn total",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "05f2b3fb-81dd-4f7f-931c-6f6c54c4574e",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Chile\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nfollow db partOf_lake_drainagebasin lake as l\ngroup by db as g\ncount distinct g.l as lake_count\nreturn db.name, lake_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 81
+ },
+ {
+  "qid": "3ee213a6-df95-4a88-ab47-44ffd608e52a",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsThrough country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 82155
+ },
+ {
+  "qid": "f3de279c-b01c-45b3-9594-90c0367a9efb",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Namtso\" as l\nfollow l locatedIn_lake_country country as c\nfollow c locatedIn_mountain_country mountain as m\ncount distinct m as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "c0bc9582-fd0b-430b-ba09-a080a0029714",
+  "category": "basic_(n)-(m0*)",
+  "query": "find drainagebasin where name = \"Tagus Basin\" as db\nfollow db locatedIn_drainagebasin_country country where capital != \"Madrid\" as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "bc6a8e96-84d2-46ab-ad69-a17b35e9a735",
+  "category": "special_three-node-groupby",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country as c\ngroup by c as g\ncount distinct g.r as n\nreturn c.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 35
+ },
+ {
+  "qid": "07ecc63b-94f5-45b2-9537-0f564e228380",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"Europe\" as c\nfollow c locatedIn_country_continent country as country\nfollow country locatedIn_lake_country lake as l\ngroup by country as g\ncount g.l as lake_count\nreturn country.name, lake_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 41
+ },
+ {
+  "qid": "9204e06a-1076-4d40-88d1-8f6fdfc8d020",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find country as c\nfollow c locatedIn_mountain_country mountain where name = \"Singhi Kangri\" as m\nfollow c locatedIn_lake_country lake where name = \"Zhelin Reservoir\" as l\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "ffd7d937-612b-4dbb-92d2-c8172d74e078",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountainrange where name = \"Gangotri Group\" as g\nfollow g partOf_mountainrange_mountainrange obj as mr\nreturn mr.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "18e2a1fd-9b10-4d9b-9c98-38eebf1eac09",
+  "category": "special_union",
+  "query": "find river where name = \"Kainsas\" or name = \"Shaytanka\" as r\nfollow r flowsInto_river_river obj as dest\ncount distinct dest as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "ed3a5f86-73b6-4a75-bbe2-fe2810aee8f6",
+  "category": "special_three-node-groupby",
+  "query": "find lake where name = \"South Henik Lake\" as l\nfollow l locatedIn_lake_country country as lc\nfollow lc locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.lc as country_count\nreturn db.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 62
+ },
+ {
+  "qid": "61ae0971-3d76-43fb-8442-24007198bc0f",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Gods Lake\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "bc0af7f5-f6d7-4fca-be75-3ea05fe9642a",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountain where name = \"Kangto\" as m\nfollow m locatedIn_mountain_country country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "0d51c972-7d99-42a2-9229-35ff20329710",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Republic of the Congo\" as c\nfollow c flowsThrough river as r\nreturn r.name order by r.discharge_m3_s desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 20
+ },
+ {
+  "qid": "782c0edc-f592-44f0-904b-f2d5024978d6",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find drainagebasin where name = \"Salar del Huasco\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfollow c locatedIn_mountain_country mountain as m\ncount distinct m as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "658c9f50-f61f-48e8-ac7d-64ce9da8908e",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Lei River\" as lei\nfollow lei flowsInto_river_river obj as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "4764dd6d-bd21-46e7-8bfc-f2d84631f3f1",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Namibia\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "83ec849e-7928-4959-8d0a-7d1712b8a2c1",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Tharkot\" as m1\nfollow m1 partOf_mountain_mountainrange mountainrange as mr\nfollow mr partOf_mountain_mountainrange mountain as m2 where m2.name = \"Annapurna\"\nreturn mr.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "6d479c24-b5fe-4273-a879-f151e2eff5a5",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Khyargas Nuur\" or name = \"Lac la Ronge\" as l\nreturn l.name order by l.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a2b3740b-c26b-4fe3-8007-0641c04f1ddc",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country where name = \"Republic of the Congo\" as c\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 5
+ },
+ {
+  "qid": "05d44b86-4a0a-48ab-b066-6485e1de1626",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Atbarah River\" as atbarah\nfollow atbarah flowsInto_river_river obj as destination\nreturn destination.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "fc2d03da-9f46-4a92-86d7-3b5870277615",
+  "category": "special_union",
+  "query": "find country where name = \"Nigeria\" or name = \"Cameroon\" as c\nfollow c flowsThrough river as r\ncount distinct r as num\nreturn num",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b36a860a-f019-4408-a696-ef566afe7027",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Chipiriri River\" as r\nfollow r flowsThrough country as c\nreturn c.name, c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "6f52eed6-8aaa-4f42-b08c-fd6184afb18a",
+  "category": "basic_(n*)",
+  "query": "find country where name = \"South Korea\" as c\nreturn c.capital",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8482d56b-87e8-446e-a8f9-9aaad22a2c8b",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Spain\" as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 33
+ },
+ {
+  "qid": "40a69b92-852e-42d6-8df7-deffe21de0f6",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find continent where name = \"North America\" as c\nfollow c locatedIn_country_continent country as countries\nfollow countries locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name order by db.area_km2 limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "20dc854a-3c3d-4fa5-ad49-0eb7d4cb59d2",
+  "category": "special_union",
+  "query": "find continent where name = \"North America\" as c\nfollow c locatedIn_country_continent country as nc\nfind river where name = \"Los Angeles River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as wc\nreturn nc.name, wc.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 23
+ },
+ {
+  "qid": "b46c6433-b591-4188-b6e1-b33b5cf340b3",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountainrange where name = \"Karakoram\" as k\nfollow k partOf_mountainrange_mountainrange subj as mr\nfollow mr partOf_mountain_mountainrange mountain where name = \"Gasherbrum\" as m\nreturn mr.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "b03ff7a5-2df7-43a3-81a1-859e1f79b887",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Lake Kisale\" as lake\nfollow lake partOf_lake_drainagebasin drainagebasin as db\nfollow db partOf_river_drainagebasin river as r where r.name = \"Lwama River\"\nreturn db.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "96f24fdd-f036-45a4-a724-9dd7030dfce7",
+  "category": "special_union",
+  "query": "find country where name = \"Jordan\" or name = \"Israel\" as c\nfollow c locatedIn_lake_country lake as l\ncount distinct l as num\nreturn num",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "9d7ff1cb-ed13-4851-a385-b286c6fde280",
+  "category": "special_comparison",
+  "query": "find country where name = \"Jordan\" or name = \"Paraguay\" as c\nreturn c.name order by c.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b7f92f7e-02d9-48e9-bded-db25dfc1572a",
+  "category": "special_union",
+  "query": "find river where name = \"Juan River\" as j\nfollow j flowsInto_river_river river as r1\nfind lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r2\nreturn r1.name, r2.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"river\" on edge flowsInto_river_river; roles are subj (river), obj (river). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "de170b8e-899e-42fa-8342-86d2499e8736",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Argentina\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l locatedIn_lake_country country as all_c\ngroup by l as g\ncount distinct g.all_c as country_count\nreturn g.l.name, country_count",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column g.l.name"
+ },
+ {
+  "qid": "bd407e92-efd2-42e3-a471-669e45736401",
+  "category": "basic_(n*)",
+  "query": "find country where name = \"South Korea\" as c\nreturn c.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "58066c4e-c6c3-4765-b21e-bfac30fed256",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Arctic Ocean\" as o1\nfind ocean where name = \"Pacific Ocean\" as o2\ncompute o2.area_km2 minus o1.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "283de32a-2f45-4f92-a0f9-7412b136b93b",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Camarones\" as cb\nfollow cb locatedIn_drainagebasin_country country as c\nfollow c locatedIn_country_continent continent where name = \"South America\" as cont\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "4b9638e0-dbfd-4fbc-a675-64f1255d01a9",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Lungser Kangri\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_country_continent continent as cont\nreturn cont.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "a50b1826-dd44-4afe-a712-743bc699c093",
+  "category": "special_comparison",
+  "query": "find mountain where name = \"Kharchakund\" as m1\nfind mountain where name = \"Denali\" as m2\ncompute m1.elevation_m minus m2.elevation_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "21e60a01-e3f3-4925-abae-a197bd20653b",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Kondinka\" as kondinka\nfollow kondinka flowsInto_river_river subj as tributaries\nfollow tributaries flowsThrough country where name = \"Russia\" as russia\nreturn tributaries.name, tributaries.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "0b08c364-1cef-4a8e-b946-43c8db12f939",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r\nfollow r flowsThrough country where name = \"People's Republic of China\" as c\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 6
+ },
+ {
+  "qid": "8c8a5115-dca2-4a12-afda-e951b1bf9fbb",
+  "category": "special_union",
+  "query": "find river where name = \"Achairka River\" as r\nfollow r flowsThrough country as c1\nfind lake where name = \"Gorky Reservoir\" as l\nfollow l locatedIn_lake_country country as c2\nreturn c1.name, c2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "4d82453a-315f-4713-b302-e7081d91c7f1",
+  "category": "basic_(n)",
+  "query": "find continent as c\nreturn c.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 7
+ },
+ {
+  "qid": "9f23622a-c44c-441d-8018-37d12594b328",
+  "category": "special_three-node-groupby",
+  "query": "find river where name = \"Sant'Ana River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.c as num_countries\nreturn db.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 40
+ },
+ {
+  "qid": "821d321d-31dd-4079-84ef-d674a2d79c85",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Kanchenjunga\" as k\nfollow k partOf_mountain_mountainrange mountainrange as mr\nfollow mr partOf_mountainrange_mountainrange subj as parts\ncount distinct parts as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "95d8969d-e2f8-4ed7-8675-af529851ce76",
+  "category": "basic_(n)",
+  "query": "find drainagebasin as db\nreturn db.name, db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1392
+ },
+ {
+  "qid": "6db2dcce-0919-4d72-8848-28377b43d41d",
+  "category": "special_optional-match",
+  "query": "find country where name = \"India\" as india\nfollow india locatedIn_mountain_country mountain as m\nfollow m locatedIn_mountain_country country as c\ngroup by m as g\ncount distinct g.c as country_count\nreturn m.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 22
+ },
+ {
+  "qid": "093cb0cc-d4c6-478e-b67a-7a44f57b138e",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Thailand\" as c\nfollow c flowsThrough river as r\nreturn r.name, r.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 111
+ },
+ {
+  "qid": "2074cb50-f885-46b2-8c39-4fefbaa26cea",
+  "category": "special_union",
+  "query": "find ocean where name = \"Arctic Ocean\" as ocean\nfollow ocean flowsInto_river_ocean river as r\nfind drainagebasin where name = \"Lena\" as basin\nfollow basin partOf_river_drainagebasin river as r\nreturn r.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"r\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "e06985dd-34b6-4d21-a777-59e887088052",
+  "category": "special_optional-match",
+  "query": "find river where name = \"Unini River\" as unini\nfollow unini flowsInto_river_river subj as tributary\nfollow tributary flowsThrough country as c\ngroup by tributary as g\ncount distinct g.c as num_countries\nreturn tributary.name, num_countries",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "637611cb-17c7-41ff-b625-c9ef3a52ea80",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Niyap River\" as niyap\nfollow niyap flowsInto_river_river obj as target\nreturn target.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "69023e79-da00-4434-a834-dcb9d24e2602",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountain where name = \"Bitkaya Peak\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_mountain_country mountain as all_m\ncount distinct all_m as total\nreturn total",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "f09c0132-0ad4-4a6a-b445-58678e7aef14",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Yuan River\" as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "3de0af18-99ca-422c-82a0-8a2d5321472f",
+  "category": "basic_(n)-(m0*)",
+  "query": "find mountainrange where name = \"Baltoro Muztagh\" as bm\nfollow bm partOf_mountainrange_mountainrange subj as mr\nreturn mr.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "82003c13-6ec2-4468-83e5-f5edccf104f5",
+  "category": "special_union",
+  "query": "find river where name = \"Paraguay River\" as pr\nfollow pr flowsInto_river_river subj as r1\nfind river as r2\nfollow r2 flowsThrough country where name = \"Brazil\" as c\nreturn r1.name, r2.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 86151
+ },
+ {
+  "qid": "5bed8910-c1c6-4e17-97f5-f06ec596582f",
+  "category": "special_union",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r\nfind country where name = \"People's Republic of China\" as c\nfollow c flowsThrough river as r\ncount distinct r as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"r\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "a3867847-7369-42a8-bdad-8c6d74bff640",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Yellow River Basin\" as db\nfollow db locatedIn_drainagebasin_country country as c\nfind mountain where name = \"Mount Genyen\" as m\nfollow m locatedIn_mountain_country country as c\ncount distinct c as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "8637a02d-8cff-4326-926e-39fff9315457",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"South America\" as c\nfollow c locatedIn_country_continent country as co\nfollow co locatedIn_mountain_country mountain as m\ngroup by co as g\ncount g.m as mountain_count\nreturn co.name, mountain_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 12
+ },
+ {
+  "qid": "d41f8d33-8319-4d38-8fd1-9ff2430bf6e3",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Nepal\" as c\nfollow c locatedIn_mountain_country mountain as m\nreturn m.name order by m.elevation_m",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 204
+ },
+ {
+  "qid": "c4a49bf6-928c-483b-a5d9-f5c24359a308",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river where length_km <= 1000 as r\nreturn r.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 6
+ },
+ {
+  "qid": "660282c8-1354-4435-b4a9-0b7c1286a724",
+  "category": "special_three-node-groupby",
+  "query": "find country where name = \"Canada\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\ngroup by db as g\ncount distinct g.l as lake_count\nreturn db.name, lake_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 56
+ },
+ {
+  "qid": "0eee9bd1-316c-485f-9c05-909c7c1babab",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Atlantic Ocean\" as atlantic\nfind ocean where name = \"Arctic Ocean\" as arctic\ncompute atlantic.max_vertical_depth_m minus arctic.max_vertical_depth_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "15eb915b-7fd4-4e80-8720-b67e9084a25b",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Mekong River\" as r\nfollow r flowsInto_river_ocean ocean as o\nreturn o.name, o.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "e9c6c774-d042-4358-a27c-b3a32d49b4eb",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Pacific Ocean\" as pacific\nfind ocean where name = \"Indian Ocean\" as indian\ncompute pacific.max_vertical_depth_m minus indian.max_vertical_depth_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "9f46a3de-f5b3-4893-99ec-6bf3ccc1c490",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find mountain where name = \"Ojos del Salado\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db where name = \"Uruguay River Basin\"\nreturn c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "ca466b33-31fd-4ee4-8daf-a88e351f54f1",
+  "category": "basic_(n*)",
+  "query": "find ocean where name = \"Arctic Ocean\" as o\nreturn o.avg_vertical_depth_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "1c754d7c-f350-4563-8559-4812294e990f",
+  "category": "special_union",
+  "query": "find mountainrange where name = \"Karakoram\" as k\nfollow k partOf_mountainrange_mountainrange subj as mr\nfind mountain where name = \"Gasherbrum\" as g\nfollow g partOf_mountain_mountainrange mountainrange as mr\ncount distinct mr as c\nreturn c",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"mr\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "023d1a50-6c7a-4a19-b7e0-17c684f950a5",
+  "category": "special_three-node-groupby",
+  "query": "find mountainrange where name = \"Himalayas\" as h\nfollow h partOf_mountain_mountainrange mountain as m\nfollow m partOf_mountain_mountainrange mountainrange as mr\ngroup by mr as g\ncount distinct g.m as mountain_count\nreturn mr.name, mountain_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "511f6689-1ee7-44fb-8261-4e26e85ed42b",
+  "category": "basic_(n)",
+  "query": "find ocean where max_vertical_depth_m > 7400 as o\nreturn o.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "c719e36f-a1b9-4d6a-83f8-8b57d631d2d0",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Atbarah River\" as atbarah\nfollow atbarah flowsInto_river_river subj as tributaries\nmin tributaries.discharge_m3_s as lowest\nreturn lowest",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "90f48717-fee7-4436-af90-9eead7431d71",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Congo basin\" as b\nfollow b partOf_river_drainagebasin river as r\nfollow r flowsInto_river_ocean ocean where name = \"Atlantic Ocean\" as o\nreturn r.name, r.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "833a54d9-205c-49fa-a788-ae30f0e573ad",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Durnitsa\" as durnitsa\nfollow durnitsa flowsInto_river_river obj as target_river\nfollow target_river partOf_river_drainagebasin drainagebasin as basin\nreturn basin.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "5526c23f-65ad-4dc1-b46a-eef06055bc3a",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsInto_river_ocean ocean as o\nreturn r.name order by r.length_km limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "b6839946-c77f-4e14-abbf-e9634c1bfb6d",
+  "category": "special_comparison",
+  "query": "find mountain where name = \"Gyachung Kang\" or name = \"Chamar\" as m\nreturn m.name order by m.elevation_m desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "1e275730-4ecb-455b-97be-d2fd96b2a73e",
+  "category": "special_comparison",
+  "query": "find mountain where name = \"Gyachung Kang\" as m1\nfind mountain where name = \"Chamar\" as m2\ncompute m1.elevation_m minus m2.elevation_m as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "ab5c0d38-5652-45d8-b963-1111190ca229",
+  "category": "basic_(n)-(m0*)",
+  "query": "find lake where name = \"Lac Manouane\" as l\nfollow l locatedIn_lake_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "19a4fffc-323a-424c-888c-9d7510cb1cda",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lac Burton\" as l1\nfind lake where name = \"Portnyagino Lake\" as l2\ncompute l1.area_km2 minus l2.area_km2 as diff\nreturn diff",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: compute minus needs numbers; got NoneType and float"
+ },
+ {
+  "qid": "b3489674-1f6e-4ec6-9c40-4763c95bd96e",
+  "category": "special_union",
+  "query": "find river where name = \"Obukhovka\" as obukhovka\nfollow obukhovka flowsInto_river_river subj as r1\nfind drainagebasin where name = \"Tobol\" as tobol\nfollow tobol partOf_river_drainagebasin river as r2\ncount distinct r1 as c1\ncount distinct r2 as c2\ncompute c1 plus c2 as total\nreturn total",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column c1"
+ },
+ {
+  "qid": "1fc31c0c-479c-4b24-bd3d-af6f319c3b7d",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Yuan River\" as yuan\nfollow yuan flowsInto_river_lake lake as l\nfollow l flowsInto_river_lake river as r where name = \"Xiang River\"\nreturn l.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+ },
+ {
+  "qid": "fd233c66-5e62-4a5e-93e6-b9fa63adc1d3",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lac Burton\" or name = \"Portnyagino Lake\" as l\nreturn l.name order by l.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "708faa95-fcbe-42fd-be4a-91f97ecccfeb",
+  "category": "special_comparison",
+  "query": "find lake where name = \"Lake Sartlan\" or name = \"Lake Sasykkol\" as l\nreturn l.name order by l.vertical_depth_m desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "9ed41909-bd00-415c-810a-8aa7fdfc0bcc",
+  "category": "special_union",
+  "query": "find river where name = \"Xiang River\" or name = \"Yuan River\" as r\nfollow r flowsInto_river_lake lake as l\ncount distinct l as count\nreturn count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "da6cef8d-2ebb-4b41-a5c3-af6e485297cf",
+  "category": "special_optional-match",
+  "query": "find ocean where name = \"Pacific Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1612
+ },
+ {
+  "qid": "3c906933-db1a-48d5-ab60-ba9a664b6fdb",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"Africa\" as c\nfollow c locatedIn_country_continent country as country\nfollow country locatedIn_drainagebasin_country drainagebasin as db\ngroup by country as g\ncount distinct g.db as basin_count\nreturn country.name, basin_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 37
+ },
+ {
+  "qid": "470799c0-f669-47ab-a0e3-3e839d74803c",
+  "category": "special_optional-match",
+  "query": "find river where name = \"Maly Turtas\" as m\nfollow m flowsInto_river_river subj as upstream\nfollow upstream flowsInto_river_river subj as tributaries\ngroup by upstream as g\ncount distinct g.tributaries as tributary_count\nreturn upstream.name, tributary_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "fc62a592-6545-4181-9bb6-11aaac69f3f7",
+  "category": "special_three-node-groupby",
+  "query": "find country where name = \"Paraguay\" as paraguay\nfollow paraguay flowsThrough river as r\nfollow r flowsThrough country as c\ngroup by c as g\ncount distinct g.r as river_count\nreturn c.name, river_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 3
+ },
+ {
+  "qid": "d9b009c2-ba0f-4823-bdbe-4d9905871899",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Ethiopia\" as eth\nfollow eth flowsThrough river as r\nfollow r flowsThrough country as c\ngroup by r as g\ncount distinct g.c as country_count\nreturn r.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 16
+ },
+ {
+  "qid": "56b25abf-3966-4d75-9b0b-ad78183f504a",
+  "category": "basic_(n)",
+  "query": "find continent as c\ncount distinct c as n\nreturn n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "98d04897-e12c-458e-8d81-48ee928501b8",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Mali\" as c\nfollow c flowsThrough river as r\nfollow r flowsInto_river_river subj as inflow\ngroup by r as g\ncount distinct g.inflow as inflow_count\nreturn r.name, inflow_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 6
+ },
+ {
+  "qid": "d455f43d-9ed9-494d-be9a-80c6e854e1f4",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Malyye Tugry River\" as r\nfollow r flowsThrough country as c\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "453e3371-8b67-4c87-9630-706870f5599b",
+  "category": "special_optional-match",
+  "query": "find continent where name = \"Europe\" as c\nfollow c locatedIn_country_continent country as country\nfollow country locatedIn_drainagebasin_country drainagebasin as db\ngroup by country as g\ncount g.db as basin_count\nreturn country.name, basin_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 37
+ },
+ {
+  "qid": "3011103b-8b88-4cf4-ae55-04bd1c782248",
+  "category": "special_comparison",
+  "query": "find river where name = \"Bandeya River\" as r1\nfind river where name = \"Sultunka River\" as r2\ncompute r1.length_km minus r2.length_km as diff\nreturn diff",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "b45a3b85-a4cc-463c-8442-ab138df925b1",
+  "category": "special_three-node-groupby",
+  "query": "find river where name = \"Madre de Dios River\" as madre\nfollow madre flowsInto_river_river subj as tributary\nfollow tributary flowsThrough country as c\ngroup by c as g\ncount distinct g.tributary as n\nreturn c.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2
+ },
+ {
+  "qid": "653c5bb8-87af-45f1-b850-bd3ff2bfb4b7",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Congo\" as db\nfollow db partOf_lake_drainagebasin lake as l\nfollow l locatedIn_lake_country country as c\ngroup by l as g\ncount distinct g.c as country_count\nreturn l.name, country_count",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "774005ce-a252-4262-ba7e-50715502d8a9",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find river where name = \"Belaya-Berel'\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_mountain_country mountain as m\nreturn m.name order by m.elevation_m limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "119ee89d-64bb-44bc-b968-a4e9b585fd1a",
+  "category": "special_comparison",
+  "query": "find drainagebasin where name = \"Congo\" or name = \"Tobol\" as basin\nreturn basin.name order by basin.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "52834d3b-accb-430f-9533-214c56229396",
+  "category": "special_optional-match",
+  "query": "find drainagebasin where name = \"Lena\" as db\nfollow db partOf_river_drainagebasin river as r\nfollow r flowsInto_river_river subj as incoming\ngroup by r as g\ncount distinct g.incoming as n\nreturn r.name, n",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "2fc7509d-2f3d-4056-b5fe-930ba8a44b68",
+  "category": "special_comparison",
+  "query": "find river where name = \"Olyokma\" or name = \"Kasai River\" as r\nreturn r.name order by r.discharge_m3_s desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "bf028cbd-d24e-42a8-b507-705f4897dffa",
+  "category": "basic_(n)-(m0)",
+  "query": "find river as r\nfollow r flowsThrough country as c\nreturn c.name order by c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 82155
+ },
+ {
+  "qid": "683b1dc8-be44-4664-8742-44fb9a66da24",
+  "category": "basic_(n)-(m0*)",
+  "query": "find country where name = \"Nepal\" as c\nfollow c locatedIn_mountain_country mountain as m\nmin m.elevation_m as lowest\nreturn lowest",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "5f75bc89-7ba3-480f-aac5-07321c446f03",
+  "category": "special_three-node-groupby",
+  "query": "find ocean where name = \"Atlantic Ocean\" as o\nfollow o flowsInto_river_ocean river as r\nfollow r partOf_river_drainagebasin drainagebasin as db\ngroup by db as g\ncount distinct g.r as n\nreturn db.name, n",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 259
+ },
+ {
+  "qid": "3f5c25a7-ff1b-4b98-a3a9-30ee221e1f11",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Arctic Ocean\" or name = \"Pacific Ocean\" as o\nreturn o.name order by o.area_km2 desc limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "9fa16bf8-1280-4e5d-80e9-f0598b32a821",
+  "category": "special_union",
+  "query": "find drainagebasin where name = \"Terek River Basin\" as basin\nfollow basin locatedIn_drainagebasin_country country as c\nfind river where name = \"Mayzas\" as r\nfollow r flowsThrough country as c\nreturn c.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "82dfd0cb-e466-44fe-a883-dc6cc59b6249",
+  "category": "special_optional-match",
+  "query": "find country where name = \"Cameroon\" as c\nfollow c flowsThrough river as r\nfollow r flowsInto_river_river subj as inflow\ngroup by r as g\ncount distinct g.inflow as count_in\nreturn r.name, count_in",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 9
+ },
+ {
+  "qid": "7326e101-27cb-45c4-a813-1840a9b3a90d",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Atbarah River\" as atbarah\nfollow atbarah flowsInto_river_river obj as target_river\nreturn target_river.name, target_river.length_km",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "0e322fdd-b45c-43de-a076-ac7e50409fc0",
+  "category": "basic_(n)",
+  "query": "find mountainrange as m\nreturn m.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 2436
+ },
+ {
+  "qid": "0c32f608-d7ba-4439-92b9-1d0a4b28bc74",
+  "category": "basic_(n*)",
+  "query": "find drainagebasin where name = \"Barycz Basin\" as db\nreturn db.area_km2",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "fb5cbbe3-6f08-4ae6-b594-14fc74fa5683",
+  "category": "basic_(n)-(m0*)",
+  "query": "find river where name = \"Xiang River\" as r\nfollow r flowsInto_river_lake lake as l\nreturn l.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "6fd1b8c4-62d7-4c2c-b6e9-038ceb681f71",
+  "category": "special_three-node-groupby",
+  "query": "find mountain where name = \"Makalu\" as m\nfollow m locatedIn_mountain_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\ngroup by db as g\ncount distinct g.c as country_count\nreturn db.name, country_count",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 11
+ },
+ {
+  "qid": "c9f7e565-0b34-49b6-b2ce-d54006ae33bf",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Irtysh\" as irtysh\nfollow irtysh flowsInto_river_river subj as r\nfollow r flowsThrough country where name = \"Kazakhstan\" as c\nreturn r.name, r.discharge_m3_s",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 11
+ },
+ {
+  "qid": "2fecf526-d6da-450c-bf8d-f7f6260c7b4e",
+  "category": "special_three-node-groupby",
+  "query": "find drainagebasin where name = \"Lena\" as lena_basin\nfollow lena_basin partOf_river_drainagebasin river as lena_river\nfollow lena_river flowsInto_river_river obj as fed_river\ngroup by fed_river as g\ncount distinct g.lena_river as count_rivers\nreturn fed_river.name, count_rivers",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "f6157759-8160-4503-aaa1-8ba09b6d5d20",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l flowsInto_river_lake river as r\nreturn r.name order by r.length_km limit 1",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "896cf652-7f4c-459b-b62e-f208b00a08f5",
+  "category": "special_optional-match",
+  "query": "find lake where name = \"Dongting Lake\" as l\nfollow l flowsInto_river_lake river as r1\nfollow r1 flowsInto_river_river subj as r2\ngroup by r1 as g\ncount distinct g.r2 as river_count\nreturn g.r1.name, river_count",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column g.r1.name"
+ },
+ {
+  "qid": "85686def-9835-4ba3-8572-6ed416bdf6bb",
+  "category": "special_comparison",
+  "query": "find country where name = \"Jordan\" as c1\nfind country where name = \"Paraguay\" as c2\ncompute c1.area_km2 minus c2.area_km2 as diff\nreturn diff",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "6730731a-1913-4c86-8e1f-fb6b0dfd290f",
+  "category": "special_union",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c locatedIn_lake_country lake as l\nfind river where name = \"Xiang River\" as r\nfollow r flowsInto_river_lake lake as l\ncount distinct l as n\nreturn n",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"l\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "e498ff27-9841-438b-8067-5e70212f734a",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find drainagebasin where name = \"Yellow River Basin\" as db\nfollow db partOf_lake_drainagebasin lake as l\nfollow l locatedIn_lake_country country where name = \"People's Republic of China\" as c\nreturn l.name, l.vertical_depth_m",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "8c848e89-3f3f-4198-9953-dccbe326fa4a",
+  "category": "special_comparison",
+  "query": "find ocean where name = \"Atlantic\" or name = \"Arctic\" as o\nreturn o.name order by o.max_vertical_depth_m desc limit 1",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "6242f60e-9c2a-4bb2-be2f-a1f108a8899f",
+  "category": "special_union",
+  "query": "find mountain where name = \"Pik 100 years Russian Geographical Society\" as m\nfollow m locatedIn_mountain_country country as c\nfind river where name = \"Dan River\" as r\nfollow r flowsThrough country as c\ncount distinct c as cnt\nreturn cnt",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: name \"c\" is already bound in line 4\nnothing was executed."
+ },
+ {
+  "qid": "d7e8b366-5d4f-4148-b538-ad309fe4493f",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "query": "find river where name = \"Kyrtau River\" as r\nfollow r flowsThrough country as c\nfollow c locatedIn_drainagebasin_country drainagebasin where name = \"Narva basin\" as db\nreturn c.name, c.area_km2",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 0
+ },
+ {
+  "qid": "35e3d056-eb22-4594-adec-337c23fe465f",
+  "category": "basic_(n)-(m0)",
+  "query": "find drainagebasin as db\nfollow db locatedIn_drainagebasin_country country as c\nreturn c.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1647
+ },
+ {
+  "qid": "1052d1d7-6605-4e6d-9530-390eebca79a4",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountainrange where name = \"Arkatag Shan\" as ar\nfollow ar partOf_mountainrange_mountainrange obj as parent\nfollow parent partOf_mountainrange_mountainrange subj as siblings\nreturn siblings.name",
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "06564ba4-3c8a-45fd-a0f0-35ecb265e7d4",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find lake where name = \"Keller Lake\" as kl\nfollow kl locatedIn_lake_country country as c\nfollow c locatedIn_drainagebasin_country drainagebasin as db\nreturn db.name order by db.area_km2 desc",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 471
+ },
+ {
+  "qid": "d0370a0d-0521-4c71-a375-10809f454181",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find mountainrange where name = \"Saser Muztagh\" as smr\nfollow smr partOf_mountainrange_mountainrange mountainrange as parent_mr\nfollow parent_mr partOf_mountain_mountainrange mountain as m\nreturn m.name order by m.elevation_m desc limit 1",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"mountainrange\" on edge partOf_mountainrange_mountainrange; roles are subj (mountainrange), obj (mountainrange). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "710ef20c-d1ea-4521-ac34-2fb9f23312e2",
+  "category": "special_union",
+  "query": "find river where name = \"Lukaya River\" as r\nfollow r partOf_river_drainagebasin drainagebasin as db_r\nfind lake where name = \"Lake Mweru\" as l\nfollow l partOf_lake_drainagebasin drainagebasin as db_l\nreturn db_r.name, db_l.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 1
+ },
+ {
+  "qid": "bd693706-3c08-43c7-a0ea-8b33cd2f910f",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "query": "find country where name = \"People's Republic of China\" as c\nfollow c locatedIn_lake_country lake as l\nfollow l partOf_lake_drainagebasin drainagebasin as db\nreturn db.name",
+  "executable": true,
+  "ex": 0.0,
+  "n_rows": 15
+ }
+]

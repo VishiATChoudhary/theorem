@@ -1,0 +1,77 @@
+{
+ "benchmark": "CypherBench test set (megagonlabs/cypherbench)",
+ "system": "text2cypher on Neo4j (official zero-shot prompt)",
+ "model": "claude-haiku-4-5-20251001",
+ "graphs_completed": [
+  "flight_accident",
+  "nba",
+  "fictional_character",
+  "company",
+  "geography",
+  "politics",
+  "movie"
+ ],
+ "graphs_missing": [],
+ "n": 2348,
+ "overall_ex": 0.7036,
+ "executable_pct": 0.9527,
+ "by_graph": {
+  "company": 0.7061,
+  "fictional_character": 0.7714,
+  "flight_accident": 0.7619,
+  "geography": 0.6257,
+  "movie": 0.6833,
+  "nba": 0.7185,
+  "politics": 0.6897
+ },
+ "by_category": {
+  "basic_(n)": {
+   "ex": 0.9016,
+   "n": 61
+  },
+  "basic_(n)-(m0)": {
+   "ex": 0.6338,
+   "n": 71
+  },
+  "basic_(n)-(m0)-(m1*)": {
+   "ex": 0.696,
+   "n": 329
+  },
+  "basic_(n)-(m0*)": {
+   "ex": 0.8427,
+   "n": 356
+  },
+  "basic_(n)-(m0*),(n)-(m1*)": {
+   "ex": 0.7477,
+   "n": 333
+  },
+  "basic_(n)=(m0)": {
+   "ex": 0.6702,
+   "n": 94
+  },
+  "basic_(n*)": {
+   "ex": 0.8475,
+   "n": 59
+  },
+  "special_comparison": {
+   "ex": 0.6463,
+   "n": 147
+  },
+  "special_optional-match": {
+   "ex": 0.5373,
+   "n": 268
+  },
+  "special_three-node-groupby": {
+   "ex": 0.6038,
+   "n": 260
+  },
+  "special_time-sensitive": {
+   "ex": 0.8667,
+   "n": 60
+  },
+  "special_union": {
+   "ex": 0.6871,
+   "n": 310
+  }
+ }
+}
