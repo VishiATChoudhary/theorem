@@ -39,6 +39,7 @@ from pathlib import Path
 
 from eval.run_public import (
     DATA,
+    count_tokens_helper as count_tokens,
     EXEC_TIMEOUT_S,
     PUB,
     TEST_GRAPHS,
@@ -299,6 +300,26 @@ def run_cypher(driver, cypher: str):
         return s.run(Query(cypher, timeout=EXEC_TIMEOUT_S)).data()
 
 
+def render_rows(rows: list[dict]) -> str:
+    """The text a client prints for a Cypher result.
+
+    Matched to what theorem's own renderer emits so the token counts are
+    comparable: a one-line header naming the columns, then one line per
+    row. Neo4j itself returns no text, so some rendering has to be
+    assumed; this is the smallest reasonable one, which favours Cypher.
+    """
+    if not rows:
+        return "results: 0 of 0, complete"
+    cols = list(rows[0].keys())
+    lines = [
+        f"results: {len(rows)} of {len(rows)}, complete",
+        "columns: " + ", ".join(cols),
+    ]
+    for row in rows:
+        lines.append(", ".join(str(row.get(c)) for c in cols))
+    return "\n".join(lines)
+
+
 # ---- phase 2: execution -----------------------------------------------
 
 
@@ -328,11 +349,16 @@ def exec_graph(graph: str, model: str) -> None:
                 "query": cypher,
             }
             try:
+                t0 = time.perf_counter()
                 raw = run_cypher(driver, cypher)
+                rec["latency_ms"] = round(1000 * (time.perf_counter() - t0), 2)
                 pred = [
                     {k: to_hashable(v) for k, v in record.items()} for record in raw
                 ]
                 rec["executable"] = True
+                rec["n_rows"] = len(raw)
+                rec["query_tokens"] = count_tokens(cypher)
+                rec["result_tokens"] = count_tokens(render_rows(raw))
                 gold = json.loads(q["answer_json"])
                 rec["ex"] = _compare_execution(
                     pred_executed=pred,

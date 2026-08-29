@@ -152,6 +152,70 @@ def main() -> None:
     )
     w("")
 
+    w("## Cost per answered question")
+    w("")
+    w(
+        "Accuracy is not the only axis an agent pays for. These are "
+        "measured on the same runs: tokens are counted with the same "
+        "estimator on the text each system hands back, and latency is "
+        "wall-clock for executing the query."
+    )
+    w("")
+
+    def med(rows, field):
+        vals = sorted(r[field] for r in rows if r.get(field) is not None)
+        return vals[len(vals) // 2] if vals else None
+
+    def mean(rows, field):
+        vals = [r[field] for r in rows if r.get(field) is not None]
+        return sum(vals) / len(vals) if vals else None
+
+    def fmt(x, unit=""):
+        return "n/a" if x is None else f"{x:,.1f}{unit}"
+
+    ok_gl = [r for r in gl if r.get("ex") == 1.0]
+    ok_cy = [r for r in cy if r.get("ex") == 1.0]
+    w("| Measure | theorem | text2cypher |")
+    w("| --- | --- | --- |")
+    w(
+        f"| Result tokens returned, median | {fmt(med(ok_gl, 'result_tokens'))} | "
+        f"{fmt(med(ok_cy, 'result_tokens'))} |"
+    )
+    w(
+        f"| Result tokens returned, mean | {fmt(mean(ok_gl, 'result_tokens'))} | "
+        f"{fmt(mean(ok_cy, 'result_tokens'))} |"
+    )
+    w(
+        f"| Query tokens written, mean | {fmt(mean(ok_gl, 'query_tokens'))} | "
+        f"{fmt(mean(ok_cy, 'query_tokens'))} |"
+    )
+    w(
+        f"| Execution latency, median | {fmt(med(ok_gl, 'latency_ms'), ' ms')} | "
+        f"{fmt(med(ok_cy, 'latency_ms'), ' ms')} |"
+    )
+    w(
+        f"| Execution latency, mean | {fmt(mean(ok_gl, 'latency_ms'), ' ms')} | "
+        f"{fmt(mean(ok_cy, 'latency_ms'), ' ms')} |"
+    )
+    w("")
+    w(
+        "Counted over the questions each system answered correctly, so "
+        "the comparison is between two right answers rather than between "
+        "a right answer and an empty one."
+    )
+    w("")
+    w(
+        "Two caveats worth stating. theorem's renderer applies a token "
+        "budget and hands back a resume handle when a result exceeds it, "
+        "so its result tokens are capped by design where Cypher's are "
+        "not; that is a real property of the system, not a measurement "
+        "artifact, but it means the two numbers answer slightly different "
+        "questions on large results. And theorem executes in-process "
+        "while Cypher goes over bolt to a container, so the latency gap "
+        "includes transport that a co-located Neo4j would not pay."
+    )
+    w("")
+
     w("## Where the gap comes from")
     w("")
     lost = sum(1 - r["ex"] for r in gl)

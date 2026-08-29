@@ -29,6 +29,7 @@ import json
 import signal
 import subprocess
 import sys
+import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from itertools import product
@@ -173,6 +174,14 @@ def to_tuples(result: List[Dict]) -> List[Tuple]:
 
 
 # ---- adapters ---------------------------------------------------------
+
+
+def count_tokens_helper(text: str) -> int:
+    """Same estimator theorem's own renderer uses, so both arms of the
+    token comparison are counted identically."""
+    from theorem.engine.executor import count_tokens
+
+    return count_tokens(text)
 
 
 def rows_to_records(rows: list) -> list[dict]:
@@ -322,7 +331,12 @@ def _alarm(signum, frame):
 def exec_graph(graph: str, model: str) -> None:
     from eval.load_graph import derive_schema, load
     from eval.run_eval import Store
-    from theorem.engine.executor import execute_rows
+    from theorem.engine.executor import (
+        ReadContext,
+        count_tokens,
+        execute_read,
+        execute_rows,
+    )
     from theorem.parser import parse
     from theorem.verifier import verify
 
@@ -362,11 +376,23 @@ def exec_graph(graph: str, model: str) -> None:
         }
         try:
             signal.alarm(EXEC_TIMEOUT_S)
+            t0 = time.perf_counter()
             plans = verify(parse(query), schema)
             rows = execute_rows(plans, store, schema)
+            rec["latency_ms"] = round(1000 * (time.perf_counter() - t0), 2)
             rec["executable"] = True
             rec["ex"] = score(rows, q["gold_cypher"], q["answer_json"])
             rec["n_rows"] = len(rows)
+            rec["query_tokens"] = count_tokens(query)
+            # What the agent actually receives back, rendered and subject
+            # to the same token budget a real session would apply.
+            try:
+                rendered = execute_read(
+                    verify(parse(query), schema), store, schema, ReadContext()
+                )
+                rec["result_tokens"] = count_tokens(rendered)
+            except Exception:
+                pass
         except (Exception, MemoryError) as e:
             rec["executable"] = False
             rec["ex"] = 0.0
