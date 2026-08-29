@@ -45,6 +45,11 @@ class Follow(Stmt):
 
 
 @dataclass
+class Or(Stmt):
+    """Separates alternative branches; their results are unioned."""
+
+
+@dataclass
 class GroupBy(Stmt):
     col: Col
     name: str

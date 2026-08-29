@@ -19,6 +19,7 @@ from ..ast_nodes import (
     Find,
     Follow,
     GroupBy,
+    Or,
     Return,
     SchemaStmt,
 )
@@ -256,6 +257,8 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
                 continue
             if edge.id in row.get("__edges__", ()):
                 continue  # trail semantics: an edge instance is used once per row
+            if stmt.name in row and not _same_node(store, row[stmt.name], dst):
+                continue  # the name is already bound: it must be this node
             if stmt.cond and not _eval_cond(
                 store,
                 schema,
@@ -281,6 +284,49 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
 def _group(stmt: GroupBy, table: Table, store: Store, schema: Schema) -> None:
     kind = "identity" if len(stmt.col) == 1 else "value"
     table.group_meta[stmt.name] = (stmt.col, kind)
+
+
+def _scalar(v):
+    return v if isinstance(v, (str, int, float, bool, type(None))) else repr(v)
+
+
+def _return_key(store: Store, schema: Schema, row: dict, cols: list[Col]):
+    """Identity of a row for the purpose of `return`.
+
+    A column rooted at a node binding keys on that node's identity, so
+    two different nodes that happen to share a name stay two rows. Any
+    other column (a group key, an aggregate) keys on its value.
+    """
+    key = []
+    for col in cols:
+        held = row.get(col[0])
+        if isinstance(held, str) and held in store.nodes:
+            key.append(("node", store.resolve(held)))
+            continue
+        try:
+            key.append(("value", _scalar(_col_value(store, schema, row, col))))
+        except ExecError:
+            key.append(("raw", _scalar(held)))
+    return tuple(key)
+
+
+def _distinct_rows(
+    store: Store, schema: Schema, stmt: Return, rows: list[dict]
+) -> list[dict]:
+    """Collapse rows that answer the question the same way.
+
+    `return` is set-valued: reaching one node by two paths answers the
+    question once, not twice.
+    """
+    seen = set()
+    out = []
+    for row in rows:
+        k = _return_key(store, schema, row, stmt.cols)
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(row)
+    return out
 
 
 def _dedup(values: list) -> list:
@@ -425,7 +471,7 @@ def _serialize(
         for c in stmt.cols
     )
 
-    rows = table.rows
+    rows = _distinct_rows(store, schema, stmt, table.rows)
     if stmt.order_by is not None:
         rows = _sorted_rows(
             rows, lambda r: _col_value(store, schema, r, stmt.order_by), stmt.desc
@@ -535,12 +581,41 @@ def _compute(stmt: Compute, table: Table, store: Store, schema: Schema) -> None:
             raise ExecError(f"unknown compute op {stmt.op}")
 
 
+class _Branches:
+    """Collects the branches an `or` separates, and unions them.
+
+    Statements after an `or` build a fresh table; the rows from earlier
+    branches wait here until something that reads the whole result set
+    (a group, an aggregate, a compute or the return) needs them.
+    """
+
+    def __init__(self) -> None:
+        self.done: list[dict] = []
+        self.any = False
+
+    def split(self, table: Table) -> Table:
+        self.done.extend(table.rows)
+        self.any = True
+        return Table()
+
+    def flush(self, table: Table) -> None:
+        if not self.any:
+            return
+        table.rows = self.done + table.rows
+        table.seeded = True
+        self.done = []
+        self.any = False
+
+
+BRANCH_STMTS = (Find, Follow)
+
+
 def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> None:
     if isinstance(stmt, Find):
         found = _find_rows(stmt, store, schema)
         # A seeded-but-empty table means an earlier find matched zero rows;
         # the cross product must stay empty rather than restart from `found`.
-        table.rows = _cross(table.rows, found) if table.seeded else found
+        table.rows = _cross(table.rows, found, store) if table.seeded else found
         table.seeded = True
     elif isinstance(stmt, Follow):
         _follow(stmt, table, store, schema)
@@ -563,9 +638,15 @@ def execute_read(
 ) -> str:
     if table is None:
         table = Table()
+    branches = _Branches()
     output: list[str] = []
     for plan in plans:
         stmt = plan.stmt
+        if isinstance(stmt, Or):
+            table = branches.split(table)
+            continue
+        if not isinstance(stmt, BRANCH_STMTS):
+            branches.flush(table)
         if isinstance(stmt, Return):
             output.append(_serialize(store, schema, stmt, table, ctx))
         elif isinstance(stmt, Continue):
@@ -595,11 +676,17 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
     Used by the eval harness for machine scoring; ignores budgets.
     """
     table = Table()
+    branches = _Branches()
     rows_out: list[list] = []
     for plan in plans:
         stmt = plan.stmt
+        if isinstance(stmt, Or):
+            table = branches.split(table)
+            continue
+        if not isinstance(stmt, BRANCH_STMTS):
+            branches.flush(table)
         if isinstance(stmt, Return):
-            rows = table.rows
+            rows = _distinct_rows(store, schema, stmt, table.rows)
             if stmt.order_by is not None:
                 rows = _sorted_rows(
                     rows,
@@ -625,5 +712,36 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
     return rows_out
 
 
-def _cross(rows_a: list[dict], rows_b: list[dict]) -> list[dict]:
-    return [{**a, **b} for a in rows_a for b in rows_b]
+def _cross(
+    rows_a: list[dict], rows_b: list[dict], store: Store | None = None
+) -> list[dict]:
+    """Combine two row sets, joining on any binding they share.
+
+    Names the two sides have in common must denote the same node, so a
+    shared name turns the cross product into a join. With no shared
+    names this is the plain cross product it always was.
+    """
+    if not rows_a or not rows_b:
+        return []
+    shared = [k for k in rows_b[0] if k in rows_a[0] and k != "__edges__"]
+    out = []
+    for a in rows_a:
+        for b in rows_b:
+            if shared and any(
+                _same_node(store, a.get(k), b.get(k)) is False for k in shared
+            ):
+                continue
+            merged = {**a, **b}
+            merged["__edges__"] = (
+                *a.get("__edges__", ()),
+                *b.get("__edges__", ()),
+            )
+            out.append(merged)
+    return out
+
+
+def _same_node(store: Store | None, x, y) -> bool:
+    if store is not None and isinstance(x, str) and isinstance(y, str):
+        if x in store.nodes and y in store.nodes:
+            return store.resolve(x) == store.resolve(y)
+    return x == y

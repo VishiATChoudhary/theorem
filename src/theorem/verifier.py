@@ -28,6 +28,7 @@ from .ast_nodes import (
     Follow,
     GroupBy,
     Merge,
+    Or,
     Refine,
     Retire,
     Return,
@@ -85,8 +86,24 @@ def verify(
 
 
 def _bind(env: dict[str, str], name: str, typ: str, line: int) -> None:
-    if name in env and not env[name].startswith("prior:"):
-        raise VerifyError(line, f'name "{name}" is already bound')
+    """Bind a name, or join against it if it is already bound.
+
+    Reusing a name means "the same node", the way it reads. That is how
+    you say two paths must meet: walk to the airport a flight departed
+    from, walk to the one it was destined for, give both the same name,
+    and only flights where they coincide survive. Rebinding to a
+    different class can never match anything, so that stays an error.
+    """
+    existing = env.get(name)
+    if existing is not None and not existing.startswith("prior:"):
+        if existing != typ:
+            raise VerifyError(
+                line,
+                f'name "{name}" is already bound to a {existing}; '
+                f"reusing a name means the same node, so it cannot also "
+                f"be a {typ}. pick a different name",
+            )
+        return
     env[name] = typ
 
 
@@ -435,6 +452,9 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
 
         case SchemaStmt():
             pass
+
+        case Or():
+            pass  # a separator; each branch is checked in the same env
 
         case _:
             raise VerifyError(line, f"unsupported statement {type(stmt).__name__}")

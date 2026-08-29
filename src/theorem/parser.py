@@ -27,6 +27,7 @@ from .ast_nodes import (
     Follow,
     GroupBy,
     Merge,
+    Or,
     Refine,
     Retire,
     Return,
@@ -334,6 +335,22 @@ class _Parser:
         stmt.line = self.line_no
         return stmt
 
+    def _trailing_where(self, cond: Cond) -> Cond:
+        """Accept `where` after `as` as well as before it.
+
+        Both orders read naturally and people reach for either; rejecting
+        one of them teaches nothing and costs a whole query.
+        """
+        if self.at_word("where"):
+            if cond:
+                raise ParseError(
+                    self.line_no,
+                    "two where clauses on one line; combine them with 'and'",
+                )
+            self.next()
+            return self.cond()
+        return cond
+
     def parse_find(self) -> Find:
         target = self.expect_name()
         cond: Cond = []
@@ -343,6 +360,9 @@ class _Parser:
         order_by, desc = self.order_by_opt()
         self.expect_word("as")
         name = self.expect_name()
+        cond = self._trailing_where(cond)
+        if order_by is None:
+            order_by, desc = self.order_by_opt()
         return Find(target, cond, name, order_by=order_by, desc=desc)
 
     def parse_follow(self) -> Follow:
@@ -355,7 +375,11 @@ class _Parser:
             cond = self.cond()
         self.expect_word("as")
         name = self.expect_name()
+        cond = self._trailing_where(cond)
         return Follow(src, edge, role, name, cond=cond)
+
+    def parse_or(self) -> Or:
+        return Or()
 
     def parse_group(self) -> GroupBy:
         self.expect_word("by")
@@ -558,4 +582,15 @@ def parse(text: str) -> list[Stmt]:
     for line_no, logical in logical_lines(text):
         tokens = tokenize(logical, line_no)
         stmts.append(_Parser(tokens, line_no).statement())
+    for i, stmt in enumerate(stmts):
+        if not isinstance(stmt, Or):
+            continue
+        # `or` joins two branches, so it needs one on each side. A
+        # dangling one is almost always a half-finished edit.
+        prev = stmts[i - 1] if i else None
+        nxt = stmts[i + 1] if i + 1 < len(stmts) else None
+        if prev is None or isinstance(prev, Or):
+            raise ParseError(stmt.line, "'or' needs a branch before it")
+        if nxt is None or isinstance(nxt, Or):
+            raise ParseError(stmt.line, "'or' needs a branch after it")
     return stmts
