@@ -14,74 +14,78 @@
  ],
  "graphs_missing": [],
  "n": 2348,
- "overall_ex": 0.5094,
- "held_out_ex": 0.4981,
+ "overall_ex": 0.7764,
+ "held_out_ex": 0.7656,
  "held_out_n": 2078,
- "executable_pct": 0.8275,
- "structurally_unreachable": {
-  "list_valued_gold": 75,
-  "needs_edge_properties": 60,
-  "total": 135,
-  "pct_of_scored": 5.7,
-  "note": "theorem v0 loads list[str] properties as comma-joined strings and loads no edge properties, so these questions cannot be answered regardless of the query written"
+ "executable_pct": 0.9664,
+ "hard_data_shapes": {
+  "list_valued_gold": {
+   "n": 75,
+   "ex": 0.84
+  },
+  "needs_edge_properties": {
+   "n": 60,
+   "ex": 0.9167
+  },
+  "note": "multi-valued properties and properties on the edge itself; both were unanswerable before the language supported them"
  },
- "ex_excluding_unreachable": 0.53,
+ "ex_excluding_hard_shapes": 0.7704,
  "by_graph": {
-  "company": 0.513,
-  "fictional_character": 0.4052,
-  "flight_accident": 0.7672,
-  "geography": 0.5355,
-  "movie": 0.4613,
-  "nba": 0.5963,
-  "politics": 0.4487
+  "company": 0.7608,
+  "fictional_character": 0.7766,
+  "flight_accident": 0.9206,
+  "geography": 0.7541,
+  "movie": 0.7357,
+  "nba": 0.8593,
+  "politics": 0.7256
  },
  "by_category": {
   "basic_(n)": {
-   "ex": 0.9016,
+   "ex": 0.918,
    "n": 61
   },
   "basic_(n)-(m0)": {
-   "ex": 0.1831,
+   "ex": 0.6197,
    "n": 71
   },
   "basic_(n)-(m0)-(m1*)": {
-   "ex": 0.5775,
+   "ex": 0.7842,
    "n": 329
   },
   "basic_(n)-(m0*)": {
-   "ex": 0.7612,
+   "ex": 0.868,
    "n": 356
   },
   "basic_(n)-(m0*),(n)-(m1*)": {
-   "ex": 0.5646,
+   "ex": 0.7508,
    "n": 333
   },
   "basic_(n)=(m0)": {
-   "ex": 0.0319,
+   "ex": 0.5426,
    "n": 94
   },
   "basic_(n*)": {
-   "ex": 0.8983,
+   "ex": 0.9661,
    "n": 59
   },
   "special_comparison": {
-   "ex": 0.8163,
+   "ex": 0.8639,
    "n": 147
   },
   "special_optional-match": {
-   "ex": 0.2351,
+   "ex": 0.5336,
    "n": 268
   },
   "special_three-node-groupby": {
-   "ex": 0.7231,
+   "ex": 0.7846,
    "n": 260
   },
   "special_time-sensitive": {
-   "ex": 0.3833,
+   "ex": 0.9167,
    "n": 60
   },
   "special_union": {
-   "ex": 0.0935,
+   "ex": 0.8677,
    "n": 310
   }
  }

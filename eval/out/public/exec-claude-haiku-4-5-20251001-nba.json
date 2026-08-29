@@ -2,599 +2,818 @@
  {
   "qid": "2d5f1e6f-ae3c-4e71-8fbe-e05f69294e46",
   "category": "special_union",
-  "query": "find team where name = \"Sacramento Kings\" or name = \"Chicago Bulls\" as t\nfollow t playsFor player as p\ncount distinct p as n\nreturn n",
+  "query": "find team where name = \"Sacramento Kings\" as t\nfollow t playsFor player as p\nor\nfind team where name = \"Chicago Bulls\" as t\nfollow t playsFor player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 1.29,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 46,
+  "result_tokens": 10
  },
  {
   "qid": "3f28fa8b-8b37-46ad-ab48-d4e573500312",
   "category": "special_union",
-  "query": "find position where name = \"shooting guard\" or name = \"swingman\" as pos\nfollow pos playsPosition player as p\ncount distinct p as total\nreturn total",
+  "query": "find position where name = \"shooting guard\" as pos\nfollow pos playsPosition player as p\nor\nfind position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 1.09,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 50,
+  "result_tokens": 10
  },
  {
   "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
   "category": "special_three-node-groupby",
   "query": "find award where name = \"ACB Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 0.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 49,
+  "result_tokens": 18
  },
  {
   "qid": "8c2683f2-d6ec-491d-8200-d1019ce7afb2",
   "category": "special_time-sensitive",
-  "query": "find player where name = \"Robert Reid\" as p\nfollow p playsFor team where year = 1983 as t\nreturn t.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: unknown property \"year\" on class team. did you mean one of: head_coach, inception_year, name, owners? in line 2\nnothing was executed."
+  "query": "find player where name = \"Robert Reid\" as p\nfollow p playsFor team as t where via.start_year <= 1983 and via.end_year >= 1983 or via.start_year <= 1983 and via.end_year = none\nreturn t.name",
+  "latency_ms": 8.33,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 14
  },
  {
   "qid": "829e543d-503e-45a1-aa9a-8a14ae871d47",
   "category": "special_union",
-  "query": "find player where name = \"Wilt Chamberlain\" or name = \"Bob Lanier\" as p\nfollow p receivesAward award as a\ncount distinct a as n\nreturn n",
+  "query": "find player where name = \"Wilt Chamberlain\" as p\nfollow p receivesAward award as a\nor\nfind player where name = \"Bob Lanier\" as p\nfollow p receivesAward award as a\ncount distinct a as n\nreturn n",
+  "latency_ms": 16.94,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 9
  },
  {
   "qid": "e26821b6-6a22-4d03-8f13-5461db203d7c",
   "category": "basic_(n)",
-  "query": "find conference as c\ncount c as n\nreturn n",
+  "query": "find conference as c\ncount distinct c as n\nreturn n",
+  "latency_ms": 0.23,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 12,
+  "result_tokens": 9
  },
  {
   "qid": "0834680e-22f8-4e23-84e8-7807640928ab",
   "category": "special_union",
-  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as sw_team\nfind player where name = \"Lucious Harris\" as p\nfollow p draftedBy team as drafted_team\ncount distinct sw_team as sw_count\ncount distinct drafted_team as drafted_count\ncompute sw_count plus drafted_team - 0 as total_teams\nreturn total_teams",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 7: unexpected character '-'"
+  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as t\nor\nfind player where name = \"Lucious Harris\" as p\nfollow p draftedBy team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 8.63,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 49,
+  "result_tokens": 9
  },
  {
   "qid": "5d04cdc7-8f1b-4d57-b469-d601bdc9806a",
   "category": "special_three-node-groupby",
-  "query": "find division where name = \"Central Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as num_teams\nreturn g.p.name, num_teams",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ExecError: cannot resolve column g.p.name"
+  "query": "find division where name = \"Central Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as n\nreturn p.name, n",
+  "latency_ms": 3.87,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1524,
+  "query_tokens": 42,
+  "result_tokens": 2004
  },
  {
   "qid": "bbbf9f6d-0ccd-4e42-8b6b-20d2af3addd2",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find venue where name = \"Chicago Coliseum\" as v1\nfollow v1 hasHomeVenue team as t\nfollow t hasHomeVenue venue where name = \"International Amphitheatre\" as v2\nreturn t.name, t.head_coach",
+  "query": "find venue where name = \"Chicago Coliseum\" as v\nfollow v hasHomeVenue team as t\nfind venue where name = \"International Amphitheatre\" as v2\nfollow v2 hasHomeVenue team as t\nreturn t.name, t.head_coach",
+  "latency_ms": 0.78,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 49,
+  "result_tokens": 22
  },
  {
   "qid": "1f022688-7b01-4c44-a38f-96efdb8a25a5",
   "category": "special_union",
-  "query": "find player where name = \"Buddy Hield\" or name = \"John Laskowski\" as p\nfollow p playsPosition position as pos\ncount distinct pos as count\nreturn count",
+  "query": "find player where name = \"Buddy Hield\" as p\nfollow p playsPosition position as pos\nor\nfind player where name = \"John Laskowski\" as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+  "latency_ms": 16.58,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 51,
+  "result_tokens": 9
  },
  {
   "qid": "590f51a4-1dae-412d-974b-d4113c8c20c3",
   "category": "special_optional-match",
   "query": "find award where name = \"ACB Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 0.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 54,
+  "result_tokens": 22
  },
  {
   "qid": "7f7a952a-81e4-4c6a-b454-d8b53911f991",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"Detroit Pistons\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 0.8,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 41
+  "ex": 1.0,
+  "n_rows": 7,
+  "query_tokens": 30,
+  "result_tokens": 79
  },
  {
   "qid": "4a506094-e930-4c8f-be3e-a72b0d8b280b",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Howard Eisley\" as p\nfollow p playsFor team as t\nfollow t partOfDivision division as d\ncount distinct d as num_divisions\nreturn num_divisions",
+  "query": "find player where name = \"Howard Eisley\" as p\nfollow p playsFor team as t\nfollow t partOfDivision division as d\ncount distinct d as n\nreturn n",
+  "latency_ms": 8.71,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 9
  },
  {
   "qid": "5715c139-758a-48e4-af9f-dcebb56721d7",
   "category": "special_optional-match",
   "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfDivision team as t\nfollow t hasHomeVenue venue as v\ngroup by t as g\ncount distinct g.v as venue_count\nreturn t.name, venue_count",
+  "latency_ms": 0.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 49,
+  "result_tokens": 40
  },
  {
   "qid": "dc90d247-c0f6-4411-904a-33c6da3058ce",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"James Ray\" as jr\nfollow jr draftedBy team as t\nfollow t draftedBy player as others\nreturn others.name order by others.date_of_birth desc",
+  "query": "find player where name = \"James Ray\" as jr\nfollow jr draftedBy team as t\nfollow t draftedBy player as p\nreturn p.name order by p.date_of_birth desc",
+  "latency_ms": 8.0,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 72
+  "n_rows": 72,
+  "query_tokens": 36,
+  "result_tokens": 264
  },
  {
   "qid": "c7ccd057-43f3-482b-b78a-a176f92d9e16",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Miami Heat\" as t\nfollow t draftedBy player as p\nreturn p.name order by p.date_of_birth limit 1",
+  "latency_ms": 0.33,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 29,
+  "result_tokens": 13
  },
  {
   "qid": "eec765d7-ebd3-4828-8041-e698f81a9bab",
   "category": "basic_(n)-(m0*)",
-  "query": "find player where name = \"Walt Hazzard\" as p\nfollow p playsFor team where owners != \"Joe Lacob\" as t\nreturn t.name",
+  "query": "find player where name = \"Walt Hazzard\" as p\nfollow p playsFor team as t where owners != \"Joe Lacob\"\nreturn t.name",
+  "latency_ms": 8.28,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 3
+  "ex": 1.0,
+  "n_rows": 2,
+  "query_tokens": 28,
+  "result_tokens": 20
  },
  {
   "qid": "1e60e349-2eb1-4da0-950b-2e0a5cf0f4d3",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\nfollow d partOfDivision team as t\nreturn t.name",
+  "latency_ms": 0.19,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 15
+  "n_rows": 15,
+  "query_tokens": 35,
+  "result_tokens": 79
  },
  {
   "qid": "c1d20c6f-ee69-4307-ae76-d720a4fc27cb",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find team where name = \"San Antonio Spurs\" as spurs\nfollow spurs draftedBy player as p\nfollow p playsFor team as other_team\nmin other_team.inception_year as earliest_year\nreturn earliest_year",
+  "query": "find team where name = \"San Antonio Spurs\" as spurs\nfollow spurs draftedBy player as p\nfollow p playsFor team as t\nmin t.inception_year as earliest_year\nreturn earliest_year",
+  "latency_ms": 0.45,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 43,
+  "result_tokens": 13
  },
  {
   "qid": "e8ec051a-c81d-4675-96bf-2fde120a3078",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"New York Knicks\" as t\nfollow t draftedBy player as p\nreturn p.name order by p.date_of_birth",
+  "latency_ms": 0.6,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 169
+  "n_rows": 169,
+  "query_tokens": 28,
+  "result_tokens": 577
  },
  {
   "qid": "f0052196-f3fa-4178-8063-2a5196717aa7",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Portland Trail Blazers\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as count\nreturn pos.name, count",
+  "query": "find team where name = \"Portland Trail Blazers\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 0.98,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 45,
+  "result_tokens": 32
  },
  {
   "qid": "d6badaed-4add-4b95-a078-68bf10f3541f",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"Swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as num_players\nreturn a.name, num_players",
+  "query": "find position where name = \"Swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as cnt\nreturn a.name, cnt",
+  "latency_ms": 0.23,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 44,
+  "result_tokens": 89
  },
  {
   "qid": "048c39e7-9056-42b3-931a-d7016ed96490",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Utah Jazz\" as jazz\nfollow jazz draftedBy player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "query": "find team where name = \"Utah Jazz\" as uj\nfollow uj draftedBy player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 0.49,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 39,
+  "result_tokens": 163
  },
  {
   "qid": "9e194653-50e4-4ca2-8721-9b8a874679e3",
   "category": "special_optional-match",
-  "query": "find player where name = \"Russell Westbrook\" as p\nfollow p receivesAward award as a\nfollow a receivesAward player as other_p\ngroup by a as g\ncount distinct g.other_p as player_count\nreturn a.name, player_count",
+  "query": "find player where name = \"Russell Westbrook\" as rw\nfollow rw receivesAward award as a\nfollow a receivesAward player as p\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+  "latency_ms": 9.15,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 44,
+  "result_tokens": 35
  },
  {
   "qid": "58d1ad18-29ef-45bb-ad70-faf82dc5ac18",
   "category": "basic_(n)-(m0*)",
   "query": "find division where name = \"Southeast Division\" as d\nfollow d partOfDivision team as t\nreturn t.name, t.head_coach",
+  "latency_ms": 0.19,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 28,
+  "result_tokens": 51
  },
  {
   "qid": "be667a90-0313-4806-a6ca-e7d1d69e5303",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Herm Gilliam\" as p1\nfollow p1 playsFor team as t\nfollow t playsFor player as p2 where p2.name = \"Scoot Henderson\"\nreturn t.name, t.owners",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+  "query": "find player where name = \"Herm Gilliam\" as p1\nfollow p1 playsFor team as t\nfind player where name = \"Scoot Henderson\" as p2\nfollow p2 playsFor team as t\nreturn t.name, t.owners",
+  "latency_ms": 16.74,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 44,
+  "result_tokens": 22
  },
  {
   "qid": "777d9ce9-a708-4eca-b669-526f54523d2f",
   "category": "special_three-node-groupby",
   "query": "find award where name = \"Champion des champions fran\u00e7ais de L'\u00c9quipe\" as a\nfollow a receivesAward player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 0.32,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 48,
+  "result_tokens": 21
  },
  {
   "qid": "61ff55fc-962f-42fb-8ddd-66791d0f75c8",
   "category": "special_union",
-  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfind player where name = \"Jim McMillian\" as p\nfollow p playsFor team as t\ncount distinct t as cnt\nreturn cnt",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"t\" is already bound in line 4\nnothing was executed."
+  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nor\nfind player where name = \"Jim McMillian\" as p\nfollow p playsFor team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 8.29,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 9
  },
  {
   "qid": "3c61a785-dd4f-4246-8c10-937e21f19b72",
   "category": "basic_(n)-(m0*)",
   "query": "find venue where name = \"Toyota Coliseum\" as v\nfollow v hasHomeVenue team as t\nreturn t.name, t.owners",
+  "latency_ms": 0.42,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 26
  },
  {
   "qid": "8a980812-f705-434c-8917-990558916d43",
   "category": "special_time-sensitive",
-  "query": "find venue where name = \"Ball Arena\" as v\nfollow v hasHomeVenue team as t\nreturn t.name",
+  "query": "find team as t\nfollow t hasHomeVenue venue as v where name = \"Ball Arena\" and via.end_year = none\nreturn t.name",
+  "latency_ms": 1.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 27,
+  "result_tokens": 14
  },
  {
   "qid": "da76e12b-4f31-496b-8575-4a4ed8c1d1f6",
   "category": "special_optional-match",
-  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as position_count\nreturn p.name, position_count",
+  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 0.48,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 71
+  "n_rows": 71,
+  "query_tokens": 49,
+  "result_tokens": 308
  },
  {
   "qid": "169efd3d-5147-4a6e-98c3-826eef355b3a",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Buddy Hield\" as bh\nfollow bh receivesAward award as award_bh\nfollow award_bh receivesAward player as other_p\ngroup by other_p as g\ncount distinct g.award_bh as n\nreturn other_p.name, n",
+  "query": "find player where name = \"Buddy Hield\" as bh\nfollow bh receivesAward award as a\nfollow a receivesAward player as p\ngroup by p as g\ncount distinct g.a as count\nreturn p.name, count",
+  "latency_ms": 8.2,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 11
+  "n_rows": 11,
+  "query_tokens": 44,
+  "result_tokens": 61
  },
  {
   "qid": "f1a0ab55-fdf4-4d8c-b5ef-ab2395fa4504",
   "category": "special_comparison",
-  "query": "find player where name = \"Jim Burns\" or name = \"Jean Prioleau\" as p\nreturn p.name order by p.date_of_birth desc limit 1",
+  "query": "find player where name = \"Jim Burns\" as p\nor\nfind player where name = \"Jean Prioleau\" as p\nreturn p.name order by p.date_of_birth desc limit 1",
+  "latency_ms": 16.29,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 13
  },
  {
   "qid": "047e97cb-44fb-4148-b36e-c539e0340d16",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find position where name = \"Small Forward\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\nreturn a.name",
+  "query": "find position where name = \"small forward\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 1.27,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 195
+  "ex": 1.0,
+  "n_rows": 11,
+  "query_tokens": 33,
+  "result_tokens": 102
  },
  {
   "qid": "93830abd-079d-43de-b596-3e3b98ab7fa7",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Bob Dandridge\" as p\nfollow p draftedBy team as t\nreturn t.name, t.head_coach",
+  "latency_ms": 8.43,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 22
  },
  {
   "qid": "4e5ed21a-4d0a-418d-98a9-cde47903857b",
   "category": "special_comparison",
-  "query": "find player where name = \"JaVale McGee\" or name = \"Kevin Grevey\" as p\nreturn p.name order by p.mass_kg desc limit 1",
+  "query": "find player where name = \"JaVale McGee\" as p\nor\nfind player where name = \"Kevin Grevey\" as p\nreturn p.name order by p.mass_kg desc limit 1",
+  "latency_ms": 16.35,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 34,
+  "result_tokens": 13
  },
  {
   "qid": "65b5ad24-2869-44ad-a5f9-18fdb2bf2a66",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Washington Wizards\" as t\nfollow t playsFor player as p\nreturn p.name",
+  "query": "find team where name = \"Washington Wizards\" as t\nfollow t playsFor player as p where via.start_year <= 1964 and via.end_year >= 1964 or via.start_year <= 1964 and via.end_year = none\nreturn p.name",
+  "latency_ms": 0.72,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 299
+  "ex": 1.0,
+  "n_rows": 4,
+  "query_tokens": 49,
+  "result_tokens": 22
  },
  {
   "qid": "cb34bff2-f55d-4155-9cbb-723d9ba17ff2",
   "category": "special_time-sensitive",
-  "query": "find player where name = \"LeBron James\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "query": "find player where name = \"LeBron James\" as p\nfollow p playsFor team as t where via.end_year = none\nreturn t.name",
+  "latency_ms": 8.51,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 4
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 28,
+  "result_tokens": 15
  },
  {
   "qid": "26a87c72-1215-40a2-bf9e-393434267cf4",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"Brooklyn Nets\" as nets\nfollow nets playsFor player as p\nfollow p draftedBy team as draft_team\nreturn draft_team.name order by draft_team.inception_year",
+  "latency_ms": 0.96,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 316
+  "n_rows": 30,
+  "query_tokens": 43,
+  "result_tokens": 141
  },
  {
   "qid": "4c1e37f4-4105-4bb8-81e7-a9fcbad651c1",
   "category": "special_union",
-  "query": "find team where name = \"Houston Rockets\" as t\nfollow t playsFor player as players\nfind award where name = \"NBA Coach of the Year Award\" as a\nfollow a receivesAward player as players\ncount distinct players as n\nreturn n",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"players\" is already bound in line 4\nnothing was executed."
+  "query": "find team where name = \"Houston Rockets\" as t\nfollow t playsFor player as p\nor\nfind award where name = \"NBA Coach of the Year Award\" as a\nfollow a receivesAward player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 0.68,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 50,
+  "result_tokens": 10
  },
  {
   "qid": "54f574bd-53ff-42cd-be6b-a2ffade30007",
   "category": "basic_(n)-(m0*)",
   "query": "find division where name = \"Southeast Division\" as d\nfollow d partOfDivision team as t\nreturn t.owners",
+  "latency_ms": 0.2,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 25,
+  "result_tokens": 32
  },
  {
   "qid": "f6e463fd-b5da-40ff-ac8e-f92d6313894b",
   "category": "special_comparison",
   "query": "find player where name = \"Billy Lange\" as p1\nfind player where name = \"Thomas Francis Xavier Smith\" as p2\ncompute p1.gender same p2.gender as answer\nreturn answer",
+  "latency_ms": 18.1,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 40,
+  "result_tokens": 11
  },
  {
   "qid": "f070dc0e-8c06-437d-a889-5ef6008d5806",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find position as pos\nfollow pos playsPosition player where name = \"Bulbs Ehlers\" as p1\nfollow pos playsPosition player where name = \"Derek Anderson\" as p2\nreturn pos.name",
+  "query": "find player where name = \"Bulbs Ehlers\" as p1\nfollow p1 playsPosition position as pos\nfind player where name = \"Derek Anderson\" as p2\nfollow p2 playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 16.57,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 14
  },
  {
   "qid": "452aab89-80b8-4b69-8d1a-4cbfd98dc024",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t playsFor player as p\nreturn p.name",
+  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t playsFor player as p where via.end_year = none\nreturn p.name",
+  "latency_ms": 1.03,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 478
+  "n_rows": 420,
+  "query_tokens": 28,
+  "result_tokens": 1404
  },
  {
   "qid": "59cf99b7-51f8-4c7c-a7e7-9a58e5ce69a2",
   "category": "special_optional-match",
-  "query": "find position where name = \"shooting guard\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
+  "query": "find position where name = \"shooting guard\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t or none\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
+  "latency_ms": 9.33,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1096
+  "n_rows": 1096,
+  "query_tokens": 49,
+  "result_tokens": 2002
  },
  {
   "qid": "39425312-ac63-44c2-a8ae-bca437f11406",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Sidney Wicks\" as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 8.46,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 21,
+  "result_tokens": 16
  },
  {
   "qid": "b08c1bf4-6125-4e60-b895-46488a92ab2c",
   "category": "special_optional-match",
-  "query": "find team where name = \"Houston Rockets\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "query": "find team where name = \"Houston Rockets\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount g.a as award_count\nreturn p.name, award_count",
+  "latency_ms": 1.23,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 21
+  "n_rows": 365,
+  "query_tokens": 46,
+  "result_tokens": 1526
  },
  {
   "qid": "ace37a08-2323-4bf0-9e5d-e0cc837dee05",
   "category": "special_union",
-  "query": "find award where name = \"Kareem Abdul-Jabbar Award\" or name = \"Oscar Robertson Trophy\" as a\nfollow a receivesAward player as p\nreturn p.name",
+  "query": "find player as p\nfollow p receivesAward award where name = \"Kareem Abdul-Jabbar Award\" as a\nor\nfind player as p\nfollow p receivesAward award where name = \"Oscar Robertson Trophy\" as a\nreturn p.name",
+  "latency_ms": 6.3,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 14
+  "ex": 1.0,
+  "n_rows": 13,
+  "query_tokens": 49,
+  "result_tokens": 57
  },
  {
   "qid": "1a0d94f4-f266-4645-8147-fdfae100b0de",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Los Angeles Lakers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+  "query": "find team where name = \"Los Angeles Lakers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as num_players\nreturn a.name, num_players",
+  "latency_ms": 0.5,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 47,
+  "result_tokens": 73
  },
  {
   "qid": "27c8c0f4-feb3-4de2-b801-47b5af2020f3",
   "category": "basic_(n)-(m0*)",
   "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\nreturn d.name",
+  "latency_ms": 0.17,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 27,
+  "result_tokens": 24
  },
  {
   "qid": "e19cf399-3883-4d92-aded-88d82fb3ccfb",
   "category": "special_union",
-  "query": "find position where name = \"Shooting Guard\" as sg\nfollow sg playsPosition player as p1\nfind award where name = \"Merited Master of Sports of the USSR\" as aw\nfollow aw receivesAward player as p2\nfind player as p\nfollow p playsPosition position where name = \"Shooting Guard\" as sg_pos\nfollow p receivesAward award where name = \"Merited Master of Sports of the USSR\" as aw2\ncount distinct p1 as sg_count\ncount distinct p2 as aw_count\ncount distinct p as overlap\ncompute sg_count plus aw_count minus overlap as total\nreturn total",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 11: expected 'as', got 'minus'"
+  "query": "find player as p\nfollow p playsPosition position where name = \"shooting guard\" as pos\nor\nfind player as p\nfollow p receivesAward award where name = \"Merited Master of Sports of the USSR\" as aw\ncount distinct p as n\nreturn n",
+  "latency_ms": 15.98,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 55,
+  "result_tokens": 10
  },
  {
   "qid": "79ed0971-42c7-4a89-be4c-02b695b12f54",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Cleveland Cavaliers\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "query": "find team where name = \"Cleveland Cavaliers\" as t\nfollow t hasHomeVenue venue as v where via.end_year = none\nreturn v.name",
+  "latency_ms": 0.3,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 30,
+  "result_tokens": 17
  },
  {
   "qid": "f0286ead-19cd-4a2b-80ac-45bf53611953",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Philadelphia 76ers\" as philly\nfollow philly draftedBy player as p\nfollow p playsFor team where name = \"Chicago Bulls\" as t\nreturn p.name order by p.mass_kg",
+  "query": "find team where name = \"Philadelphia 76ers\" as t76\nfollow t76 draftedBy player as p\nfollow p playsFor team where name = \"Chicago Bulls\" as t\nreturn p.name order by p.mass_kg",
+  "latency_ms": 1.37,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 17
+  "n_rows": 17,
+  "query_tokens": 43,
+  "result_tokens": 68
  },
  {
   "qid": "db8afe3d-a67c-4f78-9602-0cc823dc39d5",
   "category": "special_optional-match",
   "query": "find team where name = \"Golden State Warriors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 1.72,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 463
+  "n_rows": 463,
+  "query_tokens": 50,
+  "result_tokens": 1926
  },
  {
   "qid": "e0edce9f-b01e-4a89-ab2f-71a2ebf8360f",
   "category": "special_optional-match",
-  "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\nfollow d partOfDivision team as t\ngroup by d as g\ncount g.t as team_count\nreturn d.name, team_count",
+  "query": "find conference where name = \"Western Conference\" as conf\nfollow conf partOfConference division as div\nfollow div partOfDivision team as t\ngroup by div as g\ncount distinct g.t as team_count\nreturn div.name, team_count",
+  "latency_ms": 0.21,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 54,
+  "result_tokens": 29
  },
  {
   "qid": "64b5710f-ef46-4e79-80ac-99660231cd2d",
   "category": "special_optional-match",
-  "query": "find team where name = \"Portland Trail Blazers\" as t\nfollow t draftedBy player as p\nfollow p playsFor team as tm\ngroup by p as g\ncount distinct g.tm as team_count\nreturn p.name, team_count",
+  "query": "find team where name = \"Portland Trail Blazers\" as t\nfollow t draftedBy player as p\nfollow p playsFor team as played_team\ngroup by p as g\ncount distinct g.played_team as teams_count\nreturn p.name, teams_count",
+  "latency_ms": 0.69,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 113
+  "n_rows": 113,
+  "query_tokens": 52,
+  "result_tokens": 489
  },
  {
   "qid": "3c847c81-e000-4031-b1bc-d039f1594816",
   "category": "special_optional-match",
-  "query": "find team where name = \"New Orleans Pelicans\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount g.pos as pos_count\nreturn p.name, pos_count",
+  "query": "find team where name = \"New Orleans Pelicans\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as position_count\nreturn p.name, position_count",
+  "latency_ms": 0.34,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 25
+  "n_rows": 25,
+  "query_tokens": 51,
+  "result_tokens": 122
  },
  {
   "qid": "35d4cf0b-db94-4958-99a8-7e948aa4805d",
   "category": "basic_(n*)",
   "query": "find player where name = \"Scott Padgett\" as p\nreturn p.country_of_citizenship",
+  "latency_ms": 8.48,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 19,
+  "result_tokens": 22
  },
  {
   "qid": "98412f9e-dbff-45fd-8025-71659fe7cdb0",
   "category": "special_three-node-groupby",
   "query": "find award where name = \"Kareem Abdul-Jabbar Award\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 0.28,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 47,
+  "result_tokens": 18
  },
  {
   "qid": "fa814366-30bf-4c2c-9edb-2fc947a82ef9",
   "category": "special_optional-match",
-  "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as num_positions\nreturn p.name, num_positions",
+  "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as position_count\nreturn p.name, position_count",
+  "latency_ms": 0.92,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 205
+  "n_rows": 205,
+  "query_tokens": 49,
+  "result_tokens": 869
  },
  {
   "qid": "896b0995-efa7-4f6d-ac57-4993dac258a1",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 0.52,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 279
+  "ex": 1.0,
+  "n_rows": 5,
+  "query_tokens": 32,
+  "result_tokens": 26
  },
  {
   "qid": "958ba905-ee0c-4a0f-8a5a-250fab423c92",
   "category": "basic_(n)-(m0*)",
   "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfConference conference as c\nreturn c.name",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 26,
+  "result_tokens": 15
  },
  {
   "qid": "3076cf23-5469-4453-b8a8-a3d09f6e255a",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Philadelphia 76ers\" as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.26,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 14
  },
  {
   "qid": "a9d24b7a-4f99-40b2-ac81-b63b3fc01bab",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Isiah Thomas\" as it\nfollow it receivesAward award as a\nfollow a receivesAward player as p\ncount distinct p.gender as n\nreturn n",
-  "executable": true,
+  "query": "find player where name = \"Isiah Thomas\" as it\nfollow it receivesAward award as a\nfollow a receivesAward player as p\ngroup by p.gender as g\ncount distinct g as n\nreturn n",
+  "executable": false,
   "ex": 0.0,
-  "n_rows": 1
+  "error": "IndexError: tuple index out of range"
  },
  {
   "qid": "d70022fe-68d7-4f80-a2a6-8a821d06ee54",
   "category": "basic_(n)-(m0*)",
   "query": "find award where name = \"Silbernes Lorbeerblatt\" as a\nfollow a receivesAward player as p\nreturn p.name",
+  "latency_ms": 0.25,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 13
  },
  {
   "qid": "0480c6db-ae32-442b-97c8-9cd76c99b9fd",
   "category": "basic_(n*)",
   "query": "find player where name = \"George Lehmann\" as p\nreturn p.date_of_birth",
+  "latency_ms": 8.47,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 17,
+  "result_tokens": 15
  },
  {
   "qid": "88ab24c3-8798-49a0-90e6-7143a5cb7370",
   "category": "special_union",
-  "query": "find player as p1\nfollow p1 draftedBy team where name = \"Boston Celtics\" as t\nfind player as p2\nfollow p2 playsPosition position where name = \"center\" as pos\nreturn p1.name, p2.name",
+  "query": "find team where name = \"Boston Celtics\" as t\nfollow t draftedBy player as p\nor\nfind position where name = \"Center\" as pos\nfollow pos playsPosition player as p\nreturn p.name",
+  "latency_ms": 1.7,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 144768
+  "ex": 1.0,
+  "n_rows": 1054,
+  "query_tokens": 43,
+  "result_tokens": 2004
  },
  {
   "qid": "2daca1ae-e59e-4241-8cf3-ba1cf07680aa",
   "category": "special_comparison",
   "query": "find team where name = \"Phoenix Suns\" as t1\nfind team where name = \"Charlotte Hornets\" as t2\ncompute t1.inception_year same t2.inception_year as answer\nreturn answer",
+  "latency_ms": 0.36,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 41,
+  "result_tokens": 11
  },
  {
   "qid": "6b6c8c33-0bd8-4ad9-bd64-03239ef2548d",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Sidney Wicks\" as p\nfollow p draftedBy team as t\nreturn t.name, t.owners",
+  "latency_ms": 8.26,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 24,
+  "result_tokens": 22
  },
  {
   "qid": "d4edad10-9ccb-49b2-a26d-e49e42452d1d",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "query": "find award where name = \"Bill Russell NBA Finals Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team where name = \"Indiana Pacers\" as t\nreturn p.name, p.country_of_citizenship",
+  "latency_ms": 0.43,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 53,
+  "result_tokens": 27
  },
  {
   "qid": "b9fd3905-8968-45ee-a3c0-e0609e6a82d8",
   "category": "special_union",
-  "query": "find player where name = \"Tom Hawkins\" as th\nfollow th draftedBy team as t\nfind player where name = \"George McCloud\" as gm\nfollow gm playsFor team as t\ncount distinct t as cnt\nreturn cnt",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"t\" is already bound in line 4\nnothing was executed."
+  "query": "find player where name = \"Tom Hawkins\" as th\nfollow th draftedBy team as t\nor\nfind player where name = \"George McCloud\" as gm\nfollow gm playsFor team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 16.58,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 46,
+  "result_tokens": 9
  },
  {
   "qid": "64a7213d-069c-4ab2-98dd-a023d713a331",
   "category": "special_comparison",
   "query": "find player where name = \"Jordan Farmar\" as p1\nfind player where name = \"Michael Cooper\" as p2\ncompute p1.height_cm minus p2.height_cm as diff\nreturn diff",
+  "latency_ms": 17.03,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 38,
+  "result_tokens": 10
  },
  {
   "qid": "899a8595-8d60-47d6-ab37-ae3bd7a60909",
   "category": "special_comparison",
   "query": "find player where name = \"Bud Olsen\" as p1\nfind player where name = \"Jerry Rullo\" as p2\ncompute p1.mass_kg minus p2.mass_kg as diff\nreturn diff",
+  "latency_ms": 15.83,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 11
  },
  {
   "qid": "6497340e-a859-4483-9ab6-ac83a0400b2a",
   "category": "basic_(n)",
   "query": "find team as t\nreturn t.name",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 7,
+  "result_tokens": 138
  },
  {
   "qid": "bca2820b-7edb-4322-ba52-8bc894d4839e",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"Power Forward\" as pf_pos\nfollow pf_pos playsPosition player as pf_player\nfollow pf_player playsPosition position as pos\ngroup by pos as g\ncount distinct g.pf_player as count\nreturn g.pos.name, count",
+  "query": "find position where name = \"power forward\" as pf\nfollow pf playsPosition player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn g.pos.name, n",
   "executable": false,
   "ex": 0.0,
   "error": "ExecError: cannot resolve column g.pos.name"
@@ -602,874 +821,1192 @@
  {
   "qid": "543ea313-3750-42a7-b6cd-415cfc19469b",
   "category": "special_optional-match",
-  "query": "find team where name = \"Los Angeles Clippers\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "query": "find team where name = \"Los Angeles Clippers\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "latency_ms": 1.34,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 12
+  "ex": 1.0,
+  "n_rows": 404,
+  "query_tokens": 49,
+  "result_tokens": 1684
  },
  {
   "qid": "6cd21454-d5db-408f-9eb8-700c620efd7c",
   "category": "special_three-node-groupby",
   "query": "find team where name = \"Indiana Pacers\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+  "latency_ms": 0.64,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 41,
+  "result_tokens": 69
  },
  {
   "qid": "0486ad8d-495e-4116-b4b5-f0b38bf0914b",
   "category": "special_optional-match",
-  "query": "find player where name = \"Jumaine Jones\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue as v\ngroup by t as g\ncount distinct g.v as venue_count\nreturn t.name, venue_count",
+  "query": "find player where name = \"Jumaine Jones\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue as v or none\ngroup by t as g\ncount distinct g.v as venues\nreturn t.name, venues",
+  "latency_ms": 8.58,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 45,
+  "result_tokens": 42
  },
  {
   "qid": "6b3e04ef-80e2-43e7-b7ea-fdcc0aaf11c9",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Chris Whitney\" as cw\nfollow cw draftedBy team as t\nfollow t playsFor player as p\nmax p.date_of_birth as latest_birth\nreturn latest_birth",
+  "query": "find player where name = \"Chris Whitney\" as cw\nfollow cw draftedBy team as t\nfollow t playsFor player as p\nreturn p.date_of_birth order by p.date_of_birth desc limit 1",
+  "latency_ms": 8.97,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 41,
+  "result_tokens": 15
  },
  {
   "qid": "da347316-e01c-4a00-a4da-8692aac8f881",
   "category": "basic_(n)",
   "query": "find award as a\nreturn a.name",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 28
+  "n_rows": 28,
+  "query_tokens": 7,
+  "result_tokens": 252
  },
  {
   "qid": "a9ced4d1-6f09-42f3-beeb-1638eccea8d2",
   "category": "special_union",
-  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfind venue where name = \"Los Angeles Memorial Sports Arena\" as v\nfollow v hasHomeVenue team as t\ncount distinct t as result\nreturn result",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"t\" is already bound in line 4\nnothing was executed."
+  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nor\nfind venue where name = \"Los Angeles Memorial Sports Arena\" as v\nfollow v hasHomeVenue team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 0.54,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 53,
+  "result_tokens": 9
  },
  {
   "qid": "9a4685c2-cb2d-4ede-a508-ce077526051b",
   "category": "basic_(n)-(m0*)",
   "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\ncount distinct d as n\nreturn n",
+  "latency_ms": 0.17,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 31,
+  "result_tokens": 9
  },
  {
   "qid": "2342d395-d41a-49ad-ac01-0a095d805658",
   "category": "basic_(n*)",
   "query": "find team where name = \"Golden State Warriors\" as t\nreturn t.inception_year",
+  "latency_ms": 0.22,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 18,
+  "result_tokens": 14
  },
  {
   "qid": "3dffa227-502f-42e3-bffb-09947424be00",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find division where name = \"Northwest Division\" as d1\nfollow d1 partOfConference conference as c1\nfind division where name = \"Southwest Division\" as d2\nfollow d2 partOfConference conference as c2\nreturn c1.name",
+  "query": "find division where name = \"Northwest Division\" as d1\nfollow d1 partOfConference conference as c\nfind division where name = \"Southwest Division\" as d2\nfollow d2 partOfConference conference as c\nreturn c.name",
+  "latency_ms": 0.25,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 51,
+  "result_tokens": 15
  },
  {
   "qid": "b8e6e457-0c08-4b03-b922-f70dd4c696ee",
   "category": "special_optional-match",
-  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p or none\ngroup by t as g\ncount distinct g.p as drafted_count\nreturn t.name, drafted_count",
+  "latency_ms": 0.89,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 51,
+  "result_tokens": 43
  },
  {
   "qid": "81fbe95c-c86d-4ea4-a414-53dcc7c0aa81",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find award where name = \"German Sportspersonality of the Year\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 0.28,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 14
  },
  {
   "qid": "b497abff-4bba-4f4d-a53b-dd3a35fc93ab",
   "category": "special_three-node-groupby",
-  "query": "find award where name = \"All-NBA Team\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as count\nreturn t.name, count",
+  "query": "find award where name = \"All-NBA Team\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 0.61,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 25
+  "n_rows": 25,
+  "query_tokens": 41,
+  "result_tokens": 135
  },
  {
   "qid": "8b7627b8-30d3-4989-a8d4-cdda65f572f2",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player as p\nfollow p playsPosition position where name = \"Center\" as pos\nfollow p draftedBy team where name = \"Atlanta Hawks\" as t\nreturn p.name order by p.date_of_birth",
+  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position where name = \"center\" as pos\nreturn p.name order by p.date_of_birth",
+  "latency_ms": 0.92,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 34
+  "n_rows": 34,
+  "query_tokens": 43,
+  "result_tokens": 122
  },
  {
   "qid": "fc233aa5-328c-4f5a-a18e-19ee17dd24d6",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\nreturn p.gender",
+  "latency_ms": 1.87,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 1286
+  "n_rows": 1094,
+  "query_tokens": 33,
+  "result_tokens": 1379
  },
  {
   "qid": "9707e428-0375-4557-82fb-b527c34681d2",
   "category": "basic_(n)",
   "query": "find position as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 0.17,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 12,
+  "result_tokens": 9
  },
  {
   "qid": "c960408d-76ca-492c-88d0-ea4088ea4e7b",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find division where name = \"Central Division\" as cd\nfollow cd partOfConference conference as conf\nfollow conf partOfConference division as d\ncount distinct d as count\nreturn count",
+  "query": "find division where name = \"Central Division\" as d\nfollow d partOfConference conference as c\nfollow c partOfConference division as d2\ncount distinct d2 as n\nreturn n",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 41,
+  "result_tokens": 9
  },
  {
   "qid": "0e2bba75-f73f-4cee-956a-687dd1142f2d",
   "category": "special_three-node-groupby",
   "query": "find position where name = \"Power Forward\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "latency_ms": 2.73,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 48,
+  "result_tokens": 175
  },
  {
   "qid": "da96ea74-2f63-4d96-babe-ea303c02dae8",
   "category": "special_optional-match",
-  "query": "find award where name = \"Gold Medal of the Royal Order of Sports Merit\" as a\nfollow a receivesAward player as p\nfollow p playsFor team as t\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
+  "query": "find award where name = \"Gold Medal of the Royal Order of Sports Merit\" as a\nfollow a receivesAward player as p\nfollow p playsFor team as t\ngroup by p as g\ncount distinct g.t as num_teams\nreturn p.name, num_teams",
+  "latency_ms": 0.32,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 53,
+  "result_tokens": 25
  },
  {
   "qid": "b99c2c82-5424-4fb2-95c9-b7dcbb87b8ab",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"San Antonio Spurs\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 0.32,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 19
+  "ex": 1.0,
+  "n_rows": 6,
+  "query_tokens": 31,
+  "result_tokens": 70
  },
  {
   "qid": "7e3ede6f-663f-484f-a228-42593db7bd0b",
   "category": "basic_(n)=(m0)",
-  "query": "find team as t\nfollow t draftedBy player as p_drafted\nfollow t playsFor player as p_roster\nreturn t.name",
+  "query": "find team as t\nfollow t draftedBy player as p1\nfollow t playsFor player as p2\nreturn t.name",
+  "latency_ms": 858.44,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1110097
+  "ex": 1.0,
+  "n_rows": 30,
+  "query_tokens": 22,
+  "result_tokens": 138
  },
  {
   "qid": "0ca8e2d8-6c25-4108-a5aa-d5c2a83d711d",
   "category": "special_optional-match",
-  "query": "find award where name = \"Sports Illustrated Sportsperson of the Year\" as a\nfollow a receivesAward player as p\nfollow p receivesAward award as awards\ngroup by p as g\ncount distinct g.awards as total_awards\nreturn p.name, total_awards",
+  "query": "find award where name = \"Sports Illustrated Sportsperson of the Year\" as a\nfollow a receivesAward player as p\nfollow p receivesAward award as all_awards\ngroup by p as g\ncount distinct g.all_awards as total_awards\nreturn p.name, total_awards",
+  "latency_ms": 0.54,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 60,
+  "result_tokens": 47
  },
  {
   "qid": "a0e95770-7dad-49a3-ba30-8be6b9e09c4c",
   "category": "basic_(n)-(m0*)",
-  "query": "find team where name = \"Denver Nuggets\" as t\nfollow t playsFor player where schools_attended != \"Tyler Junior College\" as p\nreturn p.name",
+  "query": "find team where name = \"Denver Nuggets\" as t\nfollow t playsFor player as p\nfind player where schools_attended != \"Tyler Junior College\" as p\nreturn p.name",
+  "latency_ms": 421.87,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 365
+  "ex": 1.0,
+  "n_rows": 364,
+  "query_tokens": 38,
+  "result_tokens": 1253
  },
  {
   "qid": "4cbfd81b-f7d7-42df-b67a-9b3fc942c36f",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find position where name = \"power forward\" as pf\nfollow pf playsPosition player as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+  "query": "find position where name = \"Power Forward\" as pf\nfollow pf playsPosition player as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+  "latency_ms": 1.8,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 9
  },
  {
   "qid": "6ca84420-ea44-44aa-b31f-d373bf45f0ae",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Aron Baynes\" as ab\nfollow ab playsFor team as t\nfollow t playsFor player as p where name != \"Aron Baynes\"\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+  "query": "find player where name = \"Aron Baynes\" as ab\nfollow ab playsFor team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as shared_teams\nreturn p.name, shared_teams",
+  "latency_ms": 17.37,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1625,
+  "query_tokens": 45,
+  "result_tokens": 2002
  },
  {
   "qid": "3580a4db-292d-4dbe-906e-e00dfbaf0fb6",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Utah Jazz\" as t\nfollow t playsFor player as p\nreturn p.name order by p.mass_kg limit 1",
+  "latency_ms": 0.65,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 27,
+  "result_tokens": 14
  },
  {
   "qid": "5257c6c3-779f-4b96-90d8-aaf6083d9e27",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find position where name = \"point forward\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\nreturn t.name, t.inception_year",
+  "latency_ms": 0.22,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 4
+  "ex": 1.0,
+  "n_rows": 3,
+  "query_tokens": 36,
+  "result_tokens": 31
  },
  {
   "qid": "4ff544f2-5ff0-47fa-8ff3-818c73cd83e8",
   "category": "special_union",
-  "query": "find division where name = \"Northwest Division\" or name = \"Pacific Division\" as d\nfollow d partOfConference conference as c\nreturn c.name",
+  "query": "find division where name = \"Northwest Division\" as d\nfollow d partOfConference conference as c\nor\nfind division where name = \"Pacific Division\" as d\nfollow d partOfConference conference as c\nreturn c.name",
+  "latency_ms": 0.24,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 51,
+  "result_tokens": 15
  },
  {
   "qid": "4bdecfd4-4b6c-4c70-a077-026ecb1989c3",
   "category": "basic_(n)-(m0*)",
   "query": "find venue where name = \"Denver Coliseum\" as v\nfollow v hasHomeVenue team as t\nreturn t.name, t.owners",
+  "latency_ms": 0.39,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 25
  },
  {
   "qid": "110334f1-21c2-4784-b215-120b6383ac4e",
   "category": "special_comparison",
   "query": "find team where name = \"Portland Trail Blazers\" as t1\nfind team where name = \"Los Angeles Lakers\" as t2\ncompute t1.inception_year minus t2.inception_year as diff\nreturn diff",
+  "latency_ms": 0.34,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 43,
+  "result_tokens": 10
  },
  {
   "qid": "6a803862-a32e-458d-b368-833fc7973c91",
   "category": "special_time-sensitive",
-  "query": "find venue where name = \"Delta Center\" as v\nfollow v hasHomeVenue team as t\nreturn t.name",
+  "query": "find venue where name = \"Delta Center\" as v\nfollow v hasHomeVenue team as t where via.end_year = none\nreturn t.name",
+  "latency_ms": 0.38,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 28,
+  "result_tokens": 12
  },
  {
   "qid": "737d13a2-ac2b-49ff-b517-2f83d1745cc3",
   "category": "special_three-node-groupby",
-  "query": "find award where name = \"L'\u00c9quipe Champion of Champions\" as target_award\nfollow target_award receivesAward player as champion_player\nfollow champion_player receivesAward award as all_awards\ngroup by all_awards as g\ncount distinct g.champion_player as player_count\nreturn all_awards.name, player_count",
+  "query": "find award where name = \"L'\u00c9quipe Champion of Champions\" as target_award\nfollow target_award receivesAward player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as player_count\nreturn a.name, player_count",
+  "latency_ms": 0.3,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 7
+  "n_rows": 7,
+  "query_tokens": 57,
+  "result_tokens": 83
  },
  {
   "qid": "e15b64e4-7dd9-4b3c-ae55-b3ab0ad5f861",
   "category": "special_optional-match",
-  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t hasHomeVenue venue as v\ngroup by t as g\ncount distinct g.v as venue_count\nreturn t.name, venue_count",
+  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t hasHomeVenue venue as v\ngroup by t as g\ncount distinct g.v as num_venues\nreturn t.name, num_venues",
+  "latency_ms": 0.39,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 48,
+  "result_tokens": 37
  },
  {
   "qid": "2583a5a3-b4e9-4334-a4e0-c75aa804a875",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Sacramento Kings\" as kings\nfollow kings playsFor player as p\nfollow p draftedBy team as drafting_team\ngroup by drafting_team as g\ncount g.p as count_players\nreturn drafting_team.name, count_players",
+  "query": "find team where name = \"Sacramento Kings\" as t\nfollow t playsFor player as p\nfollow p draftedBy team as draft_team\ngroup by draft_team as g\ncount distinct g.p as n\nreturn draft_team.name, n",
+  "latency_ms": 0.82,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 28
+  "ex": 1.0,
+  "n_rows": 28,
+  "query_tokens": 47,
+  "result_tokens": 156
  },
  {
   "qid": "cda3e6ed-7ca2-43ac-80c8-e851b7116153",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Denver Nuggets\" as t\nfollow t playsFor player as p\nreturn p.nicknames",
+  "latency_ms": 0.67,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 380
+  "n_rows": 380,
+  "query_tokens": 23,
+  "result_tokens": 596
  },
  {
   "qid": "2e548453-7ec9-452d-aaf6-66847b9d242f",
   "category": "special_union",
-  "query": "find position where name = \"Shooting Guard\" as sg\nfollow sg playsPosition player as p\nfind team where name = \"Dallas Mavericks\" as t\nfollow t playsFor player as p\nreturn p.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"p\" is already bound in line 4\nnothing was executed."
+  "query": "find player as p\nfollow p playsPosition position where name = \"shooting guard\" as pos\nor\nfind player as p\nfollow p playsFor team where name = \"Dallas Mavericks\" as t\nreturn p.name",
+  "latency_ms": 38.47,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1320,
+  "query_tokens": 44,
+  "result_tokens": 2004
  },
  {
   "qid": "34f89205-bc56-4d35-942d-478b0ab73d1b",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Walt Hazzard\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "latency_ms": 8.69,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 4
+  "n_rows": 4,
+  "query_tokens": 21,
+  "result_tokens": 29
  },
  {
   "qid": "d182fb58-7cfe-4ade-8bc8-5c6ee29a711f",
   "category": "basic_(n)=(m0)",
-  "query": "find player as p\nfollow p draftedBy team as t_draft\nfollow p playsFor team as t_play\nreturn t_draft.name, t_draft.head_coach where t_draft.name = t_play.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 4: unexpected trailing input starting at 'where'"
+  "query": "find team as t\nfollow t draftedBy player as p\nfollow t playsFor player as p\nreturn t.name, t.head_coach",
+  "latency_ms": 339.12,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 30,
+  "query_tokens": 25,
+  "result_tokens": 247
  },
  {
   "qid": "b0285463-0a21-4600-afc4-2d72c94e0efe",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Dennis Hopson\" as p1\nfollow p1 draftedBy team as t\nfollow t draftedBy player where name = \"Marcus Williams\" as p2\nreturn t.name",
+  "query": "find player where name = \"Dennis Hopson\" as p1\nfollow p1 draftedBy team as t\nfind player where name = \"Marcus Williams\" as p2\nfollow p2 draftedBy team as t\nreturn t.name",
+  "latency_ms": 17.07,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 42,
+  "result_tokens": 13
  },
  {
   "qid": "6f6470c7-185b-4331-a6e7-adc86dfbc523",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "query": "find player where name = \"Cheick Diallo\" as p\nfollow p playsFor team as t\nfollow t partOfDivision division where name = \"Pacific Division\" as d\nreturn t.name",
+  "latency_ms": 8.46,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 13
  },
  {
   "qid": "77fe76ea-bccd-461e-82f8-40effb448738",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Derek Fisher\" as p\nfollow p draftedBy team as t\nfollow t partOfDivision division where name = \"Pacific Division\" as d\nreturn t.name",
+  "query": "find player where name = \"Derek Fisher\" as p\nfollow p draftedBy team as t\nfollow t partOfDivision division as d where name = \"Pacific Division\"\nreturn t.name",
+  "latency_ms": 8.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 15
  },
  {
   "qid": "cb5e298f-9275-42a8-a0a1-c3abeee8dc96",
   "category": "special_three-node-groupby",
   "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 0.46,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 43,
+  "result_tokens": 35
  },
  {
   "qid": "50c09ddc-f73d-4f75-b73b-7c9afa53ff5e",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"center\" as center_pos\nfollow center_pos playsPosition player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as count\nreturn pos.name, count",
+  "query": "find player as p\nfollow p playsPosition position where name = \"Center\" as center_pos\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 12.01,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 46,
+  "result_tokens": 33
  },
  {
   "qid": "e3518c25-3bb1-41d3-b3f2-e1677096ee67",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"center\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as player_count\nreturn a.name, player_count",
+  "query": "find position where name = \"center\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+  "latency_ms": 0.93,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 15
+  "n_rows": 15,
+  "query_tokens": 42,
+  "result_tokens": 153
  },
  {
   "qid": "38066bd3-418d-4368-9d54-46461091f57a",
   "category": "special_union",
-  "query": "find team where name = \"Utah Jazz\" as t\nfollow t playsFor player as p\nfind position where name = \"Small Forward\" as pos\nfollow pos playsPosition player as p\ncount distinct p as n\nreturn n",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"p\" is already bound in line 4\nnothing was executed."
+  "query": "find team where name = \"Utah Jazz\" as t\nfollow t playsFor player as p\nor\nfind position where name = \"Small Forward\" as pos\nfollow pos playsPosition player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 1.19,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 10
  },
  {
   "qid": "032f1ce7-3acb-4de9-b37d-290c512a5c2f",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 8.1,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 24,
+  "result_tokens": 17
  },
  {
   "qid": "ffee6402-a29f-498d-85d8-8c8669f2afa5",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find venue where name = \"Indiana Farmers Coliseum\" as v\nfollow v hasHomeVenue team as t\nfollow t partOfDivision division where name = \"Central Division\" as d\nreturn t.name",
+  "query": "find venue where name = \"Indiana Farmers Coliseum\" as v\nfollow v hasHomeVenue team as t\nfollow t partOfDivision division as d where name = \"Central Division\"\nreturn t.name",
+  "latency_ms": 0.48,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 42,
+  "result_tokens": 14
  },
  {
   "qid": "d837eba0-6d59-40a7-8f33-6e6facccea23",
   "category": "special_time-sensitive",
-  "query": "find venue where name = \"Madison Square Garden\" as v\nfollow v hasHomeVenue team as t\nreturn t.name",
+  "query": "find venue where name = \"Madison Square Garden\" as v\nfollow v hasHomeVenue team as t where via.start_year <= 1946 and via.end_year >= 1946 or via.start_year <= 1946 and via.end_year = none\nreturn t.name",
+  "latency_ms": 0.42,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 50,
+  "result_tokens": 14
  },
  {
   "qid": "ddf26fab-79e3-43e7-80ba-7e9c62217385",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\ngroup by p.handedness as g\nreturn g.key",
-  "executable": false,
+  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\nreturn p.handedness",
+  "latency_ms": 1.05,
+  "executable": true,
   "ex": 0.0,
-  "error": "ExecError: cannot resolve column g.key"
+  "n_rows": 583,
+  "query_tokens": 34,
+  "result_tokens": 750
  },
  {
   "qid": "092279f0-c321-4d43-86c3-61eb970139a9",
   "category": "special_optional-match",
-  "query": "find award where name = \"Gold Medal of the Royal Order of Sports Merit\" as a\nfollow a receivesAward player as p\nfollow p receivesAward award as all_awards\ngroup by p as g\ncount g.all_awards as total_awards\nreturn p.name, total_awards",
+  "query": "find award where name = \"Gold Medal of the Royal Order of Sports Merit\" as a\nfollow a receivesAward player as p\nfollow p receivesAward award as awards\ngroup by p as g\ncount distinct g.awards as total_awards\nreturn p.name, total_awards",
+  "latency_ms": 0.3,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 58,
+  "result_tokens": 17
  },
  {
   "qid": "5ce28bbd-d6c8-49e6-9d79-ddc07e77fa6c",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Jos\u00e9 Calder\u00f3n\" as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 9.33,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 23,
+  "result_tokens": 21
  },
  {
   "qid": "84db92d8-6589-4714-9d29-72a4bfe23469",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find venue where name = \"Gainbridge Fieldhouse\" as v\nfollow v hasHomeVenue team as t\nfollow t playsFor player as p\nreturn p.name order by p.date_of_death limit 1",
-  "executable": true,
-  "ex": 1.0,
-  "n_rows": 1
+  "query": "find venue where name = \"Gainbridge Fieldhouse\" as v\nfollow v hasHomeVenue team as t\nfollow t playsFor player as p\nreturn p.name order by p.date_of_death asc limit 1",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 4: unexpected trailing input starting at 'asc'"
  },
  {
   "qid": "6b0ce2fe-f6ab-4f9a-89e6-53df6622c36a",
   "category": "basic_(n)",
   "query": "find team as t\nreturn t.name order by t.inception_year limit 1",
+  "latency_ms": 0.19,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 15,
+  "result_tokens": 14
  },
  {
   "qid": "f9f4c195-929a-4922-a5a0-e804df936190",
   "category": "special_comparison",
-  "query": "find player where name = \"Greg Jackson\" or name = \"Nate Hawthorne\" as p\nreturn p.name order by p.date_of_death desc limit 1",
+  "query": "find player where name = \"Greg Jackson\" as p\nor\nfind player where name = \"Nate Hawthorne\" as p\nreturn p.name order by p.date_of_death desc limit 1",
+  "latency_ms": 21.67,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 36,
+  "result_tokens": 13
  },
  {
   "qid": "25f770ce-ef0f-4c72-91cd-353fbaf1007d",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find position where name = \"small forward\" as pos\nfollow pos playsPosition player as p\nfollow p draftedBy team as t\ngroup by t as g\nreturn t.owners",
+  "query": "find position where name = \"small forward\" as pos\nfollow pos playsPosition player as p\nfollow p draftedBy team as t\nreturn t.owners",
+  "latency_ms": 1.74,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 809
+  "n_rows": 30,
+  "query_tokens": 32,
+  "result_tokens": 154
  },
  {
   "qid": "9973aa44-a59a-4f3c-a664-eebe7794893e",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Dave Meyers\" as p\nfollow p draftedBy team as t\nfollow t hasHomeVenue venue where name = \"Los Angeles Memorial Sports Arena\" as v\nreturn t.name",
+  "query": "find venue where name = \"Los Angeles Memorial Sports Arena\" as v\nfollow v hasHomeVenue team as t\nfind player where name = \"Dave Meyers\" as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 8.62,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 45,
+  "result_tokens": 15
  },
  {
   "qid": "cc4636c5-3c72-4dd7-8faa-20718aa96cbb",
   "category": "special_optional-match",
   "query": "find team where name = \"Chicago Bulls\" as t\nfollow t playsFor player as p\nfollow p playsFor team as teams\ngroup by p as g\ncount distinct g.teams as team_count\nreturn p.name, team_count",
+  "latency_ms": 1.74,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 320
+  "n_rows": 320,
+  "query_tokens": 46,
+  "result_tokens": 1333
  },
  {
   "qid": "d94d0061-7000-4478-b913-15d833f73958",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Jack Stephens\" as jack\nfollow jack playsPosition position as pos\nfollow pos playsPosition player as players\ngroup by players as g\ncount distinct g.pos as num_positions\nreturn players.name, num_positions",
+  "query": "find player where name = \"Jack Stephens\" as js\nfollow js playsPosition position as p\nfollow p playsPosition player as other\ngroup by other as g\ncount distinct g.p as num_positions\nreturn other.name, num_positions",
+  "latency_ms": 10.56,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 991
+  "n_rows": 991,
+  "query_tokens": 53,
+  "result_tokens": 2002
  },
  {
   "qid": "f58f6ea7-8297-45df-aae2-d3591e411e37",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Toni Kuko\u010d\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue where name = \"Spectrum\" as v\nreturn t.name, t.head_coach",
+  "query": "find player where name = \"Toni Kuko\u010d\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue as v where name = \"Spectrum\"\nreturn t.name, t.head_coach",
+  "latency_ms": 8.93,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 38,
+  "result_tokens": 21
  },
  {
   "qid": "b297f41f-f097-46fb-9971-1390033e183e",
   "category": "basic_(n)-(m0*)",
   "query": "find venue where name = \"Denver Coliseum\" as v\nfollow v hasHomeVenue team as t\nreturn t.name, t.head_coach",
+  "latency_ms": 0.42,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 26,
+  "result_tokens": 20
  },
  {
   "qid": "2e2c70f0-7a57-4aa8-89d6-459d45cfb643",
   "category": "basic_(n)",
   "query": "find venue as v\ncount distinct v as n\nreturn n",
+  "latency_ms": 0.2,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 11,
+  "result_tokens": 10
  },
  {
   "qid": "05885222-231e-47c3-a064-a713dab2a132",
   "category": "basic_(n)",
   "query": "find venue as v\nreturn v.name",
+  "latency_ms": 0.23,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 105
+  "n_rows": 105,
+  "query_tokens": 7,
+  "result_tokens": 496
  },
  {
   "qid": "3b35e5ef-144d-4554-bbc4-ffee3a4bad1b",
   "category": "special_comparison",
-  "query": "find player where name = \"Bud Olsen\" or name = \"Jerry Rullo\" as p\nreturn p.name order by p.mass_kg desc limit 1",
+  "query": "find player where name = \"Bud Olsen\" as p\nor\nfind player where name = \"Jerry Rullo\" as p\nreturn p.name order by p.mass_kg desc limit 1",
+  "latency_ms": 16.29,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 33,
+  "result_tokens": 12
  },
  {
   "qid": "50d44b7a-64e6-49f6-8ba2-602c29e3ef9e",
   "category": "basic_(n)-(m0*)",
-  "query": "find team where name = \"Utah Jazz\" as t\nfollow t playsFor player where date_of_birth = \"1978-02-28\" as p\nreturn p.name",
-  "executable": true,
-  "ex": 1.0,
-  "n_rows": 1
+  "query": "find player where date_of_birth = \"1978-02-28\" as p\nfollow p playsFor team as t where t.name = \"Utah Jazz\"\nreturn p.name",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown property \"t\" on class team. did you mean one of: head_coach, inception_year, name, owners? in line 2\nnothing was executed."
  },
  {
   "qid": "fe1bf035-136a-430d-b98c-3c5d5dfdb37d",
   "category": "special_optional-match",
-  "query": "find position where name = \"small forward\" as sf\nfollow sf playsPosition player as p\nfollow p playsPosition position as pos\ngroup by p as g\ncount distinct g.pos as pos_count\nreturn p.name, pos_count",
+  "query": "find position where name = \"Small Forward\" as pos\nfollow pos playsPosition player as p\nfollow p playsPosition position as other_pos\ngroup by p as g\ncount distinct g.other_pos as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 2.33,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 482
+  "n_rows": 482,
+  "query_tokens": 55,
+  "result_tokens": 2003
  },
  {
   "qid": "76db58f6-8e70-42d7-9ab3-29660ba8b9ae",
   "category": "special_optional-match",
   "query": "find team where name = \"Cleveland Cavaliers\" as t\nfollow t draftedBy player as p\nfollow p playsFor team as team_played\ngroup by p as g\ncount distinct g.team_played as team_count\nreturn p.name, team_count",
+  "latency_ms": 0.65,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 98
+  "n_rows": 98,
+  "query_tokens": 50,
+  "result_tokens": 430
  },
  {
   "qid": "44e56e56-e9d2-4efb-87fa-1b9673e881e8",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as player_count\nreturn pos.name, player_count",
+  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 1.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 43,
+  "result_tokens": 33
  },
  {
   "qid": "18201426-24e8-4c45-9b6f-8b12b7c4f5a3",
   "category": "basic_(n)-(m0*)",
   "query": "find venue where name = \"Toyota Coliseum\" as v\nfollow v hasHomeVenue team as t\nreturn t.name, t.head_coach",
+  "latency_ms": 0.4,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 26,
+  "result_tokens": 21
  },
  {
   "qid": "3043b730-ff1a-4ecc-9970-aed55ba7512e",
   "category": "special_time-sensitive",
-  "query": "find player where name = \"Elfrid Payton\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "query": "find player where name = \"Elfrid Payton\" as p\nfollow p playsFor team as t where via.end_year = none\nreturn t.name",
+  "latency_ms": 8.88,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 4
+  "n_rows": 2,
+  "query_tokens": 28,
+  "result_tokens": 19
  },
  {
   "qid": "60f51daa-d6f7-4f29-a101-87cd09850353",
   "category": "special_union",
-  "query": "find award where name = \"NBA Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nfind team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p2\ngroup by p as g1\ngroup by p2 as g2\ncount distinct g1.p as mvp_count\ncount distinct g2.p2 as jazz_count\ncompute mvp_count plus jazz_count as combined\nreturn combined",
-  "executable": false,
-  "ex": 0.0,
-  "error": "KeyError: '__members_g2'"
+  "query": "find award where name = \"NBA Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nor\nfind team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 0.55,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 50,
+  "result_tokens": 10
  },
  {
   "qid": "d8947542-8e7d-4a1f-9513-b8576feccd26",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find player where name = \"Keith Booth\" as p\nfollow p draftedBy team as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 8.24,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 31,
+  "result_tokens": 14
  },
  {
   "qid": "eac8346f-ae9c-467a-a714-75484a454074",
   "category": "special_union",
-  "query": "find venue where name = \"Baltimore Arena\" as v\nfollow v hasHomeVenue team as t\nfind player where name = \"Jerry McKee\" as p\nfollow p draftedBy team as t\nreturn t.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"t\" is already bound in line 4\nnothing was executed."
+  "query": "find venue where name = \"Baltimore Arena\" as v\nfollow v hasHomeVenue team as t\nor\nfind player where name = \"Jerry McKee\" as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 8.55,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 42,
+  "result_tokens": 15
  },
  {
   "qid": "a45276ae-ac0b-43f9-a182-912eff75f6b1",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"center\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "query": "find position where name = \"center\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "latency_ms": 2.54,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 46,
+  "result_tokens": 174
  },
  {
   "qid": "69867d8c-6c35-4c3e-a1ae-d62bcde56b7a",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "latency_ms": 0.29,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 9
+  "ex": 1.0,
+  "n_rows": 8,
+  "query_tokens": 22,
+  "result_tokens": 45
  },
  {
   "qid": "e7d7ac09-21e7-4da8-b389-2d42d404bbf9",
   "category": "basic_(n*)",
   "query": "find team where name = \"Brooklyn Nets\" as t\nreturn t.head_coach",
+  "latency_ms": 0.21,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 15,
+  "result_tokens": 15
  },
  {
   "qid": "359697f9-878a-444a-b952-c43edfef5641",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"Memphis Grizzlies\" as t\nfollow t partOfDivision division as d\nfollow d partOfConference conference as c\nreturn c.name",
+  "latency_ms": 0.24,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 15
  },
  {
   "qid": "7ee9045b-2a28-48dd-82dd-9256673e3135",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find award where name = \"All-NBA Team\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position where name = \"center\" as pos\nmin p.date_of_death as earliest\nreturn earliest",
+  "query": "find award where name = \"All-NBA Team\" as a\nfollow a receivesAward player as p\nfollow p playsPosition position where name = \"Center\" as pos\nreturn p.date_of_death order by p.date_of_death limit 1",
+  "latency_ms": 1.41,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 15
  },
  {
   "qid": "c21c5900-7028-4de2-a792-1459cf645449",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Kent Benson\" as kb\nfollow kb draftedBy team as t\nfollow t playsFor player where name = \"Jabari Parker\" as p\nreturn t.name, t.owners",
+  "query": "find player where name = \"Kent Benson\" as kb\nfollow kb draftedBy team as t\nfind player where name = \"Jabari Parker\" as jp\nfollow jp playsFor team as t\nreturn t.name, t.owners",
+  "latency_ms": 16.46,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 43,
+  "result_tokens": 18
  },
  {
   "qid": "34c88f84-1297-48aa-8f12-2a14ee597e19",
   "category": "basic_(n*)",
   "query": "find team where name = \"Brooklyn Nets\" as t\nreturn t.inception_year",
+  "latency_ms": 0.23,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 16,
+  "result_tokens": 14
  },
  {
   "qid": "29bb366e-8b46-48bf-a5b6-c9125bc7b64a",
   "category": "special_union",
-  "query": "find team as t1\nfollow t1 hasHomeVenue venue where name = \"Madison Square Garden\" as v\nfind team as t2\nfollow t2 partOfDivision division where name = \"Atlantic Division\" as d\nreturn t1.name, t2.name",
+  "query": "find venue where name = \"Madison Square Garden\" as v\nfollow v hasHomeVenue team as t\nor\nfind division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nreturn t.name",
+  "latency_ms": 0.49,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 10
+  "ex": 1.0,
+  "n_rows": 5,
+  "query_tokens": 46,
+  "result_tokens": 30
  },
  {
   "qid": "adc5d3af-fd77-4a53-af32-452d9c51f015",
   "category": "special_optional-match",
   "query": "find position where name = \"point guard\" as pos\nfollow pos playsPosition player as p\nfollow p playsFor team as t\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
+  "latency_ms": 4.19,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 992
+  "n_rows": 992,
+  "query_tokens": 46,
+  "result_tokens": 2004
  },
  {
   "qid": "4e2dd668-77c3-4ad2-a5ad-7520194e8809",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Memphis Grizzlies\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "query": "find team where name = \"Memphis Grizzlies\" as t\nfollow t hasHomeVenue venue as v where via.end_year = none\nreturn v.name",
+  "latency_ms": 0.29,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 30,
+  "result_tokens": 13
  },
  {
   "qid": "6a0e3125-a01a-4106-8bf8-5dedf4dad1a8",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Toronto Raptors\" as raptors\nfollow raptors draftedBy player as drafted_player\nfollow drafted_player playsFor team as played_team\ngroup by played_team as g\ncount distinct g.drafted_player as player_count\nreturn played_team.name, player_count",
+  "query": "find team where name = \"Toronto Raptors\" as t\nfollow t draftedBy player as p\nfollow p playsFor team as team_played\ngroup by team_played as g\ncount distinct g.p as n\nreturn team_played.name, n",
+  "latency_ms": 0.37,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 26
+  "n_rows": 26,
+  "query_tokens": 47,
+  "result_tokens": 144
  },
  {
   "qid": "a9e50885-4a72-4f47-b146-c38f8f41e266",
   "category": "special_comparison",
-  "query": "find team where name = \"Portland Trail Blazers\" or name = \"Los Angeles Lakers\" as t\nreturn t.name order by t.inception_year desc limit 1",
+  "query": "find team where name = \"Portland Trail Blazers\" as t\nor\nfind team where name = \"Los Angeles Lakers\" as t\nreturn t.name order by t.inception_year desc limit 1",
+  "latency_ms": 0.34,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 16
  },
  {
   "qid": "5be4f84c-fd63-4782-90bc-4c23634ffdef",
   "category": "special_three-node-groupby",
-  "query": "find award where name = \"Merited Master of Sports of the USSR\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as count\nreturn t.name, count",
+  "query": "find award where name = \"Merited Master of Sports of the USSR\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 0.28,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 47,
+  "result_tokens": 28
  },
  {
   "qid": "1f38fc20-60f8-4f77-8555-50ba18a84f05",
   "category": "special_union",
-  "query": "find team where name = \"Atlanta Hawks\" or name = \"Washington Wizards\" as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t partOfDivision division as d\nor\nfind team where name = \"Washington Wizards\" as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.41,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 46,
+  "result_tokens": 15
  },
  {
   "qid": "a550e214-eb55-452c-8416-75f3e9044d79",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Barry Orms\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "latency_ms": 8.1,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 21,
+  "result_tokens": 14
  },
  {
   "qid": "87016d06-6db8-47c8-be60-994f58d67561",
   "category": "basic_(n)-(m0*)",
-  "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\ncount distinct d as num\nreturn num",
+  "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\ncount distinct d as n\nreturn n",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 31,
+  "result_tokens": 9
  },
  {
   "qid": "930cb5de-91ac-4934-8b0d-dfd69fb7c5b9",
   "category": "special_three-node-groupby",
   "query": "find team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as n\nreturn a.name, n",
+  "latency_ms": 0.41,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 40,
+  "result_tokens": 49
  },
  {
   "qid": "9bfc2e59-1348-4667-90fc-779016840ec5",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find award where name = \"MVP Supercup of Spain\" as a\nfollow a receivesAward player as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 0.25,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 32,
+  "result_tokens": 12
  },
  {
   "qid": "56e62758-4355-47e3-ab35-27f316d2a681",
   "category": "basic_(n)-(m0*)",
   "query": "find position where name = \"forward-center\" as pos\nfollow pos playsPosition player as p\nreturn p.name, p.height_cm",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 28,
+  "result_tokens": 23
  },
  {
   "qid": "3d3b116c-6da1-4cce-9080-e08f1c4ba87a",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Khalid El-Amin\" as kea\nfollow kea playsFor team as t\nfollow t draftedBy player where date_of_death < \"2019\" as p\nreturn p.name",
+  "query": "find player where name = \"Khalid El-Amin\" as kea\nfollow kea playsFor team as t\nfollow t draftedBy player as p where date_of_death < \"2019\"\nreturn p.name",
+  "latency_ms": 8.67,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 12
+  "n_rows": 12,
+  "query_tokens": 38,
+  "result_tokens": 55
  },
  {
   "qid": "1b62d569-60ef-422a-8d44-58d9fbd9b7be",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player where name = \"Rik Smits\" as rs\nfollow rs draftedBy team as t\nfollow t playsFor player where name = \"Fred Jones\" as fj\nreturn t.name, t.inception_year",
+  "query": "find player where name = \"Fred Jones\" as p1\nfollow p1 playsFor team as t\nfind player where name = \"Rik Smits\" as p2\nfollow p2 draftedBy team as t\nreturn t.name, t.inception_year",
+  "latency_ms": 15.68,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 44,
+  "result_tokens": 20
  },
  {
   "qid": "99d50929-5675-4f6c-919c-f80f5241a955",
   "category": "special_comparison",
-  "query": "find player where name = \"Skeeter Swift\" or name = \"Lee Knorek\" as p\nreturn p.name order by p.date_of_death desc limit 1",
+  "query": "find player where name = \"Skeeter Swift\" as p\nor\nfind player where name = \"Lee Knorek\" as p\nreturn p.name order by p.date_of_death desc limit 1",
+  "latency_ms": 16.25,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 13
  },
  {
   "qid": "6544cdcb-6324-4881-8e6b-0c1c07736b99",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "query": "find team where name = \"Memphis Grizzlies\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position where name = \"Center\" as pos\nreturn p.nicknames",
+  "latency_ms": 0.42,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 39,
+  "result_tokens": 23
  },
  {
   "qid": "470cd22d-40b3-4459-9649-1ca3d6c47c13",
   "category": "basic_(n)-(m0*)",
-  "query": "find position where name = \"power forward\" as pos\nfollow pos playsPosition player as p\nreturn p.date_of_death order by p.date_of_death limit 1",
+  "query": "find position where name = \"power forward\" as pos\nfollow pos playsPosition player as p\nmin p.date_of_death as earliest_death\nreturn earliest_death",
+  "latency_ms": 0.99,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 36,
+  "result_tokens": 15
  },
  {
   "qid": "57681808-232d-49c0-8d3f-452d7171c945",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find venue where name = \"Bill Graham Civic Auditorium\" as v\nfollow v hasHomeVenue team as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.55,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 14
  },
  {
   "qid": "3dc0ecd4-6103-4db3-840e-906be0a25f44",
   "category": "basic_(n)-(m0)",
   "query": "find player as p\nfollow p receivesAward award as a\nreturn p.name",
+  "latency_ms": 2.12,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 598
+  "ex": 1.0,
+  "n_rows": 151,
+  "query_tokens": 16,
+  "result_tokens": 528
  },
  {
   "qid": "cfcf8b07-15eb-4617-9096-23bbfb3b8d62",
   "category": "special_optional-match",
-  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount g.a as award_count\nreturn p.name, award_count",
-  "executable": true,
+  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount distinct g.a as award_count\nreturn g.p.name, award_count",
+  "executable": false,
   "ex": 0.0,
-  "n_rows": 1
+  "error": "ExecError: cannot resolve column g.p.name"
  },
  {
   "qid": "16725cad-e28c-4b23-8d61-c5c86740b740",
   "category": "special_comparison",
   "query": "find player where name = \"JaVale McGee\" as p1\nfind player where name = \"Kevin Grevey\" as p2\ncompute p1.mass_kg minus p2.mass_kg as diff\nreturn diff",
+  "latency_ms": 16.6,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 36,
+  "result_tokens": 10
  },
  {
   "qid": "673e5888-d9d9-4f05-b843-e8722712bd48",
   "category": "special_optional-match",
-  "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t playsFor player as p\nfollow p playsFor team as all_teams\ngroup by p as g\ncount distinct g.all_teams as team_count\nreturn p.name, team_count",
+  "query": "find team where name = \"Brooklyn Nets\" as bn\nfollow bn playsFor player as p\nfollow p playsFor team as all_teams\ngroup by p as g\ncount distinct g.all_teams as team_count\nreturn p.name, team_count",
+  "latency_ms": 2.22,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 322
+  "n_rows": 322,
+  "query_tokens": 48,
+  "result_tokens": 1352
  },
  {
   "qid": "03f17d98-a4a9-4287-9f4c-217a37ba6b9e",
   "category": "special_time-sensitive",
-  "query": "find venue where name = \"XL Center\" as v\nfollow v hasHomeVenue team as t\nreturn t.name",
+  "query": "find venue where name = \"XL Center\" as v\nfollow v hasHomeVenue team as t where via.start_year <= 1975 and via.end_year >= 1975 or via.start_year <= 1975 and via.end_year = none\nreturn t.name",
+  "latency_ms": 0.41,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 14
  },
  {
   "qid": "b3ed9c15-8d20-401b-ab16-795eff573a2e",
   "category": "special_time-sensitive",
-  "query": "find player where name = \"Bill Russell\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "query": "find player where name = \"Bill Russell\" as p\nfollow p playsFor team as t where via.start_year <= 1956 and via.end_year >= 1956 or via.start_year <= 1956 and via.end_year = none\nreturn t.name",
+  "latency_ms": 8.54,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 14
  },
  {
   "qid": "9949be94-04e8-4e5f-97a3-6b0337882684",
   "category": "basic_(n*)",
   "query": "find team where name = \"Golden State Warriors\" as t\nreturn t.head_coach",
+  "latency_ms": 0.24,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 17,
+  "result_tokens": 14
  },
  {
   "qid": "df1a1489-cdae-457e-9d7c-accb98d9507c",
   "category": "special_comparison",
   "query": "find player where name = \"Herb Williams\" as p1\nfind player where name = \"Ed Mikan\" as p2\ncompute p1.gender same p2.gender as answer\nreturn answer",
+  "latency_ms": 16.13,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 36,
+  "result_tokens": 11
  },
  {
   "qid": "254422cc-b184-4b01-a197-d41229f8f41d",
   "category": "basic_(n)",
   "query": "find player as p\nreturn p.name",
+  "latency_ms": 3.03,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 4148
+  "n_rows": 4148,
+  "query_tokens": 7,
+  "result_tokens": 2005
  },
  {
   "qid": "6cfe27cd-d135-4369-879c-c22ca9a29755",
   "category": "basic_(n)-(m0*)",
   "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfConference conference as c\nreturn c.name",
+  "latency_ms": 0.24,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 27,
+  "result_tokens": 15
  },
  {
   "qid": "d79d2251-db04-4a52-8de9-6752d8262ce2",
   "category": "special_union",
   "query": "find venue where name = \"Georgia Dome\" or name = \"Kiel Auditorium\" as v\nfollow v hasHomeVenue team as t\nreturn t.name",
+  "latency_ms": 0.58,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 29,
+  "result_tokens": 13
  },
  {
   "qid": "6da9e493-aa84-4bf9-a7ca-3f2d6bb32379",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Clyde Drexler\" as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 8.43,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 5
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 23,
+  "result_tokens": 13
  },
  {
   "qid": "c1985c8d-170e-414f-a2d9-58cd52ff5aca",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "query": "find team where name = \"Brooklyn Nets\" as t\nfollow t hasHomeVenue venue as v where via.start_year <= 1972 and via.end_year >= 1972 or via.start_year <= 1972 and via.end_year = none\nreturn v.name",
+  "latency_ms": 0.31,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 7
+  "ex": 1.0,
+  "n_rows": 2,
+  "query_tokens": 48,
+  "result_tokens": 22
  },
  {
   "qid": "7960644e-99f8-48c8-9b43-729dd97a0a3f",
@@ -1482,303 +2019,414 @@
  {
   "qid": "99689270-dae4-4a80-9991-b8a2b7248c5d",
   "category": "special_optional-match",
-  "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\nfollow d partOfDivision team as t\ngroup by d as g\ncount distinct g.t as team_count\nreturn d.name, team_count",
+  "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\nfollow d partOfDivision team as t or none\ngroup by d as g\ncount distinct g.t as n\nreturn d.name, n",
+  "latency_ms": 0.22,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 48,
+  "result_tokens": 26
  },
  {
   "qid": "15cc498b-3256-4dae-8279-1b6a7a219240",
   "category": "basic_(n)-(m0)",
   "query": "find player as p\nfollow p draftedBy team as t\nreturn p.name order by p.mass_kg desc",
+  "latency_ms": 7.18,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 2889
+  "n_rows": 2888,
+  "query_tokens": 20,
+  "result_tokens": 2003
  },
  {
   "qid": "9a3be261-90d1-405a-adcc-d5b833ee5032",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Barry Orms\" as p\nfollow p playsFor team as t\nreturn t.name, t.owners",
+  "latency_ms": 8.0,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 23,
+  "result_tokens": 20
  },
  {
   "qid": "08bbf296-e39e-42d9-a650-53a8c33144ee",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Bob Dandridge\" as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 8.38,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 22,
+  "result_tokens": 14
  },
  {
   "qid": "d775cbb0-4f5f-4217-b2f3-b8b0ae778a04",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Chicago Bulls\" as bulls\nfollow bulls playsFor player as player_bulls\nfollow player_bulls playsFor team as other_teams\ngroup by other_teams as g\ncount distinct g.player_bulls as n\nreturn other_teams.name, n",
+  "query": "find team where name = \"Chicago Bulls\" as bulls\nfollow bulls playsFor player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 2.35,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 41,
+  "result_tokens": 169
  },
  {
   "qid": "3b950840-1d21-4843-a82a-5a4102405a0c",
   "category": "basic_(n)-(m0*)",
   "query": "find award where name = \"Silbernes Lorbeerblatt\" as a\nfollow a receivesAward player as p\nreturn p.name, p.schools_attended",
+  "latency_ms": 0.27,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 30,
+  "result_tokens": 26
  },
  {
   "qid": "362e614b-168a-478c-98db-a0fafce1b1e0",
   "category": "special_optional-match",
-  "query": "find player where name = \"Vander Blue\" as p\nfollow p playsFor team as t\nfollow t playsFor player as team_player\ngroup by t as g\ncount distinct g.team_player as player_count\nreturn t.name, player_count",
+  "query": "find player where name = \"Vander Blue\" as p\nfollow p playsFor team as t\nfollow t playsFor player as tp\ngroup by t as g\ncount distinct g.tp as player_count\nreturn t.name, player_count",
+  "latency_ms": 9.62,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 45,
+  "result_tokens": 24
  },
  {
   "qid": "7def5609-998a-4326-b7a4-f1dba4a57e30",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find venue where name = \"FedExForum\" as v1\nfollow v1 hasHomeVenue team as t\nfollow t hasHomeVenue venue as v2\nreturn v2.name",
+  "query": "find venue where name = \"FedExForum\" as fedex\nfollow fedex hasHomeVenue team as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "latency_ms": 0.5,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 32,
+  "result_tokens": 13
  },
  {
   "qid": "f9e315dc-8671-44a0-8c52-414533604dcb",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Miami Heat\" as t\nfollow t playsFor player as p\nreturn p.name",
+  "query": "find team where name = \"Miami Heat\" as t\nfollow t playsFor player as p where via.start_year <= 1996 and via.end_year >= 1996 or via.start_year <= 1996 and via.end_year = none\nreturn p.name",
+  "latency_ms": 0.61,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 258
+  "ex": 1.0,
+  "n_rows": 5,
+  "query_tokens": 47,
+  "result_tokens": 27
  },
  {
   "qid": "7bd31ea5-9bdd-4733-af1a-29a164a5387a",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Toronto Raptors\" as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.3,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 24,
+  "result_tokens": 14
  },
  {
   "qid": "f29c01d9-fb9f-4384-b5fa-77a0538d9943",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Sacramento Kings\" as t\nfollow t partOfDivision division as d\nfollow d partOfConference conference where name = \"Western Conference\" as c\nreturn d.name",
+  "query": "find conference where name = \"Western Conference\" as c\nfollow c partOfConference division as d\nfind team where name = \"Sacramento Kings\" as t\nfollow t partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.36,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 14
  },
  {
   "qid": "a6530611-68f5-41b4-947e-df9599ef0401",
   "category": "special_optional-match",
   "query": "find player where name = \"Doc Rivers\" as dr\nfollow dr playsFor team as t\nfollow t playsFor player as p\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "latency_ms": 9.99,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 45,
+  "result_tokens": 40
  },
  {
   "qid": "0057ca47-ddfa-410f-9634-a4400849ee20",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Orlando Magic\" as t\nfollow t playsFor player as p\nreturn p.name",
+  "query": "find team where name = \"Orlando Magic\" as t\nfollow t playsFor player as p where via.end_year = none\nreturn p.name",
+  "latency_ms": 0.59,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 238
+  "n_rows": 193,
+  "query_tokens": 28,
+  "result_tokens": 662
  },
  {
   "qid": "27225d97-4d5c-4b73-b28e-05520a7aa9f1",
   "category": "basic_(n)-(m0*)",
-  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team where head_coach = \"Stephen Silas\" as t\nreturn t.name",
+  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as t where head_coach = \"Stephen Silas\"\nreturn t.name",
+  "latency_ms": 0.2,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 33,
+  "result_tokens": 14
  },
  {
   "qid": "a922af23-a03c-4e4c-a267-f6e5535eea7f",
   "category": "special_optional-match",
-  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p\ngroup by t as g\ncount distinct g.p as drafted_count\nreturn t.name, drafted_count",
+  "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t draftedBy player as p or none\ngroup by t as g\ncount distinct g.p as count\nreturn t.name, count",
+  "latency_ms": 0.76,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 47,
+  "result_tokens": 37
  },
  {
   "qid": "e01ace2f-7bde-4e43-9d56-1d65f52ef670",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Memphis Grizzlies\" as memphis\nfollow memphis playsFor player as p\nfollow p draftedBy team as drafted_team\ngroup by drafted_team as g\ncount distinct g.p as count\nreturn drafted_team.name, count",
+  "query": "find team where name = \"Memphis Grizzlies\" as grizzlies\nfollow grizzlies playsFor player as p\nfollow p draftedBy team as draft_team\ngroup by draft_team as g\ncount distinct g.p as count\nreturn draft_team.name, count",
+  "latency_ms": 0.59,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 53,
+  "result_tokens": 165
  },
  {
   "qid": "d3827784-7139-4952-af2c-ce949e880ceb",
   "category": "basic_(n)-(m0*)",
-  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team where inception_year = 1980 as t\nreturn t.name",
+  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as t where inception_year = 1980\nreturn t.name",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 32,
+  "result_tokens": 14
  },
  {
   "qid": "e66f1f03-39da-426f-8b8e-158d804347a0",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Miami Heat\" as t\nfollow t draftedBy player as p\nreturn p.schools_attended",
+  "latency_ms": 0.29,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 46
+  "n_rows": 46,
+  "query_tokens": 24,
+  "result_tokens": 646
  },
  {
   "qid": "9e00c9ea-7cd4-4e44-8934-3656a6498bb4",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find award where name = \"Australian Sports Medal\" as a\nfollow a receivesAward player as p\nfollow p playsFor team where name = \"Houston Rockets\" as t\nreturn p.name, p.gender",
+  "query": "find award where name = \"Australian Sports Medal\" as a\nfollow a receivesAward player as p\nfollow p playsFor team as t where name = \"Houston Rockets\"\nreturn p.name, p.gender",
+  "latency_ms": 0.27,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 43,
+  "result_tokens": 18
  },
  {
   "qid": "92ad9905-dbac-47b8-9d19-bab0ee2316fe",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Joel Kramer\" as jk\nfollow jk playsPosition position as pos\nfollow pos playsPosition player as p\ngroup by p as g\ncount distinct g.pos as count\nreturn p.name, count",
+  "query": "find player where name = \"Joel Kramer\" as jk\nfollow jk playsPosition position as pos\nfollow pos playsPosition player as p\ngroup by p as g\ncount distinct g.pos as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 10.64,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1083
+  "n_rows": 1083,
+  "query_tokens": 51,
+  "result_tokens": 2003
  },
  {
   "qid": "df3389b0-1ba2-4dea-9216-b1c5eabd79e8",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find team where name = \"New Orleans Pelicans\" as pelicans\nfollow pelicans partOfDivision division as div\nfollow div partOfDivision team as teams\nreturn teams.name",
+  "query": "find team where name = \"New Orleans Pelicans\" as pelicans\nfollow pelicans partOfDivision division as d\nfollow d partOfDivision team as others\nreturn others.name",
+  "latency_ms": 0.31,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 4
+  "n_rows": 4,
+  "query_tokens": 40,
+  "result_tokens": 28
  },
  {
   "qid": "c00cad2c-7c11-40de-8f19-fc661b304f8e",
   "category": "basic_(n)-(m0*)",
-  "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct pos as count\nreturn count",
+  "query": "find player where name = \"Robert Rose\" as p\nfollow p playsPosition position as pos\ncount distinct pos as n\nreturn n",
+  "latency_ms": 8.4,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 28,
+  "result_tokens": 9
  },
  {
   "qid": "d946ab81-43b7-4b81-9db6-345deffac0fe",
   "category": "special_union",
-  "query": "find player where name = \"Bob Christian\" or name = \"Dwight Jones\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "query": "find player where name = \"Bob Christian\" as p\nfollow p playsFor team as t\nor\nfind player where name = \"Dwight Jones\" as p\nfollow p playsFor team as t\nreturn t.name",
+  "latency_ms": 16.66,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 8
+  "ex": 1.0,
+  "n_rows": 7,
+  "query_tokens": 40,
+  "result_tokens": 37
  },
  {
   "qid": "d1187032-d527-4f03-9db9-2b8ee7056acf",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as count\nreturn pos.name, count",
+  "query": "find team where name = \"Utah Jazz\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\ngroup by pos as g\ncount distinct g.p as n\nreturn pos.name, n",
+  "latency_ms": 0.48,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 42,
+  "result_tokens": 32
  },
  {
   "qid": "0f76e925-cb2e-46c6-8a73-cdb9478a6df1",
   "category": "special_comparison",
   "query": "find player where name = \"Mark McNamara\" as p1\nfind player where name = \"Chris Paul\" as p2\ncompute p1.handedness same p2.handedness as answer\nreturn answer",
+  "latency_ms": 16.13,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 38,
+  "result_tokens": 11
  },
  {
   "qid": "9d779813-fa5d-4d4a-9760-d5465e5cd6b2",
   "category": "special_union",
-  "query": "find player where name = \"Cotton Nash\" or name = \"John Block\" as p\nfollow p draftedBy team as t\ncount distinct t as n\nreturn n",
+  "query": "find player where name = \"Cotton Nash\" as p\nfollow p draftedBy team as t\nor\nfind player where name = \"John Block\" as p\nfollow p draftedBy team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 15.99,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 44,
+  "result_tokens": 9
  },
  {
   "qid": "65eb9ed3-3ad2-4438-99fe-76f8fbbdc1d4",
   "category": "special_union",
-  "query": "find position where name = \"Shooting Guard\" as sg\nfollow sg playsPosition player as p1\nfind team where name = \"Houston Rockets\" as t\nfollow t draftedBy player as p2\nreturn p1.name, p2.name",
+  "query": "find player as p\nfollow p playsPosition position where name = \"Shooting Guard\" as sg_pos\nor\nfind player as p\nfollow p draftedBy team where name = \"Houston Rockets\" as hr_team\nreturn p.name",
+  "latency_ms": 21.58,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 109600
+  "ex": 1.0,
+  "n_rows": 1174,
+  "query_tokens": 47,
+  "result_tokens": 2004
  },
  {
   "qid": "5c4218c5-4f9e-435b-8f09-af57060e9ad7",
   "category": "special_optional-match",
   "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "latency_ms": 1.87,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 48,
+  "result_tokens": 40
  },
  {
   "qid": "fa32b281-08f9-4efa-808a-44fe04d081a5",
   "category": "basic_(n*)",
   "query": "find player where name = \"Scott Padgett\" as p\nreturn p.mass_kg",
+  "latency_ms": 8.54,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 15,
+  "result_tokens": 12
  },
  {
   "qid": "eed738c7-f7f7-4058-b8b9-27c70431015d",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Golden State Warriors\" as w\nfollow w partOfDivision division as d\nfollow d partOfDivision team where name = \"Los Angeles Clippers\" as c\nreturn d.name",
+  "query": "find team where name = \"Golden State Warriors\" as t1\nfollow t1 partOfDivision division as d\nfind team where name = \"Los Angeles Clippers\" as t2\nfollow t2 partOfDivision division as d\nreturn d.name",
+  "latency_ms": 0.51,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 49,
+  "result_tokens": 14
  },
  {
   "qid": "048783df-791f-494d-a6a7-9d20529f9559",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfollow t hasHomeVenue venue where name = \"Golden 1 Center\" as v\nreturn t.name",
+  "latency_ms": 0.39,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 40,
+  "result_tokens": 14
  },
  {
   "qid": "10bd954c-faad-48fc-bba8-93c7ab8e7fed",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t hasHomeVenue venue as v\ncount distinct v as n\nreturn n",
+  "latency_ms": 0.35,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 26,
+  "result_tokens": 9
  },
  {
   "qid": "62fa1d94-cc62-461e-aaef-2d0e7e56e32c",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find award where name = \"Princess of Asturias Award for Sports\" as a\nfollow a receivesAward player as p\nfollow p receivesAward award as all_awards\nreturn all_awards.name",
+  "query": "find award where name = \"Princess of Asturias Award for Sports\" as poa\nfollow poa receivesAward player as p\nfollow p receivesAward award as a\nreturn a.name",
+  "latency_ms": 0.27,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 38,
+  "result_tokens": 29
  },
  {
   "qid": "1299c4cf-de88-4603-95b0-1dc278bb66ee",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Marcus Camby\" as mc\nfollow mc playsFor team as t\nfollow t playsFor player where name != \"Marcus Camby\" as others\ngroup by others as g\ncount g.t as team_count\nreturn others.name, team_count",
+  "query": "find player where name = \"Marcus Camby\" as mc\nfollow mc playsFor team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as team_count\nreturn p.name, team_count",
+  "latency_ms": 18.61,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1721
+  "ex": 1.0,
+  "n_rows": 1722,
+  "query_tokens": 44,
+  "result_tokens": 2004
  },
  {
   "qid": "2eae7020-d970-42fb-9f2a-8308e63eec8f",
   "category": "special_optional-match",
-  "query": "find position where name = \"point guard\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "query": "find position where name = \"point guard\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "latency_ms": 2.68,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 52
+  "ex": 1.0,
+  "n_rows": 992,
+  "query_tokens": 50,
+  "result_tokens": 2004
  },
  {
   "qid": "4615e1e9-a9be-49ac-8aee-0085570c7a7a",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Buck Williams\" as bw\nfollow bw playsPosition position as pos\nfollow pos playsPosition player as p where p.mass_kg <= 130\nreturn p.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 3: unexpected trailing input starting at 'where'"
+  "query": "find player where name = \"Buck Williams\" as bw\nfollow bw playsPosition position as pos\nfollow pos playsPosition player as p where mass_kg <= 130\nreturn p.name",
+  "latency_ms": 11.94,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1534,
+  "query_tokens": 39,
+  "result_tokens": 2005
  },
  {
   "qid": "7535ba70-b009-43a3-8eab-3f6fac5d8edd",
   "category": "basic_(n)",
-  "query": "find division as d\ncount d.name as n\nreturn n",
+  "query": "find division as d\ncount distinct d as n\nreturn n",
+  "latency_ms": 0.18,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 12,
+  "result_tokens": 9
  },
  {
   "qid": "b36d681d-2911-4d69-8e69-d03cb5570de8",
   "category": "special_three-node-groupby",
-  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as team_count\nreturn g.p.name, team_count",
+  "query": "find division where name = \"Pacific Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by p as g\ncount distinct g.t as n\nreturn g.p.name, n",
   "executable": false,
   "ex": 0.0,
   "error": "ExecError: cannot resolve column g.p.name"
@@ -1787,376 +2435,517 @@
   "qid": "c4e0c873-fc3b-4a28-88fa-ba111e2e9256",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Los Angeles Clippers\" as t\nfollow t hasHomeVenue venue as v\ncount distinct v as n\nreturn n",
+  "latency_ms": 0.26,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 28,
+  "result_tokens": 9
  },
  {
   "qid": "104ae671-8b3d-47eb-affd-070ec693f1e5",
   "category": "special_time-sensitive",
-  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "query": "find team where name = \"Atlanta Hawks\" as t\nfollow t hasHomeVenue venue as v where via.start_year <= 1946 and via.end_year >= 1946 or via.start_year <= 1946 and via.end_year = none\nreturn v.name",
+  "latency_ms": 0.3,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 9
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 15
  },
  {
   "qid": "9bf0c917-b7a2-4c1e-9b3e-9661030b372f",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"Los Angeles Clippers\" as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "latency_ms": 0.28,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 24,
+  "result_tokens": 38
  },
  {
   "qid": "37442066-46ba-4366-8fc1-554ebd96a739",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Atlanta Hawks\" as hawks\nfollow hawks playsFor player as hawk_players\nfollow hawk_players playsFor team as other_teams\ngroup by other_teams as g\ncount distinct g.hawk_players as player_count\nreturn other_teams.name, player_count",
+  "query": "find team where name = \"Atlanta Hawks\" as hawks\nfollow hawks playsFor player as p\nfollow p playsFor team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 1.58,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 30
+  "n_rows": 30,
+  "query_tokens": 41,
+  "result_tokens": 169
  },
  {
   "qid": "c6c6699e-c63a-4c0d-87d8-6efc71b8c2fa",
   "category": "special_comparison",
   "query": "find team where name = \"Phoenix Suns\" or name = \"Charlotte Hornets\" as t\nreturn t.name order by t.inception_year desc limit 1",
+  "latency_ms": 0.29,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 31,
+  "result_tokens": 14
  },
  {
   "qid": "75362c1e-12f9-4b88-8550-56f9e878c525",
   "category": "special_three-node-groupby",
-  "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as num_players\nreturn t.name, num_players",
+  "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p draftedBy team as t\ngroup by t as g\ncount distinct g.p as n\nreturn t.name, n",
+  "latency_ms": 0.19,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 41,
+  "result_tokens": 24
  },
  {
   "qid": "b8db7ffe-dc7b-4fc0-836c-3535b1f4ca16",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find player where name = \"Pete Brennan\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue as v\ngroup by p as g\ncount distinct g.v as n\nreturn n",
+  "query": "find player where name = \"Pete Brennan\" as p\nfollow p playsFor team as t\nfollow t hasHomeVenue venue as v\ncount distinct v as n\nreturn n",
+  "latency_ms": 8.36,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 34,
+  "result_tokens": 9
  },
  {
   "qid": "3f18ff61-188a-448c-a377-f6cdb283f964",
   "category": "special_three-node-groupby",
-  "query": "find team where name = \"Boston Celtics\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as player_count\nreturn a.name, player_count",
+  "query": "find team where name = \"Boston Celtics\" as t\nfollow t playsFor player as p\nfollow p receivesAward award as a\ngroup by a as g\ncount distinct g.p as num_players\nreturn a.name, num_players",
+  "latency_ms": 0.86,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 46,
+  "result_tokens": 90
  },
  {
   "qid": "77741715-db78-4186-a03b-146bfce2ba79",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position where name = \"point guard\" as pos\nreturn p.name",
+  "query": "find team where name = \"Toronto Raptors\" as t\nfollow t playsFor player as p\nfollow p playsPosition position as pos where name = \"point guard\"\nreturn p.name",
+  "latency_ms": 1.17,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 52
+  "ex": 1.0,
+  "n_rows": 51,
+  "query_tokens": 38,
+  "result_tokens": 183
  },
  {
   "qid": "d0fae0dc-8ab8-4c35-a1c2-79c6bebe4a0d",
   "category": "basic_(n)-(m0*)",
   "query": "find award where name = \"NBA All-Star Game Kobe Bryant Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nreturn p.name",
+  "latency_ms": 0.37,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 70
+  "ex": 1.0,
+  "n_rows": 50,
+  "query_tokens": 34,
+  "result_tokens": 177
  },
  {
   "qid": "2066785e-837a-4e4d-871b-a483636f6deb",
   "category": "special_union",
-  "query": "find conference where name = \"Western Conference\" as conf\nfollow conf partOfConference division as d\nfind team where name = \"Golden State Warriors\" as t\nfollow t partOfDivision division as d\ncount distinct d as n\nreturn n",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"d\" is already bound in line 4\nnothing was executed."
+  "query": "find division as d\nfollow d partOfConference conference where name = \"Western Conference\" as c\nor\nfind team where name = \"Golden State Warriors\" as t\nfollow t partOfDivision division as d\ncount distinct d as n\nreturn n",
+  "latency_ms": 0.39,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 54,
+  "result_tokens": 9
  },
  {
   "qid": "f0824791-26e5-46e3-8d92-609937ab1af9",
   "category": "special_comparison",
   "query": "find player where name = \"Kevin Durant\" as p1\nfind player where name = \"Kareem Abdul-Jabbar\" as p2\ncompute p1.handedness same p2.handedness as answer\nreturn answer",
+  "latency_ms": 18.16,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 40,
+  "result_tokens": 11
  },
  {
   "qid": "a535cd95-402c-429b-8939-68d143eaa700",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find award as a\nfollow a receivesAward player as p1 where name = \"Nate Archibald\"\nfollow a receivesAward player as p2 where name = \"Lenny Wilkens\"\nreturn a.name",
-  "executable": false,
-  "ex": 0.0,
-  "error": "ParseError: parse error at line 2: unexpected trailing input starting at 'where'"
+  "query": "find player where name contains \"Archibald\" as p1\nfollow p1 receivesAward award as a\nfind player where name contains \"Wilkens\" as p2\nfollow p2 receivesAward award as a\nreturn a.name",
+  "latency_ms": 15.97,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 45,
+  "result_tokens": 24
  },
  {
   "qid": "8ace4649-473b-4df5-a0d1-500e4bc0d51c",
   "category": "basic_(n)-(m0*)",
   "query": "find player where name = \"Royce O'Neale\" as p\nfollow p playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 8.53,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 25,
+  "result_tokens": 14
  },
  {
   "qid": "ccfadb00-96aa-42bb-bbb3-d3b0ee64a2f9",
   "category": "basic_(n)",
   "query": "find position as p\nreturn p.name",
+  "latency_ms": 0.16,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 8,
+  "result_tokens": 35
  },
  {
   "qid": "4f663af5-dab4-4246-bd48-df2f50302e4f",
   "category": "basic_(n)",
   "query": "find division as d\nreturn d.name",
+  "latency_ms": 0.14,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 6
+  "n_rows": 6,
+  "query_tokens": 8,
+  "result_tokens": 37
  },
  {
   "qid": "5169000c-5ebe-4757-a5b5-3920ad6241e2",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find player where name = \"Bo Erias\" as p\nfollow p draftedBy team as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "latency_ms": 7.86,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 29,
+  "result_tokens": 43
  },
  {
   "qid": "a6d6ac03-64e2-4625-be95-9e77b57d461e",
   "category": "special_union",
-  "query": "find team where name = \"Boston Celtics\" as t1\nfollow t1 playsFor player as p1\nfind team where name = \"Miami Heat\" as t2\nfollow t2 draftedBy player as p2\nreturn p1.name, p2.name",
+  "query": "find team where name = \"Boston Celtics\" as t\nfollow t playsFor player as p\nor\nfind team where name = \"Miami Heat\" as t\nfollow t draftedBy player as p\nreturn p.name",
+  "latency_ms": 1.07,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 22310
+  "ex": 1.0,
+  "n_rows": 526,
+  "query_tokens": 40,
+  "result_tokens": 1766
  },
  {
   "qid": "c3de4204-22b3-4a1e-bd43-99fb555b8900",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find team where name = \"Phoenix Suns\" as t\nfollow t draftedBy player as p\nfollow p playsPosition position as pos\nreturn pos.name",
+  "latency_ms": 0.51,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 157
+  "ex": 1.0,
+  "n_rows": 5,
+  "query_tokens": 32,
+  "result_tokens": 26
  },
  {
   "qid": "66818788-9342-460b-9a4b-7d26cc3f73bc",
   "category": "basic_(n)-(m0*)",
   "query": "find conference where name = \"Eastern Conference\" as c\nfollow c partOfConference division as d\nreturn d.name",
+  "latency_ms": 0.16,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 27,
+  "result_tokens": 23
  },
  {
   "qid": "7117ce19-29c8-45ae-8b6d-f02c7f5149f9",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find player where name = \"Billy Donovan\" as bd\nfollow bd playsFor team as t\nfollow t playsFor player as p\nreturn p.name order by p.date_of_birth desc limit 1",
+  "latency_ms": 9.43,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 39,
+  "result_tokens": 14
  },
  {
   "qid": "9e9c32cf-8e1c-460d-8d9c-8a6b2b53696f",
   "category": "special_union",
-  "query": "find award where name = \"NBA All-Star Game Kobe Bryant Most Valuable Player Award\" as a\nfollow a receivesAward player as p\nfind team where name = \"Golden State Warriors\" as t\nfollow t playsFor player as p\ncount distinct p as total\nreturn total",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"p\" is already bound in line 4\nnothing was executed."
+  "query": "find player as p\nfollow p receivesAward award where name = \"NBA All-Star Game Kobe Bryant Most Valuable Player Award\" as a\nor\nfind player as p\nfollow p playsFor team where name = \"Golden State Warriors\" as t\ncount distinct p as n\nreturn n",
+  "latency_ms": 30.32,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 59,
+  "result_tokens": 10
  },
  {
   "qid": "06435451-b21c-4944-a27f-94078c07e06b",
   "category": "basic_(n)-(m0*)",
   "query": "find team where name = \"New York Knicks\" as t\nfollow t draftedBy player as p\nreturn p.name, p.schools_attended",
+  "latency_ms": 0.6,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 169
+  "ex": 1.0,
+  "n_rows": 169,
+  "query_tokens": 27,
+  "result_tokens": 1999
  },
  {
   "qid": "ddea610c-00bc-444c-85b0-a5b15b93ac4c",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find division where name = \"Atlantic Division\" as d\nfollow d partOfDivision team as t\nfollow t hasHomeVenue venue as v\nreturn v.name",
+  "latency_ms": 0.36,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 19
+  "n_rows": 19,
+  "query_tokens": 33,
+  "result_tokens": 104
  },
  {
   "qid": "49b5b6a9-b72d-4152-a7d0-edd85bdf301d",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find team where name = \"Washington Wizards\" as wizards\nfollow wizards playsFor player as p\nfollow p playsFor team where name != \"Washington Wizards\" as t\ncount distinct t as n\nreturn n",
+  "query": "find team where name = \"Washington Wizards\" as wizards\nfollow wizards playsFor player as p\nfollow p playsFor team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 1.11,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 37,
+  "result_tokens": 9
  },
  {
   "qid": "75295cc6-0576-4131-9226-11efc882228d",
   "category": "special_comparison",
-  "query": "find player where name = \"Jordan Farmar\" or name = \"Michael Cooper\" as p\nreturn p.name order by p.height_cm desc limit 1",
+  "query": "find player where name = \"Jordan Farmar\" as p\nor\nfind player where name = \"Michael Cooper\" as p\nreturn p.name order by p.height_cm desc limit 1",
+  "latency_ms": 17.0,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 14
  },
  {
   "qid": "d332a07b-c0a7-4b9c-985d-e1aedfffc886",
   "category": "basic_(n)-(m0)-(m1*)",
-  "query": "find venue where name = \"Hy-Vee Arena\" as v\nfollow v hasHomeVenue team as t\nfollow t draftedBy player where date_of_birth < \"1950-01-22\" as p\nreturn p.name",
+  "query": "find player where date_of_birth < \"1950-01-22\" as p\nfollow p draftedBy team as t\nfollow t hasHomeVenue venue as v where name = \"Hy-Vee Arena\"\nreturn p.name",
+  "latency_ms": 21.29,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 56
+  "n_rows": 56,
+  "query_tokens": 38,
+  "result_tokens": 193
  },
  {
   "qid": "a657a788-c2d4-4eb0-aeac-066c20685ad8",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find position where name = \"Power Forward\" as pos\nfollow pos playsPosition player where schools_attended contains \"Lausanne Collegiate School\" as p\nfollow p receivesAward award where name = \"Princess of Asturias Award for Sports\" as a\nreturn p.name",
+  "query": "find position where name = \"power forward\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award where name = \"Princess of Asturias Award for Sports\" as a\nfind player where schools_attended contains \"Lausanne Collegiate School\" as p\nreturn p.name",
+  "latency_ms": 22.85,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 66,
+  "result_tokens": 13
  },
  {
   "qid": "1d1022b9-209b-4f78-84c9-8784e8dc22de",
   "category": "special_optional-match",
-  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "query": "find division where name = \"Southwest Division\" as d\nfollow d partOfDivision team as t\nfollow t playsFor player as p or none\ngroup by t as g\ncount distinct g.p as player_count\nreturn t.name, player_count",
+  "latency_ms": 1.41,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 5
+  "n_rows": 5,
+  "query_tokens": 50,
+  "result_tokens": 42
  },
  {
   "qid": "f7ab951c-44d8-4085-8d0c-f8ce94fdbef8",
   "category": "special_union",
-  "query": "find venue where name = \"International Amphitheatre\" as v\nfollow v hasHomeVenue team as t\nfind player where name = \"Barney Cable\" as p\nfollow p playsFor team as t\ncount distinct t as count\nreturn count",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"t\" is already bound in line 4\nnothing was executed."
+  "query": "find venue where name = \"International Amphitheatre\" as v\nfollow v hasHomeVenue team as t\nor\nfind player where name = \"Barney Cable\" as p\nfollow p playsFor team as t\ncount distinct t as n\nreturn n",
+  "latency_ms": 8.68,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 49,
+  "result_tokens": 9
  },
  {
   "qid": "1149e1e6-a5af-4763-8fbc-ca4b18764859",
   "category": "special_optional-match",
-  "query": "find team where name = \"Oklahoma City Thunder\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "query": "find team where name = \"Oklahoma City Thunder\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "latency_ms": 0.32,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 15,
+  "query_tokens": 50,
+  "result_tokens": 80
  },
  {
   "qid": "d92ea44f-f80c-4ed2-b662-3653600af70c",
   "category": "basic_(n)",
   "query": "find conference as c\nreturn c.name",
+  "latency_ms": 0.15,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 2
+  "n_rows": 2,
+  "query_tokens": 8,
+  "result_tokens": 19
  },
  {
   "qid": "7427da01-2c98-4f7e-9d27-774839ca147c",
   "category": "special_union",
-  "query": "find player where name = \"Mark Strickland\" as ms\nfollow ms playsFor team as t1\nfind player where name = \"Raul Neto\" as rn\nfollow rn draftedBy team as t2\nreturn t1.name, t2.name",
+  "query": "find player where name = \"Mark Strickland\" as p\nfollow p playsFor team as t\nor\nfind player where name = \"Raul Neto\" as p\nfollow p draftedBy team as t\nreturn t.name",
+  "latency_ms": 16.66,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 5
+  "ex": 1.0,
+  "n_rows": 5,
+  "query_tokens": 40,
+  "result_tokens": 28
  },
  {
   "qid": "f0519f0b-778e-42b3-bbba-6787e29d0e9b",
   "category": "special_union",
-  "query": "find team where name = \"Phoenix Suns\" as t1\nfollow t1 draftedBy player as p\nfind team where name = \"Golden State Warriors\" as t2\nfollow t2 playsFor player as p\ncount distinct p as n\nreturn n",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"p\" is already bound in line 4\nnothing was executed."
+  "query": "find team where name = \"Phoenix Suns\" as suns\nfollow suns draftedBy player as p\nor\nfind team where name = \"Golden State Warriors\" as warriors\nfollow warriors playsFor player as p\ncount distinct p as n\nreturn n",
+  "latency_ms": 1.0,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 52,
+  "result_tokens": 10
  },
  {
   "qid": "5687cb19-549e-4111-94e9-d23594a7f7e1",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "query": "find player as p\nfollow p receivesAward award where name = \"Bill Russell NBA Finals Most Valuable Player Award\" as a1\nfollow p receivesAward award where name = \"German Sportspersonality of the Year\" as a2\nreturn p.name, p.gender",
+  "latency_ms": 6.11,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 57,
+  "result_tokens": 17
  },
  {
   "qid": "a7bfa0a6-69dc-4639-bccf-6ff8dafc2b6b",
   "category": "basic_(n)-(m0)-(m1*)",
   "query": "find award where name = \"Big Ten Conference Men's Basketball Coach of the Year\" as a\nfollow a receivesAward player as p\nfollow p playsFor team as t\nreturn t.owners",
+  "latency_ms": 0.32,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 8
+  "n_rows": 8,
+  "query_tokens": 40,
+  "result_tokens": 67
  },
  {
   "qid": "c2cc845c-b8ed-40ae-867d-7b3260a00962",
   "category": "basic_(n)",
   "query": "find award as a\ncount distinct a as n\nreturn n",
+  "latency_ms": 0.16,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 11,
+  "result_tokens": 9
  },
  {
   "qid": "70338d8d-1a76-44bd-911d-413d96a0972e",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Dallas Mavericks\" as mav\nfollow mav playsFor player as p\nfollow p playsFor team where name = \"Indiana Pacers\" as pac\nreturn p.name order by p.mass_kg desc",
+  "query": "find team where name = \"Dallas Mavericks\" as t1\nfollow t1 playsFor player as p\nfollow p playsFor team where name = \"Indiana Pacers\" as t2\nreturn p.name order by p.mass_kg desc",
+  "latency_ms": 2.87,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 39
+  "n_rows": 39,
+  "query_tokens": 43,
+  "result_tokens": 146
  },
  {
   "qid": "26414c4a-54c7-4266-8f15-f7854fd714cb",
   "category": "special_union",
-  "query": "find award where name = \"NBA All-Star Game Kobe Bryant Most Valuable Player Award\" as a\nfollow a receivesAward player as p1\nfind position where name = \"power forward\" as pos\nfollow pos playsPosition player as p2\nreturn p1.name, p2.name",
+  "query": "find player as p\nfollow p receivesAward award where name = \"NBA All-Star Game Kobe Bryant Most Valuable Player Award\" as a\nor\nfind player as p\nfollow p playsPosition position where name = \"power forward\" as pos\nreturn p.name",
+  "latency_ms": 16.96,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 71470
+  "ex": 1.0,
+  "n_rows": 1056,
+  "query_tokens": 56,
+  "result_tokens": 2003
  },
  {
   "qid": "72441cdf-1658-4aec-9a74-58d51653b9bc",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award where name = \"Bill Russell NBA Finals Most Valuable Player Award\" as a\nreturn p.name",
+  "query": "find team where name = \"Indiana Pacers\" as t\nfollow t draftedBy player as p\nfollow p receivesAward award as a where name = \"Bill Russell NBA Finals Most Valuable Player Award\"\nreturn p.name",
+  "latency_ms": 0.37,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 47,
+  "result_tokens": 13
  },
  {
   "qid": "6392f8db-296a-48dd-892e-72d3e4e371dc",
   "category": "special_union",
-  "query": "find team where name = \"Los Angeles Lakers\" as t\nfollow t draftedBy player as p\nfind award where name = \"All-NBA Team\" as a\nfollow a receivesAward player as p\ncount distinct p as n\nreturn n",
-  "executable": false,
-  "ex": 0.0,
-  "error": "VerifyError: error: name \"p\" is already bound in line 4\nnothing was executed."
+  "query": "find team where name = \"Los Angeles Lakers\" as t\nfollow t draftedBy player as p\nor\nfind player as p\nfollow p receivesAward award as a where name = \"All-NBA Team\"\ncount distinct p as n\nreturn n",
+  "latency_ms": 3.6,
+  "executable": true,
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 48,
+  "result_tokens": 10
  },
  {
   "qid": "b5c759bb-c89b-4d32-b063-4909efc645dd",
   "category": "special_comparison",
   "query": "find player where name = \"Isaac Bonga\" as p1\nfind player where name = \"Linas Kleiza\" as p2\ncompute p1.height_cm minus p2.height_cm as diff\nreturn diff",
+  "latency_ms": 16.77,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 37,
+  "result_tokens": 10
  },
  {
   "qid": "2a814f17-2928-47ff-a560-d6894ca3e414",
   "category": "special_three-node-groupby",
-  "query": "find player where name = \"Wilt Chamberlain\" as wc\nfollow wc receivesAward award as a\nfollow a receivesAward player as p\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "query": "find player where name = \"Wilt Chamberlain\" as wilt\nfollow wilt receivesAward award as award\nfollow award receivesAward player as other_player where name != \"Wilt Chamberlain\"\ngroup by other_player as g\ncount distinct g.award as n\nreturn other_player.name, n",
+  "latency_ms": 15.3,
   "executable": true,
-  "ex": 1.0,
-  "n_rows": 90
+  "ex": 0.0,
+  "n_rows": 89,
+  "query_tokens": 64,
+  "result_tokens": 380
  },
  {
   "qid": "ac5fae91-630e-4df7-aaf1-070cede1c006",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "query": "find player as p\nfollow p playsPosition position where name = \"point guard\" as pos1\nfollow p playsPosition position where name = \"center\" as pos2\nreturn p.name, p.schools_attended",
+  "query": "find player as p\nfollow p playsPosition position where name = \"Point Guard\" as pos1\nfollow p playsPosition position where name = \"Center\" as pos2\nreturn p.name, p.schools_attended",
+  "latency_ms": 13.34,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 1
+  "ex": 1.0,
+  "n_rows": 1,
+  "query_tokens": 44,
+  "result_tokens": 20
  },
  {
   "qid": "7950c517-8360-4905-879b-3b987f68a48a",
   "category": "special_optional-match",
-  "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p playsPosition position as all_pos\ngroup by p as g\ncount distinct g.all_pos as num_pos\nreturn p.name, num_pos",
+  "query": "find position where name = \"swingman\" as swingman_pos\nfollow swingman_pos playsPosition player as p\nfollow p playsPosition position as all_positions\ngroup by p as g\ncount distinct g.all_positions as num_positions\nreturn p.name, num_positions",
+  "latency_ms": 0.23,
   "executable": true,
   "ex": 0.0,
-  "n_rows": 3
+  "n_rows": 3,
+  "query_tokens": 60,
+  "result_tokens": 27
  },
  {
   "qid": "e7a681b6-d97e-46bf-a413-f354f7784ff9",
   "category": "special_comparison",
-  "query": "find player where name = \"Al Butler\" or name = \"Jerry Kelly\" as p\nreturn p.name order by p.date_of_birth desc limit 1",
+  "query": "find player where name = \"Al Butler\" as p\nor\nfind player where name = \"Jerry Kelly\" as p\nreturn p.name order by p.date_of_birth desc limit 1",
+  "latency_ms": 15.94,
   "executable": true,
   "ex": 1.0,
-  "n_rows": 1
+  "n_rows": 1,
+  "query_tokens": 35,
+  "result_tokens": 12
  },
  {
   "qid": "63f60dba-c276-412c-9f8a-45d9aa6d3b28",
   "category": "special_optional-match",
-  "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a\ngroup by p as g\ncount distinct g.a as num_awards\nreturn p.name, num_awards",
+  "query": "find position where name = \"swingman\" as pos\nfollow pos playsPosition player as p\nfollow p receivesAward award as a or none\ngroup by p as g\ncount distinct g.a as award_count\nreturn p.name, award_count",
+  "latency_ms": 0.24,
   "executable": true,
-  "ex": 0.0,
-  "n_rows": 2
+  "ex": 1.0,
+  "n_rows": 3,
+  "query_tokens": 50,
+  "result_tokens": 27
  }
 ]

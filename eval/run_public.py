@@ -2,9 +2,8 @@
 
 Protocol (matches the official benchmark, no curated slice):
 - Full public test set: all 2,348 questions across the 7 test graphs.
-- ALL match categories, including those not expressible in theorem v0
-  (union, optional-match, time-sensitive/edge-properties). Those count
-  as misses; there is no category filter.
+- ALL match categories. There is no category filter, and nothing is
+  excluded for being hard to express.
 - Full (unsampled) simplekg graphs, the same ones the official Docker
   deployment loads, so gold answer_json values are directly comparable.
 - Zero-shot, single generation, no repair retry, mirroring the official
@@ -451,12 +450,11 @@ def report(model: str, strict: bool = True) -> None:
     def ex_of(rs):
         return round(sum(r["ex"] for r in rs) / len(rs), 4) if rs else None
 
-    # Two v0 data-model gaps make some questions unreachable no matter
-    # what query the model writes: list[str] properties load as
-    # comma-joined strings (so a list-valued gold cell can never match),
-    # and edge properties are not loaded at all (so gold queries that
-    # filter on r0.<prop> cannot be expressed). Counted from the data
-    # rather than asserted, so the ceiling sits next to the score.
+    # These two groups used to be unreachable no matter what query was
+    # written, because list properties were flattened to strings and edge
+    # properties were not loaded. Both are supported now, so this is kept
+    # as a breakdown of the questions that were hardest to reach rather
+    # than as a ceiling.
     import re as _re
 
     scored = {r["qid"] for r in all_results}
@@ -497,18 +495,21 @@ def report(model: str, strict: bool = True) -> None:
         "executable_pct": round(
             sum(r["executable"] for r in all_results) / n, 4
         ),
-        "structurally_unreachable": {
-            "list_valued_gold": len(list_gold),
-            "needs_edge_properties": len(edge_prop),
-            "total": len(unreachable),
-            "pct_of_scored": round(100 * len(unreachable) / n, 1),
+        "hard_data_shapes": {
+            "list_valued_gold": {
+                "n": len(list_gold),
+                "ex": ex_of([r for r in all_results if r["qid"] in list_gold]),
+            },
+            "needs_edge_properties": {
+                "n": len(edge_prop),
+                "ex": ex_of([r for r in all_results if r["qid"] in edge_prop]),
+            },
             "note": (
-                "theorem v0 loads list[str] properties as comma-joined "
-                "strings and loads no edge properties, so these questions "
-                "cannot be answered regardless of the query written"
+                "multi-valued properties and properties on the edge itself; "
+                "both were unanswerable before the language supported them"
             ),
         },
-        "ex_excluding_unreachable": ex_of(
+        "ex_excluding_hard_shapes": ex_of(
             [r for r in all_results if r["qid"] not in unreachable]
         ),
         "by_graph": {
