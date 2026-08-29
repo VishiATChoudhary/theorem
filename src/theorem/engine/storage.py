@@ -50,6 +50,9 @@ class Store:
         (self.path / "runs").mkdir(exist_ok=True)
         self.wal_path = self.path / "wal.jsonl"
         self.nodes: dict[str, Node] = {}
+        # class name -> node ids, so seeding a query costs the class
+        # rather than the whole store
+        self.by_class: dict[str, list[str]] = {}
         self.edges: dict[str, list[Edge]] = {}
         self.edge_index: dict[str, Edge] = {}
         self.lineage: list[dict] = []
@@ -272,6 +275,7 @@ class Store:
             for k, v in rec.get("_restore", {}).items():
                 setattr(node, k, v)
             self.nodes[node.id] = node
+            self.by_class.setdefault(node.cls, []).append(node.id)
             self.edges.setdefault(node.id, [])
             self._bump_counter(node.cls, node.id)
         elif op == "patch_node":

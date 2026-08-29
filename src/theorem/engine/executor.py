@@ -228,7 +228,9 @@ def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
         if stmt.target == "nodes":
             nodes = [n for n in store.nodes.values()]
         else:
-            nodes = [n for n in store.nodes.values() if n.cls == stmt.target]
+            nodes = [
+                store.nodes[nid] for nid in store.by_class.get(stmt.target, ())
+            ]
         pool = [
             {name: n.id}
             for n in nodes
