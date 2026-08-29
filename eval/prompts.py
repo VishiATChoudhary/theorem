@@ -103,9 +103,6 @@ Rules:
   e.g. `where date_of_death < "2019"`.
 - `return <col>, ... [order by <col> [desc]] [limit N]` ends the query.
   Return properties (like `t.name`), never bare bindings.
-- Results are sets: duplicates do not matter, except counts must be exact,
-  so use `count distinct` when the same node can be reached twice.
-
 - Results are a set of rows: reaching the same node twice answers once.
   For a count, use `count distinct` when the same node can be reached by
   more than one path.
