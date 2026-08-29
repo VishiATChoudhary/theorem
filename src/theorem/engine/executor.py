@@ -326,7 +326,9 @@ def _scalar(v):
     return v if isinstance(v, (str, int, float, bool, type(None))) else repr(v)
 
 
-def _return_key(store: Store, schema: Schema, row: dict, cols: list[Col]):
+def _return_key(
+    store: Store, schema: Schema, row: dict, cols: list[Col], by_identity: bool = True
+):
     """Identity of a row for the purpose of `return`.
 
     A column rooted at a node binding keys on that node's identity, so
@@ -336,6 +338,12 @@ def _return_key(store: Store, schema: Schema, row: dict, cols: list[Col]):
     key = []
     for col in cols:
         held = row.get(col[0])
+        if not by_identity:
+            try:
+                key.append(("value", _scalar(_col_value(store, schema, row, col))))
+            except ExecError:
+                key.append(("raw", _scalar(held)))
+            continue
         if isinstance(held, str) and held in store.nodes:
             key.append(("node", store.resolve(held)))
             continue
@@ -357,7 +365,7 @@ def _distinct_rows(
     seen = set()
     out = []
     for row in rows:
-        k = _return_key(store, schema, row, stmt.cols)
+        k = _return_key(store, schema, row, stmt.cols, not stmt.distinct)
         if k in seen:
             continue
         seen.add(k)

@@ -109,6 +109,12 @@ Rules:
 - Results are a set of rows: reaching the same node twice answers once.
   For a count, use `count distinct` when the same node can be reached by
   more than one path.
+- `return distinct <cols>` collapses repeated VALUES, where plain
+  `return` collapses repeated nodes. Two different people can share a
+  name, and `return p.name` lists both; `return distinct p.name` lists
+  the name once. Use `distinct` when the question asks for the unique or
+  distinct values of a property ("the unique creators", "the distinct
+  countries"), and plain `return` when it asks for the things themselves.
 - Some edges join two nodes of the SAME class (hasSpouse between two
   characters, subsidiaryOf between two companies). Their roles are named
   `subj` and `obj`, not the class name, because the class cannot tell the
@@ -125,7 +131,8 @@ Grammar (EBNF):
   group   := "group" "by" NAME["." PROP] "as" NAME
   agg     := ("count"|"sum"|"avg"|"min"|"max") ["distinct"] NAME "." COL ["." PROP] "as" NAME
   compute := "compute" col ("plus"|"minus"|"times"|"over"|"same") col "as" NAME
-  return  := "return" col ("," col)* ["order" "by" col ["desc"]] ["limit" INT]
+  return  := "return" ["distinct"] col ("," col)*
+             ["order" "by" col ["desc"]] ["limit" INT]
   cond    := clause (("and"|"or") clause)*
   clause  := PROP OP literal ; OP: = != > >= < <= contains
 
@@ -181,6 +188,11 @@ find player where name = "Alice Doe" as p1
 find player where name = "Bob Roe" as p2
 compute p1.handedness same p2.handedness as answer
 return answer
+
+Q: Who are the unique head coaches of teams LeBron James played for?
+find player where name = "LeBron James" as lj
+follow lj playsFor team as t
+return distinct t.head_coach
 
 Q: Which players played for teams that LeBron James also played for?
 find player where name = "LeBron James" as lj

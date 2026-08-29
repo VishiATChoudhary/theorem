@@ -80,6 +80,7 @@ class Return(Stmt):
     limit: int | None
     budget: int  # defaulted to 2000 when unstated
     after: str | None  # position token @t-N
+    distinct: bool = False  # dedup on the projected values, not identity
 
 
 @dataclass

@@ -437,6 +437,13 @@ class _Parser:
         return Compute(left, op, right, name)
 
     def parse_return(self) -> Return:
+        # `return distinct x` collapses repeated values, the way
+        # `count distinct` already does; plain `return` collapses
+        # repeated nodes.
+        distinct = False
+        if self.at_word("distinct"):
+            self.next()
+            distinct = True
         cols = [self.col()]
         while self.peek() == ("punct", ","):
             self.next()
@@ -463,6 +470,7 @@ class _Parser:
             limit,
             DEFAULT_BUDGET if budget is None else budget,
             after,
+            distinct=distinct,
         )
 
     def parse_continue(self) -> Continue:

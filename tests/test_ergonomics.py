@@ -224,3 +224,32 @@ def test_optional_follow_with_where(fixture_store):
         fixture_store,
     )
     assert rows == [["GridPack", 0], ["PowerBank Pro", 0], ["SolarCharger X", 1]]
+
+
+# ---- `return distinct` collapses repeated values -----------------------
+
+
+def test_return_distinct_dedups_on_the_value(fixture_store):
+    """Two different suppliers are both called Ionix. Asking for the
+    distinct names gives one Ionix; asking for the names gives both."""
+    plain = run("find supplier as s\nreturn s.name", fixture_store)
+    distinct = run("find supplier as s\nreturn distinct s.name", fixture_store)
+    assert sorted(plain) == [["Ionix"], ["Ionix"], ["VoltaChem"]]
+    assert sorted(distinct) == [["Ionix"], ["VoltaChem"]]
+
+
+def test_return_distinct_across_several_columns(fixture_store):
+    rows = run(
+        "find supplier as s\nreturn distinct s.name, s.country",
+        fixture_store,
+    )
+    assert sorted(rows) == [["Ionix", "JP"], ["Ionix", "KR"], ["VoltaChem", "DE"]]
+
+
+def test_return_distinct_respects_order_and_limit(fixture_store):
+    rows = run(
+        "find product as p\nfollow p uses component as c\n"
+        "return distinct c.name order by c.name limit 2",
+        fixture_store,
+    )
+    assert rows == [["casing"], ["copper wire"]]
