@@ -77,23 +77,20 @@ def _many_store(tmp_path, n):
 
 
 def test_count_distinct_is_linear(tmp_path):
-    """Quadratic dedup made large graphs unqueryable: 5x the rows must
-    not cost anywhere near 25x the time."""
-    small, schema = _many_store(tmp_path / "small", 4_000)
-    big, _ = _many_store(tmp_path / "big", 20_000)
+    """Quadratic dedup made large graphs unqueryable.
+
+    An absolute bound rather than a ratio between two sizes: ratios are
+    noisy when the machine is busy, while the gap here is enormous.
+    Deduplicating 20k rows is a few milliseconds linearly and takes
+    2 * 10^8 comparisons quadratically, so seconds. One second separates
+    them by two orders of magnitude either way.
+    """
+    big, schema = _many_store(tmp_path / "big", 20_000)
     q = "find widget as w\ncount distinct w as n\nreturn n"
 
     t0 = time.perf_counter()
-    assert run(q, small, schema) == [[4_000]]
-    t_small = time.perf_counter() - t0
-
-    t0 = time.perf_counter()
     assert run(q, big, schema) == [[20_000]]
-    t_big = time.perf_counter() - t0
-
-    # linear would be ~5x; quadratic ~25x. Allow generous headroom for
-    # fixed overhead and CI noise, but fail the quadratic case.
-    assert t_big < max(t_small, 0.01) * 12
+    assert time.perf_counter() - t0 < 1.0
 
 
 def test_dedup_handles_unhashable_values(fixture_store):
