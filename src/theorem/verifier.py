@@ -270,7 +270,24 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                         f"type error: {edge} connects {other_cls} ({other}) to "
                         f'{arrival_cls} ({role}); "{src}" is a {src_cls}',
                     )
-            _check_cond(cond, schema, env, arrival_cls, line)
+            # `via.<prop>` in a follow's condition reads the edge's own
+            # properties rather than the arrival node's.
+            node_cond = [(j, c) for j, c in cond if c.col[0] != "via"]
+            for _joiner, clause in cond:
+                if clause.col[0] != "via":
+                    continue
+                if len(clause.col) != 2:
+                    raise VerifyError(
+                        line, "via takes one property: via.<property>"
+                    )
+                prop = clause.col[1]
+                if prop not in edef.props:
+                    raise VerifyError(
+                        line,
+                        f'unknown property "{prop}" on edge {edge}.'
+                        f"{_suggest(prop, edef.props)}",
+                    )
+            _check_cond(node_cond, schema, env, arrival_cls, line)
             _bind(env, name, arrival_cls, line)
 
         case GroupBy(col=col, name=name):

@@ -113,6 +113,10 @@ def _col_value(store: Store, schema: Schema, row: dict, col: Col):
     raise ExecError(f"cannot resolve column {'.'.join(col)}")
 
 
+def _is_none_literal(v) -> bool:
+    return type(v).__name__ == "_Missing"
+
+
 def _fold(v):
     """Agent-friendly string normalization (shared with dedup; see text.py).
     Agents transliterate names; silently matching nothing is the worse
@@ -124,6 +128,11 @@ def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> 
     v = row_value
     want = clause.value
     op = clause.op
+    if _is_none_literal(want):
+        # `= none` / `!= none` ask whether the value is there at all,
+        # which is the only way to talk about missing data.
+        missing = v is None or v == []
+        return missing if op == "=" else not missing
     if v is None:
         return False
     if isinstance(v, list):
@@ -279,7 +288,12 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
                 store,
                 schema,
                 stmt.cond,
-                lambda col, dst=dst: _first_prop(store, schema, dst, col),
+                lambda col, dst=dst, edge=edge: (
+                    # via.<prop> asks about the relationship itself
+                    edge.props.get(col[1])
+                    if col[0] == "via"
+                    else _first_prop(store, schema, dst, col)
+                ),
             ):
                 continue
             touched.add(src_id)

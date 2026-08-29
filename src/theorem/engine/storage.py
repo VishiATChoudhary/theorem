@@ -38,6 +38,7 @@ class Edge:
     id: str
     type: str
     roles: dict[str, str]  # role name -> node id
+    props: dict[str, object] = field(default_factory=dict)
     created_at: int = 0
     retired_at: int | None = None
 
@@ -186,6 +187,7 @@ class Store:
                     "id": e.id,
                     "type": e.type,
                     "roles": e.roles,
+                    "props": e.props,
                     "_pos": e.created_at,
                     "_restore": {"retired_at": e.retired_at},
                 }
@@ -283,7 +285,11 @@ class Store:
                 node.state = rec["state"]
         elif op == "put_edge":
             edge = Edge(
-                id=rec["id"], type=rec["type"], roles=dict(rec["roles"]), created_at=pos
+                id=rec["id"],
+                type=rec["type"],
+                roles=dict(rec["roles"]),
+                props=dict(rec.get("props") or {}),
+                created_at=pos,
             )
             for k, v in rec.get("_restore", {}).items():
                 setattr(edge, k, v)

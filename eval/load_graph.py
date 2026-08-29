@@ -13,9 +13,8 @@ Deterministic schema derivation rules (documented for reproducibility):
   declare.
 - Role names: subj role = subj_label lowercased, obj role = obj_label
   lowercased; when both ends share a label, roles are "subj" and "obj".
-- Relation properties (edge properties) are NOT loaded; questions needing
-  them are excluded from the eval slice (reported in results).
-- list[...] properties load as comma-joined strings so `contains` works.
+- Relation properties load onto the edge and are read with via.<prop>.
+- list[...] properties stay lists; conditions match any member.
 - date properties load as ISO strings (string comparison preserves order).
 """
 
@@ -86,6 +85,10 @@ def derive_schema(cb_schema: dict) -> Schema:
                 subj_role: class_name(rel["subj_label"]),
                 obj_role: class_name(rel["obj_label"]),
             },
+            props={
+                pname: TYPE_MAP.get(ptype, "str")
+                for pname, ptype in (rel.get("properties") or {}).items()
+            },
         )
     return schema
 
@@ -134,6 +137,11 @@ def load(graph_path: str | Path, store: Store) -> dict[str, str]:
                 "id": store.next_id("edge"),
                 "type": name,
                 "roles": {subj_role: subj, obj_role: obj},
+                "props": {
+                    k: v
+                    for k, v in (rel.get("properties") or {}).items()
+                    if v is not None
+                },
             }
         )
     store.bulk(records)

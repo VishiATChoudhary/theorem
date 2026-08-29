@@ -22,6 +22,7 @@ class ClassDef:
 class EdgeDef:
     name: str
     roles: dict[str, str]  # role name -> class name, exactly two roles
+    props: dict[str, str] = field(default_factory=dict)  # edge's own props
 
     def other_role(self, role: str) -> str:
         for r in self.roles:
@@ -119,5 +120,8 @@ class Schema:
         lines.append("edges:")
         for e in self.edges.values():
             roles = ", ".join(f"{r}: {cls}" for r, cls in e.roles.items())
-            lines.append(f"  {e.name}({roles})")
+            # An edge's own properties are only reachable through via.,
+            # so they have to be visible here or nobody can ask about them.
+            props = f" via{{{', '.join(e.props)}}}" if e.props else ""
+            lines.append(f"  {e.name}({roles}){props}")
         return "\n".join(lines)

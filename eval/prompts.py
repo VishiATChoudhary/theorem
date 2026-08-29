@@ -72,6 +72,19 @@ Rules:
 - Some properties hold several values (a player with two citizenships).
   Ask about one at a time: `where country_of_citizenship = "Japan"` is
   true when Japan is one of them. Returning the property gives them all.
+- SOME PROPERTIES BELONG TO THE RELATIONSHIP, not to either end: when a
+  spell started and ended. Read them in a follow's `where` with `via.`,
+  and the schema below lists them next to the edge:
+    follow p playsFor team as t where via.start_year <= 1983
+- `none` means the value is missing. `via.end_year = none` is a spell
+  that has not ended; `via.end_year != none` is one that has.
+  There are no parentheses: `and` binds tighter than `or`, so a
+  condition reads as OR over AND-groups. For "held in year Y", which is
+  "started by Y and either not ended or ended no earlier than Y", repeat
+  the shared part in both groups:
+    where via.start_year <= Y and via.end_year >= Y
+       or via.start_year <= Y and via.end_year = none
+  "currently" is `via.end_year = none` on its own.
 - Scalar math and equality between two bound values:
   `compute <col> plus|minus|times|over|same <col> as <name>`.
   `same` yields true/false. Use for "how much taller", "do X and Y share".
@@ -191,6 +204,13 @@ follow t playsFor player as p or none
 group by t as g
 count distinct g.p as n
 return t.name, n
+
+Q: Which teams did Robert Reid play for during 1983?
+find player where name = "Robert Reid" as p
+follow p playsFor team as t where via.start_year <= 1983
+  and via.end_year >= 1983
+  or via.start_year <= 1983 and via.end_year = none
+return t.name
 
 Q: Which players received both the MVP award and the Finals MVP award?
 find player as p

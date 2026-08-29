@@ -35,6 +35,15 @@ from .ast_nodes import (
     Stmt,
 )
 
+class _Missing:
+    """Sentinel for the `none` literal, distinct from a parse failure."""
+
+    def __repr__(self) -> str:
+        return "none"
+
+
+_NONE = _Missing()
+
 DEFAULT_BUDGET = 2000
 
 AGG_VERBS = {"count", "sum", "avg", "min", "max"}
@@ -183,6 +192,10 @@ class _Parser:
                 return True
             if text == "false":
                 return False
+            if text == "none":
+                # the absence of a value, for data that is genuinely
+                # missing: `where via.end_year = none`
+                return _NONE
             if allow_word and "." not in text:
                 # bare word in a condition RHS: class names in
                 # (find dup_candidates where class = supplier)
