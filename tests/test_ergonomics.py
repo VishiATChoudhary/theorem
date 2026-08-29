@@ -166,3 +166,61 @@ def test_or_branches_may_use_different_edges(fixture_store):
 def test_trailing_or_is_an_error():
     with pytest.raises(Exception):
         parse("find product as p\nor\n")
+
+
+# ---- `or none` keeps rows that matched nothing ------------------------
+
+
+def test_optional_follow_keeps_unmatched_rows(fixture_store):
+    """Every product, and how many parts each uses, including any product
+    that uses none."""
+    rows = run(
+        "find product as p\n"
+        "follow p uses component as c or none\n"
+        "group by p as g\n"
+        "count distinct g.c as n\n"
+        "return p.name, n order by p.name",
+        fixture_store,
+    )
+    assert rows == [["GridPack", 2], ["PowerBank Pro", 2], ["SolarCharger X", 1]]
+
+
+def test_optional_follow_yields_zero_not_missing_row(fixture_store):
+    """A supplier that supplies nothing still appears, with a count of 0."""
+    store = fixture_store
+    from tests.conftest import _node
+
+    _node(store, "supplier", name="Dormant Co", country="FI")
+    rows = run(
+        "find supplier as s\n"
+        "follow s supplied_by item as part or none\n"
+        "group by s as g\n"
+        "count distinct g.part as n\n"
+        "return s.name, n order by n",
+        store,
+    )
+    assert ["Dormant Co", 0] in rows
+
+
+def test_plain_follow_still_drops_unmatched(fixture_store):
+    store = fixture_store
+    from tests.conftest import _node
+
+    _node(store, "supplier", name="Dormant Co", country="FI")
+    rows = run(
+        "find supplier as s\nfollow s supplied_by item as part\nreturn s.name",
+        store,
+    )
+    assert ["Dormant Co"] not in rows
+
+
+def test_optional_follow_with_where(fixture_store):
+    rows = run(
+        "find product as p\n"
+        'follow p uses component as c where unit_cost > 5 or none\n'
+        "group by p as g\n"
+        "count distinct g.c as n\n"
+        "return p.name, n order by p.name",
+        fixture_store,
+    )
+    assert rows == [["GridPack", 0], ["PowerBank Pro", 0], ["SolarCharger X", 1]]

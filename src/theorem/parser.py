@@ -270,10 +270,21 @@ class _Parser:
                 raise ParseError(self.line_no, f"unknown operator {op!r}")
             value = self.literal(allow_word=True)
             out.append((joiner, Clause(col, op, value)))
+            # `or none` ends a follow rather than joining another clause,
+            # so it belongs to the statement, not to this condition.
+            if self.at_word("or") and self._peek_word_at(1) == "none":
+                return out
             if self.at_word("and", "or"):
                 joiner = self.next()[1]
                 continue
             return out
+
+    def _peek_word_at(self, ahead: int) -> str | None:
+        j = self.i + ahead
+        if j >= len(self.tokens):
+            return None
+        kind, text = self.tokens[j]
+        return text if kind == "word" else None
 
     def order_by_opt(self) -> tuple[Col | None, bool]:
         if not self.at_word("order"):
@@ -376,7 +387,13 @@ class _Parser:
         self.expect_word("as")
         name = self.expect_name()
         cond = self._trailing_where(cond)
-        return Follow(src, edge, role, name, cond=cond)
+        optional = False
+        if self.at_word("or"):
+            self.next()
+            self.expect_word("none")
+            optional = True
+            cond = self._trailing_where(cond)
+        return Follow(src, edge, role, name, cond=cond, optional=optional)
 
     def parse_or(self) -> Or:
         return Or()

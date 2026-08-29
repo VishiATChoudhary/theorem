@@ -42,6 +42,7 @@ class Follow(Stmt):
     role: str
     name: str
     cond: Cond = field(default_factory=list)  # filters the arrival node
+    optional: bool = False  # "or none": keep rows that matched nothing
 
 
 @dataclass

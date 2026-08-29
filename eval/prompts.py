@@ -59,6 +59,19 @@ Rules:
   Give the branches the same names for the things you want combined.
   `group`, the aggregates and `return` all see the combined result.
 - `where` may come before or after `as`; both read the same.
+- END A `follow` WITH `or none` TO KEEP ROWS THAT MATCHED NOTHING. Use it
+  whenever the question says "including those with none", or asks for a
+  count per thing where some things may have zero:
+    find team as t
+    follow t playsFor player as p or none
+    group by t as g
+    count distinct g.p as n
+    return t.name, n
+  gives every team, with 0 for teams that have no players. A plain
+  `follow` drops those teams instead.
+- Some properties hold several values (a player with two citizenships).
+  Ask about one at a time: `where country_of_citizenship = "Japan"` is
+  true when Japan is one of them. Returning the property gives them all.
 - Scalar math and equality between two bound values:
   `compute <col> plus|minus|times|over|same <col> as <name>`.
   `same` yields true/false. Use for "how much taller", "do X and Y share".
@@ -95,7 +108,7 @@ Grammar (EBNF):
   branch  := (find | follow)+
   find    := "find" CLASS ["where" cond] "as" NAME
   follow  := "follow" NAME EDGE ROLE ["where" cond] "as" NAME
-            ; where comes BEFORE as: follow p playsFor team where name = "X" as t
+             ["where" cond] ["or" "none"]
   group   := "group" "by" NAME["." PROP] "as" NAME
   agg     := ("count"|"sum"|"avg"|"min"|"max") ["distinct"] NAME "." COL ["." PROP] "as" NAME
   compute := "compute" col ("plus"|"minus"|"times"|"over"|"same") col "as" NAME
@@ -170,6 +183,14 @@ find team where name = "Sacramento Kings" as t
 follow t playsFor player as p
 count distinct p as n
 return n
+
+Q: For each team founded before 1970, how many players has it had,
+   counting teams with none?
+find team where inception_year < 1970 as t
+follow t playsFor player as p or none
+group by t as g
+count distinct g.p as n
+return t.name, n
 
 Q: Which players received both the MVP award and the Finals MVP award?
 find player as p

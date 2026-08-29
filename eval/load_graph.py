@@ -91,8 +91,9 @@ def derive_schema(cb_schema: dict) -> Schema:
 
 
 def _prop_value(v):
-    if isinstance(v, list):
-        return ", ".join(str(x) for x in v)
+    # Multi-valued properties stay lists. Joining them into one string
+    # made "one of these citizenships is Japan" unaskable and made the
+    # value itself unreturnable in the shape it was stored in.
     return v
 
 

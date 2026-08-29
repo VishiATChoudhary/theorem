@@ -126,6 +126,21 @@ def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> 
     op = clause.op
     if v is None:
         return False
+    if isinstance(v, list):
+        # A multi-valued property is asked about one value at a time:
+        # "citizenship = Japan" means Japan is one of them. Ordering
+        # comparisons have no meaning across a list.
+        if op in ("=", "contains"):
+            return any(
+                _clause_matches(store, schema, item, Clause(clause.col, op, want))
+                for item in v
+            )
+        if op == "!=":
+            return not any(
+                _clause_matches(store, schema, item, Clause(clause.col, "=", want))
+                for item in v
+            )
+        return False
     if isinstance(v, str) or isinstance(want, str):
         v, want = _fold(v), _fold(want)
     try:
@@ -246,6 +261,7 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
     touched: set[str] = set()
     for row in table.rows:
         src_id = store.resolve(row[stmt.src])
+        matched = False
         for edge in store.edges.get(src_id, []):
             if edge.type != stmt.edge or edge.retired_at is not None:
                 continue
@@ -268,6 +284,7 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
                 continue
             touched.add(src_id)
             touched.add(dst)
+            matched = True
             new_rows.append(
                 {
                     **row,
@@ -275,6 +292,11 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
                     "__edges__": (*row.get("__edges__", ()), edge.id),
                 }
             )
+        if stmt.optional and not matched:
+            # "or none": the row survives with nothing bound to the name,
+            # so counts over it come out as zero rather than the row
+            # vanishing from the result entirely.
+            new_rows.append({**row, stmt.name: None})
     for nid in touched:
         blob = 1 if store.nodes[nid].state == "blob" else 0
         store.apply({"op": "traffic", "id": nid, "n": 1, "blob": blob})
