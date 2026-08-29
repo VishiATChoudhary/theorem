@@ -41,6 +41,7 @@ build-backend = "uv_build"
 dev = [
     "hypothesis>=6.165.10",
     "matplotlib>=3.11.1",
+    "neo4j>=6.3.0",
     "pytest>=9.1.1",
 ]
 
