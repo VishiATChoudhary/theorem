@@ -402,16 +402,23 @@ def exec_graph(graph: str, model: str) -> None:
 # ---- phase 3: report --------------------------------------------------
 
 
-def report(model: str) -> None:
+def report(model: str, strict: bool = True) -> None:
     all_results = []
+    missing = []
     for g in TEST_GRAPHS:
         path = PUB / f"exec-{model}-{g}.json"
         if not path.exists():
-            print(f"missing {path}, run exec --graph {g} first")
-            sys.exit(1)
+            missing.append(g)
+            continue
         for r in json.loads(path.read_text()):
             r["graph"] = g
             all_results.append(r)
+    if missing and strict:
+        print(f"missing graphs: {missing}; run exec --graph <g> for each")
+        sys.exit(1)
+    if not all_results:
+        print("no completed graphs yet")
+        return
     n = len(all_results)
     by = lambda key: sorted({r[key] for r in all_results})  # noqa: E731
 
@@ -428,8 +435,16 @@ def report(model: str) -> None:
         ),
         "system": "theorem v0 grammar-prompting + theorem engine",
         "model": model,
+        "graphs_completed": [g for g in TEST_GRAPHS if g not in missing],
+        "graphs_missing": missing,
         "n": n,
         "overall_ex": ex_of(all_results),
+        # The theorem prompt's worked examples and return-discipline rules
+        # were written while iterating on the nba graph, so nba is the one
+        # graph this system has effectively seen. The held-out figure
+        # excludes it and is the number to quote.
+        "held_out_ex": ex_of([r for r in all_results if r["graph"] != "nba"]),
+        "held_out_n": sum(r["graph"] != "nba" for r in all_results),
         "executable_pct": round(
             sum(r["executable"] for r in all_results) / n, 4
         ),
@@ -486,6 +501,11 @@ def main() -> None:
     ap.add_argument("--graph", default=None)
     ap.add_argument("--model", default="claude-haiku-4-5-20251001")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument(
+        "--partial",
+        action="store_true",
+        help="report on the graphs finished so far instead of requiring all 7",
+    )
     args = ap.parse_args()
     if args.cmd == "gen":
         gen(args.model, args.workers)
@@ -496,7 +516,7 @@ def main() -> None:
             sys.exit("exec needs --graph")
         exec_graph(args.graph, args.model)
     elif args.cmd == "report":
-        report(args.model)
+        report(args.model, strict=not args.partial)
     else:
         run_all(args.model, args.workers)
 
