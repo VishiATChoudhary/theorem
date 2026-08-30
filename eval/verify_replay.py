@@ -19,6 +19,7 @@ import json
 import signal
 import sys
 import time
+from pathlib import Path
 
 from eval.run_public import (
     DATA,
@@ -44,19 +45,26 @@ GRAPHS = [
 ]
 
 
-def replay(graph: str, model: str) -> tuple[int, list[dict]]:
+def replay(
+    graph: str,
+    model: str,
+    queries_path: Path | None = None,
+    published_dir: Path | None = None,
+) -> tuple[int, list[dict]]:
     from eval.load_graph import derive_schema
     from theorem.engine.executor import execute_rows, limits
     from theorem.engine.storage import Store
     from theorem.parser import parse
     from theorem.verifier import verify
 
-    published_path = PUB / f"exec-{model}-{graph}.json"
+    published_path = (published_dir or PUB) / f"exec-{model}-{graph}.json"
     if not published_path.exists():
         print(f"[{graph}] no published run to check against, skipping")
         return 0, []
     published = {r["qid"]: r for r in json.loads(published_path.read_text())}
-    queries = load_queries(model)
+    queries = (
+        json.loads(queries_path.read_text()) if queries_path else load_queries(model)
+    )
     schema = derive_schema(json.loads((DATA / f"{graph}_schema.json").read_text()))
 
     store = Store(OUT / f"db-full-{graph}", lock=False)
@@ -115,10 +123,25 @@ def replay(graph: str, model: str) -> tuple[int, list[dict]]:
 
 
 def main(argv: list[str]) -> int:
+    """Optional first two arguments: a queries file and a published dir.
+
+    Comparing a run against the archive it came from is how an engine
+    change is separated from a prompt change: same queries, same stores,
+    only the code differs.
+    """
+    queries_path = published_dir = None
+    while argv and argv[0].startswith("--"):
+        flag, value = argv.pop(0), argv.pop(0)
+        if flag == "--queries":
+            queries_path = Path(value)
+        elif flag == "--published":
+            published_dir = Path(value)
+        else:
+            sys.exit(f"unknown flag {flag}")
     graphs = argv or GRAPHS
     total, all_moved = 0, []
     for graph in graphs:
-        checked, moved = replay(graph, MODEL)
+        checked, moved = replay(graph, MODEL, queries_path, published_dir)
         total += checked
         all_moved += moved
     print(f"\nchecked {total} questions across {len(graphs)} graphs")
