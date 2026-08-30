@@ -1,37 +1,13 @@
 # Benchmarks
 
+The current results live in **[benchmarks/cypherbench.md](benchmarks/cypherbench.md)**, which is generated from the result JSONs so it cannot drift from the data.
+
 ## Headline
 
-On CypherBench multi-hop questions, theorem with the small Haiku 4.5 model reaches **96%** execution accuracy where text2cypher with the same model reaches **56%**. The language switch moves both tested models 20+ points overall; model scaling moves text2cypher approximately nothing.
+On the full public CypherBench test set, all 2,348 questions, the small Haiku model writing theorem reaches **78.0%** execution accuracy where the same model writing Cypher reaches **70.4%**, ahead on all seven graphs.
 
-![Spider diagram](assets/spider.png)
+That page carries the full method, per-graph and per-category breakdowns, the token and latency comparison, and the caveats that matter, including the prompt asymmetry between the two arms and the fact that theorem's prompt was written against the `nba` graph.
 
-## Setup
+## A note on earlier numbers
 
-- **Dataset**: CypherBench NBA slice, 60 questions stratified over the expressible categories (no union, optional-match, or edge-property questions; those are [roadmap items](https://github.com/VishiATChoudhary/theorem/blob/main/ROADMAP.md)).
-- **Conditions**: both ran on the identical slice with one repair retry each. text2cypher executed live on Neo4j; theorem executed on its own engine over the same graph loaded from CypherBench JSON.
-- **Metric**: execution accuracy against CypherBench gold answers (set comparison, order-insensitive except explicit order-by questions).
-
-## Results
-
-| Condition | Overall EX | Multi-hop | 1-hop | Syntax valid | Mean result tokens |
-|-----------|-----------:|----------:|------:|-------------:|-------------------:|
-| theorem + Haiku 4.5 | **98.3%** | **96.0%** | **100%** | 100% | 245 |
-| text2cypher + Haiku 4.5 | 73.3% | 56.0% | 85.7% | 98.3% | 394 |
-| theorem + Sonnet 5 | **95.0%** | **92.0%** | 97.1% | 100% | 278 |
-| text2cypher + Sonnet 5 | 71.7% | 60.0% | 80.0% | 96.7% | 207 |
-
-Published frontier baselines for context: Claude 3.5 Sonnet 61.6% EX, GPT-4o 60.2% (CypherBench, arXiv 2412.18702). Two model generations later, Claude Opus 4.8 and GPT-5.5 still sit at 51-58% Cypher EX with 19-44% on hard queries (Text2GraphQuery-Bench, arXiv 2602.11745).
-
-## What the eval fed back into the language
-
-Three language changes came out of the eval loop, each documented in the spec: global aggregates, trail semantics, and the `compute` verb. The benchmark is not just a scoreboard; it is the language's test suite.
-
-## Reproduce
-
-```bash
-uv run python -m eval.run_eval --n 60   # needs the claude CLI; docker for the Neo4j baseline
-uv run python -m eval.spider
-```
-
-Per-question results, prompts, and the harness live in [`eval/`](https://github.com/VishiATChoudhary/theorem/tree/main/eval). New model runs are welcome as [benchmark result issues](https://github.com/VishiATChoudhary/theorem/issues/new?template=benchmark_result.md).
+An earlier version of this page reported 98.3% for theorem against 73.3% for text2cypher, and 96% against 56% on multi-hop. Those came from a 60-question hand-picked slice of the `nba` graph with the categories theorem could not then express removed, and with a prompt that had been iterated against those same questions. They did not survive the full public benchmark and should not be quoted. The numbers above are the whole test set with nothing excluded.

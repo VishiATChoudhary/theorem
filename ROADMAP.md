@@ -2,13 +2,24 @@
 
 Directions, not promises. Comment on the linked issues (or open one) to influence priority.
 
-## v0.2: close the expressiveness gaps
+## v0.2: close the expressiveness gaps (done)
 
-The CypherBench eval deliberately excluded three query categories theorem cannot yet express. They are the top priorities:
+- **Union**: a line containing only `or` starts an alternative branch.
+- **Optional traversal**: `follow ... or none` keeps rows whose edge is absent.
+- **Edge properties**: `via.<prop>` inside a follow's condition, with `none` for
+  values that are missing rather than merely unequal.
 
-- **Union**: combine results of two pipelines (`union` verb, one line, staged like everything else).
-- **Optional traversal**: keep rows whose edge is absent (`follow ... optional`), nulls sort last as everywhere.
-- **Edge properties**: match and return properties on edges, not just nodes.
+## v0.3: what technical graphs need and Cypher already has
+
+Aimed at dependency, bill-of-materials and standards graphs, where the
+interesting questions are about reach rather than about one hop:
+
+- **Transitive traversal**: follow an edge repeatedly, bounded or to exhaustion.
+  "What transitively depends on this component" has no expression today.
+- **Filtering on an aggregate**: keep the groups whose count passes a test,
+  without a second query.
+- **Path as a value**: return *why* two nodes are connected, not just that they
+  are, so an agent can cite the chain.
 
 Each needs a language proposal issue first (see [CONTRIBUTING](CONTRIBUTING.md), spec-first rule).
 

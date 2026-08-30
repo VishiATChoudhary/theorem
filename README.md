@@ -16,7 +16,7 @@ Every query is verified whole against the live schema before anything runs.</p>
 
 LLMs get roughly **40% of Cypher queries wrong** on realistic schemas. Two model generations of scaling have not fixed it: frontier models still sit at 51-61% execution accuracy. The failure modes are structural: reversed arrows, hallucinated labels, implicit grouping, long-range brackets.
 
-**theorem** removes each failure mode by construction. On CypherBench multi-hop questions, the small Haiku model writing theorem reaches **96%** where the same model writing Cypher reaches **56%**.
+**theorem** removes each failure mode by construction. On the full public CypherBench test set, all 2,348 questions, the small Haiku model writing theorem reaches **78.0%** execution accuracy where the same model writing Cypher reaches **70.4%**, ahead on all seven graphs.
 
 <p align="center">
   <img src="docs/assets/demo.gif" alt="theorem REPL: a typo is caught before execution with a suggestion; a five-step pipeline aggregates suppliers" width="720">
@@ -70,20 +70,26 @@ And a write surface no existing query language has: `assert` with provenance, re
 
 ## Benchmarks
 
-CypherBench NBA slice, 60 questions stratified over the expressible categories; both conditions ran on the identical slice with one repair retry each. Execution accuracy against CypherBench gold answers; text2cypher executed live on Neo4j.
+The complete public [CypherBench](https://github.com/megagonlabs/cypherbench) test set (ACL 2025): all 2,348 questions across all 7 test graphs, every match category, the full unsampled graphs, zero-shot with one generation and no repair retry, scored with the benchmark's own execution-accuracy comparator against its published answers.
 
-| Condition | Overall EX | Multi-hop | 1-hop | Syntax valid | Mean result tokens |
-|-----------|-----------:|----------:|------:|-------------:|-------------------:|
-| theorem + Haiku 4.5 | **98.3%** | **96.0%** | **100%** | 100% | 245 |
-| text2cypher + Haiku 4.5 | 73.3% | 56.0% | 85.7% | 98.3% | 394 |
-| theorem + Sonnet 5 | **95.0%** | **92.0%** | 97.1% | 100% | 278 |
-| text2cypher + Sonnet 5 | 71.7% | 60.0% | 80.0% | 96.7% | 207 |
+| Condition | EX | Multi-hop EX | Executable | Mean result tokens |
+|-----------|---:|-------------:|-----------:|-------------------:|
+| theorem + Haiku 4.5 | **78.0%** | **78.7%** | 97.4% | **159** |
+| text2cypher + Haiku 4.5 | 70.4% | 68.9% | 95.3% | 242 |
+| text2cypher + Claude 3.5 Sonnet (published) | 61.6% | — | 96.3% | — |
+| text2cypher + GPT-4o (published) | 60.2% | — | 94.9% | — |
 
-![Spider diagram](eval/out/spider.png)
+The text2cypher row is a control, not a citation: same model, same questions, same comparator, the official zero-shot prompt, executed on the official Neo4j image. Excluding `nba`, the one graph theorem's prompt was written against, theorem scores 76.9%. Median execution latency is 0.2 ms against 67 ms over Bolt.
 
-Published frontier baselines for context: Claude 3.5 Sonnet 61.6% EX, GPT-4o 60.2% (CypherBench, arXiv 2412.18702); two model generations later, Claude Opus 4.8 and GPT-5.5 still sit at 51-58% Cypher EX with 19-44% on hard queries (Text2GraphQuery-Bench, arXiv 2602.11745). Model scaling is flat on this task; the language switch moves both models 20+ points. The full "won't better models fix Cypher?" argument is Section 7 of [the technical report](docs/report/graphlang-v0-report.pdf): corpus (not capacity) is the bottleneck and your schema is never in the corpus; surviving errors are the silent semantic kind that Cypher executes and theorem refuses; and a perfect Cypher generator still writes against a database with no receipts, dedup, lineage, granularity, health, or token budgets.
+Full method, per-category results and the caveats that matter, including the prompt asymmetry between the two arms, are in [docs/benchmarks/cypherbench.md](docs/benchmarks/cypherbench.md). Per-question queries and errors for both arms are in `eval/out/public/`.
 
-Reproduce: `uv run python -m eval.run_eval --n 60` (needs the `claude` CLI; docker for the Neo4j text2cypher baseline), then `uv run python -m eval.spider`.
+Reproduce (needs the `claude` CLI, and docker for the text2cypher control):
+
+```bash
+uv run python -m eval.run_public all --model claude-haiku-4-5-20251001
+uv run python -m eval.run_cypher_public all --model claude-haiku-4-5-20251001
+uv run python -m eval.make_report
+```
 
 ## Development
 
@@ -91,7 +97,7 @@ Reproduce: `uv run python -m eval.run_eval --n 60` (needs the `claude` CLI; dock
 git clone https://github.com/VishiATChoudhary/theorem
 cd theorem
 uv sync
-uv run pytest -q     # 146 tests incl. property-based hardening, < 2s
+uv run pytest -q     # 277 tests incl. property-based hardening
 ```
 
 | Path | What |

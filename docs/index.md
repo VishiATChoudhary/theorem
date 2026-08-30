@@ -2,7 +2,7 @@
 
 **A graph language agents can't get wrong.** Every query is verified whole against the live schema before anything runs.
 
-LLMs get roughly 40% of Cypher queries wrong on realistic schemas, and two years of model scaling have not moved that number. The failure modes are structural: reversed arrows, hallucinated labels, implicit grouping, long-range brackets. theorem removes each failure mode by construction. On CypherBench multi-hop questions, the small Haiku model writing theorem reaches **96%** where the same model writing Cypher reaches **56%**.
+LLMs get roughly 40% of Cypher queries wrong on realistic schemas, and two years of model scaling have not moved that number. The failure modes are structural: reversed arrows, hallucinated labels, implicit grouping, long-range brackets. theorem removes each failure mode by construction. On the full public CypherBench test set, all 2,348 questions, the small Haiku model writing theorem reaches **78.0%** execution accuracy where the same model writing Cypher reaches **70.4%**, ahead on all seven graphs.
 
 ![theorem REPL demo](assets/demo.gif)
 

@@ -6,7 +6,7 @@ The obvious objection to theorem is that model progress will dissolve it: wait a
 
 Between late 2024 and mid 2026 the frontier advanced from Claude 3.5 Sonnet and GPT-4o to Claude Opus 4.8 and GPT-5.5, several major model generations. Cypher generation did not move with it. Text2GraphQuery-Bench (Feb 2026, arXiv 2602.11745) evaluates exactly these newest models: 51.2% Cypher execution accuracy for Claude Opus 4.8 and 53.3% for GPT-5.5 zero-shot, rising only to 57.6% and 55.3% few-shot. On the hardest query tier, GPT-5.5 falls to 19.1% zero-shot.
 
-Our own benchmark is a live second data point: text2cypher with Sonnet 5 (71.7%) is no better than with the far smaller Haiku 4.5 (73.3%), while switching the *language* moved both models twenty-plus points overall and thirty-plus on multi-hop. Model scaling is flat on this task; language design is not. Dedicated Cypher repair-and-triage systems were still being published in June 2026 (CYGNET, arXiv 2606.04645), which is not what an about-to-be-solved problem looks like.
+Our own control is a live second data point: on the full public CypherBench test set, the same Haiku 4.5 model scores 70.4% writing Cypher and 78.0% writing theorem, and the published frontier baselines from 2024 sit below both at 60-62%. Model scaling has been flat on this task; language design has not. Dedicated Cypher repair-and-triage systems were still being published in June 2026 (CYGNET, arXiv 2606.04645), which is not what an about-to-be-solved problem looks like.
 
 ## The reason it stays flat is structural: corpus, not capacity
 
@@ -28,6 +28,6 @@ The 2026 agent-memory landscape confirms nobody else is building this surface: p
 
 ## Even for a perfect generator, the economics invert
 
-Our results show a small, cheap model using theorem outperforming a frontier model writing Cypher (98.3% vs 71.7%). Agent fleets run on small models because they issue thousands of queries; a language that moves reliable graph access down-market is worth more than a frontier model that matches it at many times the price.
+Our results show a small, cheap model using theorem outperforming the published frontier Cypher baselines (78.0% against 61.6% for Claude 3.5 Sonnet and 60.2% for GPT-4o), and beating the same model writing Cypher by 7.7 points. Agent fleets run on small models because they issue thousands of queries; a language that moves reliable graph access down-market is worth more than a frontier model that matches it at many times the price.
 
 Canonical forms add a compounding benefit that *improves* as generation improves: when there is exactly one way to write each operation, correct agents produce byte-identical queries. That makes plan caching trivial and agent behavior auditable. The better the models get, the more of their output can be cached, verified, and trusted, but only in a language canonical enough to make equality meaningful.

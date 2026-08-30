@@ -59,6 +59,22 @@
 \maketitle
 
 \begin{abstract}
+\begin{center}
+\fbox{\begin{minipage}{0.92\textwidth}
+\textbf{Erratum (2026-08-30).} The evaluation in this report used a
+60-question hand-picked slice of the CypherBench \texttt{nba} graph, with the
+categories the language could not then express removed, and a prompt that had
+been iterated against those same questions. Its headline figures (98.3\% against
+73.3\%, and 96.0\% against 56.0\% on multi-hop) do not survive the full public
+benchmark and should not be cited. On the complete CypherBench test set, all
+2{,}348 questions across all seven graphs with no category excluded, theorem
+scores \textbf{78.0\%} against \textbf{70.4\%} for the same model writing Cypher.
+See \texttt{docs/benchmarks/cypherbench.md} for the current method and results.
+\end{minipage}}
+\end{center}
+
+\vspace{1em}
+
 \noindent Language models write graph database queries badly, and they fail in structural, predictable ways: reversed relationship directions, hallucinated schema elements, implicit-grouping mistakes, and long-range syntax errors. GraphLang is a graph query and construction language that removes each documented failure mode by construction rather than by prompting around it, paired with a write surface no existing query language offers agents: provenance-carrying structural writes with receipts, system-detected and agent-resolved deduplication, agent-controlled granularity with full lineage, and queryable per-node health. This report documents the complete v0: the data model, every language construct with its exact semantics, the verify-before-execute pipeline, the single-process engine whose write-ahead-log and immutable-run architecture preserves the shape of the planned distributed system, and the development methodology (test-first with an adversarial review loop that surfaced thirteen confirmed defects before evaluation). On a 60-question CypherBench slice with both conditions running the same models live, GraphLang reaches 98.3\% execution accuracy with Claude Haiku 4.5 against 73.3\% for text-to-Cypher with the same model; on multi-hop questions the margin is 96.0\% to 56.0\%. The language has no training corpus; it is taught entirely in context.
 \end{abstract}
 
