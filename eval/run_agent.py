@@ -101,7 +101,7 @@ class TheoremArm:
     def prompt(self, question: str) -> str:
         from eval.prompts import theorem_prompt
 
-        return theorem_prompt(self.schema, question)
+        return theorem_prompt(self.schema, question, self.store)
 
     def run(self, query: str):
         from theorem.engine.executor import execute_rows

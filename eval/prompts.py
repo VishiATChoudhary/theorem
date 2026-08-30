@@ -138,11 +138,11 @@ return diff
 """
 
 
-def theorem_prompt(schema: Schema, question: str) -> str:
+def theorem_prompt(schema: Schema, question: str, store=None) -> str:
     return (
         f"{GRAPHLANG_TUTORIAL}\n"
         f"Live schema (classes with properties, edges with roles):\n"
-        f"{schema.render()}\n\n"
+        f"{schema.render(store)}\n\n"
         f"Write a single theorem query answering the question.\n"
         f"Output ONLY the query text, no explanation, no code fences.\n\n"
         f"Question: {question}\n"

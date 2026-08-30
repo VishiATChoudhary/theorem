@@ -107,10 +107,26 @@ class Schema:
         )
         return s
 
-    def render(self) -> str:
-        """Explainer-format schema listing."""
+    def render(self, store=None) -> str:
+        """Explainer-format schema listing.
+
+        With a store, only classes that hold data are listed, and only
+        edges whose two ends are both listed. An agent choosing what to
+        query should see the schema that can answer something; empty
+        classes are prompt tokens on every turn and an invitation to
+        traverse somewhere nothing lives. Without a store nothing is
+        hidden, since a write workflow needs to see classes it has not
+        populated yet.
+        """
+        populated = None
+        if store is not None:
+            populated = {
+                cls for cls, ids in getattr(store, "by_class", {}).items() if ids
+            }
         lines = ["classes:"]
         for c in self.classes.values():
+            if populated is not None and c.name not in populated:
+                continue
             props = ", ".join(c.props)
             suffix = ""
             if c.status == "provisional":
@@ -119,6 +135,10 @@ class Schema:
             lines.append(f"  {c.name}{{{props}}}{base}{suffix}")
         lines.append("edges:")
         for e in self.edges.values():
+            if populated is not None and not all(
+                cls in populated for cls in e.roles.values()
+            ):
+                continue
             roles = ", ".join(f"{r}: {cls}" for r, cls in e.roles.items())
             # An edge's own properties are only reachable through via.,
             # so they have to be visible here or nobody can ask about them.
