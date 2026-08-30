@@ -29,6 +29,22 @@ What is not in doubt is the cost. theorem executes 19x faster, and costs 2.5x th
 
 At n=120 the 95% interval on either solve rate is about 6 points wide, so this benchmark can only detect large differences. Narrowing it means more questions and more graphs, not more retries.
 
+## Why the token gap, and when it closes
+
+The gap is one thing and it is not the data. Per turn on this graph, theorem spends 1,241 tokens stating its language against roughly 146 for the Cypher prompt's instructions, because Cypher arrives already known and theorem has to be taught in context every time. On the schema theorem is the cheaper of the two: 119 tokens against 333.
+
+That matters because the two costs scale differently. The rules are a fixed cost per turn no matter how big the graph is; the schema grows with it. Measured over merged CypherBench schemas, each additional class costs theorem about 42 tokens and Cypher about 104, so theorem's fixed overhead is repaid at roughly 18 to 20 classes and is pure profit above that.
+
+| Schema | Classes | theorem | text2cypher |
+| --- | ---: | ---: | ---: |
+| terrorist_attack (this benchmark) | 5 | 1,405 | 476 |
+| three graphs merged | 15 | 1,698 | 1,352 |
+| four graphs merged | 20 | 1,879 | 1,797 |
+| six graphs merged | 28 | 2,266 | 2,771 |
+| all eight merged | 39 | 2,837 | 4,001 |
+
+The benchmark graphs have five to eleven classes, which is the region where theorem looks most expensive. A schema of the size this language is built for, a bill of materials or a standards corpus, sits the other side of the crossover. Two caveats: the Cypher figure uses the benchmark's official JSON schema format, and a terser serialisation would push the crossover out; and none of this changes the small-schema result measured above, which is what the table at the top reports.
+
 ## Reproducing
 
 ```bash
