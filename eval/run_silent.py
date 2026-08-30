@@ -326,9 +326,148 @@ def _row(t: Tally, bold: bool = False) -> str:
     )
 
 
+
+# ---- the published page ----------------------------------------------
+
+DOC = Path(__file__).resolve().parents[1] / "docs" / "benchmarks" / "silent-failure.md"
+
+
+def write_doc(graphs: list[str]) -> Path:
+    """Regenerate docs/benchmarks/silent-failure.md from the run JSONs."""
+    per_graph = {}
+    for graph in graphs:
+        path = PUB / f"silent-{graph}.json"
+        if path.exists():
+            per_graph[graph] = json.loads(path.read_text())
+    if not per_graph:
+        sys.exit("no silent-*.json results to report on")
+
+    lines = [
+        "# When a query is wrong, does anyone find out?",
+        "",
+        "Execution accuracy counts the queries a model gets right. It says",
+        "nothing about the ones it gets wrong, and that is where the two",
+        "languages differ most. A Cypher query naming a label that does not",
+        "exist is legal Cypher: it matches nothing and returns an empty",
+        "result, which is exactly what a question whose true answer is empty",
+        "returns. theorem verifies the whole query against the live schema",
+        "before running any of it, so the same mistake is refused.",
+        "",
+        "## Method",
+        "",
+        "Start from a query known to be correct, break one token in a way",
+        "models actually break queries, run it, and record what the caller",
+        "sees. Each arm's own correct query is mutated: theorem's are the",
+        "generated queries that scored exactly right, Cypher's are",
+        "CypherBench's gold queries. Four mutations, each applied at most",
+        "once per query:",
+        "",
+        "| mutation | theorem | Cypher |",
+        "|---|---|---|",
+        "| class | `find player` becomes `find players` | `:Player` becomes `:Players` |",
+        "| edge | `playsFor` becomes `playsFors` | `[:playsFor]` becomes `[:playsFors]` |",
+        "| property | `where name =` becomes `where name_x =` | `.name` becomes `.name_x` |",
+        "| direction | the arrival role is swapped for the other role | the arrow is reversed |",
+        "",
+        "Outcomes:",
+        "",
+        "- **rejected** &mdash; an error instead of an answer. The caller knows.",
+        "- **empty** &mdash; ran, returned nothing. Indistinguishable from a true empty answer.",
+        "- **wrong** &mdash; ran, returned rows that are not the right rows.",
+        "- **inert** &mdash; the mutation did not change the answer; not counted.",
+        "",
+        "`empty` and `wrong` together are **undetectable**: the caller gets a",
+        "result and has no signal that it is not the answer.",
+        "",
+    ]
+
+    for graph, tallies in per_graph.items():
+        lines += [f"## {graph}", "", *_table(tallies), ""]
+
+    total = {}
+    for tallies in per_graph.values():
+        for t in tallies:
+            acc = total.setdefault(t["arm"], dict.fromkeys(
+                ("rejected", "empty", "wrong", "inert", "skipped", "warned"), 0))
+            for k in acc:
+                acc[k] += t[k]
+    lines += ["## Both graphs", "", "| arm | mutants | rejected | undetectable |",
+              "|---|---:|---:|---:|"]
+    for arm, acc in total.items():
+        n = acc["rejected"] + acc["empty"] + acc["wrong"]
+        bad = acc["empty"] + acc["wrong"]
+        lines.append(f"| {arm} | {n} | {acc['rejected']} | {100 * bad / n:.1f}% |")
+
+    lines += [
+        "",
+        "## What this does and does not show",
+        "",
+        "**The one case theorem does not catch is direction, and only when",
+        "both of an edge's roles hold the same class.** `hasFather(subj:",
+        "person, obj: person)` is type-correct whichever role you arrive at,",
+        "so swapping them is a different question rather than an invalid one,",
+        "and no schema check can tell. `nba` has no same-class edge and",
+        "theorem catches everything on it; `fictional_character` has five, and",
+        "half the direction mutants there survive. Cypher has the same blind",
+        "spot and reports none of the other three either.",
+        "",
+        "**Neo4j does notify the driver.** A missing label, relationship type",
+        "or property raises a `01N42` notification alongside a successful",
+        "result. It is a warning on a call that succeeded, not an error, and",
+        "it never fires on a reversed arrow. The `warned` column counts them",
+        "so the comparison is not accused of hiding one. Every published",
+        "text2cypher pipeline, including CypherBench's own harness, reads the",
+        "rows and not the notifications.",
+        "",
+        "**A mutation is not a model.** This measures what a language does",
+        "with a broken query, not how often a model breaks one. How often is",
+        "the execution-accuracy benchmark, which is a separate page.",
+        "",
+        f"Reproduce: `uv run python -m eval.run_silent --graph {list(per_graph)[0]}`.",
+        "",
+    ]
+    DOC.parent.mkdir(parents=True, exist_ok=True)
+    DOC.write_text("\n".join(lines) + "\n")
+    return DOC
+
+
+def _table(tallies: list[dict]) -> list[str]:
+    out = [
+        "| arm | mutation | mutants | rejected | empty | wrong | warned | undetectable |",
+        "|---|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    by_arm: dict[str, list[dict]] = {}
+    for t in tallies:
+        by_arm.setdefault(t["arm"], []).append(t)
+    for arm, ts in by_arm.items():
+        acc = dict.fromkeys(("rejected", "empty", "wrong", "warned"), 0)
+        for t in sorted(ts, key=lambda t: t["mutation"]):
+            for k in acc:
+                acc[k] += t[k]
+            out.append(_doc_row(arm, t["mutation"], t))
+        out.append(_doc_row(f"**{arm}**", "**all**", acc))
+    return out
+
+
+def _doc_row(arm: str, mutation: str, t: dict) -> str:
+    n = t["rejected"] + t["empty"] + t["wrong"]
+    bad = t["empty"] + t["wrong"]
+    pct = f"{100 * bad / n:.1f}%" if n else "-"
+    return (
+        f"| {arm} | {mutation} | {n} | {t['rejected']} | {t['empty']} "
+        f"| {t['wrong']} | {t['warned']} | {pct} |"
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--graph", default="nba")
+    ap.add_argument(
+        "--report",
+        nargs="*",
+        metavar="GRAPH",
+        help="regenerate the published page from existing results and exit",
+    )
     ap.add_argument("--arm", choices=["theorem", "cypher", "both"], default="both")
     ap.add_argument("--limit", type=int, default=200, help="questions per arm")
     ap.add_argument("--queries", type=Path, help="a frozen queries JSON to mutate")
@@ -339,6 +478,9 @@ def main() -> int:
         help="the scored run that says which of those queries were right",
     )
     args = ap.parse_args()
+    if args.report is not None:
+        print(f"wrote {write_doc(args.report or ['nba', 'fictional_character'])}")
+        return 0
 
     questions = questions_for(args.graph)
     tallies: list[Tally] = []

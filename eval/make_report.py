@@ -49,6 +49,17 @@ CATEGORY_ORDER = [
 ]
 
 
+
+def _scored_fingerprint() -> str:
+    """The prompt hash of the queries this report was built from."""
+    from eval.run_public import PUB
+
+    files = sorted(PUB.glob("queries-*.json"))
+    if not files:
+        return "unknown"
+    return files[-1].stem.rsplit("-", 1)[-1]
+
+
 def pct(x):
     return "n/a" if x is None else f"{100 * x:.2f}"
 
@@ -330,12 +341,12 @@ def main() -> None:
 
     w("## Protocol")
     w("")
-    from eval.run_public import prompt_fingerprint
-
     w(
-        f"- **Prompt version**: fingerprint `{prompt_fingerprint()}`. The "
-        "frozen query file is keyed by this hash, so a run cannot silently "
-        "score queries generated from a different tutorial."
+        f"- **Prompt version**: fingerprint `{_scored_fingerprint()}`, read "
+        "from the name of the frozen query file these results were scored "
+        "from. Recomputing it here instead would print the tutorial that "
+        "happens to be checked out, which is how a report comes to claim a "
+        "prompt it never ran."
     )
     w(
         "- **Questions**: the full published test set, all 2,348 "
