@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import functools
 import signal
 import subprocess
 import sys
@@ -367,6 +368,7 @@ def exec_graph(graph: str, model: str) -> None:
         count_tokens,
         execute_read,
         execute_rows,
+        limits,
     )
     from theorem.parser import parse
     from theorem.verifier import verify
@@ -390,6 +392,10 @@ def exec_graph(graph: str, model: str) -> None:
 
     signal.signal(signal.SIGALRM, _alarm)
     PUB.mkdir(parents=True, exist_ok=True)
+    # The engine's own ceilings are tighter than the official metric's,
+    # so pin them to it: the published number must be what the official
+    # comparator's timeout allows, not what a default happens to be.
+    exec_limits = functools.partial(limits, seconds=EXEC_TIMEOUT_S, max_rows=10**9)
     partial = PUB / f"exec-{model}-{graph}.partial.json"
     results = json.loads(partial.read_text()) if partial.exists() else []
     done = {r["qid"] for r in results}
@@ -409,7 +415,8 @@ def exec_graph(graph: str, model: str) -> None:
             signal.alarm(EXEC_TIMEOUT_S)
             t0 = time.perf_counter()
             plans = verify(parse(query), schema)
-            rows = execute_rows(plans, store, schema)
+            with exec_limits():
+                rows = execute_rows(plans, store, schema)
             rec["latency_ms"] = round(1000 * (time.perf_counter() - t0), 2)
             rec["executable"] = True
             rec["ex"] = score(rows, q["gold_cypher"], q["answer_json"])
@@ -418,9 +425,10 @@ def exec_graph(graph: str, model: str) -> None:
             # What the agent actually receives back, rendered and subject
             # to the same token budget a real session would apply.
             try:
-                rendered = execute_read(
-                    verify(parse(query), schema), store, schema, ReadContext()
-                )
+                with exec_limits():
+                    rendered = execute_read(
+                        verify(parse(query), schema), store, schema, ReadContext()
+                    )
                 rec["result_tokens"] = count_tokens(rendered)
             except Exception:
                 pass

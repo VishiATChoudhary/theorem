@@ -11,3 +11,5 @@ dist/
 .hypothesis/
 eval/out/*.log
 handoffs/
+eval/out/public-archive-*/
+eval/out/*.log

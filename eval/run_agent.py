@@ -104,15 +104,20 @@ class TheoremArm:
         return theorem_prompt(self.schema, question, self.store)
 
     def run(self, query: str):
-        from theorem.engine.executor import execute_rows
+        from theorem.engine.executor import execute_rows, limits
         from theorem.parser import parse
         from theorem.verifier import verify
 
-        rows = execute_rows(verify(parse(query), self.schema), self.store, self.schema)
+        # Pinned to the same ceiling the Cypher arm gets, so neither arm
+        # is stopped by a default the other does not have.
+        with limits(seconds=EXEC_TIMEOUT_S, max_rows=10**9):
+            rows = execute_rows(
+                verify(parse(query), self.schema), self.store, self.schema
+            )
         return rows, _render(rows)
 
     def close(self):
-        pass
+        self.store.close()
 
 
 class CypherArm:
