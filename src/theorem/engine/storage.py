@@ -53,6 +53,9 @@ class Store:
         # class name -> node ids, so seeding a query costs the class
         # rather than the whole store
         self.by_class: dict[str, list[str]] = {}
+        # (class, folded name) -> node ids, so looking a node up by name
+        # costs the name rather than the class
+        self.by_name: dict[tuple[str, str], list[str]] = {}
         self.edges: dict[str, list[Edge]] = {}
         self.edge_index: dict[str, Edge] = {}
         self.lineage: list[dict] = []
@@ -225,6 +228,28 @@ class Store:
         self.wal_path.write_text("")
         return run_path
 
+    def _name_key(self, node) -> tuple[str, str] | None:
+        from .text import fold
+
+        name = node.props.get("name")
+        if not isinstance(name, str):
+            return None
+        return (node.cls, fold(name))
+
+    def _index_name(self, node) -> None:
+        key = self._name_key(node)
+        if key is not None:
+            self.by_name.setdefault(key, []).append(node.id)
+
+    def _deindex_name(self, node) -> None:
+        key = self._name_key(node)
+        if key is not None and key in self.by_name:
+            ids = [i for i in self.by_name[key] if i != node.id]
+            if ids:
+                self.by_name[key] = ids
+            else:
+                del self.by_name[key]
+
     # ---- ids -------------------------------------------------------
 
     def next_id(self, cls: str) -> str:
@@ -276,10 +301,13 @@ class Store:
                 setattr(node, k, v)
             self.nodes[node.id] = node
             self.by_class.setdefault(node.cls, []).append(node.id)
+            self._index_name(node)
             self.edges.setdefault(node.id, [])
             self._bump_counter(node.cls, node.id)
         elif op == "patch_node":
             node = self.nodes[rec["id"]]
+            if "name" in rec["props"]:
+                self._deindex_name(node)
             for k, v in rec["props"].items():
                 if k in node.props and node.props[k] != v:
                     node.conflict_count += 1
@@ -287,6 +315,8 @@ class Store:
             node.last_confirmed = pos
             if "state" in rec:
                 node.state = rec["state"]
+            if "name" in rec["props"]:
+                self._index_name(node)
         elif op == "put_edge":
             edge = Edge(
                 id=rec["id"],

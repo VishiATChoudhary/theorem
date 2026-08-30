@@ -202,6 +202,33 @@ def _candidate_rows(store: Store) -> list[dict]:
     return rows
 
 
+def _name_lookup(stmt: Find, store: Store) -> list[str] | None:
+    """Node ids that could match a name-equality condition, else None.
+
+    A prefilter only: the caller still evaluates the whole condition on
+    every candidate, so this can safely return a superset and matching
+    semantics are untouched. Returns None when the condition is not
+    purely name equality, which means "no shortcut, read the class".
+    """
+    if not stmt.cond:
+        return None
+    for _joiner, clause in stmt.cond:
+        if (
+            clause.col != ("name",)
+            or clause.op != "="
+            or not isinstance(clause.value, str)
+        ):
+            return None
+    ids: list[str] = []
+    seen: set[str] = set()
+    for _joiner, clause in stmt.cond:
+        for nid in store.by_name.get((stmt.target, _fold(clause.value)), ()):
+            if nid not in seen:
+                seen.add(nid)
+                ids.append(nid)
+    return ids
+
+
 def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
     name = stmt.name
 
@@ -228,8 +255,14 @@ def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
         if stmt.target == "nodes":
             nodes = [n for n in store.nodes.values()]
         else:
+            candidates = _name_lookup(stmt, store)
             nodes = [
-                store.nodes[nid] for nid in store.by_class.get(stmt.target, ())
+                store.nodes[nid]
+                for nid in (
+                    store.by_class.get(stmt.target, ())
+                    if candidates is None
+                    else candidates
+                )
             ]
         pool = [
             {name: n.id}
