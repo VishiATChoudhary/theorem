@@ -110,6 +110,10 @@ def _col_value(store: Store, schema: Schema, row: dict, col: Col):
         return value
     if len(col) >= 2 and f"{head}_key" in row and col[1] == "key":
         return row[f"{head}_key"]
+    if len(col) >= 2 and col[1] in row:
+        # g.<member>: a binding named through its group. Nothing has
+        # collapsed it, so it still reads as the binding itself.
+        return _col_value(store, schema, row, col[1:])
     raise ExecError(f"cannot resolve column {'.'.join(col)}")
 
 
@@ -471,6 +475,50 @@ def _global_aggregate(
     table.group_meta.clear()
 
 
+def _materialize_groups(
+    gname: str, table: Table, store: Store, schema: Schema
+) -> None:
+    """Collapse the rows into one row per group key.
+
+    Done on demand: by the first aggregate over the group, or by a return
+    that names the group, so `group by x as g` then `return g.key` works
+    without an aggregate in between.
+    """
+    if table.grouped or gname not in table.group_meta:
+        return
+    key_col, kind = table.group_meta[gname]
+    groups: dict = {}
+    order: list = []
+    for row in table.rows:
+        key = _col_value(store, schema, row, key_col)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(row)
+    group_rows = []
+    for key in order:
+        base = {f"{gname}_key": key, f"__members_{gname}": groups[key]}
+        if kind == "identity":
+            base[key_col[0]] = key  # keep the node binding on the group row
+        group_rows.append(base)
+    table.rows = group_rows
+    table.grouped = True
+
+
+def _group_referenced_by(stmt: Return, table: Table) -> str | None:
+    """The group a return asks to collapse, if any.
+
+    Only naming the group itself or its key asks for one row per group.
+    `g.<member>` names a binding through its group and reads as that
+    binding, so it leaves the rows alone.
+    """
+    cols = list(stmt.cols) + ([stmt.order_by] if stmt.order_by else [])
+    for col in cols:
+        if col[0] in table.group_meta and (len(col) == 1 or col[1] == "key"):
+            return col[0]
+    return None
+
+
 def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> None:
     gname = stmt.col[0]
     if gname not in table.group_meta:
@@ -480,24 +528,7 @@ def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> N
     prop = stmt.col[2] if len(stmt.col) > 2 else None
     key_col, kind = table.group_meta[gname]
 
-    if not table.grouped:
-        groups: dict = {}
-        order: list = []
-        for row in table.rows:
-            key = _col_value(store, schema, row, key_col)
-            if key not in groups:
-                groups[key] = []
-                order.append(key)
-            groups[key].append(row)
-        group_rows = []
-        for key in order:
-            members = groups[key]
-            base = {f"{gname}_key": key, f"__members_{gname}": members}
-            if kind == "identity":
-                base[key_col[0]] = key  # keep the node binding on the group row
-            group_rows.append(base)
-        table.rows = group_rows
-        table.grouped = True
+    _materialize_groups(gname, table, store, schema)
 
     for row in table.rows:
         members = row[f"__members_{gname}"]
@@ -557,6 +588,9 @@ def _serialize(
         for c in stmt.cols
     )
 
+    gname = _group_referenced_by(stmt, table)
+    if gname is not None:
+        _materialize_groups(gname, table, store, schema)
     rows = _distinct_rows(store, schema, stmt, table.rows)
     if stmt.order_by is not None:
         rows = _sorted_rows(
@@ -772,6 +806,9 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
         if not isinstance(stmt, BRANCH_STMTS):
             branches.flush(table)
         if isinstance(stmt, Return):
+            gname = _group_referenced_by(stmt, table)
+            if gname is not None:
+                _materialize_groups(gname, table, store, schema)
             rows = _distinct_rows(store, schema, stmt, table.rows)
             if stmt.order_by is not None:
                 rows = _sorted_rows(
