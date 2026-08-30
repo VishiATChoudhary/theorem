@@ -81,7 +81,7 @@ The complete public [CypherBench](https://github.com/megagonlabs/cypherbench) te
 
 The text2cypher row is a control, not a citation: same model, same questions, same comparator, the official zero-shot prompt, executed on the official Neo4j image. Excluding `nba`, the one graph theorem's prompt was written against, theorem scores 76.9%. Median execution latency is 0.2 ms against 67 ms over Bolt.
 
-Full method, per-category results and the caveats that matter, including the prompt asymmetry between the two arms, are in [docs/benchmarks/cypherbench.md](docs/benchmarks/cypherbench.md). Per-question queries and errors for both arms are in `eval/out/public/`.
+Full method, per-category results and the caveats that matter, including the prompt asymmetry between the two arms, are in [docs/benchmarks/cypherbench.md](docs/benchmarks/cypherbench.md). That benchmark measures one-shot translation; for convergence under retry and tokens across a whole agent loop, on graphs nothing was tuned on, see [docs/benchmarks/agent-loop.md](docs/benchmarks/agent-loop.md). Per-question queries and errors for both arms are in `eval/out/public/`.
 
 Reproduce (needs the `claude` CLI, and docker for the text2cypher control):
 

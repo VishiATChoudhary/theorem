@@ -97,6 +97,7 @@ Executable queries went from 82.75% to 97.40%, which is the clearest single sign
 
 ## Protocol
 
+- **Prompt version**: fingerprint `eb0f4010`. The frozen query file is keyed by this hash, so a run cannot silently score queries generated from a different tutorial.
 - **Questions**: the full published test set, all 2,348 questions across all 7 test graphs. No category was excluded, including the ones theorem v0 cannot express.
 - **Graphs**: the full unsampled `simplekg` graphs, the same files the official Docker deployment loads, so the published gold answers apply unchanged.
 - **Generation**: zero-shot, one generation per question, no repair retry, no self-consistency, no reranking.
@@ -133,3 +134,5 @@ uv run python -m eval.make_report
 ```
 
 Per-question queries, results and errors for every arm are in `eval/out/public/`.
+
+This page measures one-shot translation. For what an agent actually pays, convergence under retry and tokens across the whole loop on graphs nothing here was tuned on, see [agent-loop.md](agent-loop.md).

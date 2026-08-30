@@ -330,6 +330,13 @@ def main() -> None:
 
     w("## Protocol")
     w("")
+    from eval.run_public import prompt_fingerprint
+
+    w(
+        f"- **Prompt version**: fingerprint `{prompt_fingerprint()}`. The "
+        "frozen query file is keyed by this hash, so a run cannot silently "
+        "score queries generated from a different tutorial."
+    )
     w(
         "- **Questions**: the full published test set, all 2,348 "
         "questions across all 7 test graphs. No category was excluded, "
@@ -457,6 +464,13 @@ def main() -> None:
     w(
         "Per-question queries, results and errors for every arm are in "
         "`eval/out/public/`."
+    )
+    w("")
+    w(
+        "This page measures one-shot translation. For what an agent "
+        "actually pays, convergence under retry and tokens across the whole "
+        "loop on graphs nothing here was tuned on, see "
+        "[agent-loop.md](agent-loop.md)."
     )
     w("")
 
