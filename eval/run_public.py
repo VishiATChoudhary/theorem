@@ -238,8 +238,9 @@ def gen(model: str, workers: int) -> None:
             if (i + 1) % 100 == 0:
                 print(f"  {i + 1}/{len(questions)}")
     PUB.mkdir(parents=True, exist_ok=True)
-    (PUB / f"queries-{model}.json").write_text(json.dumps(queries, indent=1))
-    print(f"wrote {PUB / f'queries-{model}.json'}")
+    out = frozen_path(model)
+    out.write_text(json.dumps(queries, indent=1))
+    print(f"wrote {out}")
 
 
 def audit(model: str) -> int:
@@ -295,12 +296,34 @@ def cache_path_for(q: dict, model: str, schemas: dict):
     return CACHE / f"pub-{q['qid']}-{digest}.txt"
 
 
+def prompt_fingerprint() -> str:
+    """Short hash of the tutorial the queries were generated from."""
+    import hashlib
+
+    from eval.prompts import GRAPHLANG_TUTORIAL
+
+    return hashlib.sha1(GRAPHLANG_TUTORIAL.encode()).hexdigest()[:8]
+
+
+def frozen_path(model: str) -> Path:
+    """The frozen query file for the CURRENT prompt.
+
+    The prompt fingerprint is in the name so a file generated from an
+    older tutorial is simply not found rather than being read as if it
+    were current. Scoring last week's queries against this week's
+    language looks like a result and is not one.
+    """
+    return PUB / f"queries-{model}-{prompt_fingerprint()}.json"
+
+
 def load_queries(model: str) -> dict[str, str]:
     """Prefer the frozen queries file; fall back to the generation cache
     so execution can proceed (and resume) without a completed gen run."""
-    frozen = PUB / f"queries-{model}.json"
+    frozen = frozen_path(model)
     if frozen.exists():
-        return json.loads(frozen.read_text())
+        queries = json.loads(frozen.read_text())
+        print(f"loaded {len(queries)} queries from {frozen.name}")
+        return queries
     from eval.load_graph import derive_schema
 
     schemas = {
