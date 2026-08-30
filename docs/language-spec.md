@@ -50,6 +50,8 @@ cond        := clause ("and" clause | "or" clause)*   ; "and" binds tighter
 clause      := col OP literal                          ; OP: = != > >= < <= contains
 col         := NAME ["." NAME ["." NAME]]              ; e.g. sups.name, health.loss
              | "via" "." NAME                          ; a follow's edge property
+             ; in a find's or follow's own condition, a leading NAME that
+             ; is the statement's own "as" name is optional and ignored
 literal     := ... | "none"                            ; the absent value
 props       := "{" NAME ":" literal ("," NAME ":" literal)* "}"
 mapping     := "{" NAME ":" "col" STRING ("," NAME ":" "col" STRING)* "}"
@@ -69,6 +71,8 @@ STRING      := '"' ... '"'
 **Binding table.** A query builds one binding table (SPARQL solution-mapping style). Each `as NAME` is a column. `find` seeds rows. `follow X edge role as Y` extends every row: for each row, for each edge of type `edge` incident to the node in column X, bind the node at `role` to Y. Rows multiply; rows with no match are dropped. Homomorphism semantics: repeated nodes are allowed. Edge instances are per-row unique (trail semantics, matching Cypher's MATCH default).
 
 **Roles.** An edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.
+
+**A condition may name its own binding.** `follow c contains part as l where l.unit_cost < 1` means the same as `where unit_cost < 1`: a follow's condition is about the node being arrived at, and `l` is the name for that node. The same holds for `find x as p where p.prop = v`. Only the statement's own name is stripped; any other binding keeps meaning what it meant, so `where r.prop` in a follow that binds `l` is still a reference to `r` and is checked as one.
 
 **Alternative branches (`or`).** A line holding only the word `or` ends the current branch and starts another. Each branch is a `find`/`follow` sequence evaluated independently; the branches' rows are unioned before whatever follows. Rows are a set, so a node found by two branches answers once. Everything after the last branch (group, aggregate, keep, compute, return) applies to the union, which is how "how many players played for either team" is one query rather than two.
 

@@ -458,6 +458,25 @@ class _Parser:
             return self.cond()
         return cond
 
+    def _unqualify(self, cond: Cond, name: str) -> Cond:
+        """Let a condition name the binding its own statement creates.
+
+        `follow c contains part as l where l.unit_cost < 1` means the same
+        thing as `where unit_cost < 1`: the condition is about the node
+        being arrived at, and `l` is the name for that node. Models write
+        the qualified form constantly, because it is the unambiguous one,
+        and rejecting it costs a whole query for no gain in meaning.
+        """
+        return [
+            (
+                joiner,
+                Clause(clause.col[1:], clause.op, clause.value)
+                if len(clause.col) > 1 and clause.col[0] == name
+                else clause,
+            )
+            for joiner, clause in cond
+        ]
+
     def parse_find(self) -> Find:
         target = self.expect_name()
         cond: Cond = []
@@ -470,7 +489,9 @@ class _Parser:
         cond = self._trailing_where(cond)
         if order_by is None:
             order_by, desc = self.order_by_opt()
-        return Find(target, cond, name, order_by=order_by, desc=desc)
+        return Find(
+            target, self._unqualify(cond, name), name, order_by=order_by, desc=desc
+        )
 
     def parse_follow(self) -> Follow:
         src = self.expect_name()
@@ -500,7 +521,15 @@ class _Parser:
             self.expect_word("none")
             optional = True
             cond = self._trailing_where(cond)
-        return Follow(src, edge, role, name, cond=cond, optional=optional, upto=upto)
+        return Follow(
+            src,
+            edge,
+            role,
+            name,
+            cond=self._unqualify(cond, name),
+            optional=optional,
+            upto=upto,
+        )
 
     def parse_keep(self) -> Keep:
         name = self.expect_name()
