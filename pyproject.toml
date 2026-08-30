@@ -1,6 +1,6 @@
 [project]
 name = "theorem"
-version = "0.1.0"
+version = "0.2.0"
 description = "A graph query and construction language for AI agents. Every query verified whole before it runs."
 readme = "README.md"
 license = "Apache-2.0"

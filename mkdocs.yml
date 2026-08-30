@@ -29,7 +29,10 @@ nav:
   - Home: index.md
   - Tutorial: tutorial.md
   - Language spec: language-spec.md
-  - Benchmarks: benchmarks.md
+  - Benchmarks:
+      - Overview: benchmarks.md
+      - CypherBench: benchmarks/cypherbench.md
+      - Agent loop: benchmarks/agent-loop.md
   - Why not Cypher?: why-not-cypher.md
 
 exclude_docs: |
