@@ -136,4 +136,4 @@ Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, 
 
 **Limits.** A read runs under a row ceiling and a wall-clock deadline (`theorem.engine.executor.limits`). `budget` bounds the answer that is printed, which does nothing for a traversal that fills memory before it reaches `return`; these bound the work. Exceeding either raises an error naming the ceiling and the clauses that lower the cost.
 
-**Scale.** Everything is in memory, with no spill to disk, at roughly 6.7 KB per node measured on the CypherBench `politics` graph (885k nodes, 5.7 GB). A 32 GB machine therefore holds a graph of about 2 to 4 million nodes. This is the supported envelope for v0.
+**Scale.** Everything is in memory, with no spill to disk, at roughly 6.7 KB per node measured on the CypherBench `politics` graph (885k nodes, 5.7 GB). A query's binding table is built on top of that, so the envelope is two thirds of RAM rather than all of it: about 3.4 million nodes on a 32 GB machine. `theorem stats --db <path>` reports where a store sits against it. Exceeding it fails on the next question rather than the next node, which is why the figure has headroom in it.

@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .engine.storage import StoreLocked
+from .engine.storage import Store, StoreLocked
 from .ingest.bulk import LoadError, load_edges, load_nodes
 from .ingest.extract import extract
 from .ingest.normalize import IngestError, normalize
@@ -134,6 +134,65 @@ def _handle_load(argv: list[str]) -> int:
         session.close()
 
 
+def _handle_stats(argv: list[str]) -> int:
+    """Report what a store holds and how close it is to the documented ceiling."""
+    ap = argparse.ArgumentParser(
+        prog="theorem stats",
+        description="Node and edge counts, log and snapshot state, and the "
+        "memory a store is using against the supported envelope.",
+    )
+    ap.add_argument("--db", default=".theorem-db", help="database directory")
+    args = ap.parse_args(argv)
+
+    path = Path(args.db)
+    if not path.exists():
+        print(f"error: no database at {path}", file=sys.stderr)
+        return 1
+    # A store being written by someone else is exactly when its numbers
+    # are worth reading, so this does not take the lock.
+    store = Store(path, lock=False)
+    nodes, edges = len(store.nodes), len(store.edge_index)
+    retired = sum(1 for n in store.nodes.values() if n.retired_at is not None)
+    runs = sorted(path.glob("runs/run-*.json"))
+    on_disk = sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+
+    print(f"store: {path}")
+    print(f"  nodes:     {nodes:>12,}{f' ({retired:,} retired)' if retired else ''}")
+    print(f"  edges:     {edges:>12,}")
+    print(f"  classes:   {len(store.by_class):>12,}")
+    print(f"  position:  {store.position:>12,}")
+    print(f"  wal:       {store.wal_len():>12,} records")
+    print(
+        f"  snapshots: {len(runs):>12,}"
+        + (f" (newest {runs[-1].name})" if runs else "")
+    )
+    print(f"  on disk:   {_human(on_disk):>12}")
+    # 6.7 KB per node is the figure measured on the CypherBench politics
+    # graph, and the one the supported envelope in the spec is derived
+    # from. It is an estimate, and says so.
+    print(f"  in memory: {_human(nodes * 6700):>12} (estimated at 6.7 KB/node)")
+    if nodes:
+        # Two thirds of RAM, not all of it: a query's binding table is
+        # built on top of the graph, and a machine that is exactly full
+        # is a machine that fails on the next question rather than on
+        # the next node. This is the figure the spec's envelope quotes.
+        capacity = int(0.66 * 32 * 1024**3) // 6700
+        print(
+            f"  a 32 GB machine holds about {capacity:,} nodes with room to "
+            f"query them; this store is at {100 * nodes / capacity:.1f}% of that."
+        )
+    store.close()
+    return 0
+
+
+def _human(n: int) -> str:
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024 or unit == "GB":
+            return f"{n:.1f} {unit}" if unit != "B" else f"{n} B"
+        n /= 1024
+    return f"{n:.1f} GB"
+
+
 def _handle_playbook(argv: list[str]) -> int:
     """Handle theorem playbook subcommand."""
     ap = argparse.ArgumentParser(prog="theorem playbook")
@@ -188,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
-    if argv and argv[0] in ("ingest", "playbook", "load"):
+    if argv and argv[0] in ("ingest", "playbook", "load", "stats"):
         subcommand = argv[0]
         if subcommand == "ingest":
             return _handle_ingest(argv[1:])
@@ -196,6 +255,8 @@ def main(argv: list[str] | None = None) -> int:
             return _handle_playbook(argv[1:])
         elif subcommand == "load":
             return _handle_load(argv[1:])
+        elif subcommand == "stats":
+            return _handle_stats(argv[1:])
 
     ap = argparse.ArgumentParser(prog="theorem")
     ap.add_argument("file", nargs="?", help="a .thm program to run")

@@ -276,6 +276,27 @@ truncated: 40 more. resume with: continue @c1a
 continue @c1a budget 500 tokens
 ```
 
+## 10b. Know where you stand
+
+```bash
+theorem stats --db mydb
+```
+
+```text
+store: mydb
+  nodes:            4,327
+  edges:           18,991
+  wal:              4,178 records
+  snapshots:            1 (newest run-23318.json)
+  in memory:      27.6 MB (estimated at 6.7 KB/node)
+  a 32 GB machine holds about 3,384,690 nodes with room to query them;
+  this store is at 0.1% of that.
+```
+
+Everything is in memory with no spill to disk, so the ceiling is real and
+worth watching. `stats` does not take the lock, because a store being
+written by someone else is exactly when its numbers are worth reading.
+
 ## 11. The maintenance surface
 
 When a duplicate slips in, the receipt tells you at write time:

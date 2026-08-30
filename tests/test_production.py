@@ -238,3 +238,32 @@ def test_a_loop_that_never_converges_says_so(db):
     assert not got.ran
     assert got.turns == 3
     assert len(got.errors) == 3
+
+
+def test_stats_reports_the_store_against_its_ceiling(db, tmp_path, capsys):
+    """The scale envelope is documented; a store should be able to say
+    where it sits in it, without taking the lock off whoever is writing."""
+    from theorem.cli import main
+    from theorem.ingest.bulk import load_nodes
+
+    with Session(db, Schema()) as s:
+        s.run(SCHEMA)
+        load_nodes(
+            s,
+            csv(tmp_path, "f.csv", "name,country,opened\nWolfsburg,DE,1938\n"),
+            "factory",
+        )
+        # still open, still locked: stats must work anyway
+        assert main(["stats", "--db", str(db)]) == 0
+
+    out = capsys.readouterr().out
+    assert "nodes:" in out and "1" in out
+    assert "in memory" in out
+    assert "32 GB machine" in out
+
+
+def test_stats_on_a_missing_database_says_so(tmp_path, capsys):
+    from theorem.cli import main
+
+    assert main(["stats", "--db", str(tmp_path / "nope")]) == 1
+    assert "no database" in capsys.readouterr().err
