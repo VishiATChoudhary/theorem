@@ -11,10 +11,10 @@
  "theorem": {
   "n": 120,
   "solve_at_1": 0.775,
-  "solve_at_2": 0.8167,
-  "solve_at_3": 0.85,
-  "mean_turns_when_solved": 1.127,
-  "mean_tokens_per_question": 1594.9,
-  "mean_exec_ms_per_question": 3.85
+  "solve_at_2": 0.8417,
+  "solve_at_3": 0.875,
+  "mean_turns_when_solved": 1.152,
+  "mean_tokens_per_question": 2168.2,
+  "mean_exec_ms_per_question": 3.55
  }
 }

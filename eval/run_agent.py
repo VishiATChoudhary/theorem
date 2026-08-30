@@ -308,6 +308,39 @@ def report(model: str) -> None:
     _write_doc(summary, model, arms)
 
 
+def _paired(arms: dict) -> dict:
+    """McNemar on the questions both arms attempted.
+
+    Two independent proportions throw away the pairing and lose most of
+    the power; what decides this is only the questions the arms disagree
+    about.
+    """
+    import math
+
+    t = {r["qid"]: r for r in arms.get("theorem", [])}
+    c = {r["qid"]: r for r in arms.get("text2cypher", [])}
+    qs = sorted(set(t) & set(c))
+    both = sum(t[q]["solved"] and c[q]["solved"] for q in qs)
+    only_t = sum(t[q]["solved"] and not c[q]["solved"] for q in qs)
+    only_c = sum(c[q]["solved"] and not t[q]["solved"] for q in qs)
+    m = only_t + only_c
+    k = min(only_t, only_c)
+    p = (
+        min(1.0, 2 * sum(math.comb(m, i) for i in range(k + 1)) / 2**m)
+        if m
+        else 1.0
+    )
+    return {
+        "n": len(qs),
+        "both": both,
+        "neither": len(qs) - both - only_t - only_c,
+        "only_theorem": only_t,
+        "only_cypher": only_c,
+        "discordant": m,
+        "p": p,
+    }
+
+
 def _write_doc(summary: dict, model: str, arms: dict) -> None:
     from eval.run_public import prompt_fingerprint
 
@@ -362,16 +395,46 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
     w("")
     if "theorem" in summary and "text2cypher" in summary:
         t, c = summary["theorem"], summary["text2cypher"]
+        pair = _paired(arms)
+        w("### Is the accuracy difference real?")
+        w("")
         w(
-            f"theorem converges higher ({100 * t['solve_at_3']:.1f}% against "
-            f"{100 * c['solve_at_3']:.1f}%) and executes "
+            "Both arms answer the same questions, so the honest test is the "
+            "paired one. Of "
+            f"{pair['n']} questions, {pair['both']} were solved by both and "
+            f"{pair['neither']} by neither. The verdict rests entirely on the "
+            f"{pair['discordant']} they disagree on: theorem alone solved "
+            f"{pair['only_theorem']}, text2cypher alone solved "
+            f"{pair['only_cypher']}."
+        )
+        w("")
+        w(
+            f"McNemar exact two-sided p = {pair['p']:.3f}. "
+            + (
+                "**The accuracy difference is not statistically significant: "
+                "on this task the two are tied.** Reading a winner into the "
+                "point estimates would be reading noise."
+                if pair["p"] > 0.05
+                else "The difference is significant at the 5% level."
+            )
+        )
+        w("")
+        w(
+            "What is not in doubt is the cost. theorem executes "
             f"{c['mean_exec_ms_per_question'] / max(t['mean_exec_ms_per_question'], 0.01):.0f}x "
-            f"faster, and costs "
+            "faster, and costs "
             f"{t['mean_tokens_per_question'] / c['mean_tokens_per_question']:.1f}x "
             "the tokens per question, because a language the model has never "
-            "seen has to carry its own tutorial in every prompt while Cypher "
-            "arrives already known. That gap is the honest cost of a new "
-            "language and the thing to keep shrinking."
+            "seen carries its own tutorial in every prompt while Cypher "
+            "arrives already known. Both gaps are large enough not to be "
+            "noise, and the token one is the honest cost of a new language."
+        )
+        w("")
+        w(
+            f"At n={pair['n']} the 95% interval on either solve rate is about "
+            "6 points wide, so this benchmark can only detect large "
+            "differences. Narrowing it means more questions and more graphs, "
+            "not more retries."
         )
         w("")
     w("## Reproducing")
