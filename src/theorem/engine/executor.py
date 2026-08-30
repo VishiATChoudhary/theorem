@@ -7,6 +7,9 @@ A query builds one binding table. find seeds rows, follow extends them
 
 from __future__ import annotations
 
+import time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 
 from ..ast_nodes import (
@@ -39,6 +42,73 @@ def count_tokens(text: str) -> int:
 
 class ExecError(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class Limits:
+    """What a single read is allowed to cost.
+
+    `budget` bounds the answer that gets printed, which is no help to a
+    traversal that fills memory long before it reaches `return`. These
+    bound the work instead. The defaults are far above any query a person
+    would write on purpose and far below what kills a process.
+    """
+
+    max_rows: int = 1_000_000
+    seconds: float | None = 60.0
+
+
+_LIMITS: ContextVar[Limits] = ContextVar("theorem_limits", default=Limits())
+_DEADLINE: ContextVar[float | None] = ContextVar("theorem_deadline", default=None)
+
+# Checking a clock once per row costs more than the row. Hot loops check
+# their size on every row, which is free, and the clock on every Nth.
+_CLOCK_EVERY = 4096
+
+
+@contextmanager
+def limits(**kwargs):
+    """Run the reads inside this block under different limits."""
+    token = _LIMITS.set(Limits(**kwargs))
+    try:
+        yield
+    finally:
+        _LIMITS.reset(token)
+
+
+def _guard(n_rows: int, *, check_clock: bool = True) -> None:
+    """Stop a read that has grown too large or run too long.
+
+    The message is written for whoever has to fix the query next, which
+    is usually a model: it names the ceiling that was hit and the two
+    clauses that lower the cost, because an error that only reports a
+    failure makes the next attempt a guess.
+    """
+    lim = _LIMITS.get()
+    if n_rows > lim.max_rows:
+        raise ExecError(
+            f"the query grew past {lim.max_rows} intermediate rows. Narrow it "
+            "with a `where` on the `find` or on a `follow`, or ask for less "
+            "with `limit` on the `return`, then run it again."
+        )
+    if check_clock:
+        deadline = _DEADLINE.get()
+        if deadline is not None and time.monotonic() > deadline:
+            raise ExecError(
+                "the query took too long and was stopped. Narrow it with a "
+                "`where` on the `find` or on a `follow`, or ask for less with "
+                "`limit` on the `return`, then run it again."
+            )
+
+
+@contextmanager
+def _deadline_for_this_read():
+    seconds = _LIMITS.get().seconds
+    token = _DEADLINE.set(None if seconds is None else time.monotonic() + seconds)
+    try:
+        yield
+    finally:
+        _DEADLINE.reset(token)
 
 
 @dataclass
@@ -379,6 +449,7 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             out[stmt.name] = dst
             out["__edges__"] = row.get("__edges__", ())
             reached.append(out)
+        _guard(len(reached) + len(next_frontier))
         if not next_frontier:
             break
         frontier = next_frontier
@@ -438,6 +509,7 @@ def _follow_once(stmt: Follow, table: Table, store: Store, schema: Schema) -> No
                     else (*row.get("__edges__", ()), edge.id),
                 }
             )
+            _guard(len(new_rows), check_clock=len(new_rows) % _CLOCK_EVERY == 0)
         if stmt.optional and not matched:
             # "or none": the row survives with nothing bound to the name,
             # so counts over it come out as zero rather than the row
@@ -460,6 +532,7 @@ def _keep(stmt: Keep, table: Table, store: Store, schema: Schema) -> None:
     _materialize_groups(stmt.name, table, store, schema)
     kept = []
     for row in table.rows:
+
         def getter(col, row=row):
             if col[0] in row or f"{col[0]}_key" in row:
                 return _col_value(store, schema, row, col)
@@ -583,9 +656,7 @@ def _global_aggregate(
     table.group_meta.clear()
 
 
-def _materialize_groups(
-    gname: str, table: Table, store: Store, schema: Schema
-) -> None:
+def _materialize_groups(gname: str, table: Table, store: Store, schema: Schema) -> None:
     """Collapse the rows into one row per group key.
 
     Done on demand: by the first aggregate over the group, or by a return
@@ -839,6 +910,7 @@ BRANCH_STMTS = (Find, Follow)
 
 
 def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> None:
+    _guard(len(table.rows))
     if isinstance(stmt, Find):
         found = _find_rows(stmt, store, schema)
         # A seeded-but-empty table means an earlier find matched zero rows;
@@ -868,6 +940,17 @@ def execute_read(
 ) -> str:
     if table is None:
         table = Table()
+    with _deadline_for_this_read():
+        return _execute_read(plans, store, schema, ctx, table)
+
+
+def _execute_read(
+    plans: list[Plan],
+    store: Store,
+    schema: Schema,
+    ctx: ReadContext,
+    table: Table,
+) -> str:
     branches = _Branches()
     output: list[str] = []
     for plan in plans:
@@ -905,6 +988,11 @@ def execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
 
     Used by the eval harness for machine scoring; ignores budgets.
     """
+    with _deadline_for_this_read():
+        return _execute_rows(plans, store, schema)
+
+
+def _execute_rows(plans: list[Plan], store: Store, schema: Schema) -> list[list]:
     table = Table()
     branches = _Branches()
     rows_out: list[list] = []
@@ -970,6 +1058,7 @@ def _cross(
                 *b.get("__edges__", ()),
             )
             out.append(merged)
+            _guard(len(out), check_clock=len(out) % _CLOCK_EVERY == 0)
     return out
 
 
