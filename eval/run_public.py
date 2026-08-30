@@ -331,11 +331,9 @@ def cache_path_for(q: dict, model: str, schemas: dict):
 
 def prompt_fingerprint() -> str:
     """Short hash of the tutorial the queries were generated from."""
-    import hashlib
+    from theorem.prompt import fingerprint
 
-    from eval.prompts import GRAPHLANG_TUTORIAL
-
-    return hashlib.sha1(GRAPHLANG_TUTORIAL.encode()).hexdigest()[:8]
+    return fingerprint()
 
 
 def frozen_path(model: str) -> Path:

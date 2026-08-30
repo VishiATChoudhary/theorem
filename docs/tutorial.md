@@ -230,6 +230,29 @@ The session holds an exclusive lock on the directory for as long as it is
 open, so close it (or use it as a context manager, as above) before
 another process opens the same database.
 
+## 9c. Let an agent write the queries
+
+The prompt the benchmarks use is the prompt the package ships:
+
+```python
+from theorem import Schema, Session, agent_prompt, repair_prompt
+
+with Session("mydb", Schema.supply_chain()) as db:
+    prompt = agent_prompt(db.schema, "Which suppliers ship more than three parts?", db.store)
+    query = your_model(prompt)          # any model; the benchmarks use Haiku
+    answer = db.run(query)
+    if "error" in answer:               # verified whole, so nothing ran
+        answer = db.run(your_model(repair_prompt(query, answer)))
+```
+
+Passing the store renders only the classes that hold data, which is both
+cheaper and less of an invitation to traverse somewhere nothing lives.
+
+The tutorial inside that prompt is versioned by its own hash
+(`theorem.prompt.fingerprint()`). The benchmarks key their frozen query
+files by it, so a published number can never come from a prompt other
+than the one it names.
+
 ## 10. Budgets and continuations
 
 `budget 2000 tokens` caps the serialized result. On overflow the result truncates at a row boundary and prints a handle:

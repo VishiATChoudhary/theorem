@@ -18,6 +18,7 @@ from .engine.executor import ExecError, Limits, limits
 from .engine.storage import Store, StoreError, StoreLocked
 from .ingest.bulk import LoadError, load_edges, load_nodes
 from .parser import ParseError, parse
+from .prompt import agent_prompt, repair_prompt
 from .schema import ClassDef, EdgeDef, Schema
 from .session import Session
 from .verifier import VerifyError, verify
@@ -38,9 +39,11 @@ __all__ = [
     "StoreLocked",
     "VerifyError",
     "__version__",
+    "agent_prompt",
     "limits",
     "load_edges",
     "load_nodes",
     "parse",
+    "repair_prompt",
     "verify",
 ]

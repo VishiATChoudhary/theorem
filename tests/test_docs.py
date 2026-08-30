@@ -87,3 +87,20 @@ def test_the_version_is_stated_once_and_agrees():
         (DOCS.parent / "pyproject.toml").read_text(encoding="utf-8")
     )
     assert theorem.__version__ == pyproject["project"]["version"]
+
+
+def test_the_shipped_prompt_is_the_benchmarked_one():
+    """The tutorial an agent is given used to live in the eval harness, so
+    the published numbers described a prompt no user had. One copy now."""
+    from eval.prompts import GRAPHLANG_TUTORIAL
+
+    from theorem.prompt import TUTORIAL
+
+    assert TUTORIAL is GRAPHLANG_TUTORIAL
+
+
+def test_the_prompt_teaches_every_verb_it_can_write():
+    from theorem.prompt import TUTORIAL
+
+    for verb in ("find", "follow", "group", "keep", "compute", "return", "upto"):
+        assert verb in TUTORIAL
