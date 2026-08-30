@@ -36,6 +36,7 @@ from .ast_nodes import (
     Stmt,
 )
 
+
 class _Missing:
     """Sentinel for the `none` literal, distinct from a parse failure."""
 
@@ -49,6 +50,49 @@ DEFAULT_BUDGET = 2000
 
 AGG_VERBS = {"count", "sum", "avg", "min", "max"}
 COMPARISON_OPS = {"=", "!=", ">", ">=", "<", "<=", "contains"}
+
+
+# Which statement each clause belongs to. A clause on its own line, or
+# trailing after a complete statement, is a rule the writer has not been
+# told; the error is the cheapest place to tell them.
+# Words that legitimately follow a condition: the condition has ended and
+# the statement continues. Anything else after a bare-word value is the
+# second word of a string somebody forgot to quote.
+CONTINUES_A_STATEMENT = frozenset(
+    {
+        "and",
+        "or",
+        "as",
+        "upto",
+        "where",
+        "order",
+        "by",
+        "desc",
+        "limit",
+        "budget",
+        "tokens",
+        "after",
+        "distinct",
+    }
+)
+
+CLAUSE_HOME = {
+    "limit": "a clause of `return`: `return p.name limit 5`",
+    "order": "a clause of `return` or `find`: `return p.name order by p.age desc`",
+    "budget": "a clause of `return`: `return p.name budget 500 tokens`",
+    "desc": "part of `order by <col> desc`",
+    "tokens": "part of `budget <n> tokens`",
+    "where": (
+        "a clause of `find` or `follow`. To filter rows that already "
+        "exist, and groups after an aggregate, use `keep <name> where ...`"
+    ),
+    "upto": "a clause of `follow`: `follow p contains part upto any as q`",
+    "none": "part of `or none` at the end of a `follow`, or the literal `none`",
+    "distinct": "part of `return distinct ...` or `count distinct <col> as n`",
+    "after": "a clause of `return`: `return p.name after @t-42`",
+    "by": "part of `group by <col> as <name>`",
+    "as": "how every statement names its result: `... as <name>`",
+}
 
 
 class ParseError(Exception):
@@ -82,7 +126,16 @@ def tokenize(text: str, line_no: int) -> list[tuple[str, str]]:
             continue
         m = TOKEN_RE.match(text, pos)
         if not m:
-            raise ParseError(line_no, f"unexpected character {text[pos]!r}")
+            hint = ""
+            if text[pos] in "-<>":
+                # A model reaching for an arrow is reaching for Cypher.
+                # Saying so here is cheaper than saying it in every prompt.
+                hint = (
+                    ". There are no arrows: a follow names the role it "
+                    "arrives at, as in "
+                    "`follow <binding> <edge> <arrival role> as <name>`"
+                )
+            raise ParseError(line_no, f"unexpected character {text[pos]!r}{hint}")
         kind = m.lastgroup
         tokens.append((kind, m.group()))
         pos = m.end()
@@ -155,10 +208,16 @@ class _Parser:
 
     def expect_end(self) -> None:
         t = self.peek()
-        if t is not None:
+        if t is None:
+            return
+        home = CLAUSE_HOME.get(t[1]) if t[0] == "word" else None
+        if home:
             raise ParseError(
-                self.line_no, f"unexpected trailing input starting at {t[1]!r}"
+                self.line_no, f"{t[1]!r} does not belong here; it is {home}"
             )
+        raise ParseError(
+            self.line_no, f"unexpected trailing input starting at {t[1]!r}"
+        )
 
     # ---- terminals -------------------------------------------------
 
@@ -197,9 +256,12 @@ class _Parser:
                 # the absence of a value, for data that is genuinely
                 # missing: `where via.end_year = none`
                 return _NONE
-            if allow_word and "." not in text:
+            if allow_word and "." not in text and text not in CONTINUES_A_STATEMENT:
                 # bare word in a condition RHS: class names in
-                # (find dup_candidates where class = supplier)
+                # (find dup_candidates where class = supplier). A word
+                # that continues the statement is not a value, so
+                # `where name = as p` reports the missing value rather
+                # than binding "as" to it.
                 return text
         raise ParseError(self.line_no, f"expected a literal value, got {text!r}")
 
@@ -283,6 +345,21 @@ class _Parser:
             if op not in COMPARISON_OPS:
                 raise ParseError(self.line_no, f"unknown operator {op!r}")
             value = self.literal(allow_word=True)
+            if isinstance(value, str) and not isinstance(value, bool):
+                nxt = self.peek()
+                if (
+                    nxt is not None
+                    and nxt[0] == "word"
+                    and nxt[1] not in CONTINUES_A_STATEMENT
+                ):
+                    # `name = LeBron James`: the value was a bare word and
+                    # another word follows, so it is an unquoted string
+                    # rather than the end of the condition.
+                    raise ParseError(
+                        self.line_no,
+                        f"a string value goes in double quotes: "
+                        f'{".".join(col)} {op} "{value} {nxt[1]} ..."',
+                    )
             out.append((joiner, Clause(col, op, value)))
             # `or none` ends a follow rather than joining another clause,
             # so it belongs to the statement, not to this condition.
@@ -353,6 +430,11 @@ class _Parser:
         elif method is None or verb == "aggregate":
             # "aggregate" would resolve to the internal parse_aggregate
             # helper, which needs an op; it is not a verb itself
+            home = CLAUSE_HOME.get(verb)
+            if home:
+                raise ParseError(
+                    self.line_no, f"{verb!r} is not a statement; it is {home}"
+                )
             raise ParseError(self.line_no, f"unknown verb {verb!r}")
         else:
             stmt = method()

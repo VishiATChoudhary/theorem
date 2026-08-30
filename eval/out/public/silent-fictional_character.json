@@ -1,0 +1,220 @@
+[
+ {
+  "arm": "theorem",
+  "mutation": "class",
+  "rejected": 300,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "edge",
+  "rejected": 287,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "property",
+  "rejected": 260,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "direction",
+  "rejected": 121,
+  "empty": 69,
+  "wrong": 48,
+  "inert": 49,
+  "skipped": 0,
+  "warned": 0,
+  "examples": [
+   {
+    "qid": "6036ecb5-178e-4da8-ba08-5dbca395f396",
+    "query": "find character where name = \"Cao Cao\" as cc\nfollow cc hasFather subj as c\nor\nfind character where name = \"Wu Lan\" as wl\nfollow wl killedBy obj as c\ncount distinct c as n\nreturn n",
+    "mutant": "find character where name = \"Cao Cao\" as cc\nfollow cc hasFather obj as c\nor\nfind character where name = \"Wu Lan\" as wl\nfollow wl killedBy obj as c\ncount distinct c as n\nreturn n"
+   },
+   {
+    "qid": "e0cb7c63-f9f1-4d3f-b58a-ab2e17832e93",
+    "query": "find character as c\nfollow c killedBy obj as v\nfollow c hasSpouse obj as v\ncount distinct c.creator as n\nreturn n",
+    "mutant": "find character as c\nfollow c killedBy subj as v\nfollow c hasSpouse obj as v\ncount distinct c.creator as n\nreturn n"
+   },
+   {
+    "qid": "124ef91a-7592-44f2-bc1a-766d459b5077",
+    "query": "find character where name = \"Jean Grey\" as jg\nfollow jg hasMother obj as mother\nfollow mother hasSpouse obj as spouse\nor\nfollow mother hasSpouse subj as spouse\nreturn spouse.name, spouse.creator",
+    "mutant": "find character where name = \"Jean Grey\" as jg\nfollow jg hasMother subj as mother\nfollow mother hasSpouse obj as spouse\nor\nfollow mother hasSpouse subj as spouse\nreturn spouse.name, spouse.creator"
+   },
+   {
+    "qid": "2ca64126-4d4a-4b65-9aaa-4f96af2124fb",
+    "query": "find character where name = \"Yuno Gasai\" as yuno\nfollow yuno killedBy subj as victim\nfollow victim hasStudent obj as student where occupation != \"serial killer\"\nreturn student.name",
+    "mutant": "find character where name = \"Yuno Gasai\" as yuno\nfollow yuno killedBy obj as victim\nfollow victim hasStudent obj as student where occupation != \"serial killer\"\nreturn student.name"
+   },
+   {
+    "qid": "0f65691e-4273-47f7-abf3-f677bf6238a4",
+    "query": "find character where name = \"Jeyne Lannister\" as jeyne\nfollow jeyne hasMother subj as child\nfollow child diedIn location where name = \"King's Landing\" as loc\nreturn child.name, child.country_of_citizenship",
+    "mutant": "find character where name = \"Jeyne Lannister\" as jeyne\nfollow jeyne hasMother obj as child\nfollow child diedIn location where name = \"King's Landing\" as loc\nreturn child.name, child.country_of_citizenship"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "class",
+  "rejected": 0,
+  "empty": 243,
+  "wrong": 39,
+  "inert": 18,
+  "skipped": 0,
+  "warned": 282,
+  "examples": [
+   {
+    "qid": "f5b4e598-1e94-452f-bff5-8f56ab44d707",
+    "query": "MATCH (n:Character {name: 'Wipeout'}), (m0:Character {name: 'Chris Bradley'}) RETURN n.gender = m0.gender AS answer",
+    "mutant": "MATCH (n:Characters {name: 'Wipeout'}), (m0:Character {name: 'Chris Bradley'}) RETURN n.gender = m0.gender AS answer"
+   },
+   {
+    "qid": "6036ecb5-178e-4da8-ba08-5dbca395f396",
+    "query": "CALL { MATCH (n:Character)-[r0:hasFather]->(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Characters)-[r0:hasFather]->(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "e0cb7c63-f9f1-4d3f-b58a-ab2e17832e93",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)",
+    "mutant": "MATCH (n:Characters)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)"
+   },
+   {
+    "qid": "861b8658-aa79-4c5c-b0bf-a61d2a9f7562",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Characters)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "124ef91a-7592-44f2-bc1a-766d459b5077",
+    "query": "MATCH (n:Character)-[r0:hasSpouse]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name, n.creator",
+    "mutant": "MATCH (n:Characters)-[r0:hasSpouse]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name, n.creator"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "edge",
+  "rejected": 0,
+  "empty": 229,
+  "wrong": 37,
+  "inert": 18,
+  "skipped": 0,
+  "warned": 266,
+  "examples": [
+   {
+    "qid": "6036ecb5-178e-4da8-ba08-5dbca395f396",
+    "query": "CALL { MATCH (n:Character)-[r0:hasFather]->(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Character)-[r0:hasFathers]->(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "e0cb7c63-f9f1-4d3f-b58a-ab2e17832e93",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)",
+    "mutant": "MATCH (n:Character)<-[r0:killedBys]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)"
+   },
+   {
+    "qid": "861b8658-aa79-4c5c-b0bf-a61d2a9f7562",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Character)<-[r0:killedBys]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "124ef91a-7592-44f2-bc1a-766d459b5077",
+    "query": "MATCH (n:Character)-[r0:hasSpouse]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name, n.creator",
+    "mutant": "MATCH (n:Character)-[r0:hasSpouses]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name, n.creator"
+   },
+   {
+    "qid": "2ca64126-4d4a-4b65-9aaa-4f96af2124fb",
+    "query": "MATCH (n:Character)<-[r0:hasStudent]-(m0:Character)-[r1:killedBy]->(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation RETURN n.name",
+    "mutant": "MATCH (n:Character)<-[r0:hasStudents]-(m0:Character)-[r1:killedBy]->(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation RETURN n.name"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "property",
+  "rejected": 0,
+  "empty": 22,
+  "wrong": 244,
+  "inert": 1,
+  "skipped": 0,
+  "warned": 266,
+  "examples": [
+   {
+    "qid": "f5b4e598-1e94-452f-bff5-8f56ab44d707",
+    "query": "MATCH (n:Character {name: 'Wipeout'}), (m0:Character {name: 'Chris Bradley'}) RETURN n.gender = m0.gender AS answer",
+    "mutant": "MATCH (n:Character {name: 'Wipeout'}), (m0:Character {name: 'Chris Bradley'}) RETURN n.gender_x = m0.gender AS answer"
+   },
+   {
+    "qid": "e0cb7c63-f9f1-4d3f-b58a-ab2e17832e93",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)",
+    "mutant": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator_x)"
+   },
+   {
+    "qid": "861b8658-aa79-4c5c-b0bf-a61d2a9f7562",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name_x"
+   },
+   {
+    "qid": "124ef91a-7592-44f2-bc1a-766d459b5077",
+    "query": "MATCH (n:Character)-[r0:hasSpouse]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name, n.creator",
+    "mutant": "MATCH (n:Character)-[r0:hasSpouse]->(m0:Character)<-[r1:hasMother]-(m1:Character {name: 'Jean Grey'}) WITH DISTINCT n RETURN n.name_x, n.creator"
+   },
+   {
+    "qid": "2ca64126-4d4a-4b65-9aaa-4f96af2124fb",
+    "query": "MATCH (n:Character)<-[r0:hasStudent]-(m0:Character)-[r1:killedBy]->(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation RETURN n.name",
+    "mutant": "MATCH (n:Character)<-[r0:hasStudent]-(m0:Character)-[r1:killedBy]->(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation_x RETURN n.name"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "direction",
+  "rejected": 0,
+  "empty": 170,
+  "wrong": 73,
+  "inert": 41,
+  "skipped": 0,
+  "warned": 0,
+  "examples": [
+   {
+    "qid": "6036ecb5-178e-4da8-ba08-5dbca395f396",
+    "query": "CALL { MATCH (n:Character)-[r0:hasFather]->(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Character)<-[r0:hasFather]-(m0:Character {name: 'Cao Cao'}) RETURN n, m0 as m UNION MATCH (n:Character)<-[r1:killedBy]-(m1:Character {name: 'Wu Lan'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "e0cb7c63-f9f1-4d3f-b58a-ab2e17832e93",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)",
+    "mutant": "MATCH (n:Character)-[r0:killedBy]->(m0:Character),(n:Character)<-[r1:hasSpouse]-(m0:Character) WITH DISTINCT n RETURN count(DISTINCT n.creator)"
+   },
+   {
+    "qid": "861b8658-aa79-4c5c-b0bf-a61d2a9f7562",
+    "query": "MATCH (n:Character)<-[r0:killedBy]-(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Character)-[r0:killedBy]->(m0:Character)<-[r1:hasSpouse]-(m1:Character {name: 'Petyr Baelish'}) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "2ca64126-4d4a-4b65-9aaa-4f96af2124fb",
+    "query": "MATCH (n:Character)<-[r0:hasStudent]-(m0:Character)-[r1:killedBy]->(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation RETURN n.name",
+    "mutant": "MATCH (n:Character)<-[r0:hasStudent]-(m0:Character)<-[r1:killedBy]-(m1:Character {name: 'Yuno Gasai'}) WITH DISTINCT n WHERE NOT 'serial killer' IN n.occupation RETURN n.name"
+   },
+   {
+    "qid": "bfd47880-61b2-493b-9503-311d8fa87055",
+    "query": "MATCH (n:Location)<-[r1:basedIn]-(m1:Organization {name: 'Night\\'s Watch'}) OPTIONAL MATCH (n:Location)<-[r0:diedIn]-(m0:Character) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Location)-[r1:basedIn]->(m1:Organization {name: 'Night\\'s Watch'}) OPTIONAL MATCH (n:Location)<-[r0:diedIn]-(m0:Character) WITH n, count(DISTINCT m0) AS num RETURN n.name, num"
+   }
+  ]
+ }
+]

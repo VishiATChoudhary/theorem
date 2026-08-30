@@ -1,0 +1,194 @@
+[
+ {
+  "arm": "theorem",
+  "mutation": "class",
+  "rejected": 235,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "edge",
+  "rejected": 195,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "property",
+  "rejected": 218,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "theorem",
+  "mutation": "direction",
+  "rejected": 195,
+  "empty": 0,
+  "wrong": 0,
+  "inert": 0,
+  "skipped": 0,
+  "warned": 0,
+  "examples": []
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "class",
+  "rejected": 0,
+  "empty": 219,
+  "wrong": 43,
+  "inert": 8,
+  "skipped": 0,
+  "warned": 262,
+  "examples": [
+   {
+    "qid": "2d5f1e6f-ae3c-4e71-8fbe-e05f69294e46",
+    "query": "CALL { MATCH (n:Player)-[r0:playsFor]->(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Players)-[r0:playsFor]->(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "3f28fa8b-8b37-46ad-ab48-d4e573500312",
+    "query": "CALL { MATCH (n:Player)-[r0:playsPosition]->(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Players)-[r0:playsPosition]->(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
+    "query": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Positions)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num"
+   },
+   {
+    "qid": "8c2683f2-d6ec-491d-8200-d1019ce7afb2",
+    "query": "MATCH (n:Team)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Teams)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "829e543d-503e-45a1-aa9a-8a14ae871d47",
+    "query": "CALL { MATCH (n:Award)<-[r0:receivesAward]-(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Awards)<-[r0:receivesAward]-(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "edge",
+  "rejected": 0,
+  "empty": 184,
+  "wrong": 38,
+  "inert": 8,
+  "skipped": 0,
+  "warned": 222,
+  "examples": [
+   {
+    "qid": "2d5f1e6f-ae3c-4e71-8fbe-e05f69294e46",
+    "query": "CALL { MATCH (n:Player)-[r0:playsFor]->(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Player)-[r0:playsFors]->(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "3f28fa8b-8b37-46ad-ab48-d4e573500312",
+    "query": "CALL { MATCH (n:Player)-[r0:playsPosition]->(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Player)-[r0:playsPositions]->(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
+    "query": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Position)<-[r0:playsPositions]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num"
+   },
+   {
+    "qid": "8c2683f2-d6ec-491d-8200-d1019ce7afb2",
+    "query": "MATCH (n:Team)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Team)<-[r0:playsFors]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "829e543d-503e-45a1-aa9a-8a14ae871d47",
+    "query": "CALL { MATCH (n:Award)<-[r0:receivesAward]-(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Award)<-[r0:receivesAwards]-(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "property",
+  "rejected": 0,
+  "empty": 31,
+  "wrong": 203,
+  "inert": 3,
+  "skipped": 0,
+  "warned": 234,
+  "examples": [
+   {
+    "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
+    "query": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name_x, num"
+   },
+   {
+    "qid": "8c2683f2-d6ec-491d-8200-d1019ce7afb2",
+    "query": "MATCH (n:Team)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Team)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year_x <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "5d04cdc7-8f1b-4d57-b469-d601bdc9806a",
+    "query": "MATCH (n:Player)-[r0:playsFor]->(m0:Team)-[r1:partOfDivision]->(m1:Division {name: 'Central Division'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Player)-[r0:playsFor]->(m0:Team)-[r1:partOfDivision]->(m1:Division {name: 'Central Division'}) WITH n, count(DISTINCT m0) AS num RETURN n.name_x, num"
+   },
+   {
+    "qid": "bbbf9f6d-0ccd-4e42-8b6b-20d2af3addd2",
+    "query": "MATCH (n:Team)-[r0:hasHomeVenue]->(m0:Venue {name: 'Chicago Coliseum'}),(n:Team)-[r1:hasHomeVenue]->(m1:Venue {name: 'International Amphitheatre'}) WITH DISTINCT n RETURN n.name, n.head_coach",
+    "mutant": "MATCH (n:Team)-[r0:hasHomeVenue]->(m0:Venue {name: 'Chicago Coliseum'}),(n:Team)-[r1:hasHomeVenue]->(m1:Venue {name: 'International Amphitheatre'}) WITH DISTINCT n RETURN n.name_x, n.head_coach"
+   },
+   {
+    "qid": "590f51a4-1dae-412d-974b-d4113c8c20c3",
+    "query": "MATCH (n:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) OPTIONAL MATCH (n:Player)-[r0:playsPosition]->(m0:Position) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) OPTIONAL MATCH (n:Player)-[r0:playsPosition]->(m0:Position) WITH n, count(DISTINCT m0) AS num RETURN n.name_x, num"
+   }
+  ]
+ },
+ {
+  "arm": "text2cypher",
+  "mutation": "direction",
+  "rejected": 0,
+  "empty": 183,
+  "wrong": 39,
+  "inert": 8,
+  "skipped": 0,
+  "warned": 0,
+  "examples": [
+   {
+    "qid": "2d5f1e6f-ae3c-4e71-8fbe-e05f69294e46",
+    "query": "CALL { MATCH (n:Player)-[r0:playsFor]->(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Player)<-[r0:playsFor]-(m0:Team {name: 'Sacramento Kings'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsFor]->(m1:Team {name: 'Chicago Bulls'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "3f28fa8b-8b37-46ad-ab48-d4e573500312",
+    "query": "CALL { MATCH (n:Player)-[r0:playsPosition]->(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Player)<-[r0:playsPosition]-(m0:Position {name: 'shooting guard'}) RETURN n, m0 as m UNION MATCH (n:Player)-[r1:playsPosition]->(m1:Position {name: 'swingman'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   },
+   {
+    "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
+    "query": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)-[r1:receivesAward]->(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num",
+    "mutant": "MATCH (n:Position)<-[r0:playsPosition]-(m0:Player)<-[r1:receivesAward]-(m1:Award {name: 'ACB Most Valuable Player Award'}) WITH n, count(DISTINCT m0) AS num RETURN n.name, num"
+   },
+   {
+    "qid": "8c2683f2-d6ec-491d-8200-d1019ce7afb2",
+    "query": "MATCH (n:Team)<-[r0:playsFor]-(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name",
+    "mutant": "MATCH (n:Team)-[r0:playsFor]->(m0:Player {name: 'Robert Reid'}) WHERE r0.start_year <= 1983 AND (r0.end_year >= 1983 OR r0.end_year IS NULL) WITH DISTINCT n RETURN n.name"
+   },
+   {
+    "qid": "829e543d-503e-45a1-aa9a-8a14ae871d47",
+    "query": "CALL { MATCH (n:Award)<-[r0:receivesAward]-(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)",
+    "mutant": "CALL { MATCH (n:Award)-[r0:receivesAward]->(m0:Player {name: 'Wilt Chamberlain'}) RETURN n, m0 as m UNION MATCH (n:Award)<-[r1:receivesAward]-(m1:Player {name: 'Bob Lanier'}) RETURN n, m1 as m } WITH DISTINCT n RETURN count(n)"
+   }
+  ]
+ }
+]

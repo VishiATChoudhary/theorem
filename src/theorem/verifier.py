@@ -278,9 +278,7 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 if clause.col[0] != "via":
                     continue
                 if len(clause.col) != 2:
-                    raise VerifyError(
-                        line, "via takes one property: via.<property>"
-                    )
+                    raise VerifyError(line, "via takes one property: via.<property>")
                 prop = clause.col[1]
                 if prop not in edef.props:
                     raise VerifyError(
@@ -303,6 +301,20 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                 if head in env:
                     _check_bound_col(clause.col, schema, env, line)
                 elif typ in schema.classes:
+                    if len(clause.col) == 1 and head not in schema.all_props(typ):
+                        # `keep g where n > 3` before anything produced n.
+                        # keep filters what exists at that point, so the
+                        # aggregate has to come first; the property
+                        # suggestion alone would send them the wrong way.
+                        raise VerifyError(
+                            line,
+                            f'"{head}" is neither a property of {typ} nor '
+                            "anything bound yet. `keep` filters the rows "
+                            "that exist at that point, so an aggregate it "
+                            f"tests must come first: `count distinct ... as "
+                            f"{head}` before `keep {name} where {head} ...`."
+                            f"{_suggest(head, schema.all_props(typ))}",
+                        )
                     _check_col_in_context(clause.col, schema, env, typ, line)
 
         case GroupBy(col=col, name=name):
@@ -312,6 +324,20 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
         case Aggregate(op=op, col=col, name=name):
             head = col[0]
             if head not in env:
+                if len(col) > 1:
+                    # `count distinct g.p as n` with no group named g: the
+                    # writer is asking per-group and has skipped the step
+                    # that makes the groups. Naming the missing binding
+                    # alone sends them to rename it instead.
+                    raise VerifyError(
+                        line,
+                        f'"{head}" is not bound. Aggregating per group is '
+                        f"two steps: `group by <binding> as {head}` first, "
+                        f"then `{op} {'distinct ' if getattr(stmt, 'distinct', False) else ''}"
+                        f"{'.'.join(col)} as {name}`. To aggregate over "
+                        f"everything at once, drop the group and write "
+                        f"`{op} {'.'.join(col[1:])} as {name}`.",
+                    )
                 raise VerifyError(line, f'"{head}" is not bound.{_suggest(head, env)}')
             typ = _read_type(env, head, line)
             if typ.startswith("value:"):
