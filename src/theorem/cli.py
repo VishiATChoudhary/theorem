@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .engine.storage import StoreLocked
+from .ingest.bulk import LoadError, load_edges, load_nodes
 from .ingest.extract import extract
 from .ingest.normalize import IngestError, normalize
 from .ingest.playbook import compile_playbook
@@ -65,6 +66,58 @@ def _handle_ingest(argv: list[str]) -> int:
         return 1
 
 
+def _handle_load(argv: list[str]) -> int:
+    """Bulk-load a CSV or JSONL file into a class or an edge type."""
+    ap = argparse.ArgumentParser(
+        prog="theorem load",
+        description="Load rows into an existing class or edge type. The "
+        "schema must already declare it; nothing is inferred.",
+    )
+    ap.add_argument("file", help="a .csv or .jsonl file")
+    ap.add_argument("--db", default=".theorem-db", help="database directory")
+    ap.add_argument("--class", dest="cls", help="class to load one node per row into")
+    ap.add_argument("--edge", help="edge type to load one edge per row into")
+    ap.add_argument(
+        "--role",
+        action="append",
+        default=[],
+        metavar="ROLE=COLUMN",
+        help="which column names the node at this role (once per role)",
+    )
+    args = ap.parse_args(argv)
+    if bool(args.cls) == bool(args.edge):
+        print("error: give exactly one of --class or --edge", file=sys.stderr)
+        return 1
+
+    try:
+        session = Session(Path(args.db), Schema.supply_chain())
+    except StoreLocked as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    try:
+        if args.cls:
+            receipt = load_nodes(session, Path(args.file), args.cls)
+        else:
+            columns = {}
+            for pair in args.role:
+                if "=" not in pair:
+                    print(
+                        f"error: --role wants ROLE=COLUMN, got {pair!r}",
+                        file=sys.stderr,
+                    )
+                    return 1
+                role, column = pair.split("=", 1)
+                columns[role] = column
+            receipt = load_edges(session, Path(args.file), args.edge, columns)
+        print(receipt.render())
+        return 0
+    except (LoadError, OSError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    finally:
+        session.close()
+
+
 def _handle_playbook(argv: list[str]) -> int:
     """Handle theorem playbook subcommand."""
     ap = argparse.ArgumentParser(prog="theorem playbook")
@@ -118,12 +171,14 @@ def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
-    if argv and argv[0] in ("ingest", "playbook"):
+    if argv and argv[0] in ("ingest", "playbook", "load"):
         subcommand = argv[0]
         if subcommand == "ingest":
             return _handle_ingest(argv[1:])
         elif subcommand == "playbook":
             return _handle_playbook(argv[1:])
+        elif subcommand == "load":
+            return _handle_load(argv[1:])
 
     ap = argparse.ArgumentParser(prog="theorem")
     ap.add_argument("file", nargs="?", help="a .thm program to run")

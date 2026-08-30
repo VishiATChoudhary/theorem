@@ -58,7 +58,8 @@ class Limits:
     seconds: float | None = 60.0
 
 
-_LIMITS: ContextVar[Limits] = ContextVar("theorem_limits", default=Limits())
+DEFAULT_LIMITS = Limits()
+_LIMITS: ContextVar[Limits] = ContextVar("theorem_limits")
 _DEADLINE: ContextVar[float | None] = ContextVar("theorem_deadline", default=None)
 
 # Checking a clock once per row costs more than the row. Hot loops check
@@ -84,7 +85,7 @@ def _guard(n_rows: int, *, check_clock: bool = True) -> None:
     clauses that lower the cost, because an error that only reports a
     failure makes the next attempt a guess.
     """
-    lim = _LIMITS.get()
+    lim = _LIMITS.get(DEFAULT_LIMITS)
     if n_rows > lim.max_rows:
         raise ExecError(
             f"the query grew past {lim.max_rows} intermediate rows. Narrow it "
@@ -103,7 +104,7 @@ def _guard(n_rows: int, *, check_clock: bool = True) -> None:
 
 @contextmanager
 def _deadline_for_this_read():
-    seconds = _LIMITS.get().seconds
+    seconds = _LIMITS.get(DEFAULT_LIMITS).seconds
     token = _DEADLINE.set(None if seconds is None else time.monotonic() + seconds)
     try:
         yield

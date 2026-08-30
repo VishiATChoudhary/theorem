@@ -46,6 +46,28 @@ assert edge supplied_by(item: cell, source: volta)
 
 Both roles are named explicitly. Passing a node of the wrong class to a role is a verify-time error; nothing executes.
 
+## 3b. Load a file instead of typing it
+
+Writing a row at a time is fine for a handful. For a table you already
+have, `load` writes it directly:
+
+```bash
+theorem load parts.csv --db mydb --class part
+theorem load links.csv --db mydb --edge supplied_by \
+    --role item=part --role source=supplier
+```
+
+CSV or JSONL. Columns must be properties the class declares and values
+must match the declared types, or the load is refused and nothing is
+written. Edge rows name their endpoints by `name` (or by id); a name that
+matches two nodes is an error rather than a coin flip.
+
+This path skips the dedup pass and the provisional-class quota, on the
+grounds that a bulk load is an operator saying the file is the truth.
+For a PDF or anything else whose structure is not already known, use
+`theorem ingest`, which stages the document and has an agent extract from
+it.
+
 ## 4. Read: find and follow
 
 ```theorem
