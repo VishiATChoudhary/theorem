@@ -23,6 +23,8 @@ from .ast_nodes import (
     Find,
     Follow,
     GroupBy,
+    Keep,
+    Or,
     Return,
     SchemaStmt,
 )
@@ -33,7 +35,21 @@ from .parser import ParseError, parse
 from .schema import Schema
 from .verifier import VerifyError, verify
 
-READ_STMTS = (Find, Follow, GroupBy, Aggregate, Compute, Return, Continue, SchemaStmt)
+# Every statement a read pipeline can contain. A verb missing from here
+# is routed to the write path, which rejects it: `or` and `keep` shipped
+# that way and were reachable only by calling the executor directly.
+READ_STMTS = (
+    Find,
+    Follow,
+    GroupBy,
+    Aggregate,
+    Keep,
+    Compute,
+    Or,
+    Return,
+    Continue,
+    SchemaStmt,
+)
 
 
 class Session:

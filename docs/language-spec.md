@@ -12,17 +12,21 @@ A program is a sequence of statements, one per logical line. A physical line sta
 program     := statement*
 statement   := read_stmt | write_stmt | util_stmt
 
-read_stmt   := find | follow | group | aggregate | compute | return | continue
+read_stmt   := find | follow | group | aggregate | keep | compute
+             | return | continue | or
 find        := "find" target ["where" cond] ["order" "by" col ["desc"]] "as" NAME
 target      := CLASSNAME | "nodes" | "dup_candidates" | "class"
-follow      := "follow" NAME EDGENAME ROLENAME ["where" cond] "as" NAME
-               ; cond filters the arrival node's properties
+follow      := "follow" NAME EDGENAME ROLENAME ["where" cond]
+               ["upto" (INT | "any")] "as" NAME ["or" "none"]
+               ; cond filters the arrival node's properties and the edge's
 group       := "group" "by" col "as" NAME
 aggregate   := AGGVERB ["distinct"] col "as" NAME     ; AGGVERB: count|sum|avg|min|max
+keep        := "keep" NAME "where" cond
 compute     := "compute" col COMPOP col "as" NAME     ; COMPOP: plus|minus|times|over|same
-return      := "return" col ("," col)* ["order" "by" col ["desc"]]
+return      := "return" ["distinct"] col ("," col)* ["order" "by" col ["desc"]]
                ["limit" INT] ["budget" INT "tokens"] ["after" POSITION]
 continue    := "continue" HANDLE ["budget" INT "tokens"]
+or          := "or"                                   ; alone on its line
 
 write_stmt  := assert_node | assert_edge | merge | distinct_s | refine
              | compact | retire | flag | derive
@@ -36,12 +40,17 @@ compact     := "compact" NAME "as" NAME props
 retire      := "retire" ref "reason" STRING
 flag        := "flag" ref "reason" STRING
 derive      := "derive" "class" NAME "from" CLASSNAME "with" propdecls
+                 ["quota" INT] ["dedup" NUMBER]
+             | "derive" "edge" EDGENAME "(" ROLENAME ":" CLASSNAME ","
+                 ROLENAME ":" CLASSNAME ")"
 
 util_stmt   := "schema"
 
 cond        := clause ("and" clause | "or" clause)*   ; "and" binds tighter
 clause      := col OP literal                          ; OP: = != > >= < <= contains
 col         := NAME ["." NAME ["." NAME]]              ; e.g. sups.name, health.loss
+             | "via" "." NAME                          ; a follow's edge property
+literal     := ... | "none"                            ; the absent value
 props       := "{" NAME ":" literal ("," NAME ":" literal)* "}"
 mapping     := "{" NAME ":" "col" STRING ("," NAME ":" "col" STRING)* "}"
 propdecls   := "{" NAME ":" TYPENAME ("," NAME ":" TYPENAME)* "}"  ; TYPENAME: str|int|float|bool
@@ -60,6 +69,20 @@ STRING      := '"' ... '"'
 **Binding table.** A query builds one binding table (SPARQL solution-mapping style). Each `as NAME` is a column. `find` seeds rows. `follow X edge role as Y` extends every row: for each row, for each edge of type `edge` incident to the node in column X, bind the node at `role` to Y. Rows multiply; rows with no match are dropped. Homomorphism semantics: repeated nodes are allowed. Edge instances are per-row unique (trail semantics, matching Cypher's MATCH default).
 
 **Roles.** An edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.
+
+**Alternative branches (`or`).** A line holding only the word `or` ends the current branch and starts another. Each branch is a `find`/`follow` sequence evaluated independently; the branches' rows are unioned before whatever follows. Rows are a set, so a node found by two branches answers once. Everything after the last branch (group, aggregate, keep, compute, return) applies to the union, which is how "how many players played for either team" is one query rather than two.
+
+**Optional traversal (`or none`).** `follow t playsFor player as p or none` keeps a row whose node has no matching edge, binding nothing to `p`. Without it the row disappears and a per-thing count cannot come out zero: a team with no players simply vanishes from the answer instead of reporting 0. An optional follow is a question asked about a row rather than a continuation of its path, so the edge that reached the row is available to it again; the trail rule does not apply across it.
+
+**Edge properties (`via.<prop>`).** Inside a follow's `where`, `via.<prop>` reads a property of the edge being walked rather than of the node being arrived at. `follow p playsFor team as t where via.start_year <= 1983` asks about the tenure, not the team. `none` is the absent value: `via.end_year = none` is a relationship that has not ended, distinct from one that ended at a value you did not match. `via.` is meaningful only within a `follow`; the verifier rejects it elsewhere.
+
+**Transitive traversal (`upto`).** `upto N` walks the edge 1 to N times; `upto any` walks it until a round reaches nothing new. Every arrival at any depth is part of the answer, so "everything this assembly contains, all the way down" is one statement. A `where` on a transitive follow filters what is *returned*, not where the walk may pass: cheap parts inside an expensive engine are still found. Reach is a set of nodes, not of paths, so a node two routes lead to is one answer and the route recorded for it is a shortest one. A cycle terminates.
+
+**keep.** `keep g where n > 3` filters the rows that exist at that point in the pipeline. After an aggregate the rows are groups, so this is how "the awards with more than twenty recipients" is asked: count first, then keep. Before an aggregate it filters plain rows. There is one rule rather than a having-clause that only works in one position.
+
+**Name reuse is a join.** Binding a name that is already bound constrains the two to be the same node rather than shadowing the first. `follow p receivesAward award where name = "MVP" as mvp` followed by a second follow arriving at `p` keeps only rows where both hold of the same player. This is how "both, and the same one" is said.
+
+**return distinct.** Plain `return` collapses repeated *nodes*; `return distinct` collapses repeated *values*. Two people who share a name are two rows under `return` and one under `return distinct`. Use `count distinct` for the same reason when a node is reachable by several paths.
 
 **group / aggregate.** `group by sups` groups by node identity; `group by sups.country` groups by value. The difference is visible in the spelling. Aggregates consume a group name: `count distinct g.parts as n_parts` counts distinct node bindings of column `parts` within each group of `g`. An aggregate over a plain (non-group) binding is a global aggregate: it collapses the table to one row. `distinct` dedups bindings before property extraction; aggregates over a property skip members where the property is null.
 
@@ -83,7 +106,8 @@ Every write returns a **receipt**: created and changed ids, position `@t-N`, the
 - **compact binding as name {props}**: replaces the bound node set with one summary node (state `composite`, parent lineage).
 - **retire ref reason "..."**: temporal invalidation. The node keeps its history and is excluded from current-time reads.
 - **flag ref reason "..."**: marks the node as having caused a downstream failure; feeds `health.query`.
-- **derive class name from base with {...}**: creates a provisional subclass with an instance quota (500 in v0). Status is queryable via `find class`.
+- **derive class name from base with {...}**: creates a provisional subclass with an instance quota (500 in v0, `quota N` to change it; `dedup R` sets the class's dup threshold). Status is queryable via `find class`.
+- **derive edge name(role: class, role: class)**: declares an edge type at runtime, with exactly two roles. Both survive a restart: the derivation is a lineage record, and a session rebuilds the schema entries a previous process created.
 
 ## Dedup
 
@@ -100,4 +124,14 @@ Four subscores in `[0,1]`, computed incrementally, queryable as `health.loss`, `
 
 ## Storage
 
-Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, one JSON record per write, position = line number); in-memory state rebuilt on open by replay; `snapshot()` writes an immutable run file `runs/run-<pos>.json` and truncates the WAL. A torn final WAL line (crash mid-append) is recovered by replaying the longest valid prefix. Single logical writer. Lineage records live in the WAL and are never pruned.
+Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, one JSON record per write, position = line number); in-memory state rebuilt on open by replay; `snapshot()` writes an immutable run file `runs/run-<pos>.json` and truncates the WAL. A torn final WAL line (crash mid-append) is recovered by replaying the longest valid prefix. Lineage records live in the WAL and are never pruned.
+
+**One writer.** A store takes an exclusive advisory lock on its directory when it opens. A second opener is refused by name, saying which process holds it; two writers would each assign the same ids and overwrite each other's records. The lock is released when the holding process dies, however it dies, so a crash does not leave a directory unopenable. A tool that only reads an idle directory can opt out with `lock=False`.
+
+**Compaction.** A snapshot is taken automatically once the WAL passes a threshold, which is both a fixed floor and the current size of the live data. Bounding it below by the data keeps loading a large graph linear: with a fixed threshold alone, a million-node ingest would rewrite a million-record run file on every threshold crossing. Runs older than the newest two are deleted.
+
+**Durability.** A committed record survives the process dying, because the write has reached the operating system. It does not survive the machine losing power: the write path does not fsync. Snapshots do, being rare enough for the guarantee to be free.
+
+**Limits.** A read runs under a row ceiling and a wall-clock deadline (`theorem.engine.executor.limits`). `budget` bounds the answer that is printed, which does nothing for a traversal that fills memory before it reaches `return`; these bound the work. Exceeding either raises an error naming the ceiling and the clauses that lower the cost.
+
+**Scale.** Everything is in memory, with no spill to disk, at roughly 6.7 KB per node measured on the CypherBench `politics` graph (885k nodes, 5.7 GB). A 32 GB machine therefore holds a graph of about 2 to 4 million nodes. This is the supported envelope for v0.

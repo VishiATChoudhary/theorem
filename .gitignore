@@ -10,3 +10,4 @@ site/
 dist/
 .hypothesis/
 eval/out/*.log
+handoffs/

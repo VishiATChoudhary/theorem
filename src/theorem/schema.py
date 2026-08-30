@@ -103,7 +103,11 @@ class Schema:
         )
         s.edges["uses"] = EdgeDef("uses", {"whole": "product", "component": "part"})
         s.edges["supplied_by"] = EdgeDef(
-            "supplied_by", {"item": "part", "source": "supplier"}
+            "supplied_by",
+            {"item": "part", "source": "supplier"},
+            # a supply relationship has its own dates: the question "who
+            # supplies this now" is about the edge, not either endpoint
+            {"start_year": "int", "contract_end": "int"},
         )
         return s
 
