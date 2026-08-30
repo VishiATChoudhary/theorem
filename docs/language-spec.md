@@ -122,6 +122,30 @@ Four subscores in `[0,1]`, computed incrementally, queryable as `health.loss`, `
 - **structure** = max(supernode: min(1, degree/100); blob traversal: min(1, traversals into blob payload / 50); orphan: 0.3 if degree is 0)
 - **staleness** = min(1, positions since last confirming write / 1000)
 
+## Compatibility
+
+theorem is pre-1.0 and versioned by semver, which before 1.0 means the minor
+number carries breaking changes: 0.1 to 0.2 refused a second writer where it
+had silently lost one of them, and that is the kind of change a minor bump is
+for. Patch releases do not change behaviour a caller can see.
+
+What a version promises:
+
+- **The log format.** A store written by any 0.x release opens in any later
+  0.x release. Records are self-describing objects with an `op`; an unknown one
+  is a loud error rather than a skipped write, so a store from the future
+  refuses to open rather than opening wrong.
+- **Queries.** A program that verifies against a schema keeps verifying against
+  it. Removing a verb, or narrowing what one accepts, is a minor bump and is
+  listed in the release. Widening what one accepts is not a break.
+- **The prompt.** `theorem.prompt.TUTORIAL` is versioned by its own hash rather
+  than by the release. Any change to it changes `fingerprint()`, which is what
+  benchmark result files are keyed by, so a number can never silently belong to
+  a different prompt.
+- **The Python surface.** Everything in `theorem.__all__`. Anything reached
+  through a module path (`theorem.engine.executor.Table`) is internal, whatever
+  its name suggests.
+
 ## Storage
 
 Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, one JSON record per write, position = line number); in-memory state rebuilt on open by replay; `snapshot()` writes an immutable run file `runs/run-<pos>.json` and truncates the WAL. A torn final WAL line (crash mid-append) is recovered by replaying the longest valid prefix. Lineage records live in the WAL and are never pruned.

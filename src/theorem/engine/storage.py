@@ -599,4 +599,14 @@ class Store:
             node.traffic += rec.get("n", 1)
             node.blob_traversals += rec.get("blob", 0)
         else:
-            raise ValueError(f"unknown WAL op {op!r}")
+            # A store written by a later version, or a corrupted record.
+            # Skipping it would apply every write around it and call the
+            # result the graph, which is the one outcome worse than not
+            # opening.
+            raise StoreError(
+                f"unknown record type {op!r} at position {pos} in {self.path}. "
+                "This store was probably written by a newer version of "
+                "theorem; upgrade to open it. Refusing to open it here would "
+                "otherwise mean applying every write around this one and "
+                "calling the result the graph."
+            )

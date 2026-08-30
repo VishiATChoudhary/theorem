@@ -146,3 +146,74 @@ def test_retire_record(tmp_path):
     store.close()
     store2 = Store(tmp_path)
     assert store2.nodes[a].retired_at == pos
+
+
+def test_a_record_from_the_future_refuses_to_open(tmp_path):
+    """The compatibility promise is that an unknown record is loud. Skipping
+    it would apply every write around it and call the result the graph."""
+    import json
+
+    import pytest
+
+    from theorem.engine.storage import StoreError
+
+    store = Store(tmp_path)
+    put_supplier(store, "VoltaChem")
+    store.close()
+    with (tmp_path / "wal.jsonl").open("a", encoding="utf-8") as f:
+        f.write(json.dumps({"op": "teleport", "id": "#s-1", "_pos": 2}) + "\n")
+
+    with pytest.raises(StoreError) as e:
+        Store(tmp_path)
+    assert "newer version" in str(e.value)
+
+
+def test_a_store_written_by_an_earlier_release_still_opens(tmp_path):
+    """Records are self-describing objects, so a log holding only the ops
+    0.1 knew about must replay unchanged."""
+    import json
+
+    wal = tmp_path / "wal.jsonl"
+    (tmp_path / "runs").mkdir(parents=True, exist_ok=True)
+    wal.write_text(
+        "\n".join(
+            json.dumps(r)
+            for r in [
+                {
+                    "op": "put_node",
+                    "id": "#s-1",
+                    "cls": "supplier",
+                    "props": {"name": "VoltaChem"},
+                    "_pos": 1,
+                },
+                {
+                    "op": "put_node",
+                    "id": "#p-1",
+                    "cls": "part",
+                    "props": {"name": "Anode"},
+                    "_pos": 2,
+                },
+                {
+                    "op": "put_edge",
+                    "id": "#e-1",
+                    "type": "supplied_by",
+                    "roles": {"item": "#p-1", "source": "#s-1"},
+                    "_pos": 3,
+                },
+                {
+                    "op": "patch_node",
+                    "id": "#s-1",
+                    "props": {"country": "DE"},
+                    "_pos": 4,
+                },
+                {"op": "retire", "id": "#p-1", "reason": "gone", "_pos": 5},
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    store = Store(tmp_path)
+    assert store.nodes["#s-1"].props["country"] == "DE"
+    assert store.nodes["#p-1"].retired_at == 5
+    assert store.edge_index["#e-1"].type == "supplied_by"
+    store.close()
