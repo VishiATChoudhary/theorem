@@ -518,7 +518,7 @@ def _follow_once(stmt: Follow, table: Table, store: Store, schema: Schema) -> No
             new_rows.append({**row, stmt.name: None})
     for nid in touched:
         blob = 1 if store.nodes[nid].state == "blob" else 0
-        store.apply({"op": "traffic", "id": nid, "n": 1, "blob": blob})
+        store.touch(nid, blob)
     table.rows = new_rows
 
 

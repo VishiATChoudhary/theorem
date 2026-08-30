@@ -132,6 +132,8 @@ Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, 
 
 **Durability.** A committed record survives the process dying, because the write has reached the operating system. It does not survive the machine losing power: the write path does not fsync. Snapshots do, being rare enough for the guarantee to be free.
 
+**Reads do not write.** Traffic telemetry (`query_traffic`, and the `health` subscores built on it) is counted in memory and reaches disk with the next snapshot. It used to be a WAL record per node per follow, which made every question a write: a read-only workload grew the log forever, answering a question needed write access, and the read path was 7x slower on the benchmark graphs. A crash loses some counts of who looked at what, which is the right thing to lose.
+
 **Limits.** A read runs under a row ceiling and a wall-clock deadline (`theorem.engine.executor.limits`). `budget` bounds the answer that is printed, which does nothing for a traversal that fills memory before it reaches `return`; these bound the work. Exceeding either raises an error naming the ceiling and the clauses that lower the cost.
 
 **Scale.** Everything is in memory, with no spill to disk, at roughly 6.7 KB per node measured on the CypherBench `politics` graph (885k nodes, 5.7 GB). A 32 GB machine therefore holds a graph of about 2 to 4 million nodes. This is the supported envelope for v0.

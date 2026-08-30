@@ -126,3 +126,26 @@ def test_limits_do_not_leak_out_of_the_block(wide):
         wide,
     )
     assert len(rows) == 79
+
+
+# ---- a read must not be a write ---------------------------------------
+
+
+def test_a_read_writes_nothing_to_the_wal(wide):
+    """Traffic telemetry used to append a WAL record per node per follow,
+    which made every question a write: a read-only workload grew the log
+    forever, and answering one needed write access."""
+    store, schema = wide
+    before = store.wal_len()
+    position = store.position
+    rows = run("find item as a\nfollow a links to as b\nreturn b.name", wide)
+    assert rows
+    assert store.wal_len() == before
+    assert store.position == position
+
+
+def test_the_counts_are_still_kept(wide):
+    store, schema = wide
+    run('find item where name = "n0" as a\nfollow a links to as b\nreturn b.name', wide)
+    walked = [n for n in store.nodes.values() if n.traffic]
+    assert walked, "a follow should record that it walked through nodes"

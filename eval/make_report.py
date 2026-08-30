@@ -49,7 +49,6 @@ CATEGORY_ORDER = [
 ]
 
 
-
 def _scored_fingerprint() -> str:
     """The prompt hash of the queries this report was built from."""
     from eval.run_public import PUB
@@ -171,10 +170,7 @@ def main() -> None:
             and ex([r for r in gl if r["graph"] == g])
             > ex([r for r in cy if r["graph"] == g])
         ]
-        w(
-            f"theorem is ahead on {len(wins)} of "
-            f"{len({r['graph'] for r in gl})} graphs."
-        )
+        w(f"theorem is ahead on {len(wins)} of {len({r['graph'] for r in gl})} graphs.")
         w("")
     w(
         "The published baselines were run on 2024 models, so they cannot "
@@ -281,7 +277,11 @@ def main() -> None:
     w("")
     worst = sorted(
         (
-            (c, [r for r in gl if r["category"] == c], [r for r in cy if r["category"] == c])
+            (
+                c,
+                [r for r in gl if r["category"] == c],
+                [r for r in cy if r["category"] == c],
+            )
             for c in {r["category"] for r in gl}
         ),
         key=lambda t: ex(t[1]),
@@ -453,7 +453,7 @@ def main() -> None:
         "quadratic, the adapter collapsed relation labels connecting more "
         "than one pair of entity types (36 points on `geography` alone), "
         "and an optional follow wrongly inherited the path's edge trail, "
-        "which undercounted every \"and how many each\" question by one."
+        'which undercounted every "and how many each" question by one.'
     )
     w(
         "- The nba graph is the one theorem's prompt was written against; "

@@ -63,7 +63,10 @@ def replay(graph: str, model: str) -> tuple[int, list[dict]]:
     if not store.nodes:
         print(f"[{graph}] store is empty; load it first")
         return 0, []
-    store.apply = lambda record: 0
+    # Reads no longer write: traffic telemetry is kept in memory and reaches
+    # disk with the next snapshot (Store.touch). The harness used to disable
+    # store.apply here, which meant the benchmark was measuring an engine the
+    # shipped one was not.
     print(f"[{graph}] {len(store.nodes)} nodes, {len(published)} scored questions")
 
     signal.signal(signal.SIGALRM, _alarm)

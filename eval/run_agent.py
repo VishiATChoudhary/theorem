@@ -57,9 +57,7 @@ def questions(graph: str, n: int, seed: int = 11) -> list[dict]:
     from collections import defaultdict
 
     all_q = [
-        q
-        for q in json.loads((DATA / "train.json").read_text())
-        if q["graph"] == graph
+        q for q in json.loads((DATA / "train.json").read_text()) if q["graph"] == graph
     ]
     by_cat = defaultdict(list)
     for q in all_q:
@@ -96,7 +94,10 @@ class TheoremArm:
         if not self.store.nodes:
             load(DATA / f"{graph}_simplekg.json", self.store)
             self.store.snapshot()
-        self.store.apply = lambda record: 0
+        # Reads no longer write: traffic telemetry is kept in memory and
+        # reaches disk with the next snapshot (Store.touch). The harness
+        # used to disable store.apply here, which meant the benchmark was
+        # measuring an engine the shipped one was not.
 
     def prompt(self, question: str) -> str:
         from eval.prompts import theorem_prompt
@@ -133,9 +134,10 @@ class CypherArm:
         )
 
         self.schema_str = official_schema_str(graph)
-        host = graph in HOST_LOADED or Path(
-            DATA / f"{graph}_simplekg.json"
-        ).stat().st_size > 50_000_000
+        host = (
+            graph in HOST_LOADED
+            or Path(DATA / f"{graph}_simplekg.json").stat().st_size > 50_000_000
+        )
         start_graph(graph, host_load=host)
         self.driver = connect(expect_empty=host)
         if host:
@@ -174,8 +176,10 @@ def _render_cypher(recs) -> str:
         return "results: 0 of 0, complete"
     cols = list(recs[0].keys())
     head = f"results: {len(recs)} of {len(recs)}, complete\ncolumns: " + ", ".join(cols)
-    return head + "\n" + "\n".join(
-        ", ".join(str(r.get(c)) for c in cols) for r in recs[:50]
+    return (
+        head
+        + "\n"
+        + "\n".join(", ".join(str(r.get(c)) for c in cols) for r in recs[:50])
     )
 
 
@@ -232,8 +236,7 @@ def solve(arm, q: dict, model: str) -> dict:
         # Ran but wrong. An agent cannot see the gold answer, so all it
         # can do is look at what came back; feed that and let it reconsider.
         prompt = (
-            base
-            + f"\nYour previous query ran but the result looks wrong.\n\n"
+            base + f"\nYour previous query ran but the result looks wrong.\n\n"
             f"Query:\n{query}\n\nResult:\n{rendered[:600]}\n\n"
             "Write a corrected query. Output ONLY the query text.\n"
         )
@@ -283,14 +286,15 @@ def report(model: str) -> None:
     def pct(x):
         return f"{100 * x:.1f}"
 
-    print(f"{'arm':14s} {'n':>5s} {'solve@1':>8s} {'solve@2':>8s} {'solve@3':>8s} "
-          f"{'turns':>6s} {'tokens':>8s} {'ms':>8s}")
+    print(
+        f"{'arm':14s} {'n':>5s} {'solve@1':>8s} {'solve@2':>8s} {'solve@3':>8s} "
+        f"{'turns':>6s} {'tokens':>8s} {'ms':>8s}"
+    )
     summary = {}
     for name, rows in arms.items():
         n = len(rows)
         at = {
-            k: sum(r["solved"] and r["turns"] <= k for r in rows) / n
-            for k in (1, 2, 3)
+            k: sum(r["solved"] and r["turns"] <= k for r in rows) / n for k in (1, 2, 3)
         }
         solved = [r for r in rows if r["solved"]]
         turns = sum(r["turns"] for r in solved) / len(solved) if solved else 0
@@ -330,11 +334,7 @@ def _paired(arms: dict) -> dict:
     only_c = sum(c[q]["solved"] and not t[q]["solved"] for q in qs)
     m = only_t + only_c
     k = min(only_t, only_c)
-    p = (
-        min(1.0, 2 * sum(math.comb(m, i) for i in range(k + 1)) / 2**m)
-        if m
-        else 1.0
-    )
+    p = min(1.0, 2 * sum(math.comb(m, i) for i in range(k + 1)) / 2**m) if m else 1.0
     return {
         "n": len(qs),
         "both": both,
@@ -386,7 +386,9 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
     w("")
     w("## Results")
     w("")
-    w("| Arm | n | solve@1 | solve@2 | solve@3 | Turns when solved | Tokens/question | Exec ms |")
+    w(
+        "| Arm | n | solve@1 | solve@2 | solve@3 | Turns when solved | Tokens/question | Exec ms |"
+    )
     w("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
     for name in sorted(summary, key=lambda k: -summary[k]["solve_at_3"]):
         d = summary[name]

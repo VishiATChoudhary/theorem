@@ -288,6 +288,23 @@ class Store:
         self._maybe_snapshot()
         return self.position
 
+    def touch(self, node_id: str, blob: int = 0) -> None:
+        """Record that a read walked through this node.
+
+        Telemetry, not truth. Writing a WAL record per node per follow
+        made every read a write: it dominated the runtime of the large
+        benchmark graphs, it turned a read-only workload into one that
+        grows the log forever, and it means a reader needs write access
+        to answer a question. The counters live in memory and reach disk
+        with the next snapshot, so a crash loses some counts of who
+        looked at what, which is the right thing to lose.
+        """
+        node = self.nodes.get(node_id)
+        if node is None:
+            return
+        node.traffic += 1
+        node.blob_traversals += blob
+
     def wal_len(self) -> int:
         if not self.wal_path.exists():
             return 0

@@ -80,11 +80,21 @@ def to_hashable(obj, unorder_list=True):
         return obj.iso_format()
     elif isinstance(obj, (list, tuple)):
         if unorder_list:
-            return tuple(sorted((to_hashable(item) for item in obj), key=lambda x: (str(type(x)), str(x))))
+            return tuple(
+                sorted(
+                    (to_hashable(item) for item in obj),
+                    key=lambda x: (str(type(x)), str(x)),
+                )
+            )
         else:
             return tuple(to_hashable(item) for item in obj)
     elif isinstance(obj, set):
-        return tuple(sorted((to_hashable(item) for item in obj), key=lambda x: (str(type(x)), str(x))))
+        return tuple(
+            sorted(
+                (to_hashable(item) for item in obj),
+                key=lambda x: (str(type(x)), str(x)),
+            )
+        )
     elif isinstance(obj, dict):
         return tuple(sorted((to_hashable(k), to_hashable(v)) for k, v in obj.items()))
     else:
@@ -292,7 +302,20 @@ def audit(model: str) -> int:
     return dropped
 
 
-GL_VERBS_STRIPPED = ("find", "follow", "group", "count", "sum", "avg", "min", "max", "compute", "return", "continue", "schema")
+GL_VERBS_STRIPPED = (
+    "find",
+    "follow",
+    "group",
+    "count",
+    "sum",
+    "avg",
+    "min",
+    "max",
+    "compute",
+    "return",
+    "continue",
+    "schema",
+)
 
 
 def cache_path_for(q: dict, model: str, schemas: dict):
@@ -388,7 +411,10 @@ def exec_graph(graph: str, model: str) -> None:
     # no bearing on answer correctness and dominates runtime on the large
     # graphs, so it is disabled here. Verified to be the sole store.apply
     # call site in the read executor.
-    store.apply = lambda record: 0
+    # Reads no longer write: traffic telemetry is kept in memory and reaches
+    # disk with the next snapshot (Store.touch). The harness used to disable
+    # store.apply here, which meant the benchmark was measuring an engine the
+    # shipped one was not.
 
     signal.signal(signal.SIGALRM, _alarm)
     PUB.mkdir(parents=True, exist_ok=True)
@@ -532,9 +558,7 @@ def report(model: str, strict: bool = True) -> None:
         # excludes it and is the number to quote.
         "held_out_ex": ex_of([r for r in all_results if r["graph"] != "nba"]),
         "held_out_n": sum(r["graph"] != "nba" for r in all_results),
-        "executable_pct": round(
-            sum(r["executable"] for r in all_results) / n, 4
-        ),
+        "executable_pct": round(sum(r["executable"] for r in all_results) / n, 4),
         "hard_data_shapes": {
             "list_valued_gold": {
                 "n": len(list_gold),

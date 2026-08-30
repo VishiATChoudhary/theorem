@@ -231,16 +231,25 @@ def start_graph(graph: str, host_load: bool = False) -> None:
     ).resolve()
     subprocess.run(
         [
-            "docker", "run", "-d", "--name", CONTAINER,
-            "-v", f"{graph_path}:/init/graph.json",
-            "-p", f"{BOLT_PORT}:7687",
-            "-e", f"NEO4J_AUTH={AUTH[0]}/{AUTH[1]}",
+            "docker",
+            "run",
+            "-d",
+            "--name",
+            CONTAINER,
+            "-v",
+            f"{graph_path}:/init/graph.json",
+            "-p",
+            f"{BOLT_PORT}:7687",
+            "-e",
+            f"NEO4J_AUTH={AUTH[0]}/{AUTH[1]}",
             # Must fit the Docker VM alongside the image's own Python
             # importer, which holds the whole graph JSON in memory. Neo4j
             # taking 5G of a 7.6G VM got the container OOM-killed (exit
             # 137) on the three largest graphs before it finished loading.
-            "-e", f"NEO4J_server_memory_heap_max__size={HEAP}",
-            "-e", f"NEO4J_server_memory_pagecache_size={PAGECACHE}",
+            "-e",
+            f"NEO4J_server_memory_heap_max__size={HEAP}",
+            "-e",
+            f"NEO4J_server_memory_pagecache_size={PAGECACHE}",
             "megagonlabs/neo4j-with-loader:2.4",
         ],
         check=True,
@@ -462,8 +471,16 @@ def main() -> None:
             if (PUB / f"cyexec-{args.model}-{g}.json").exists():
                 continue
             r = subprocess.run(
-                [sys.executable, "-m", "eval.run_cypher_public", "exec",
-                 "--graph", g, "--model", args.model]
+                [
+                    sys.executable,
+                    "-m",
+                    "eval.run_cypher_public",
+                    "exec",
+                    "--graph",
+                    g,
+                    "--model",
+                    args.model,
+                ]
             )
             if r.returncode != 0:
                 print(f"[{g}] cypher exec failed ({r.returncode})")

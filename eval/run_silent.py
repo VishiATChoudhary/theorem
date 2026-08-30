@@ -166,7 +166,10 @@ def theorem_arm(graph: str, queries: dict[str, str], limit: int) -> list[Tally]:
     store = Store(OUT / f"db-full-{graph}", lock=False)
     if not store.nodes:
         sys.exit(f"store for {graph} is empty; run the benchmark loader first")
-    store.apply = lambda record: 0
+    # Reads no longer write: traffic telemetry is kept in memory and reaches
+    # disk with the next snapshot (Store.touch). The harness used to disable
+    # store.apply here, which meant the benchmark was measuring an engine the
+    # shipped one was not.
     rng = random.Random(SEED)
     tallies = {m: Tally("theorem", m) for m in MUTATIONS}
 
@@ -326,7 +329,6 @@ def _row(t: Tally, bold: bool = False) -> str:
     )
 
 
-
 # ---- the published page ----------------------------------------------
 
 DOC = Path(__file__).resolve().parents[1] / "docs" / "benchmarks" / "silent-failure.md"
@@ -387,12 +389,20 @@ def write_doc(graphs: list[str]) -> Path:
     total = {}
     for tallies in per_graph.values():
         for t in tallies:
-            acc = total.setdefault(t["arm"], dict.fromkeys(
-                ("rejected", "empty", "wrong", "inert", "skipped", "warned"), 0))
+            acc = total.setdefault(
+                t["arm"],
+                dict.fromkeys(
+                    ("rejected", "empty", "wrong", "inert", "skipped", "warned"), 0
+                ),
+            )
             for k in acc:
                 acc[k] += t[k]
-    lines += ["## Both graphs", "", "| arm | mutants | rejected | undetectable |",
-              "|---|---:|---:|---:|"]
+    lines += [
+        "## Both graphs",
+        "",
+        "| arm | mutants | rejected | undetectable |",
+        "|---|---:|---:|---:|",
+    ]
     for arm, acc in total.items():
         n = acc["rejected"] + acc["empty"] + acc["wrong"]
         bad = acc["empty"] + acc["wrong"]
