@@ -253,3 +253,42 @@ def test_return_distinct_respects_order_and_limit(fixture_store):
         fixture_store,
     )
     assert rows == [["casing"], ["copper wire"]]
+
+
+# ---- an optional follow is a fresh match ------------------------------
+
+
+def test_optional_follow_may_reuse_the_edge_that_reached_it(fixture_store):
+    """"The parts of PowerBank Pro, and how many products use each" must
+    count PowerBank Pro itself.
+
+    A plain follow cannot walk back down the edge it arrived on, which is
+    what makes "the OTHER products using this part" work. An optional
+    follow asks a fresh question about each row instead, so the edge that
+    got there is available again.
+    """
+    both = run(
+        'find product where name = "PowerBank Pro" as pb\n'
+        "follow pb uses component as c\n"
+        "follow c uses whole as users or none\n"
+        "group by c as g\n"
+        "count distinct g.users as n\n"
+        "return c.name, n order by c.name",
+        fixture_store,
+    )
+    assert both == [["copper wire", 1], ["lithium cell", 2]]
+
+
+def test_plain_follow_still_excludes_the_edge_it_came_from(fixture_store):
+    others = run(
+        'find product where name = "PowerBank Pro" as pb\n'
+        "follow pb uses component as c\n"
+        "follow c uses whole as users\n"
+        "group by c as g\n"
+        "count distinct g.users as n\n"
+        "return c.name, n order by c.name",
+        fixture_store,
+    )
+    # copper wire drops out entirely: a plain follow keeps no row when
+    # nothing matches, and the only edge to it is the one already walked.
+    assert others == [["lithium cell", 1]]

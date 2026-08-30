@@ -315,8 +315,13 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             dst_node = store.nodes.get(dst)
             if dst_node is None or dst_node.retired_at is not None:
                 continue
-            if edge.id in row.get("__edges__", ()):
-                continue  # trail semantics: an edge instance is used once per row
+            if not stmt.optional and edge.id in row.get("__edges__", ()):
+                # Trail semantics: within one path an edge is walked once,
+                # so "the other products using this part" excludes the one
+                # you came from. An optional follow is a separate question
+                # asked about each row, not a continuation of the path, so
+                # the edge that reached the row is available to it again.
+                continue
             if stmt.name in row and not _same_node(store, row[stmt.name], dst):
                 continue  # the name is already bound: it must be this node
             if stmt.cond and not _eval_cond(
@@ -338,7 +343,9 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
                 {
                     **row,
                     stmt.name: dst,
-                    "__edges__": (*row.get("__edges__", ()), edge.id),
+                    "__edges__": row.get("__edges__", ())
+                    if stmt.optional
+                    else (*row.get("__edges__", ()), edge.id),
                 }
             )
         if stmt.optional and not matched:
