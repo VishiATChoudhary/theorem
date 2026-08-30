@@ -113,7 +113,5 @@ def test_not_equal_excludes_members(tmp_path):
 
 def test_scalar_properties_are_unaffected(tmp_path):
     store, schema = _load(tmp_path)
-    rows = run(
-        "find player where height_cm > 185 as p\nreturn p.name", store, schema
-    )
+    rows = run("find player where height_cm > 185 as p\nreturn p.name", store, schema)
     assert rows == [["Bo"]]

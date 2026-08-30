@@ -24,10 +24,10 @@ def run(text, store, schema=S):
 
 def test_find_where_after_as(fixture_store):
     before = run(
-        'find product where launch_year > 2024 as p\nreturn p.name', fixture_store
+        "find product where launch_year > 2024 as p\nreturn p.name", fixture_store
     )
     after = run(
-        'find product as p where launch_year > 2024\nreturn p.name', fixture_store
+        "find product as p where launch_year > 2024\nreturn p.name", fixture_store
     )
     assert sorted(before) == sorted(after)
     assert sorted(before) == [["GridPack"], ["PowerBank Pro"]]
@@ -35,13 +35,13 @@ def test_find_where_after_as(fixture_store):
 
 def test_follow_where_after_as(fixture_store):
     before = run(
-        'find product as p\n'
+        "find product as p\n"
         'follow p uses component where name = "lithium cell" as c\n'
         "return p.name",
         fixture_store,
     )
     after = run(
-        'find product as p\n'
+        "find product as p\n"
         'follow p uses component as c where name = "lithium cell"\n'
         "return p.name",
         fixture_store,
@@ -59,7 +59,12 @@ def test_return_deduplicates_on_projected_bindings(fixture_store):
         "find product as p\nfollow p uses component as c\nreturn c.name",
         fixture_store,
     )
-    assert sorted(rows) == [["casing"], ["copper wire"], ["lithium cell"], ["solar film"]]
+    assert sorted(rows) == [
+        ["casing"],
+        ["copper wire"],
+        ["lithium cell"],
+        ["solar film"],
+    ]
 
 
 def test_return_keeps_distinct_entities_that_share_a_name(fixture_store):
@@ -112,7 +117,7 @@ def test_reused_name_with_no_overlap_is_empty(fixture_store):
         'find supplier where name = "VoltaChem" as v\n'
         "follow v supplied_by item as part\n"
         'find product where name = "GridPack" as gp\n'
-        "follow gp uses component where name = \"casing\" as part\n"
+        'follow gp uses component where name = "casing" as part\n'
         "return part.name",
         fixture_store,
     )
@@ -217,7 +222,7 @@ def test_plain_follow_still_drops_unmatched(fixture_store):
 def test_optional_follow_with_where(fixture_store):
     rows = run(
         "find product as p\n"
-        'follow p uses component as c where unit_cost > 5 or none\n'
+        "follow p uses component as c where unit_cost > 5 or none\n"
         "group by p as g\n"
         "count distinct g.c as n\n"
         "return p.name, n order by p.name",
@@ -259,7 +264,7 @@ def test_return_distinct_respects_order_and_limit(fixture_store):
 
 
 def test_optional_follow_may_reuse_the_edge_that_reached_it(fixture_store):
-    """"The parts of PowerBank Pro, and how many products use each" must
+    """ "The parts of PowerBank Pro, and how many products use each" must
     count PowerBank Pro itself.
 
     A plain follow cannot walk back down the edge it arrived on, which is

@@ -74,3 +74,16 @@ def test_the_added_clauses_are_in_the_tutorial(clause):
     """The spec is normative; the tutorial is how anyone finds a feature."""
     text = (DOCS / "tutorial.md").read_text(encoding="utf-8")
     assert clause in text
+
+
+def test_the_version_is_stated_once_and_agrees():
+    """Two copies of a version number drift; a test is cheaper than a
+    release that reports the wrong one."""
+    import tomllib
+
+    import theorem
+
+    pyproject = tomllib.loads(
+        (DOCS.parent / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    assert theorem.__version__ == pyproject["project"]["version"]

@@ -108,9 +108,7 @@ def test_keep_needs_a_bound_name(fixture_store):
 
 def test_keep_rejects_an_unknown_property(fixture_store):
     with pytest.raises(VerifyError):
-        verify(
-            parse("find product as p\nkeep p where nonsense = 1\nreturn p.name"), S
-        )
+        verify(parse("find product as p\nkeep p where nonsense = 1\nreturn p.name"), S)
 
 
 def test_keep_needs_a_condition():

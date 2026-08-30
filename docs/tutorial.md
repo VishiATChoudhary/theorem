@@ -208,6 +208,28 @@ return sups.name, n order by n desc
 collapses repeated nodes. Two suppliers sharing a name are two rows under
 `return` and one under `return distinct`.
 
+## 9b. Use it from Python
+
+The CLI is a wrapper. An application embeds the session directly:
+
+```python
+from theorem import Schema, Session
+
+with Session("mydb", Schema()) as db:
+    print(db.run("derive class supplier from entity with {country: str}"))
+    print(db.run('assert supplier {name: "VoltaChem", country: "DE"} as v'))
+    print(db.run('find supplier where country = "DE" as s\nreturn s.name'))
+```
+
+`Schema()` is the base schema: `entity` to derive your own classes from,
+plus the document classes the ingest pipeline uses.
+`Schema.supply_chain()` adds the demo classes this tutorial uses, and is
+what the CLI opens with unless you pass `--schema base`.
+
+The session holds an exclusive lock on the directory for as long as it is
+open, so close it (or use it as a context manager, as above) before
+another process opens the same database.
+
 ## 10. Budgets and continuations
 
 `budget 2000 tokens` caps the serialized result. On overflow the result truncates at a row boundary and prints a handle:

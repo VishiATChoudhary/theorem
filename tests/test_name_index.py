@@ -55,25 +55,37 @@ def run(text, store, schema):
 
 def test_lookup_by_name(tmp_path):
     store, schema = _store(tmp_path, 50, extra=[("Angela Merkel", 70)])
-    rows = run('find person where name = "Angela Merkel" as p\nreturn p.age', store, schema)
+    rows = run(
+        'find person where name = "Angela Merkel" as p\nreturn p.age', store, schema
+    )
     assert rows == [[70]]
 
 
 def test_lookup_is_accent_and_case_insensitive(tmp_path):
     store, schema = _store(tmp_path, 10, extra=[("Nikola Mirotić", 33)])
-    assert run('find person where name = "nikola mirotic" as p\nreturn p.age', store, schema) == [[33]]
-    assert run('find person where name = "NIKOLA MIROTIĆ" as p\nreturn p.age', store, schema) == [[33]]
+    assert run(
+        'find person where name = "nikola mirotic" as p\nreturn p.age', store, schema
+    ) == [[33]]
+    assert run(
+        'find person where name = "NIKOLA MIROTIĆ" as p\nreturn p.age', store, schema
+    ) == [[33]]
 
 
 def test_all_nodes_sharing_a_name_are_found(tmp_path):
     store, schema = _store(tmp_path, 5, extra=[("Ionix", 1), ("Ionix", 2)])
-    rows = run('find person where name = "Ionix" as p\nreturn p.age order by p.age', store, schema)
+    rows = run(
+        'find person where name = "Ionix" as p\nreturn p.age order by p.age',
+        store,
+        schema,
+    )
     assert rows == [[1], [2]]
 
 
 def test_other_conditions_still_work(tmp_path):
     store, schema = _store(tmp_path, 20)
-    rows = run("find person where age > 17 as p\nreturn p.age order by p.age", store, schema)
+    rows = run(
+        "find person where age > 17 as p\nreturn p.age order by p.age", store, schema
+    )
     assert rows == [[18], [19]]
 
 

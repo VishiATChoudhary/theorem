@@ -27,7 +27,7 @@ def test_global_count_distinct_collapses_duplicates(fixture_store):
     # cell is reached from both PowerBank Pro and GridPack, so the raw
     # binding column holds it twice; distinct must count it once.
     rows = run(
-        'find product where launch_year > 2024 as p\n'
+        "find product where launch_year > 2024 as p\n"
         "follow p uses component as parts\n"
         "count distinct parts as n\n"
         "return n",
@@ -38,7 +38,7 @@ def test_global_count_distinct_collapses_duplicates(fixture_store):
 
 def test_grouped_count_distinct(fixture_store):
     rows = run(
-        'find product where launch_year > 2024 as p\n'
+        "find product where launch_year > 2024 as p\n"
         "follow p uses component as parts\n"
         "follow parts supplied_by source as sups\n"
         "group by sups as g\n"
@@ -51,7 +51,7 @@ def test_grouped_count_distinct(fixture_store):
 
 def test_count_distinct_without_distinct_keeps_duplicates(fixture_store):
     plain = run(
-        'find product where launch_year > 2024 as p\n'
+        "find product where launch_year > 2024 as p\n"
         "follow p uses component as parts\n"
         "count parts as n\n"
         "return n",

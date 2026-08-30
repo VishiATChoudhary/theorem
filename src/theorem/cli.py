@@ -19,11 +19,26 @@ from .session import Session
 from .verifier import VerifyError
 
 
+def _add_schema_arg(ap: argparse.ArgumentParser) -> None:
+    ap.add_argument(
+        "--schema",
+        choices=["demo", "base"],
+        default="demo",
+        help="demo: the tutorial's supply-chain classes. base: entity and "
+        "the document classes only, to derive your own from.",
+    )
+
+
+def _schema_for(name: str) -> Schema:
+    return Schema.supply_chain() if name == "demo" else Schema()
+
+
 def _handle_ingest(argv: list[str]) -> int:
     """Handle theorem ingest subcommand."""
     ap = argparse.ArgumentParser(prog="theorem ingest")
     ap.add_argument("file", help="file to ingest")
     ap.add_argument("--db", default=".theorem-db", help="database directory")
+    _add_schema_arg(ap)
     ap.add_argument(
         "--extract", action="store_true", help="run extraction after staging"
     )
@@ -34,7 +49,7 @@ def _handle_ingest(argv: list[str]) -> int:
     args = ap.parse_args(argv)
 
     try:
-        session = Session(Path(args.db), Schema.supply_chain())
+        session = Session(Path(args.db), _schema_for(args.schema))
         file_path = Path(args.file)
         raw = file_path.read_bytes()
         envelope = normalize(raw, file_path.name)
@@ -75,6 +90,7 @@ def _handle_load(argv: list[str]) -> int:
     )
     ap.add_argument("file", help="a .csv or .jsonl file")
     ap.add_argument("--db", default=".theorem-db", help="database directory")
+    _add_schema_arg(ap)
     ap.add_argument("--class", dest="cls", help="class to load one node per row into")
     ap.add_argument("--edge", help="edge type to load one edge per row into")
     ap.add_argument(
@@ -90,7 +106,7 @@ def _handle_load(argv: list[str]) -> int:
         return 1
 
     try:
-        session = Session(Path(args.db), Schema.supply_chain())
+        session = Session(Path(args.db), _schema_for(args.schema))
     except StoreLocked as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
@@ -128,6 +144,7 @@ def _handle_playbook(argv: list[str]) -> int:
     compile_parser.add_argument(
         "--db", default=".theorem-db", help="database directory"
     )
+    _add_schema_arg(compile_parser)
     compile_parser.add_argument("--agent", default="claude", help="agent runner name")
     compile_parser.add_argument(
         "--unhinged", action="store_true", help="apply without confirmation"
@@ -137,7 +154,7 @@ def _handle_playbook(argv: list[str]) -> int:
 
     if args.subcommand == "compile":
         try:
-            session = Session(Path(args.db), Schema.supply_chain())
+            session = Session(Path(args.db), _schema_for(args.schema))
             runner = get_runner(args.agent)
         except RunnerError as e:
             print(f"error: {e}", file=sys.stderr)
@@ -183,11 +200,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="theorem")
     ap.add_argument("file", nargs="?", help="a .thm program to run")
     ap.add_argument("--db", default=".theorem-db", help="database directory")
+    _add_schema_arg(ap)
     ap.add_argument("--repl", action="store_true", help="interactive session")
     args = ap.parse_args(argv)
 
     try:
-        session = Session(Path(args.db), Schema.supply_chain())
+        session = Session(Path(args.db), _schema_for(args.schema))
     except StoreLocked as e:
         # A held database is an operator problem, not a bug: say what is
         # wrong on one line rather than unwinding a traceback at them.

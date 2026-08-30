@@ -59,9 +59,7 @@ def test_edges_between_populated_classes_survive(tmp_path):
     store = Store(tmp_path / "db")
     for cls, name in (("team", "Bulls"), ("player", "Jordan")):
         nid = store.next_id(cls)
-        store.apply(
-            {"op": "put_node", "id": nid, "cls": cls, "props": {"name": name}}
-        )
+        store.apply({"op": "put_node", "id": nid, "cls": cls, "props": {"name": name}})
     out = schema.render(store)
     assert "playsFor" in out and "team" in out and "player" in out
 

@@ -62,9 +62,7 @@ def test_group_then_aggregate_still_works(fixture_store):
 
 def test_group_key_renders(fixture_store):
     out = execute_read(
-        verify(
-            parse("find supplier as s\ngroup by s.country as g\nreturn g.key"), S
-        ),
+        verify(parse("find supplier as s\ngroup by s.country as g\nreturn g.key"), S),
         fixture_store,
         S,
         ReadContext(),

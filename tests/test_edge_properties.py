@@ -41,12 +41,27 @@ KG = {
         {"eid": "Team#3", "label": "Team", "name": "Spurs", "properties": {}},
     ],
     "relations": [
-        {"rid": "0", "label": "playsFor", "subj_id": "Player#1", "obj_id": "Team#1",
-         "properties": {"start_year": 1982, "end_year": 1988}},
-        {"rid": "1", "label": "playsFor", "subj_id": "Player#1", "obj_id": "Team#2",
-         "properties": {"start_year": 1988, "end_year": 1990}},
-        {"rid": "2", "label": "playsFor", "subj_id": "Player#1", "obj_id": "Team#3",
-         "properties": {"start_year": 1991}},  # ongoing: no end year
+        {
+            "rid": "0",
+            "label": "playsFor",
+            "subj_id": "Player#1",
+            "obj_id": "Team#1",
+            "properties": {"start_year": 1982, "end_year": 1988},
+        },
+        {
+            "rid": "1",
+            "label": "playsFor",
+            "subj_id": "Player#1",
+            "obj_id": "Team#2",
+            "properties": {"start_year": 1988, "end_year": 1990},
+        },
+        {
+            "rid": "2",
+            "label": "playsFor",
+            "subj_id": "Player#1",
+            "obj_id": "Team#3",
+            "properties": {"start_year": 1991},
+        },  # ongoing: no end year
     ],
 }
 
@@ -67,9 +82,7 @@ def run(text, loaded):
 
 def test_edge_properties_are_loaded(loaded):
     store, _ = loaded
-    years = sorted(
-        e.props.get("start_year") for e in store.edge_index.values()
-    )
+    years = sorted(e.props.get("start_year") for e in store.edge_index.values())
     assert years == [1982, 1988, 1991]
 
 
@@ -87,7 +100,7 @@ def test_edge_and_node_conditions_combine(loaded):
     rows = run(
         'find player where name = "Reid" as p\n'
         "follow p playsFor team as t where via.start_year <= 1983 "
-        'and via.end_year >= 1983\n'
+        "and via.end_year >= 1983\n"
         "return t.name",
         loaded,
     )
@@ -133,7 +146,7 @@ def test_unknown_edge_property_is_rejected(loaded):
     with pytest.raises(VerifyError):
         verify(
             parse(
-                'find player as p\nfollow p playsFor team as t where via.bogus = 1\n'
+                "find player as p\nfollow p playsFor team as t where via.bogus = 1\n"
                 "return t.name"
             ),
             schema,

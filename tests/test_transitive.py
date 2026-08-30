@@ -88,9 +88,7 @@ def names(rows):
 
 def test_one_hop_unchanged_without_upto(bom):
     rows = run(
-        'find item where name = "car" as c\n'
-        "follow c contains part as p\n"
-        "return p.name",
+        'find item where name = "car" as c\nfollow c contains part as p\nreturn p.name',
         bom,
     )
     assert names(rows) == ["engine"]
@@ -118,8 +116,7 @@ def test_upto_any_reaches_the_whole_subtree(bom):
 
 def test_upto_one_is_a_plain_follow(bom):
     plain = run(
-        'find item where name = "car" as c\n'
-        "follow c contains part as p\nreturn p.name",
+        'find item where name = "car" as c\nfollow c contains part as p\nreturn p.name',
         bom,
     )
     upto = run(

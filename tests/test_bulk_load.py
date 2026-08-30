@@ -223,3 +223,30 @@ def test_the_cli_reports_a_load_error_without_a_traceback(tmp_path, capsys):
     code = main(["load", str(f), "--db", str(tmp_path / "db"), "--class", "part"])
     assert code == 1
     assert "colour" in capsys.readouterr().err
+
+
+# ---- the schema the CLI opens with ------------------------------------
+
+
+def test_the_cli_can_open_a_database_without_the_demo_classes(tmp_path, capsys):
+    """A production user's schema is their own; the demo supply chain
+    must not be the only thing the CLI can open a database with."""
+    program = tmp_path / "s.thm"
+    program.write_text(
+        "derive class widget from entity with {sku: str}\n"
+        'assert widget {name: "W1", sku: "A-1"} as w\n'
+        "find widget as w2\nreturn w2.sku\n"
+    )
+    code = main([str(program), "--db", str(tmp_path / "db"), "--schema", "base"])
+    out = capsys.readouterr().out
+    assert code == 0, out
+    assert "A-1" in out
+    assert "product" not in out
+
+
+def test_the_package_exports_what_an_application_needs():
+    import theorem
+
+    for name in ("Session", "Schema", "Store", "StoreLocked", "limits", "parse"):
+        assert hasattr(theorem, name), name
+    assert theorem.__version__

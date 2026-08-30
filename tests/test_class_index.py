@@ -24,7 +24,12 @@ def _store(tmp_path, n_big, n_small):
         for i in range(n):
             nid = store.next_id(cls)
             records.append(
-                {"op": "put_node", "id": nid, "cls": cls, "props": {"name": f"{cls}{i}"}}
+                {
+                    "op": "put_node",
+                    "id": nid,
+                    "cls": cls,
+                    "props": {"name": f"{cls}{i}"},
+                }
             )
     store.bulk(records)
     return store, schema
