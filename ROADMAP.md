@@ -27,16 +27,26 @@ Each needs a language proposal issue first (see [CONTRIBUTING](CONTRIBUTING.md),
 
 The agent-loop benchmark ties with text2cypher on accuracy and costs 2.5x
 the tokens, because a language the model has never seen carries its tutorial
-in every prompt. Cutting the tutorial from 2,433 to 1,241 tokens cost nothing
-measurable; cutting it to 818 hurt repair. So the remaining ideas are
-structural rather than editorial:
+in every prompt. Three attempts, one worked:
+
+| Attempt | solve@3 | Tokens | Verdict |
+|---|---:|---:|---|
+| 2,433-token tutorial | 85.8 | 3,900 | baseline |
+| 1,241-token tutorial | 87.5 | 2,168 | **kept**, free |
+| 818-token tutorial | 85.0 | 1,595 | rejected, hurt repair |
+| core first, full on retry | 82.5 | 1,835 | rejected, 8-2 worse for 15% |
+
+Editorial compression is exhausted: the first cut was free, the next two
+cost accuracy. What is left is structural:
 
 - **Teach from the schema.** The schema render is already half the size of
   the equivalent Cypher JSON. Rules that could be read off a richer schema
   need not be prose in the prompt.
 - **Errors that carry the rule they enforce.** If a verifier error states the
-  rule, the prompt need not pre-state it. The 818-token experiment suggests
-  today's errors do not yet do this well enough.
+  rule, the prompt need not pre-state it. Two experiments now point here: the
+  818-token cut and the tiered prompt both failed specifically at repair, and
+  both would have worked if the error had taught what the missing prose did.
+  This is engine work, not prompt work.
 - **A second graph in the agent benchmark.** At n=120 the interval is six
   points wide; nothing subtle is measurable until that shrinks.
 
