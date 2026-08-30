@@ -26,5 +26,6 @@ def test_deprecation_survives_restart(tmp_path):
     s1 = Session(db, Schema.supply_chain())
     s1.run("derive class widget from entity with {}")
     deprecate_class(s1, "widget")
+    s1.close()
     s2 = Session(db, Schema.supply_chain())
     assert s2.schema.classes["widget"].status == "deprecated"

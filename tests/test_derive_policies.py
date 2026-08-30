@@ -30,6 +30,7 @@ def test_policy_clauses_survive_restart(tmp_path):
     db = tmp_path / "db"
     s1 = Session(db, Schema.supply_chain())
     s1.run("derive class widget from entity with {} quota 2 dedup 0.95")
+    s1.close()
     s2 = Session(db, Schema.supply_chain())
     assert s2.schema.classes["widget"].quota == 2
     assert s2.schema.classes["widget"].dedup_threshold == 0.95

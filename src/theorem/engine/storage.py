@@ -9,12 +9,47 @@ replay and live application share one code path.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
+
+try:  # POSIX
+    import fcntl
+
+    msvcrt = None
+except ImportError:  # Windows
+    fcntl = None
+    import msvcrt
+
+# Windows locks a byte range from the current file position, so the lock
+# byte sits past anything the file actually holds; the holder's pid, at
+# offset zero, stays readable by the process that was refused.
+_LOCK_BYTE = 1 << 20
 
 
 class StoreError(Exception):
     """Durable-state problem: corrupt WAL/run file or invalid record."""
+
+
+class StoreLocked(StoreError):
+    """Another writer already holds this store directory."""
+
+
+def _lock(f) -> None:
+    """Take an exclusive advisory lock, or raise OSError. Never blocks."""
+    if fcntl is not None:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    else:
+        f.seek(_LOCK_BYTE)
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+
+
+def _unlock(f) -> None:
+    if fcntl is not None:
+        fcntl.flock(f, fcntl.LOCK_UN)
+    else:
+        f.seek(_LOCK_BYTE)
+        msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
 
 
 @dataclass
@@ -44,11 +79,41 @@ class Edge:
 
 
 class Store:
-    def __init__(self, path: str | Path):
+    """One writer per directory.
+
+    `snapshot_every` is the number of WAL records after which the store
+    compacts itself: without it the WAL grows for the life of the graph
+    and every startup replays the whole history. The default is high
+    enough that a small store never pays for a snapshot it does not need.
+
+    `lock=False` is for a tool that only reads a directory nobody is
+    writing. Two writers is the case this class exists to prevent.
+
+    Durability: a committed record survives the process dying, because
+    the WAL write has reached the operating system. It does not survive
+    the machine losing power, because nothing is fsynced on the write
+    path. Snapshots are fsynced, being rare.
+    """
+
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        lock: bool = True,
+        snapshot_every: int = 50_000,
+        keep_runs: int = 2,
+    ):
         self.path = Path(path)
         self.path.mkdir(parents=True, exist_ok=True)
         (self.path / "runs").mkdir(exist_ok=True)
         self.wal_path = self.path / "wal.jsonl"
+        self.snapshot_every = snapshot_every
+        self.keep_runs = keep_runs
+        self._pid = os.getpid()
+        self._lock_file = None
+        self._wal_records = 0
+        if lock:
+            self._acquire_lock()
         self.nodes: dict[str, Node] = {}
         # class name -> node ids, so seeding a query costs the class
         # rather than the whole store
@@ -64,7 +129,67 @@ class Store:
         self.aliases: dict[str, str] = {}
         self.id_counters: dict[str, int] = {}
         self.position = 0
-        self._replay()
+        try:
+            self._replay()
+        except Exception:
+            self.close()
+            raise
+
+    # ---- one writer --------------------------------------------------
+
+    def _acquire_lock(self) -> None:
+        """Take the directory, or say who has it.
+
+        The lock is an advisory `flock`, which the operating system drops
+        when the holding process dies however it dies. A crashed writer
+        therefore does not leave the directory unopenable, which a lock
+        made of a file's existence would.
+        """
+        lock_path = self.path / "lock"
+        f = lock_path.open("a+", encoding="utf-8")
+        try:
+            _lock(f)
+        except OSError as e:
+            f.seek(0)
+            holder = f.read().strip() or "unknown"
+            f.close()
+            raise StoreLocked(
+                f"{self.path} is open for writing by process {holder}. "
+                "A store takes one writer at a time; two would each assign "
+                "the same ids and overwrite each other's records. Close the "
+                "other writer, or open this one with lock=False if you only "
+                "intend to read."
+            ) from e
+        f.seek(0)
+        f.truncate()
+        f.write(str(self._pid))
+        f.flush()
+        self._lock_file = f
+
+    def close(self) -> None:
+        """Release the directory. Safe to call twice."""
+        if self._lock_file is not None:
+            try:
+                _unlock(self._lock_file)
+            except OSError:
+                pass  # closing the file releases it regardless
+            finally:
+                self._lock_file.close()
+                self._lock_file = None
+
+    def __enter__(self) -> "Store":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        # A dropped Store should not keep the directory hostage for the
+        # life of the process. The OS would release it at exit anyway.
+        try:
+            self.close()
+        except Exception:
+            pass
 
     # ---- durability ------------------------------------------------
 
@@ -118,6 +243,7 @@ class Store:
                 # If a crash hit between snapshot() writing the run file and
                 # truncating the WAL, WAL records are already baked into the
                 # run; their recorded _pos tells us to skip them.
+                self._wal_records += 1
                 rec_pos = rec.get("_pos")
                 if rec_pos is not None and rec_pos <= base:
                     continue
@@ -144,7 +270,9 @@ class Store:
         with self.wal_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
         self.position += 1
+        self._wal_records += 1
         self._apply_to_memory(record, self.position)
+        self._maybe_snapshot()
         return self.position
 
     def bulk(self, records: list[dict]) -> int:
@@ -155,13 +283,31 @@ class Store:
                 record = {**record, "_pos": self.position + 1}
                 f.write(json.dumps(record) + "\n")
                 self.position += 1
+                self._wal_records += 1
                 self._apply_to_memory(record, self.position)
+        self._maybe_snapshot()
         return self.position
 
     def wal_len(self) -> int:
         if not self.wal_path.exists():
             return 0
         return sum(1 for _ in self.wal_path.open())
+
+    def _maybe_snapshot(self) -> None:
+        """Compact once the WAL has grown past the threshold.
+
+        A snapshot costs the size of the live data, so a fixed threshold
+        would make loading a large graph quadratic: a million-node
+        ingest would write a million-record run file twenty times. The
+        threshold is therefore also at least the live data, which means
+        a snapshot never costs more than the WAL that triggered it, and
+        the work is amortized to a constant per record.
+        """
+        if not self.snapshot_every:
+            return
+        live = len(self.nodes) + len(self.edge_index)
+        if self._wal_records >= max(self.snapshot_every, live):
+            self.snapshot()
 
     def snapshot(self) -> Path:
         """Write an immutable run holding the full replayable state, truncate WAL."""
@@ -214,19 +360,38 @@ class Store:
         run_path = self.path / "runs" / f"run-{self.position}.json"
         # write-then-rename so a crash mid-write never leaves a torn run file
         tmp_path = run_path.with_suffix(".json.tmp")
-        tmp_path.write_text(
-            json.dumps(
+        with tmp_path.open("w", encoding="utf-8") as f:
+            json.dump(
                 {
                     "position": self.position,
                     "id_counters": self.id_counters,
                     "records": records,
-                }
-            ),
-            encoding="utf-8",
-        )
+                },
+                f,
+            )
+            f.flush()
+            # The rename is only atomic with respect to a crash if the
+            # bytes are on disk before it happens. Snapshots are rare, so
+            # this costs nothing measurable and buys the guarantee.
+            os.fsync(f.fileno())
         tmp_path.rename(run_path)
         self.wal_path.write_text("")
+        self._wal_records = 0
+        self._prune_runs()
         return run_path
+
+    def _prune_runs(self) -> None:
+        """Keep the newest runs and delete the rest.
+
+        Replay reads only the newest. The one before it is the fallback
+        the corrupt-run message tells an operator to fall back to. Every
+        run older than that is a disk leak that grows with history.
+        """
+        runs = sorted(
+            self.path.glob("runs/run-*.json"), key=lambda p: int(p.stem.split("-")[1])
+        )
+        for stale in runs[: -self.keep_runs] if self.keep_runs else runs:
+            stale.unlink(missing_ok=True)
 
     def _name_key(self, node) -> tuple[str, str] | None:
         from .text import fold

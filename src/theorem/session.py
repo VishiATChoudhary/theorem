@@ -37,13 +37,23 @@ READ_STMTS = (Find, Follow, GroupBy, Aggregate, Compute, Return, Continue, Schem
 
 
 class Session:
-    def __init__(self, path: str | Path, schema: Schema):
-        self.store = Store(path)
+    def __init__(self, path: str | Path, schema: Schema, *, lock: bool = True):
+        self.store = Store(path, lock=lock)
         self.schema = schema
         self._restore_derived_schema()
         self.read_ctx = ReadContext()
         self.write_ctx = WriteContext(store=self.store, schema=schema)
         self.type_env: dict[str, str] = {}
+
+    def close(self) -> None:
+        """Release the store directory so another process can write it."""
+        self.store.close()
+
+    def __enter__(self) -> "Session":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
 
     def _restore_derived_schema(self) -> None:
         """derive class/edge are durable via their lineage records; rebuild

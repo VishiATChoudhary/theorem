@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .engine.storage import StoreLocked
 from .ingest.extract import extract
 from .ingest.normalize import IngestError, normalize
 from .ingest.playbook import compile_playbook
@@ -130,9 +131,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--repl", action="store_true", help="interactive session")
     args = ap.parse_args(argv)
 
-    session = Session(Path(args.db), Schema.supply_chain())
+    try:
+        session = Session(Path(args.db), Schema.supply_chain())
+    except StoreLocked as e:
+        # A held database is an operator problem, not a bug: say what is
+        # wrong on one line rather than unwinding a traceback at them.
+        print(f"error: {e}", file=sys.stderr)
+        return 1
     if args.file:
         print(session.run(Path(args.file).read_text()))
+        session.close()
         return 0
     if args.repl:
         print(
@@ -151,7 +159,9 @@ def main(argv: list[str] | None = None) -> int:
             pass
         if block:
             print(session.run("\n".join(block)))
+        session.close()
         return 0
+    session.close()
     ap.print_help()
     return 1
 

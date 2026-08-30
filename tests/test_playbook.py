@@ -85,6 +85,7 @@ def test_deprecation_survives_restart(tmp_path):
     sess1 = Session(db, Schema.supply_chain())
     compile_playbook(sess1, _pb(tmp_path), One(RESPONSE), confirm=lambda s: True)
 
+    sess1.close()
     sess2 = Session(db, Schema.supply_chain())
     without_edgeclass = (
         RESPONSE.replace(

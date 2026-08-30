@@ -70,6 +70,7 @@ def test_retired_nodes_stay_out_of_find(tmp_path):
 def test_index_survives_replay(tmp_path):
     store, schema = _store(tmp_path, 5, 4)
     store.snapshot()
+    store.close()
     reopened = Store(tmp_path / "db")
     rows = execute_rows(
         verify(parse("find small as s\nreturn s.name"), schema), reopened, schema

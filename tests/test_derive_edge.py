@@ -34,6 +34,7 @@ def test_derive_edge_survives_restart(tmp_path):
     db = tmp_path / "db"
     s1 = Session(db, Schema.supply_chain())
     s1.run("derive edge acquired(buyer: supplier, target: supplier)")
+    s1.close()
     s2 = Session(db, Schema.supply_chain())
     assert "acquired" in s2.schema.edges
 

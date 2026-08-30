@@ -64,6 +64,7 @@ def test_reopen_replays_wal(tmp_path):
     store = Store(tmp_path)
     nid = put_supplier(store, "Ionix", "KR")
     pos = store.apply({"op": "patch_node", "id": nid, "props": {"country": "JP"}})
+    store.close()
     store2 = Store(tmp_path)
     assert store2.nodes[nid].props["country"] == "JP"
     assert store2.position == pos
@@ -76,6 +77,7 @@ def test_snapshot_then_more_writes_then_reopen(tmp_path):
     store.snapshot()
     assert store.wal_len() == 0
     b = put_supplier(store, "Ionix")
+    store.close()
     store2 = Store(tmp_path)
     assert set(store2.nodes) == {a, b}
     assert store2.nodes[a].props["name"] == "VoltaChem"
@@ -128,6 +130,7 @@ def test_lineage_and_distinct_and_dup_records(tmp_path):
             "evidence": "near name",
         }
     )
+    store.close()
     store2 = Store(tmp_path)
     assert store2.lineage[0]["kind"] == "merge"
     assert frozenset((a, b)) in store2.distinct_pairs
@@ -140,5 +143,6 @@ def test_retire_record(tmp_path):
     a = put_supplier(store, "A")
     pos = store.apply({"op": "retire", "id": a, "reason": "gone"})
     assert store.nodes[a].retired_at == pos
+    store.close()
     store2 = Store(tmp_path)
     assert store2.nodes[a].retired_at == pos

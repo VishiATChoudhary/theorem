@@ -140,6 +140,7 @@ def test_reopen_after_wal_truncation(tmp_path_factory, cut):
         )
     raw = store.wal_path.read_bytes()
     store.wal_path.write_bytes(raw[: min(cut, len(raw))])
+    store.close()
     reopened = Store(db)
     assert len(reopened.nodes) <= 5
     # every fully-written record before the cut must survive

@@ -31,6 +31,7 @@ def test_snapshot_crash_before_truncate_does_not_double_apply(tmp_path):
     store.snapshot()
     # simulate a crash after the run file landed but before WAL truncation
     store.wal_path.write_text(wal_before)
+    store.close()
     reopened = Store(tmp_path / "db")
     merges = [r for r in reopened.lineage if r.get("kind") == "merge"]
     assert len(merges) == 1
@@ -55,6 +56,7 @@ def test_derived_class_survives_restart(tmp_path):
     out = s1.run('assert gadget {name: "Widget", warranty_years: 2} as w')
     assert "created gadget" in out
 
+    s1.close()
     s2 = Session(db, Schema.supply_chain())
     out = s2.run("find gadget as g\nreturn g.name")
     assert "Widget" in out
@@ -152,6 +154,7 @@ def test_replay_tolerates_dangling_records(tmp_path):
     with store.wal_path.open("a") as f:
         f.write(json.dumps({"op": "retire", "id": "#p-999", "reason": "x"}) + "\n")
         f.write(json.dumps({"op": "traffic", "id": "#p-999"}) + "\n")
+    store.close()
     reopened = Store(tmp_path / "db")  # must not raise
     assert nid in reopened.nodes
 
@@ -192,6 +195,7 @@ def test_non_utf8_wal_tail_recovers(tmp_path):
     with store.wal_path.open("ab") as f:
         f.write(b"\xff\n")
     # an unreadable tail line is a torn write: recover the prefix, no crash
+    store.close()
     reopened = Store(tmp_path / "db")
     assert nid in reopened.nodes
     assert b"\xff" not in store.wal_path.read_bytes()
