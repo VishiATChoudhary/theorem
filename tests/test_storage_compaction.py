@@ -102,3 +102,25 @@ def test_snapshots_are_amortized_not_quadratic(tmp_path):
         put(store, f"s{i}")
     assert sum(written) < 3 * 2000, written
     store.close()
+
+
+def test_a_derived_schema_survives_compaction(tmp_path):
+    """The classes a user declared live in lineage records, which the
+    snapshot has to carry forward. Losing them orphans every node."""
+    from theorem import Schema, Session
+
+    db = tmp_path / "db"
+    s = Session(db, Schema())
+    s.store.snapshot_every = 10
+    s.run("derive class widget from entity with {sku: str}")
+    s.run("derive edge fits(part: widget, whole: widget)")
+    for i in range(40):
+        s.run(f'assert widget {{name: "W{i}", sku: "S{i}"}} as w')
+    assert list((db / "runs").glob("run-*.json"))  # it did compact
+    s.close()
+
+    s2 = Session(db, Schema())
+    assert "widget" in s2.schema.classes
+    assert "fits" in s2.schema.edges
+    assert s2.rows("find widget as w\ncount distinct w as n\nreturn n") == [[40]]
+    s2.close()
