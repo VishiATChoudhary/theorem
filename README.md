@@ -35,6 +35,19 @@ theorem program.thm --db ./db
 theorem --repl
 ```
 
+Or embed it, and let a model write the queries:
+
+```python
+from theorem import Schema, Session, answer
+
+with Session("./db", Schema()) as db:
+    db.run("derive class supplier from entity with {country: str}")
+    got = answer(db, "Which suppliers are in Germany?", your_model)
+    print(got.rows, got.turns, got.errors)
+```
+
+`answer` is the loop the benchmarks measure: write, run, and on an error hand the error back verbatim and try again. Nothing is ever partly applied, so a repair is a fresh attempt rather than a cleanup.
+
 ## Sixty seconds of theorem
 
 ```
@@ -58,6 +71,14 @@ theorem ingest report.pdf --db ./db
 theorem playbook compile playbook.md --db ./db --agent claude
 ```
 
+For data whose columns you already know, skip the model entirely:
+
+```bash
+theorem load parts.csv --db ./db --class part
+theorem load links.csv --db ./db --edge supplied_by --role item=part --role source=supplier
+theorem stats --db ./db
+```
+
 ## Why agents stop failing
 
 - **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result.
@@ -65,6 +86,8 @@ theorem playbook compile playbook.md --db ./db --agent claude
 - **Explicit staged aggregation.** `group by sups as g`, then `count distinct g.parts as n`. Adding a return column can never change the grouping.
 - **Schema-closed vocabulary.** Every query is verified whole against the live schema before anything runs; errors name the line, suggest the fix, and confirm nothing executed.
 - **Token budgets.** `budget 2000 tokens` caps serialized results with explicit truncation and `continue @c...` handles.
+
+Break a correct query one token, the way models break them, and ask what the caller sees. theorem refuses 1,811 of 1,928 such mutants; text2cypher refuses **none** of 1,997, returning rows or a confident empty set every time ([silent-failure benchmark](docs/benchmarks/silent-failure.md), which also reports the one case theorem does not catch).
 
 And a write surface no existing query language has: `assert` with provenance, receipts carrying dedup candidates, `merge`/`distinct` resolution, `refine`/`compact` granularity verbs with full lineage, `retire`, `flag`, `derive class`, and queryable per-node health (`find nodes where health.loss > 0.8`).
 
@@ -80,6 +103,8 @@ The complete public [CypherBench](https://github.com/megagonlabs/cypherbench) te
 | text2cypher + GPT-4o (published) | 60.2% | — | 94.9% | — |
 
 The text2cypher row is a control, not a citation: same model, same questions, same comparator, the official zero-shot prompt, executed on the official Neo4j image. Excluding `nba`, the one graph theorem's prompt was written against, theorem scores 76.9%. Median execution latency is 0.2 ms against 67 ms over Bolt.
+
+theorem's prompt carries a tutorial the model has never seen, so it costs more per question on these graphs, which have 9 to 13 classes each. It costs 39 tokens per class against text2cypher's 85, and the lines cross at 31: on the seven schemas unioned, 40 classes, theorem's prompt is the smaller one ([prompt cost](docs/benchmarks/prompt-cost.md)).
 
 Full method, per-category results and the caveats that matter, including the prompt asymmetry between the two arms, are in [docs/benchmarks/cypherbench.md](docs/benchmarks/cypherbench.md). That benchmark measures one-shot translation; for convergence under retry and tokens across a whole agent loop, on graphs nothing was tuned on, see [docs/benchmarks/agent-loop.md](docs/benchmarks/agent-loop.md). Per-question queries and errors for both arms are in `eval/out/public/`.
 
@@ -97,26 +122,28 @@ uv run python -m eval.make_report
 git clone https://github.com/VishiATChoudhary/theorem
 cd theorem
 uv sync
-uv run pytest -q     # 277 tests incl. property-based hardening
+uv run pytest -q     # unit, property-based, and end-to-end deployment tests
 ```
 
 | Path | What |
 |------|------|
 | `src/theorem/parser.py` | Tokenizer + line-oriented parser |
 | `src/theorem/verifier.py` | Whole-program verify-before-execute |
-| `src/theorem/engine/storage.py` | WAL + immutable snapshot runs, single process |
+| `src/theorem/engine/storage.py` | WAL, automatic compaction, one-writer lock |
 | `src/theorem/engine/executor.py` | Binding-table reads, budgets, serialization |
 | `src/theorem/engine/writes.py` | Structural writes with receipts |
 | `src/theorem/engine/dedup.py` | Blocking + similarity dedup pipeline |
 | `src/theorem/engine/health.py` | Four health subscores |
-| `src/theorem/session.py` | Session facade (parse, verify, execute) |
-| `eval/` | CypherBench harness, prompts, spider chart |
-| `docs/superpowers/specs/` | Language spec (decisions, grammar, semantics) |
+| `src/theorem/session.py` | Session facade (parse, verify, execute, rows) |
+| `src/theorem/prompt.py` | The prompt and agent loop the benchmarks measure |
+| `src/theorem/ingest/bulk.py` | CSV/JSONL bulk load |
+| `eval/` | CypherBench, agent-loop, silent-failure and prompt-cost harnesses |
+| `docs/language-spec.md` | Normative grammar and semantics |
 
 ## Community
 
 theorem is a community project under Apache-2.0. The language grows spec-first: proposals are discussed as issues before syntax lands ([how it works](CONTRIBUTING.md)).
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): setup, test loop, DCO sign-off
-- [ROADMAP.md](ROADMAP.md): union, optional traversal, edge properties are the next expressiveness targets
+- [ROADMAP.md](ROADMAP.md): every open objective states the number that closes it
 - [Good first issues](https://github.com/VishiATChoudhary/theorem/labels/good%20first%20issue)
