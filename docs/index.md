@@ -32,7 +32,7 @@ One line, one step, one name. There is exactly one way to write each operation, 
 
 ## Five design rules
 
-1. **No direction glyphs.** Edges traverse by role name. A wrong role is a type error caught before execution, not a silently empty result.
+1. **No direction glyphs.** Edges traverse by role name. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can tell ([measured](benchmarks/silent-failure.md)).
 2. **One line, one step, one name.** No chaining, no nesting, nothing to balance.
 3. **Explicit staged aggregation.** Adding a return column can never change the grouping.
 4. **Schema-closed vocabulary.** The whole program is verified against the live schema before anything runs. Errors name the line, suggest the fix, and confirm nothing executed.
@@ -44,6 +44,6 @@ Beyond reads, theorem has a write surface no existing query language has: `asser
 
 - [Tutorial](tutorial.md): productive in ten minutes
 - [Language spec](language-spec.md): full grammar and semantics
-- [Benchmarks](benchmarks.md): numbers, method, reproduction
+- [Benchmarks](benchmarks.md): accuracy, agent loop, silent failure, prompt cost
 - [Why not Cypher?](why-not-cypher.md): the scaling counterargument in full
 - [Contributing](https://github.com/VishiATChoudhary/theorem/blob/main/CONTRIBUTING.md): the language grows spec-first, and proposals are welcome
