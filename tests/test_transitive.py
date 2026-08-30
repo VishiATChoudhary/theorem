@@ -286,3 +286,42 @@ def test_dense_bounded_depth_is_a_ball(dense):
         dense,
     )
     assert names(rows) == [f"n{i}" for i in range(1, 7)]
+
+
+# ---- name reuse means the same node here too ---------------------------
+
+
+def test_reusing_a_name_constrains_a_transitive_follow(bom):
+    """A one-hop follow onto a bound name keeps only rows that land on
+    that same node. The transitive form was overwriting the binding
+    instead, so the rule held or not depending on whether you wrote
+    `upto`."""
+    rows = run(
+        'find item where name = "car" as c\n'
+        "follow c contains part upto any as c\n"
+        "return c.name",
+        bom,
+    )
+    assert names(rows) == []  # nothing in the car is the car
+
+
+def test_a_cycle_can_satisfy_the_reused_name(bom):
+    """specA contains specB contains specA, so specA does reach itself."""
+    rows = run(
+        'find item where name = "specA" as a\n'
+        "follow a contains part upto any as a\n"
+        "return a.name",
+        bom,
+    )
+    assert names(rows) == ["specA"]
+
+
+def test_a_reused_name_from_an_earlier_step_still_joins(bom):
+    rows = run(
+        'find item where name = "ring" as r\n'
+        'find item where name = "car" as top\n'
+        "follow r contains whole upto any as top\n"
+        "return top.name",
+        bom,
+    )
+    assert names(rows) == ["car"]

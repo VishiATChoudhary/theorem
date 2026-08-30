@@ -447,6 +447,13 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             ):
                 continue
             out = {k: v for k, v in row.items() if not k.startswith("__upto")}
+            if stmt.name in out and not _same_node(store, out[stmt.name], dst):
+                # A bound name means the same node, which a one-hop follow
+                # already enforces. Overwriting it here made the rule hold
+                # or not depending on whether `upto` was written. The walk
+                # continues past this arrival for the same reason a `where`
+                # does: a longer route may still land on the right node.
+                continue
             out[stmt.name] = dst
             out["__edges__"] = row.get("__edges__", ())
             reached.append(out)
