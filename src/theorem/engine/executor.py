@@ -302,14 +302,37 @@ def _sorted_rows(rows, key, desc: bool):
     return sorted(present, key=lambda r: _sort_key(key(r)), reverse=desc) + missing
 
 
+def _carried(row: dict, store: Store) -> tuple:
+    """The bindings a walk starts with, which every step of it keeps.
+
+    Two rows that arrive at the same node carrying the same earlier
+    bindings are the same answer, however they got there. This is the
+    key that makes reach a walk over nodes rather than over paths.
+    """
+    return tuple(
+        sorted(
+            (k, store.resolve(v) if isinstance(v, str) else v)
+            for k, v in row.items()
+            if k != "__edges__" and not k.startswith("__upto")
+        )
+    )
+
+
 def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
     """Walk an edge, once or repeatedly.
 
     `upto N` repeats the one-hop step: the rows arrived at on one round
     are the rows departed from on the next, and every arrival at any
     depth is part of the answer. `upto any` repeats until a round adds
-    nothing. Termination is free: the trail rule already forbids reusing
-    an edge instance within a row, so a cycle runs out of unused edges.
+    nothing.
+
+    A node reached twice is not expanded twice. Without that rule the
+    walk enumerates paths, of which a cyclic graph has exponentially
+    many, and a sixty-node ring does not finish. The trail rule alone
+    terminates but does not bound the work. Dropping a repeat arrival
+    also fixes what it would have meant: reach is the set of nodes you
+    can get to, so a node that two routes lead to is still one answer.
+    The route kept is the first one found, which is a shortest one.
     """
     if stmt.upto is None or stmt.upto == 1:
         _follow_once(stmt, table, store, schema)
@@ -319,6 +342,7 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
 
     reached: list[dict] = []
     frontier = list(table.rows)
+    seen: set[tuple] = set()
     depth = 0
     while frontier:
         depth += 1
@@ -336,9 +360,14 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
         )
         if not step.rows:
             break
-        frontier = step.rows
+        next_frontier = []
         for row in step.rows:
             dst = row[hop_name]
+            key = (_carried(row, store), store.resolve(dst))
+            if key in seen:
+                continue
+            seen.add(key)
+            next_frontier.append(row)
             if stmt.cond and not _eval_cond(
                 store,
                 schema,
@@ -350,6 +379,9 @@ def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
             out[stmt.name] = dst
             out["__edges__"] = row.get("__edges__", ())
             reached.append(out)
+        if not next_frontier:
+            break
+        frontier = next_frontier
         if stmt.upto and depth >= stmt.upto:
             break
     table.rows = reached

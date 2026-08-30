@@ -219,3 +219,73 @@ def test_unknown_role_still_caught(bom):
             ),
             schema,
         )
+
+
+# ---- a dense graph must not enumerate paths ---------------------------
+
+
+@pytest.fixture
+def dense(tmp_path):
+    """A 60-node ring where every node also links to the node two ahead.
+
+    120 edges, every node reachable from every other, and the number of
+    simple paths is exponential in the node count. The answer is 60 rows;
+    an implementation that walks paths instead of nodes cannot produce it.
+    """
+    schema = _schema()
+    store = Store(tmp_path / "db")
+    ids = {}
+    n = 60
+    for i in range(n):
+        nid = store.next_id("item")
+        store.apply(
+            {
+                "op": "put_node",
+                "id": nid,
+                "cls": "item",
+                "props": {"name": f"n{i}", "unit_cost": float(i)},
+            }
+        )
+        ids[f"n{i}"] = nid
+    for i in range(n):
+        for step in (1, 2):
+            store.apply(
+                {
+                    "op": "put_edge",
+                    "id": store.next_id("edge"),
+                    "type": "contains",
+                    "roles": {
+                        "whole": ids[f"n{i}"],
+                        "part": ids[f"n{(i + step) % n}"],
+                    },
+                }
+            )
+    store.ids = ids
+    return store, schema
+
+
+def test_dense_cycle_completes(dense):
+    """Reach in a dense cyclic graph is linear work, not path enumeration."""
+    import time
+
+    start = time.monotonic()
+    rows = run(
+        'find item where name = "n0" as c\n'
+        "follow c contains part upto any as p\n"
+        "return p.name",
+        dense,
+    )
+    elapsed = time.monotonic() - start
+    assert len(names(rows)) == 60  # every node, including the start, via the ring
+    assert elapsed < 1.0, f"took {elapsed:.1f}s"
+
+
+def test_dense_bounded_depth_is_a_ball(dense):
+    """upto N is every node within N hops: steps of 1 and 2 reach 2N."""
+    rows = run(
+        'find item where name = "n0" as c\n'
+        "follow c contains part upto 3 as p\n"
+        "return p.name",
+        dense,
+    )
+    assert names(rows) == [f"n{i}" for i in range(1, 7)]
