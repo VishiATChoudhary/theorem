@@ -235,14 +235,25 @@ another process opens the same database.
 The prompt the benchmarks use is the prompt the package ships:
 
 ```python
-from theorem import Schema, Session, agent_prompt, repair_prompt
+from theorem import Schema, Session, answer
 
 with Session("mydb", Schema.supply_chain()) as db:
-    prompt = agent_prompt(db.schema, "Which suppliers ship more than three parts?", db.store)
-    query = your_model(prompt)          # any model; the benchmarks use Haiku
-    answer = db.run(query)
-    if "error" in answer:               # verified whole, so nothing ran
-        answer = db.run(your_model(repair_prompt(query, answer)))
+    got = answer(db, "Which suppliers ship more than three parts?", your_model)
+    print(got.rows, got.turns, got.errors)
+```
+
+`your_model` is any callable taking a prompt and returning text; the
+benchmarks pass Haiku. `answer` is the loop those benchmarks measure:
+write, run, and on an error hand the error back verbatim and try again,
+three turns by default. A failed query is never partly applied, so a
+repair is a fresh attempt rather than a cleanup.
+
+The two halves are exported separately if you want your own loop:
+
+```python
+from theorem import agent_prompt, repair_prompt
+
+prompt = agent_prompt(db.schema, question, db.store)
 ```
 
 Passing the store renders only the classes that hold data, which is both

@@ -198,3 +198,43 @@ def _tmpcsv(session, text: str):
     path = session.store.path / f"tmp-{abs(hash(text))}.csv"
     path.write_text(text, encoding="utf-8")
     return path
+
+
+# ---- the loop the benchmarks measure ----------------------------------
+
+
+def test_an_agent_loop_repairs_from_the_error(db):
+    """The loop is short enough to reimplement and worth shipping anyway:
+    a user should get the behaviour the published numbers describe."""
+    from theorem import answer
+
+    attempts = []
+
+    def model(prompt):
+        attempts.append(prompt)
+        if len(attempts) == 1:
+            return "```\nfind factory as f\nreturn f.contry\n```"  # wrong, and fenced
+        return "find factory as f\nreturn f.country"
+
+    with Session(db, Schema()) as s:
+        s.run(SCHEMA)
+        s.run('assert factory {name: "Wolfsburg", country: "DE"} as w')
+        got = answer(s, "which countries have factories?", model)
+
+    assert got.rows == [["DE"]]
+    assert got.turns == 2
+    assert got.ran
+    assert "country" in got.errors[0]  # the error named the fix
+    assert "contry" in attempts[1]  # and the repair prompt carried the query
+
+
+def test_a_loop_that_never_converges_says_so(db):
+    from theorem import answer
+
+    with Session(db, Schema()) as s:
+        s.run(SCHEMA)
+        got = answer(s, "anything", lambda prompt: "find nowhere as n\nreturn n.name")
+
+    assert not got.ran
+    assert got.turns == 3
+    assert len(got.errors) == 3

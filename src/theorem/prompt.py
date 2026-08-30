@@ -14,6 +14,7 @@ different tutorial. Editing anything below changes that hash on purpose.
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 
 from .schema import Schema
 
@@ -173,3 +174,47 @@ def repair_prompt(previous_query: str, error: str) -> str:
         "Write a corrected query. Output ONLY the query text, no "
         "explanation, no code fences.\\n"
     )
+
+
+@dataclass
+class Answer:
+    """What an agent loop produced, and what it cost to get there."""
+
+    rows: list[list]
+    query: str
+    turns: int
+    errors: list[str]
+
+    @property
+    def ran(self) -> bool:
+        return self.query != "" and len(self.errors) < self.turns
+
+
+def answer(session, question: str, ask, turns: int = 3) -> Answer:
+    """Have a model write a query for `question` and run it, repairing.
+
+    `ask` is any callable taking a prompt and returning the model's text.
+    The loop is three lines of obvious code, and shipping it anyway is
+    the point: it is what the benchmarks measure, so a user gets the
+    behaviour the numbers describe rather than a reimplementation of it.
+
+    A query that fails is never partly applied, so a repair is a fresh
+    attempt rather than a cleanup. The error goes back verbatim, because
+    it names the rule the next attempt needs.
+    """
+    base = agent_prompt(session.schema, question, session.store)
+    prompt, query, errors = base, "", []
+    for turn in range(1, turns + 1):
+        query = _strip_fences(ask(prompt))
+        try:
+            return Answer(session.rows(query), query, turn, errors)
+        except Exception as e:
+            errors.append(f"{type(e).__name__}: {e}")
+            prompt = base + "\n" + repair_prompt(query, errors[-1])
+    return Answer([], query, turns, errors)
+
+
+def _strip_fences(text: str) -> str:
+    """Models add code fences however firmly they are asked not to."""
+    lines = [ln for ln in text.strip().splitlines() if not ln.startswith("```")]
+    return "\n".join(lines).strip()

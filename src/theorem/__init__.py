@@ -18,7 +18,7 @@ from .engine.executor import ExecError, Limits, limits
 from .engine.storage import Store, StoreError, StoreLocked
 from .ingest.bulk import LoadError, load_edges, load_nodes
 from .parser import ParseError, parse
-from .prompt import agent_prompt, repair_prompt
+from .prompt import Answer, agent_prompt, answer, repair_prompt
 from .schema import ClassDef, EdgeDef, Schema
 from .session import Session
 from .verifier import VerifyError, verify
@@ -26,6 +26,7 @@ from .verifier import VerifyError, verify
 __version__ = "0.2.0"
 
 __all__ = [
+    "Answer",
     "ClassDef",
     "EdgeDef",
     "ExecError",
@@ -40,6 +41,7 @@ __all__ = [
     "VerifyError",
     "__version__",
     "agent_prompt",
+    "answer",
     "limits",
     "load_edges",
     "load_nodes",
