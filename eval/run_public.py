@@ -249,18 +249,39 @@ def gen(model: str, workers: int) -> None:
 
     def one(q):
         prompt = theorem_prompt(schemas[q["graph"]], q["nl_question"])
-        return q["qid"], llm(prompt, model, f"pub-{q['qid']}")
+        try:
+            return q["qid"], llm(prompt, model, f"pub-{q['qid']}")
+        except Exception as e:
+            # A run of this length meets transport failures. Losing the
+            # other 2,347 answers to one of them, hours in, is the worse
+            # outcome: the cache makes a resume free, so record the miss
+            # and let the next pass fill it.
+            return q["qid"], RuntimeError(f"{type(e).__name__}: {e}")
 
-    queries = {}
+    queries, failed = {}, []
     with ThreadPoolExecutor(max_workers=workers) as ex:
         for i, (qid, text) in enumerate(ex.map(one, questions)):
-            queries[qid] = text
+            if isinstance(text, Exception):
+                failed.append((qid, str(text)))
+            else:
+                queries[qid] = text
             if (i + 1) % 100 == 0:
-                print(f"  {i + 1}/{len(questions)}")
+                print(f"  {i + 1}/{len(questions)}, {len(failed)} failed", flush=True)
     PUB.mkdir(parents=True, exist_ok=True)
+    if failed:
+        # A frozen file with holes in it would be scored as if the model
+        # had answered every question, counting transport failures as
+        # wrong answers. Refuse to write one.
+        for qid, why in failed[:5]:
+            print(f"  FAILED {qid}: {why}")
+        print(
+            f"{len(failed)} of {len(questions)} calls failed; not writing the "
+            "frozen file. Re-run `gen` to fill them (the rest are cached)."
+        )
+        return
     out = frozen_path(model)
     out.write_text(json.dumps(queries, indent=1))
-    print(f"wrote {out}")
+    print(f"wrote {out} ({len(queries)} queries)")
 
 
 def audit(model: str) -> int:

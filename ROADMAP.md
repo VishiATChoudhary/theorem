@@ -1,74 +1,85 @@
 # theorem roadmap
 
-Directions, not promises. Comment on the linked issues (or open one) to influence priority.
+Directions, not promises. Every open item states the number that closes it,
+because an objective without an exit criterion is a mood.
 
-## v0.2: close the expressiveness gaps (done)
+## Shipped
 
-- **Union**: a line containing only `or` starts an alternative branch.
-- **Optional traversal**: `follow ... or none` keeps rows whose edge is absent.
-- **Edge properties**: `via.<prop>` inside a follow's condition, with `none` for
-  values that are missing rather than merely unequal.
+**v0.2: expressiveness.** `or` branches (union), `or none` (optional follow),
+`via.<prop>` with `none` (edge properties), `upto N` / `upto any` (transitive
+reach), `keep <b> where <cond>` (filter after aggregating), `return distinct`,
+name reuse as a join. All are in the [language spec](docs/language-spec.md) and
+the [tutorial](docs/tutorial.md), and a CI test fails when a verb the parser
+accepts is missing from either.
 
-## v0.3: what technical graphs need and Cypher already has
+**v0.2: production floor.** One writer per store, enforced by an advisory lock
+that a crash releases. Automatic WAL compaction, amortized so a large ingest
+stays linear. A row and wall-clock ceiling on every read. Reads no longer write:
+traffic telemetry lives in memory, which took an ordinary query from 129 ms and
+4,178 WAL records to 17 ms and none. `theorem load` for CSV and JSONL. An import
+surface (`from theorem import Session, Schema, agent_prompt`) and a CLI that can
+open a database without the demo schema.
 
-Aimed at dependency, bill-of-materials and standards graphs, where the
-interesting questions are about reach rather than about one hop:
+**v0.2: the prompt ships.** The tutorial an agent is given lived in the
+benchmark harness, so every published number described a prompt no user had. It
+is `theorem.prompt` now, versioned by its own hash, and the harness re-exports
+it.
 
-- **Transitive traversal**: follow an edge repeatedly, bounded or to exhaustion.
-  "What transitively depends on this component" has no expression today.
-- **Filtering on an aggregate**: keep the groups whose count passes a test,
-  without a second query.
-- **Path as a value**: return *why* two nodes are connected, not just that they
-  are, so an agent can cite the chain.
+## Open: prove it is better
 
-Each needs a language proposal issue first (see [CONTRIBUTING](CONTRIBUTING.md), spec-first rule).
+**Turn the agent-loop tie into a measured result.** At n=120 the interval is six
+points wide and the arms sit at 87.5 each, McNemar p = 1.000. Nothing subtle is
+measurable there.
+*Closes at* n >= 480 across four train graphs, with paired McNemar reported
+whatever it says.
 
-## v0.4: close the prompt-token gap
+**Errors that teach, measured on tokens.** Six verifier and parser messages now
+state the rule they enforce rather than only the violation, because both failed
+prompt cuts failed specifically at repair. That is a hypothesis until it is
+tested.
+*Closes at* the tutorial back under 900 tokens with solve@3 no worse than 87.5,
+which would take the agent-loop token gap from 2.5x to about 1.9x.
 
-The agent-loop benchmark ties with text2cypher on accuracy and costs 2.5x
-the tokens, because a language the model has never seen carries its tutorial
-in every prompt. Three attempts, one worked:
+**Token crossover, demonstrated not extrapolated.** theorem's rules are fixed
+and its schema render is cheaper per class (~42 tokens against Cypher's ~104),
+so the overhead is predicted to repay at 18-20 classes. Every benchmark graph
+has 5-11, which is theorem's worst region, and a prediction is not a result.
+*Closes at* both arms run on a >= 25-class schema, with theorem's total prompt
+tokens lower.
 
-| Attempt | solve@3 | Tokens | Verdict |
-|---|---:|---:|---|
-| 2,433-token tutorial | 85.8 | 3,900 | baseline |
-| 1,241-token tutorial | 87.5 | 2,168 | **kept**, free |
-| 818-token tutorial | 85.0 | 1,595 | rejected, hurt repair |
-| core first, full on retry | 82.5 | 1,835 | rejected, 8-2 worse for 15% |
+**Check the thesis against a frontier model.** Every result is one small model.
+If the gap closes on a frontier model, the language is scaffolding for weak
+models and the moat has an expiry date.
+*Closes at* both arms, >= 500 questions, one frontier model, published either
+way.
 
-Editorial compression is exhausted: the first cut was free, the next two
-cost accuracy. What is left is structural:
+## Open: engine
 
-- **Teach from the schema.** The schema render is already half the size of
-  the equivalent Cypher JSON. Rules that could be read off a richer schema
-  need not be prose in the prompt.
-- **Errors that carry the rule they enforce.** If a verifier error states the
-  rule, the prompt need not pre-state it. Two experiments now point here: the
-  818-token cut and the tiered prompt both failed specifically at repair, and
-  both would have worked if the error had taught what the missing prose did.
-  This is engine work, not prompt work.
-- **A second graph in the agent benchmark.** At n=120 the interval is six
-  points wide; nothing subtle is measurable until that shrinks.
+- Concurrent readers during a write. A reader opens with `lock=False` and sees
+  the store as of open; there is no way to follow a writer.
+- Spill to disk. Everything is in memory at ~6.7 KB per node, so a 32 GB machine
+  holds 2-4 M nodes and the next node fails.
+- Faster dedup blocking beyond 10^6 nodes.
+- Import from a Cypher dump, so migrating does not mean re-exporting.
 
-## v0.x: engine
+## Open: agent ergonomics
 
-- Concurrent readers during a write (currently single process, single writer).
-- Snapshot compaction and WAL size management for long-lived graphs.
-- Faster dedup blocking for graphs beyond 10^6 nodes.
-- Import/export: bulk load from CSV/JSONL and from Cypher dumps.
-
-## v0.x: agent ergonomics
-
-- Error-message quality pass: every verifier error should name the fix, not just the problem.
 - Session-level schema diffing: tell the agent what changed since it last looked.
 - Richer `continue @c...` cursors (seek, sample).
+- Role naming as a checkable property. The one mistake the verifier cannot catch
+  is a reversed role on an edge whose two roles hold the same class
+  ([silent-failure benchmark](docs/benchmarks/silent-failure.md)). Nothing in the
+  schema distinguishes `subj` from `obj`; a schema that named them `child` and
+  `father` would make the mistake visible to the model, if not to the verifier.
 
 ## Research track
 
-- Benchmark expansion beyond the NBA/movies slices; adversarial schema suite.
-- Formal grammar spec suitable for alternative engine implementations.
-- Multi-agent write contention semantics (receipts already carry provenance; what does conflict look like?).
+- Adversarial schema suite: near-miss class names, overloaded edge labels.
+- Formal grammar spec sufficient for a second engine implementation.
+- Multi-agent write contention semantics (receipts already carry provenance;
+  what does a conflict look like?).
 
 ## Non-goals for now
 
-Distributed execution, a query planner with cost model, Cypher compatibility mode, Bolt protocol support.
+Distributed execution, a query planner with a cost model, Cypher compatibility
+mode, Bolt protocol support.
