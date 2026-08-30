@@ -43,6 +43,8 @@ class Follow(Stmt):
     name: str
     cond: Cond = field(default_factory=list)  # filters the arrival node
     optional: bool = False  # "or none": keep rows that matched nothing
+    upto: int | None = None  # "upto N": walk 1..N times; None means once,
+    #                          0 means "upto any", to exhaustion
 
 
 @dataclass

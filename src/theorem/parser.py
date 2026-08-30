@@ -397,6 +397,17 @@ class _Parser:
         if self.at_word("where"):
             self.next()
             cond = self.cond()
+        upto = None
+        if self.at_word("upto"):
+            self.next()
+            if self.at_word("any"):
+                self.next()
+                upto = 0  # walk to exhaustion
+            else:
+                upto = self._int(self.next(), "upto", 1)
+            if self.at_word("where"):
+                self.next()
+                cond = self.cond() if not cond else cond
         self.expect_word("as")
         name = self.expect_name()
         cond = self._trailing_where(cond)
@@ -406,7 +417,7 @@ class _Parser:
             self.expect_word("none")
             optional = True
             cond = self._trailing_where(cond)
-        return Follow(src, edge, role, name, cond=cond, optional=optional)
+        return Follow(src, edge, role, name, cond=cond, optional=optional, upto=upto)
 
     def parse_or(self) -> Or:
         return Or()

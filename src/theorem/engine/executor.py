@@ -302,6 +302,59 @@ def _sorted_rows(rows, key, desc: bool):
 
 
 def _follow(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
+    """Walk an edge, once or repeatedly.
+
+    `upto N` repeats the one-hop step: the rows arrived at on one round
+    are the rows departed from on the next, and every arrival at any
+    depth is part of the answer. `upto any` repeats until a round adds
+    nothing. Termination is free: the trail rule already forbids reusing
+    an edge instance within a row, so a cycle runs out of unused edges.
+    """
+    if stmt.upto is None or stmt.upto == 1:
+        _follow_once(stmt, table, store, schema)
+        return
+
+    import dataclasses
+
+    reached: list[dict] = []
+    frontier = list(table.rows)
+    depth = 0
+    while frontier:
+        depth += 1
+        hop_name = f"__upto{depth}"
+        src = stmt.src if depth == 1 else f"__upto{depth - 1}"
+        # Walk with no condition: a node that fails the filter is still a
+        # route to nodes that pass it, so "cheap parts in this car" must
+        # not stop at the expensive engine.
+        step = Table(rows=frontier, seeded=True)
+        _follow_once(
+            dataclasses.replace(stmt, src=src, name=hop_name, cond=[], upto=None),
+            step,
+            store,
+            schema,
+        )
+        if not step.rows:
+            break
+        frontier = step.rows
+        for row in step.rows:
+            dst = row[hop_name]
+            if stmt.cond and not _eval_cond(
+                store,
+                schema,
+                stmt.cond,
+                lambda col, dst=dst: _first_prop(store, schema, dst, col),
+            ):
+                continue
+            out = {k: v for k, v in row.items() if not k.startswith("__upto")}
+            out[stmt.name] = dst
+            out["__edges__"] = row.get("__edges__", ())
+            reached.append(out)
+        if stmt.upto and depth >= stmt.upto:
+            break
+    table.rows = reached
+
+
+def _follow_once(stmt: Follow, table: Table, store: Store, schema: Schema) -> None:
     edef = schema.edges[stmt.edge]
     arrive_role = stmt.role
     depart_role = edef.other_role(arrive_role)
