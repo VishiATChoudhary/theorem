@@ -40,12 +40,14 @@ tested.
 *Closes at* the tutorial back under 900 tokens with solve@3 no worse than 87.5,
 which would take the agent-loop token gap from 2.5x to about 1.9x.
 
-**Token crossover, demonstrated not extrapolated.** theorem's rules are fixed
-and its schema render is cheaper per class (~42 tokens against Cypher's ~104),
-so the overhead is predicted to repay at 18-20 classes. Every benchmark graph
-has 5-11, which is theorem's worst region, and a prediction is not a result.
-*Closes at* both arms run on a >= 25-class schema, with theorem's total prompt
-tokens lower.
+**Token crossover: measured, and it holds.** theorem costs 39 tokens per class
+against text2cypher's 85, on top of 1,357 tokens of tutorial that never grows.
+The lines cross at 31 classes, and the crossing is inside the measured range:
+on the seven benchmark schemas unioned (40 classes, 62 edge types) theorem's
+prompt is *smaller*, 2,793 tokens against 3,186. The benchmark graphs have 9 to
+13 classes each, which is theorem's worst region.
+See [prompt cost](docs/benchmarks/prompt-cost.md). What is still open is
+accuracy at that size: nothing has been run against a 40-class graph.
 
 **Check the thesis against a frontier model.** Every result is one small model.
 If the gap closes on a frontier model, the language is scaffolding for weak

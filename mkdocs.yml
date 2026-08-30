@@ -34,6 +34,7 @@ nav:
       - CypherBench: benchmarks/cypherbench.md
       - Agent loop: benchmarks/agent-loop.md
       - Silent failure: benchmarks/silent-failure.md
+      - Prompt cost: benchmarks/prompt-cost.md
   - Why not Cypher?: why-not-cypher.md
 
 exclude_docs: |
