@@ -27,6 +27,7 @@ from .ast_nodes import (
     Flag,
     Follow,
     GroupBy,
+    Keep,
     Merge,
     Or,
     Refine,
@@ -289,6 +290,20 @@ def _verify_stmt(stmt: Stmt, schema: Schema, env: dict[str, str]) -> None:
                     )
             _check_cond(node_cond, schema, env, arrival_cls, line)
             _bind(env, name, arrival_cls, line)
+
+        case Keep(name=name, cond=cond):
+            if name not in env:
+                raise VerifyError(line, f'"{name}" is not bound.{_suggest(name, env)}')
+            typ = _read_type(env, name, line)
+            for _joiner, clause in cond:
+                head = clause.col[0]
+                # A column that names something else bound in the pipeline
+                # (a count, another binding) is checked on its own terms;
+                # a bare property is checked against this binding's class.
+                if head in env:
+                    _check_bound_col(clause.col, schema, env, line)
+                elif typ in schema.classes:
+                    _check_col_in_context(clause.col, schema, env, typ, line)
 
         case GroupBy(col=col, name=name):
             _check_bound_col(col, schema, env, line)

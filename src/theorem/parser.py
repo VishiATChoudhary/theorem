@@ -26,6 +26,7 @@ from .ast_nodes import (
     Flag,
     Follow,
     GroupBy,
+    Keep,
     Merge,
     Or,
     Refine,
@@ -418,6 +419,11 @@ class _Parser:
             optional = True
             cond = self._trailing_where(cond)
         return Follow(src, edge, role, name, cond=cond, optional=optional, upto=upto)
+
+    def parse_keep(self) -> Keep:
+        name = self.expect_name()
+        self.expect_word("where")
+        return Keep(name, self.cond())
 
     def parse_or(self) -> Or:
         return Or()

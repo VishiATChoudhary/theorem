@@ -53,6 +53,14 @@ class Or(Stmt):
 
 
 @dataclass
+class Keep(Stmt):
+    """Filter the rows that exist at this point, groups included."""
+
+    name: str
+    cond: Cond
+
+
+@dataclass
 class GroupBy(Stmt):
     col: Col
     name: str

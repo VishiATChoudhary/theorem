@@ -19,6 +19,7 @@ from ..ast_nodes import (
     Find,
     Follow,
     GroupBy,
+    Keep,
     Or,
     Return,
     SchemaStmt,
@@ -416,6 +417,28 @@ def _follow_once(stmt: Follow, table: Table, store: Store, schema: Schema) -> No
     table.rows = new_rows
 
 
+def _keep(stmt: Keep, table: Table, store: Store, schema: Schema) -> None:
+    """Filter the rows that exist right now.
+
+    After an aggregate the rows are groups, so this is how "the parts used
+    by more than three products" is asked: count first, then keep. Before
+    one it filters plain rows, so there is a single rule rather than a
+    separate having-clause that only works in one place.
+    """
+    _materialize_groups(stmt.name, table, store, schema)
+    kept = []
+    for row in table.rows:
+        def getter(col, row=row):
+            if col[0] in row or f"{col[0]}_key" in row:
+                return _col_value(store, schema, row, col)
+            # A bare property name is read off the binding being kept.
+            return _col_value(store, schema, row, (stmt.name, *col))
+
+        if _eval_cond(store, schema, stmt.cond, getter):
+            kept.append(row)
+    table.rows = kept
+
+
 def _group(stmt: GroupBy, table: Table, store: Store, schema: Schema) -> None:
     kind = "identity" if len(stmt.col) == 1 else "value"
     table.group_meta[stmt.name] = (stmt.col, kind)
@@ -792,6 +815,8 @@ def _apply_pipeline_stmt(stmt, table: Table, store: Store, schema: Schema) -> No
         table.seeded = True
     elif isinstance(stmt, Follow):
         _follow(stmt, table, store, schema)
+    elif isinstance(stmt, Keep):
+        _keep(stmt, table, store, schema)
     elif isinstance(stmt, GroupBy):
         _group(stmt, table, store, schema)
     elif isinstance(stmt, Aggregate):
