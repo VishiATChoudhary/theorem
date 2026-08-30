@@ -14,139 +14,77 @@ import json
 from theorem.schema import Schema
 
 GRAPHLANG_TUTORIAL = """\
-You write queries in theorem, a line-oriented graph query language.
+theorem is a line-oriented graph query language. One operation per line,
+each binding its result with `as`.
 
-Rules:
-- One operation per line. Every line binds its result to a name with `as`.
-- `find <class> [where <cond>] as <name>` seeds the working set.
-- `follow <binding> <edge_type> <arrival_role> [where <cond>] as <name>`
-  walks an edge type. You name the ROLE you arrive at, never a direction.
-  The role names and their classes are listed in the schema below.
-  You cannot arrive at the role your binding already occupies.
-- Conditions: `prop = value`, `!=`, `>`, `>=`, `<`, `<=`,
-  `prop contains "text"`, joined with `and` / `or` (and binds tighter).
-  Strings in double quotes. Numbers bare.
-- Aggregation over the whole result is one step:
-  `count distinct <binding> as <name>`, or over a property
-  `avg <binding>.<prop> as <name>` (also sum/min/max). It collapses
-  the result to a single row.
-- Per-group aggregation is two explicit steps:
-  `group by <binding> as <g>` groups by node identity;
-  `group by <binding>.<prop> as <g>` groups by a property value.
-  Then `count [distinct] <g>.<column> as <name>` (also sum/avg/min/max,
-  e.g. `avg g.p.height_cm as h`). The grouped binding stays available
-  in `return`; `<g>.key` is the group key value.
-- The same edge instance is never used twice in one result row, so
-  "other teams in the same division as X" naturally excludes X.
-- REUSING A NAME MEANS THE SAME NODE. Give two steps the same `as` name
-  and only rows where they land on the same node survive. That is how you
-  say "both ... and the same one":
-    find flightaccident as f
-    follow f departsFrom airport as a
-    follow f destinedFor airport as a
-  keeps only accidents whose departure and destination airport are one
-  and the same. Use different names when you mean different nodes.
-- A LINE CONTAINING ONLY `or` STARTS AN ALTERNATIVE BRANCH. Everything
-  after it is a separate way of reaching the answer, and the results are
-  combined. Use it for "either ... or ...":
-    find team where name = "Chicago Bulls" as t
-    follow t playsFor player as p
-    or
-    find team where name = "Sacramento Kings" as t
-    follow t playsFor player as p
-    count distinct p as n
-    return n
-  Give the branches the same names for the things you want combined.
-  `group`, the aggregates and `return` all see the combined result.
-- `where` may come before or after `as`; both read the same.
-- END A `follow` WITH `or none` TO KEEP ROWS THAT MATCHED NOTHING. Use it
-  whenever the question says "including those with none", or asks for a
-  count per thing where some things may have zero:
-    find team as t
-    follow t playsFor player as p or none
-    group by t as g
-    count distinct g.p as n
-    return t.name, n
-  gives every team, with 0 for teams that have no players. A plain
-  `follow` drops those teams instead.
-- Some properties hold several values (a player with two citizenships).
-  Ask about one at a time: `where country_of_citizenship = "Japan"` is
-  true when Japan is one of them. Returning the property gives them all.
-- SOME PROPERTIES BELONG TO THE RELATIONSHIP, not to either end: when a
-  spell started and ended. Read them in a follow's `where` with `via.`,
-  and the schema below lists them next to the edge:
-    follow p playsFor team as t where via.start_year <= 1983
-- `none` means the value is missing. `via.end_year = none` is a spell
-  that has not ended; `via.end_year != none` is one that has.
-  There are no parentheses: `and` binds tighter than `or`, so a
-  condition reads as OR over AND-groups. For "held in year Y", which is
-  "started by Y and either not ended or ended no earlier than Y", repeat
-  the shared part in both groups:
-    where via.start_year <= Y and via.end_year >= Y
-       or via.start_year <= Y and via.end_year = none
-  "currently" is `via.end_year = none` on its own.
-- Scalar math and equality between two bound values:
-  `compute <col> plus|minus|times|over|same <col> as <name>`.
-  `same` yields true/false. Use for "how much taller", "do X and Y share".
-- String matching (`=`, `contains`) is case- and accent-insensitive.
-- RETURN DISCIPLINE: return exactly the values the question asks for,
-  nothing extra. A column used only for ordering goes in `order by`,
-  not in `return`. "Which X is biggest?" returns only the name:
-  `return t.name order by t.inception_year limit 1`.
-- "Who is taller / heavier / died later, X or Y?" asks for a NAME:
-  find both with `or`, then `return p.name order by p.<prop> desc limit 1`.
-  Use `compute` only when the question asks for the numeric difference
-  or an explicit yes/no.
-- Entity names: use the FULL name as stated in the question
-  ("Southeast Division", not "Southeast").
-- Date properties are ISO strings: compare with quoted strings,
-  e.g. `where date_of_death < "2019"`.
-- `return <col>, ... [order by <col> [desc]] [limit N]` ends the query.
-  Return properties (like `t.name`), never bare bindings.
-- Results are a set of rows: reaching the same node twice answers once.
-  For a count, use `count distinct` when the same node can be reached by
-  more than one path.
-- `return distinct <cols>` collapses repeated VALUES, where plain
-  `return` collapses repeated nodes. Two different people can share a
-  name, and `return p.name` lists both; `return distinct p.name` lists
-  the name once. Use `distinct` when the question asks for the unique or
-  distinct values of a property ("the unique creators", "the distinct
-  countries"), and plain `return` when it asks for the things themselves.
-- Some edges join two nodes of the SAME class (hasSpouse between two
-  characters, subsidiaryOf between two companies). Their roles are named
-  `subj` and `obj`, not the class name, because the class cannot tell the
-  two ends apart. `follow c hasFather obj as dad` goes from a character
-  to their father; `follow c hasFather subj as kid` goes the other way.
-  When the relation reads both ways, use `or` to take both.
-
-Grammar (EBNF):
-  query   := branch ("or" branch)* (group | agg | compute)* return
+Grammar:
+  query   := branch ("or" branch)* (group | agg | compute | keep)* return
   branch  := (find | follow)+
   find    := "find" CLASS ["where" cond] "as" NAME
-  follow  := "follow" NAME EDGE ROLE ["where" cond] "as" NAME
-             ["where" cond] ["or" "none"]
+  follow  := "follow" NAME EDGE ROLE ["upto" (INT|"any")] ["where" cond]
+             "as" NAME ["where" cond] ["or" "none"]
   group   := "group" "by" NAME["." PROP] "as" NAME
-  agg     := ("count"|"sum"|"avg"|"min"|"max") ["distinct"] NAME "." COL ["." PROP] "as" NAME
+  agg     := ("count"|"sum"|"avg"|"min"|"max") ["distinct"] COL "as" NAME
+  keep    := "keep" NAME "where" cond
   compute := "compute" col ("plus"|"minus"|"times"|"over"|"same") col "as" NAME
   return  := "return" ["distinct"] col ("," col)*
              ["order" "by" col ["desc"]] ["limit" INT]
-  cond    := clause (("and"|"or") clause)*
-  clause  := PROP OP literal ; OP: = != > >= < <= contains
+  cond    := clause (("and"|"or") clause)*   ; and binds tighter, no parens
+  clause  := PROP OP literal                 ; OP: = != > >= < <= contains
 
-Worked examples (schema: player/team/award, edges playsFor(player, team),
-receivesAward(player, award)):
+Traversal
+- `follow` names the ROLE you arrive at, never a direction. Roles are in
+  the schema below. You cannot arrive at the role your binding occupies.
+- Edges between two nodes of the same class use roles `subj` and `obj`.
+  `follow c hasFather obj as dad` goes to the father, `subj` to the child.
+- `upto N` walks the edge 1..N times, `upto any` until exhausted. Use for
+  "transitively", "at any depth", "all the way down".
+- `or none` keeps rows that matched nothing, so a per-thing count can come
+  out 0. Use whenever some things may have none.
+- An edge instance is used once per row, so "other teams in X's division"
+  excludes X by itself.
+- Reusing an `as` name means THE SAME NODE, which is how you say "both,
+  and the same one".
+
+Conditions
+- Strings double-quoted, numbers bare. Matching is case- and
+  accent-insensitive.
+- A property holding several values matches if any one matches.
+- `via.<prop>` reads a property of the EDGE, inside a follow's `where`.
+- `none` is a missing value: `via.end_year = none` has not ended.
+  For "in year Y" repeat the shared part across the or-groups:
+  `where via.start_year <= Y and via.end_year >= Y
+      or via.start_year <= Y and via.end_year = none`
+- Dates are ISO strings: `where date_of_death < "2019"`.
+- Use the full entity name as the question states it.
+
+Aggregation
+- One step over everything: `count distinct p as n`, `avg p.height_cm as h`.
+  Collapses to one row.
+- Per group is two steps: `group by p as g` (by identity) or
+  `group by p.prop as g` (by value), then `count distinct g.p as n`.
+  `g.key` is the key; the grouped binding stays usable in `return`.
+- `keep g where n > 3` filters AFTER counting. `keep p where ...` filters
+  plain rows.
+
+Return
+- Return properties (`t.name`), never bare bindings, and return exactly
+  what is asked. A column used only for ordering goes in `order by`.
+- Rows are a set: reaching a node twice answers once. `count distinct`
+  when a node is reachable by several paths.
+- `return distinct` collapses repeated VALUES; plain `return` collapses
+  repeated nodes. Two people sharing a name are two rows under `return`,
+  one under `return distinct`.
+- "Who is taller, X or Y?" wants a name: find both with `or`, then
+  `return p.name order by p.height_cm desc limit 1`. `compute` is only for
+  a numeric difference or an explicit yes/no.
+
+Examples (player/team/award; playsFor(player,team), receivesAward(player,award)):
 
 Q: Which teams has LeBron James played for?
 find player where name = "LeBron James" as p
 follow p playsFor team as t
 return t.name
-
-Q: How many distinct players have played for the Lakers?
-find team where name = "Los Angeles Lakers" as t
-follow t playsFor player as p
-group by t as g
-count distinct g.p as n
-return n
 
 Q: For each team founded after 1960, how many distinct players played for it?
 find team where inception_year > 1960 as t
@@ -154,48 +92,6 @@ follow t playsFor player as p
 group by t as g
 count distinct g.p as n
 return t.name, n
-
-Q: Which players taller than 210 cm received an award?
-find player where height_cm > 210 as p
-follow p receivesAward award as a
-return p.name
-
-Q: What is the average height of players who played for the Bulls?
-find team where name = "Chicago Bulls" as t
-follow t playsFor player as p
-group by t as g
-avg distinct g.p.height_cm as h
-return h
-
-Q: Which award has the most distinct recipients?
-find award as a
-follow a receivesAward player as p
-group by a as g
-count distinct g.p as n
-return a.name, n order by n desc limit 1
-
-Q: How much taller is Alice Doe than Bob Roe in centimeters?
-find player where name = "Alice Doe" as p1
-find player where name = "Bob Roe" as p2
-compute p1.height_cm minus p2.height_cm as diff
-return diff
-
-Q: Do Alice Doe and Bob Roe have the same handedness?
-find player where name = "Alice Doe" as p1
-find player where name = "Bob Roe" as p2
-compute p1.handedness same p2.handedness as answer
-return answer
-
-Q: Who are the unique head coaches of teams LeBron James played for?
-find player where name = "LeBron James" as lj
-follow lj playsFor team as t
-return distinct t.head_coach
-
-Q: Which players played for teams that LeBron James also played for?
-find player where name = "LeBron James" as lj
-follow lj playsFor team as t
-follow t playsFor player as others
-return others.name
 
 Q: How many players have played for either the Bulls or the Kings?
 find team where name = "Chicago Bulls" as t
@@ -206,13 +102,18 @@ follow t playsFor player as p
 count distinct p as n
 return n
 
-Q: For each team founded before 1970, how many players has it had,
-   counting teams with none?
-find team where inception_year < 1970 as t
+Q: Every team, and how many players it has had, counting teams with none?
+find team as t
 follow t playsFor player as p or none
 group by t as g
 count distinct g.p as n
 return t.name, n
+
+Q: Which players received both the MVP and the Finals MVP award?
+find player as p
+follow p receivesAward award where name = "MVP" as mvp
+follow p receivesAward award where name = "Finals MVP" as finals
+return p.name
 
 Q: Which teams did Robert Reid play for during 1983?
 find player where name = "Robert Reid" as p
@@ -221,18 +122,19 @@ follow p playsFor team as t where via.start_year <= 1983
   or via.start_year <= 1983 and via.end_year = none
 return t.name
 
-Q: Which players received both the MVP award and the Finals MVP award?
-find player as p
-follow p receivesAward award where name = "MVP" as mvp
-follow p receivesAward award where name = "Finals MVP" as finals
-return p.name
+Q: Which awards have more than 20 distinct recipients?
+find award as a
+follow a receivesAward player as p
+group by a as g
+count distinct g.p as n
+keep g where n > 20
+return a.name, n order by n desc
 
-Q: Which players played for a team whose head coach they also played
-   under at another team? (same node reached two ways)
-find player as p
-follow p playsFor team as t
-follow p coachedBy team as t
-return p.name
+Q: How much taller is Alice Doe than Bob Roe?
+find player where name = "Alice Doe" as p1
+find player where name = "Bob Roe" as p2
+compute p1.height_cm minus p2.height_cm as diff
+return diff
 """
 
 
