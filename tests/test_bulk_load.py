@@ -250,3 +250,26 @@ def test_the_package_exports_what_an_application_needs():
     for name in ("Session", "Schema", "Store", "StoreLocked", "limits", "parse"):
         assert hasattr(theorem, name), name
     assert theorem.__version__
+
+
+def test_the_loader_accepts_inherited_properties(tmp_path):
+    """A class derived from `entity` inherits `name`, and every file has
+    that column. Checking only the class's own props rejected all of them."""
+    s = Session(tmp_path / "db", Schema())
+    s.run("derive class factory from entity with {country: str}")
+    f = write(tmp_path, "f.csv", "name,country\nWolfsburg,DE\n")
+    assert load_nodes(s, f, "factory").written == 1
+    assert "Wolfsburg" in s.run("find factory as f\nreturn f.name")
+    s.close()
+
+
+def test_rows_returns_values_and_raises_on_error(tmp_path):
+    """`run` renders for a reader; a program wants the values, and an
+    exception it can catch rather than an error it must remember to look
+    for in a string."""
+    s = Session(tmp_path / "db", Schema.supply_chain())
+    load_nodes(s, write(tmp_path, "p.csv", "name,unit_cost\nAnode,0.4\n"), "part")
+    assert s.rows("find part as p\nreturn p.name") == [["Anode"]]
+    with pytest.raises(Exception):
+        s.rows("find part as p\nreturn p.colour")
+    s.close()

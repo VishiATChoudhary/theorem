@@ -97,7 +97,10 @@ def load_nodes(session, path: Path, cls: str) -> LoadReceipt:
             f"unknown class {cls!r}. known: {', '.join(sorted(schema.classes))}. "
             "Declare it first with `derive class`."
         )
-    props = schema.classes[cls].props
+    # all_props, not the class's own: a class derived from `entity`
+    # inherits `name`, and rejecting the column every such file has would
+    # make the loader unusable on any schema a user actually declares.
+    props = schema.all_props(cls)
     rows = read_rows(path)
     if not rows:
         return LoadReceipt("node", cls)

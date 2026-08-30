@@ -118,6 +118,26 @@ class Session:
             if name in playbook_by_name:
                 rec["playbook"] = playbook_by_name[name]
 
+    def rows(self, text: str) -> list[list]:
+        """Run a read program and return its rows as plain values.
+
+        `run` renders an answer for a reader, which is what an agent
+        wants and what a program has to parse back out again. This is the
+        same pipeline without the rendering, and it raises rather than
+        returning an error as text, because a caller in code has
+        `except` and does not have to remember to look.
+        """
+        from .engine.executor import execute_rows
+
+        plans = verify(parse(text), self.schema)
+        for plan in plans:
+            if not isinstance(plan.stmt, READ_STMTS):
+                raise WriteError(
+                    f"rows() runs reads; {type(plan.stmt).__name__} is a write. "
+                    "Use run() for writes, which returns their receipt."
+                )
+        return execute_rows(plans, self.store, self.schema)
+
     def run(self, text: str) -> str:
         try:
             stmts = parse(text)
