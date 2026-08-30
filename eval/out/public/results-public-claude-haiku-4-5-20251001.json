@@ -14,30 +14,30 @@
  ],
  "graphs_missing": [],
  "n": 2348,
- "overall_ex": 0.7764,
- "held_out_ex": 0.7656,
+ "overall_ex": 0.7802,
+ "held_out_ex": 0.7685,
  "held_out_n": 2078,
- "executable_pct": 0.9664,
+ "executable_pct": 0.974,
  "hard_data_shapes": {
   "list_valued_gold": {
    "n": 75,
-   "ex": 0.84
+   "ex": 0.8133
   },
   "needs_edge_properties": {
    "n": 60,
-   "ex": 0.9167
+   "ex": 0.9333
   },
   "note": "multi-valued properties and properties on the edge itself; both were unanswerable before the language supported them"
  },
- "ex_excluding_hard_shapes": 0.7704,
+ "ex_excluding_hard_shapes": 0.775,
  "by_graph": {
-  "company": 0.7608,
-  "fictional_character": 0.7766,
-  "flight_accident": 0.9206,
-  "geography": 0.7541,
-  "movie": 0.7357,
-  "nba": 0.8593,
-  "politics": 0.7256
+  "company": 0.7695,
+  "fictional_character": 0.8026,
+  "flight_accident": 0.9101,
+  "geography": 0.7486,
+  "movie": 0.7382,
+  "nba": 0.8704,
+  "politics": 0.7154
  },
  "by_category": {
   "basic_(n)": {
@@ -45,47 +45,47 @@
    "n": 61
   },
   "basic_(n)-(m0)": {
-   "ex": 0.6197,
+   "ex": 0.6479,
    "n": 71
   },
   "basic_(n)-(m0)-(m1*)": {
-   "ex": 0.7842,
+   "ex": 0.8146,
    "n": 329
   },
   "basic_(n)-(m0*)": {
-   "ex": 0.868,
+   "ex": 0.8539,
    "n": 356
   },
   "basic_(n)-(m0*),(n)-(m1*)": {
-   "ex": 0.7508,
+   "ex": 0.7417,
    "n": 333
   },
   "basic_(n)=(m0)": {
-   "ex": 0.5426,
+   "ex": 0.6702,
    "n": 94
   },
   "basic_(n*)": {
-   "ex": 0.9661,
+   "ex": 0.9831,
    "n": 59
   },
   "special_comparison": {
-   "ex": 0.8639,
+   "ex": 0.8503,
    "n": 147
   },
   "special_optional-match": {
-   "ex": 0.5336,
+   "ex": 0.5112,
    "n": 268
   },
   "special_three-node-groupby": {
-   "ex": 0.7846,
+   "ex": 0.8115,
    "n": 260
   },
   "special_time-sensitive": {
-   "ex": 0.9167,
+   "ex": 0.9333,
    "n": 60
   },
   "special_union": {
-   "ex": 0.8677,
+   "ex": 0.8419,
    "n": 310
   }
  }
