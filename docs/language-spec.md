@@ -128,6 +128,8 @@ Single process, disaggregated shape preserved: an append-only WAL (`wal.jsonl`, 
 
 **One writer.** A store takes an exclusive advisory lock on its directory when it opens. A second opener is refused by name, saying which process holds it; two writers would each assign the same ids and overwrite each other's records. The lock is released when the holding process dies, however it dies, so a crash does not leave a directory unopenable. A tool that only reads an idle directory can opt out with `lock=False`.
 
+**Readers.** A store reads its directory once, at open, so a second process holding it open with `lock=False` answers from the graph as it was. `refresh()` replays what has been committed since and returns how many records that was. Records are selected by the position they carry rather than by a byte offset, so a writer that compacted the log mid-read is not a special case: the run file is newer, and the store is rebuilt from it.
+
 **Compaction.** A snapshot is taken automatically once the WAL passes a threshold, which is both a fixed floor and the current size of the live data. Bounding it below by the data keeps loading a large graph linear: with a fixed threshold alone, a million-node ingest would rewrite a million-record run file on every threshold crossing. Runs older than the newest two are deleted.
 
 **Durability.** A committed record survives the process dying, because the write has reached the operating system. It does not survive the machine losing power: the write path does not fsync. Snapshots do, being rare enough for the guarantee to be free.

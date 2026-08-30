@@ -112,6 +112,7 @@ class Store:
         self._pid = os.getpid()
         self._lock_file = None
         self._wal_records = 0
+        self._loaded_run: Path | None = None
         if lock:
             self._acquire_lock()
         self.nodes: dict[str, Node] = {}
@@ -197,6 +198,7 @@ class Store:
         runs = sorted(
             self.path.glob("runs/run-*.json"), key=lambda p: int(p.stem.split("-")[1])
         )
+        self._loaded_run = runs[-1] if runs else None
         if runs:
             try:
                 data = json.loads(runs[-1].read_text(encoding="utf-8"))
@@ -249,6 +251,66 @@ class Store:
                     continue
                 self.position += 1
                 self._apply_to_memory(rec, self.position)
+
+    def refresh(self) -> int:
+        """Catch up with whatever a writer has committed since.
+
+        A store reads its directory once, at open, so a second process
+        holding it open for reads answers from the graph as it was. This
+        replays what has been appended since, and returns how many
+        records that was.
+
+        Records are selected by the position they carry rather than by a
+        byte offset, so a writer that compacted the log mid-read is not a
+        special case: the run file is simply newer, and the whole store is
+        rebuilt from it. Correctness here is worth more than the read it
+        costs, since the alternative is silently answering from a graph
+        that no longer exists.
+        """
+        newest = self._newest_run()
+        if newest != self._loaded_run:
+            before = self.position
+            self._reset()
+            self._replay()
+            return max(0, self.position - before)
+        if not self.wal_path.exists():
+            return 0
+        applied = 0
+        for line in self.wal_path.read_bytes().splitlines(keepends=True):
+            if not line.endswith(b"\n"):
+                break  # a torn tail: the writer is mid-append, come back later
+            try:
+                rec = json.loads(line)
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                break
+            if (rec.get("_pos") or 0) <= self.position:
+                continue
+            self.position += 1
+            self._wal_records += 1
+            self._apply_to_memory(rec, self.position)
+            applied += 1
+        return applied
+
+    def _newest_run(self) -> Path | None:
+        runs = sorted(
+            self.path.glob("runs/run-*.json"), key=lambda p: int(p.stem.split("-")[1])
+        )
+        return runs[-1] if runs else None
+
+    def _reset(self) -> None:
+        """Drop everything derived from the log, keeping the file handles."""
+        self.nodes = {}
+        self.by_class = {}
+        self.by_name = {}
+        self.edges = {}
+        self.edge_index = {}
+        self.lineage = []
+        self.distinct_pairs = set()
+        self.dup_ledger = []
+        self.aliases = {}
+        self.id_counters = {}
+        self.position = 0
+        self._wal_records = 0
 
     def _validate(self, record: dict) -> None:
         """Reject records that would poison the WAL: they must be appliable."""

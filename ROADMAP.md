@@ -57,8 +57,9 @@ way.
 
 ## Open: engine
 
-- Concurrent readers during a write. A reader opens with `lock=False` and sees
-  the store as of open; there is no way to follow a writer.
+- Automatic refresh. A reader opened with `lock=False` can call `refresh()` to
+  catch up with a writer, but has to know to call it; there is no notification
+  and no way to read a consistent snapshot while one is in progress.
 - Spill to disk. Everything is in memory at ~6.7 KB per node, so a 32 GB machine
   holds 2-4 M nodes and the next node fails.
 - Faster dedup blocking beyond 10^6 nodes.
