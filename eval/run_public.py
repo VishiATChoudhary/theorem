@@ -505,6 +505,20 @@ def exec_graph(graph: str, model: str) -> None:
         return
     out = PUB / f"exec-{model}-{graph}.json"
     out.write_text(json.dumps(results, indent=1))
+    # Which prompt these queries came from, recorded beside the scores
+    # rather than inferred later from a file name. A report that has to
+    # guess this is a report that can claim a prompt it never ran.
+    out.with_suffix(".meta.json").write_text(
+        json.dumps(
+            {
+                "prompt_fingerprint": prompt_fingerprint(),
+                "model": model,
+                "graph": graph,
+                "questions": len(results),
+            },
+            indent=1,
+        )
+    )
     partial.unlink(missing_ok=True)
     print(f"[{graph}] EX {ex_score:.4f} over {len(results)} -> {out}", flush=True)
 

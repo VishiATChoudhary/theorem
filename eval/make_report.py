@@ -50,13 +50,29 @@ CATEGORY_ORDER = [
 
 
 def _scored_fingerprint() -> str:
-    """The prompt hash of the queries this report was built from."""
+    """The prompt hash the scored runs recorded for themselves.
+
+    Read from the runs rather than recomputed, and rather than guessed
+    from the name of whichever frozen file happens to sort last: both of
+    those let a report describe a prompt it never ran.
+    """
+    import json
+
     from eval.run_public import PUB
 
-    files = sorted(PUB.glob("queries-*.json"))
-    if not files:
-        return "unknown"
-    return files[-1].stem.rsplit("-", 1)[-1]
+    stamps = {
+        json.loads(m.read_text()).get("prompt_fingerprint")
+        for m in PUB.glob("exec-*.meta.json")
+    }
+    stamps.discard(None)
+    if not stamps:
+        return "unrecorded"
+    if len(stamps) > 1:
+        raise SystemExit(
+            f"the scored graphs came from different prompts: {sorted(stamps)}. "
+            "Re-run the ones that are stale rather than reporting a mixture."
+        )
+    return stamps.pop()
 
 
 def pct(x):
