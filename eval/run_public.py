@@ -59,7 +59,10 @@ EXEC_TIMEOUT_S = 120  # official metric's per-query timeout
 # answer_json, which is already plain JSON). One deviation:
 # to_hashable sorts with an explicit (type, str) key so mixed-type
 # lists don't crash under Python 3; for homogeneous lists (all that
-# occur in the gold answers) semantics are identical.
+# occur in the gold answers) semantics are identical. Its neo4j temporal
+# branch is duck-typed on iso_format rather than importing neo4j, so the
+# theorem arm needs no driver installed, but it covers the same Date case
+# the original handles.
 
 import random
 from typing import Dict, List, Set, Tuple
@@ -68,6 +71,12 @@ from typing import Dict, List, Set, Tuple
 def to_hashable(obj, unorder_list=True):
     if isinstance(obj, (tuple, int, float, str, bool, type(None))):
         return obj
+    elif hasattr(obj, "iso_format"):
+        # neo4j temporal values (Date, DateTime, Time). The official
+        # implementation converts Date this way; dropping it makes every
+        # Cypher query that returns a date raise and score zero, which
+        # penalises the control arm for a harness detail.
+        return obj.iso_format()
     elif isinstance(obj, (list, tuple)):
         if unorder_list:
             return tuple(sorted((to_hashable(item) for item in obj), key=lambda x: (str(type(x)), str(x))))
