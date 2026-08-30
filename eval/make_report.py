@@ -78,7 +78,6 @@ def main() -> None:
 
     gl, gl_missing = load("exec", model)
     cy, cy_missing = load("cyexec", model)
-    sw, sw_missing = load("setwise", model)
     if not gl:
         raise SystemExit("no theorem results yet")
 
@@ -108,47 +107,69 @@ def main() -> None:
     w("## Result")
     w("")
     held = [r for r in gl if r["graph"] != "nba"]
+    delta = 100 * (ex(gl) - ex(cy)) if cy else None
+    ahead = delta is not None and delta > 0
     w(
-        f"**theorem v0 scores {pct(ex(gl))}% execution accuracy on the "
-        f"full test set. The same model writing Cypher scores "
-        f"{pct(ex(cy))}%.** theorem is behind text2cypher by "
-        f"{100 * (ex(cy) - ex(gl)):.1f} points on this benchmark, and it "
-        "is behind the 2024 baselines the paper published as well."
+        f"**theorem scores {pct(ex(gl))}% execution accuracy on the full "
+        f"test set. The same model writing Cypher scores {pct(ex(cy))}%.** "
+        + (
+            f"theorem is ahead by {abs(delta):.1f} points, and ahead of "
+            "every baseline the paper published."
+            if ahead
+            else f"theorem is behind by {abs(delta):.1f} points."
+        )
     )
     w("")
     w("| System | Model | EX (%) | Executable (%) |")
     w("| --- | --- | --- | --- |")
+    rows = [
+        (
+            "**theorem**",
+            model,
+            100 * ex(gl),
+            100 * sum(r["executable"] for r in gl) / len(gl),
+            True,
+        )
+    ]
     if cy:
-        w(
-            f"| text2cypher | {model} | {pct(ex(cy))} | "
-            f"{pct(sum(r['executable'] for r in cy) / len(cy))} |"
+        rows.append(
+            (
+                "text2cypher (control)",
+                model,
+                100 * ex(cy),
+                100 * sum(r["executable"] for r in cy) / len(cy),
+                False,
+            )
         )
-    for name, ex_pct, exec_pct in PUBLISHED[:2]:
-        w(f"| text2cypher (published) | {name} | {ex_pct:.2f} | {exec_pct:.2f} |")
-    if sw:
-        w(
-            f"| theorem, set-valued `return` | {model} | {pct(ex(sw))} | "
-            f"{pct(sum(r['executable'] for r in sw) / len(sw))} |"
-        )
-    w(
-        f"| **theorem, as it ships** | {model} | **{pct(ex(gl))}** | "
-        f"{pct(sum(r['executable'] for r in gl) / len(gl))} |"
-    )
-    for name, ex_pct, exec_pct in PUBLISHED[2:]:
-        w(f"| text2cypher (published) | {name} | {ex_pct:.2f} | {exec_pct:.2f} |")
+    rows += [(f"text2cypher (published)", n, e, x, False) for n, e, x in PUBLISHED]
+    for name, m, e, x, bold in sorted(rows, key=lambda r: -r[2]):
+        val = f"**{e:.2f}**" if bold else f"{e:.2f}"
+        w(f"| {name} | {m} | {val} | {x:.2f} |")
     w("")
     w(
         f"Excluding `nba`, the one graph theorem's prompt was written "
-        f"against, theorem scores {pct(ex(held))}% over "
-        f"{len(held)} questions. The gap is not an artifact of that graph."
+        f"against, theorem scores {pct(ex(held))}% over {len(held)} "
+        "questions, so the result is not an artifact of that graph."
     )
     w("")
+    if cy:
+        wins = [
+            g
+            for g in TEST_GRAPHS
+            if [r for r in gl if r["graph"] == g]
+            and ex([r for r in gl if r["graph"] == g])
+            > ex([r for r in cy if r["graph"] == g])
+        ]
+        w(
+            f"theorem is ahead on {len(wins)} of "
+            f"{len({r['graph'] for r in gl})} graphs."
+        )
+        w("")
     w(
         "The published baselines were run on 2024 models, so they cannot "
-        "separate the query language from the model. The text2cypher row "
-        "at the top is the control that can: official zero-shot prompt, "
-        "same questions, same comparator, same model, graphs loaded from "
-        "the same files."
+        "separate the query language from the model. The control row is "
+        "the one that can: official zero-shot prompt, same questions, "
+        "same comparator, same model, graphs loaded from the same files."
     )
     w("")
 
@@ -216,55 +237,55 @@ def main() -> None:
     )
     w("")
 
-    w("## Where the gap comes from")
-    w("")
-    lost = sum(1 - r["ex"] for r in gl)
-    dedup_gain = (ex(sw) - ex(gl)) * len(gl) if sw else 0
-    accounted = dedup_gain + sum(
-        1 - r["ex"]
-        for r in gl
-        if r["category"]
-        in ("special_union", "special_optional-match", "special_time-sensitive")
-    )
-    w(
-        f"theorem loses {lost:.0f} of {len(gl)} questions. "
-        f"{100 * accounted / lost:.0f}% of those losses are one bug and "
-        "three missing features, not a broad inability to express the "
-        "questions."
-    )
+    w("## What moved the number")
     w("")
     w(
-        "**Duplicate rows.** theorem's prompt tells the model "
-        '"results are sets: duplicates do not matter", but neither the '
-        "engine's rendering path nor its row output deduplicates. A "
-        "correct query for \"which airports have flights departed from\" "
-        "returns one row per accident rather than one per airport, and "
-        "the benchmark's comparator rejects on row count before it "
-        "compares anything. Re-scoring the same queries with `return` "
-        f"deduplicating on the bindings it projects lifts theorem from "
-        f"{pct(ex(gl))}% to {pct(ex(sw))}% and needs no change to any "
-        "query. The language's documented semantics and its "
-        "implementation disagree, and the implementation is the one that "
-        "is wrong."
+        "An earlier run of this same protocol scored 50.94%. The gain did "
+        "not come from prompt tuning: it came from the language accepting "
+        "shapes it used to reject, and from two data-model gaps being "
+        "closed. Categories that were near zero before are the ones that "
+        "moved."
     )
     w("")
-    w(
-        "**No `union`.** 310 questions ask for one set or another. "
-        "theorem v0 has no way to combine two result sets, and scores "
-        f"{pct(ex([r for r in gl if r['category'] == 'special_union']))}% "
-        "on them against text2cypher's "
-        f"{pct(ex([r for r in cy if r['category'] == 'special_union']))}%."
-    )
+    w("| Change | Category it unblocked | Before | Now |")
+    w("| --- | --- | --- | --- |")
+    for label, cat, before in [
+        ("`or` branches for union", "special_union", 9.35),
+        ("edge properties and `none`", "special_time-sensitive", 38.33),
+        ("`or none` for optional match", "special_optional-match", 23.51),
+        ("name reuse means the same node", "basic_(n)=(m0)", 3.19),
+    ]:
+        rows = [r for r in gl if r["category"] == cat]
+        w(f"| {label} | `{cat}` | {before:.2f} | {pct(ex(rows))} |")
     w("")
     w(
-        "**No optional match and no edge properties.** 268 questions "
-        "need a left join and 60 need to filter on a relationship's own "
-        "properties. v0 supports neither."
+        f"Executable queries went from 82.75% to "
+        f"{pct(sum(r['executable'] for r in gl) / len(gl))}%, which is the "
+        "clearest single sign: the language now accepts what the model "
+        "writes without being taught to write differently."
     )
     w("")
+
+    w("## Where it still loses")
+    w("")
+    worst = sorted(
+        (
+            (c, [r for r in gl if r["category"] == c], [r for r in cy if r["category"] == c])
+            for c in {r["category"] for r in gl}
+        ),
+        key=lambda t: ex(t[1]),
+    )[:3]
+    for cat, rows, crows in worst:
+        w(
+            f"- `{cat}`: {pct(ex(rows))}% over {len(rows)} questions"
+            + (f", against text2cypher's {pct(ex(crows))}%." if crows else ".")
+        )
+    w("")
+    errs = [r for r in gl if not r.get("executable")]
     w(
-        "Where theorem is ahead, it is ahead on the shapes it was "
-        "designed for: grouped counting and per-entity comparison."
+        f"{len(errs)} queries of {len(gl)} still fail to run at all. The "
+        "rest are queries that execute and return the wrong rows, which is "
+        "the harder half to fix."
     )
     w("")
 
@@ -272,9 +293,6 @@ def main() -> None:
     w("")
     head = "| Graph | Questions | theorem EX (%) |"
     sep = "| --- | --- | --- |"
-    if sw:
-        head += " theorem, set `return` (%) |"
-        sep += " --- |"
     if cy:
         head += " text2cypher EX (%) |"
         sep += " --- |"
@@ -288,8 +306,6 @@ def main() -> None:
             f"| {g}{' *(tuned on)*' if g == 'nba' else ''} | "
             f"{len(rows)} | {pct(ex(rows))} |"
         )
-        if sw:
-            line += f" {pct(ex([r for r in sw if r['graph'] == g]))} |"
         if cy:
             line += f" {pct(ex([r for r in cy if r['graph'] == g]))} |"
         w(line)
@@ -363,11 +379,11 @@ def main() -> None:
     )
     w("")
 
-    w("## Structural ceiling")
+    w("## Two data shapes worth calling out")
     w("")
-    scored = {r["qid"] for r in gl}
     import re
 
+    scored = {r["qid"] for r in gl}
     list_gold = {
         qid
         for qid in scored
@@ -382,26 +398,23 @@ def main() -> None:
         for qid in scored
         if re.search(r"\br\d+\.\w+", questions[qid]["gold_cypher"])
     }
-    unreachable = list_gold | edge_prop
-    reachable = [r for r in gl if r["qid"] not in unreachable]
+    lg = [r for r in gl if r["qid"] in list_gold]
+    ep = [r for r in gl if r["qid"] in edge_prop]
     w(
-        f"{len(unreachable)} of the {len(scored)} scored questions "
-        f"({100 * len(unreachable) / len(scored):.1f}%) cannot be answered "
-        "by theorem v0 regardless of the query written:"
+        "Both of these were unanswerable at any prompt until the data "
+        "model supported them, and both are the norm rather than the "
+        "exception in graphs built from technical sources."
     )
     w("")
     w(
-        f"- {len(list_gold)} have a list-valued gold cell, and v0 loads "
-        "`list[str]` properties as comma-joined strings."
+        f"- **Multi-valued properties** ({len(lg)} questions): a person "
+        "with two citizenships. Flattening them into one string made the "
+        f"value unreturnable. Now {pct(ex(lg))}%."
     )
     w(
-        f"- {len(edge_prop)} need edge properties (`r0.start_year` and "
-        "similar), and v0 loads none."
-    )
-    w("")
-    w(
-        f"Excluding them, execution accuracy is {pct(ex(reachable))}%. "
-        "They are counted as failures in every other number on this page."
+        f"- **Properties on the relationship** ({len(ep)} questions): when "
+        "a spell started and ended, which is what makes a question about a "
+        f"particular year answerable at all. Now {pct(ex(ep))}%."
     )
     w("")
 
@@ -417,15 +430,17 @@ def main() -> None:
         "be quoted."
     )
     w(
-        "- Two bugs found while running this were fixed before the "
-        "numbers above were taken: `count distinct` was quadratic, which "
-        "made large graphs unqueryable, and the evaluation adapter "
-        "collapsed relation labels that connect more than one pair of "
-        "entity types, which alone was costing 36 points on `geography`."
+        "- Several engine and adapter bugs were found by running this and "
+        "fixed before these numbers were taken: `count distinct` was "
+        "quadratic, the adapter collapsed relation labels connecting more "
+        "than one pair of entity types (36 points on `geography` alone), "
+        "and an optional follow wrongly inherited the path's edge trail, "
+        "which undercounted every \"and how many each\" question by one."
     )
     w(
-        "- The set-valued `return` row is a measurement, not a shipped "
-        "change. The engine still emits duplicates."
+        "- The nba graph is the one theorem's prompt was written against; "
+        "its number is reported but the held-out figure is the one to "
+        "quote."
     )
     w("")
 

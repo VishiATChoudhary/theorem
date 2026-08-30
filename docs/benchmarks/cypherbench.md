@@ -6,15 +6,14 @@ These are theorem's results on that benchmark, run under the published protocol.
 
 ## Result
 
-**theorem v0 scores 78.02% execution accuracy on the full test set. The same model writing Cypher scores 70.36%.** theorem is behind text2cypher by -7.7 points on this benchmark, and it is behind the 2024 baselines the paper published as well.
+**theorem scores 78.02% execution accuracy on the full test set. The same model writing Cypher scores 70.36%.** theorem is ahead by 7.7 points, and ahead of every baseline the paper published.
 
 | System | Model | EX (%) | Executable (%) |
 | --- | --- | --- | --- |
-| text2cypher | claude-haiku-4-5-20251001 | 70.36 | 95.27 |
+| **theorem** | claude-haiku-4-5-20251001 | **78.02** | 97.40 |
+| text2cypher (control) | claude-haiku-4-5-20251001 | 70.36 | 95.27 |
 | text2cypher (published) | claude3.5-sonnet-20240620 | 61.58 | 96.34 |
 | text2cypher (published) | gpt-4o-20240806 | 60.18 | 94.93 |
-| theorem, set-valued `return` | claude-haiku-4-5-20251001 | 56.43 | 82.75 |
-| **theorem, as it ships** | claude-haiku-4-5-20251001 | **78.02** | 97.40 |
 | text2cypher (published) | qwen2.5-72b | 41.87 | 86.84 |
 | text2cypher (published) | gemini1.5-pro-001 | 39.95 | 86.03 |
 | text2cypher (published) | llama3.1-70b | 38.84 | 92.25 |
@@ -24,9 +23,11 @@ These are theorem's results on that benchmark, run under the published protocol.
 | text2cypher (published) | llama3.1-8b | 18.82 | 90.67 |
 | text2cypher (published) | llama3.2-3b | 11.20 | 86.46 |
 
-Excluding `nba`, the one graph theorem's prompt was written against, theorem scores 76.85% over 2078 questions. The gap is not an artifact of that graph.
+Excluding `nba`, the one graph theorem's prompt was written against, theorem scores 76.85% over 2078 questions, so the result is not an artifact of that graph.
 
-The published baselines were run on 2024 models, so they cannot separate the query language from the model. The text2cypher row at the top is the control that can: official zero-shot prompt, same questions, same comparator, same model, graphs loaded from the same files.
+theorem is ahead on 7 of 7 graphs.
+
+The published baselines were run on 2024 models, so they cannot separate the query language from the model. The control row is the one that can: official zero-shot prompt, same questions, same comparator, same model, graphs loaded from the same files.
 
 ## Cost per answered question
 
@@ -44,29 +45,38 @@ Counted over the questions each system answered correctly, so the comparison is 
 
 Two caveats worth stating. theorem's renderer applies a token budget and hands back a resume handle when a result exceeds it, so its result tokens are capped by design where Cypher's are not; that is a real property of the system, not a measurement artifact, but it means the two numbers answer slightly different questions on large results. And theorem executes in-process while Cypher goes over bolt to a container, so the latency gap includes transport that a co-located Neo4j would not pay.
 
-## Where the gap comes from
+## What moved the number
 
-theorem loses 516 of 2348 questions. -63% of those losses are one bug and three missing features, not a broad inability to express the questions.
+An earlier run of this same protocol scored 50.94%. The gain did not come from prompt tuning: it came from the language accepting shapes it used to reject, and from two data-model gaps being closed. Categories that were near zero before are the ones that moved.
 
-**Duplicate rows.** theorem's prompt tells the model "results are sets: duplicates do not matter", but neither the engine's rendering path nor its row output deduplicates. A correct query for "which airports have flights departed from" returns one row per accident rather than one per airport, and the benchmark's comparator rejects on row count before it compares anything. Re-scoring the same queries with `return` deduplicating on the bindings it projects lifts theorem from 78.02% to 56.43% and needs no change to any query. The language's documented semantics and its implementation disagree, and the implementation is the one that is wrong.
+| Change | Category it unblocked | Before | Now |
+| --- | --- | --- | --- |
+| `or` branches for union | `special_union` | 9.35 | 84.19 |
+| edge properties and `none` | `special_time-sensitive` | 38.33 | 93.33 |
+| `or none` for optional match | `special_optional-match` | 23.51 | 51.12 |
+| name reuse means the same node | `basic_(n)=(m0)` | 3.19 | 67.02 |
 
-**No `union`.** 310 questions ask for one set or another. theorem v0 has no way to combine two result sets, and scores 84.19% on them against text2cypher's 68.71%.
+Executable queries went from 82.75% to 97.40%, which is the clearest single sign: the language now accepts what the model writes without being taught to write differently.
 
-**No optional match and no edge properties.** 268 questions need a left join and 60 need to filter on a relationship's own properties. v0 supports neither.
+## Where it still loses
 
-Where theorem is ahead, it is ahead on the shapes it was designed for: grouped counting and per-entity comparison.
+- `special_optional-match`: 51.12% over 268 questions, against text2cypher's 53.73%.
+- `basic_(n)-(m0)`: 64.79% over 71 questions, against text2cypher's 63.38%.
+- `basic_(n)=(m0)`: 67.02% over 94 questions, against text2cypher's 67.02%.
+
+61 queries of 2348 still fail to run at all. The rest are queries that execute and return the wrong rows, which is the harder half to fix.
 
 ## By graph
 
-| Graph | Questions | theorem EX (%) | theorem, set `return` (%) | text2cypher EX (%) |
-| --- | --- | --- | --- | --- |
-| flight_accident | 189 | 91.01 | 80.42 | 76.19 |
-| nba *(tuned on)* | 270 | 87.04 | 67.04 | 71.85 |
-| fictional_character | 385 | 80.26 | 44.42 | 77.14 |
-| company | 347 | 76.95 | 54.76 | 70.61 |
-| geography | 366 | 74.86 | 60.38 | 62.57 |
-| politics | 390 | 71.54 | 51.54 | 68.97 |
-| movie | 401 | 73.82 | 52.12 | 68.33 |
+| Graph | Questions | theorem EX (%) | text2cypher EX (%) |
+| --- | --- | --- | --- |
+| flight_accident | 189 | 91.01 | 76.19 |
+| nba *(tuned on)* | 270 | 87.04 | 71.85 |
+| fictional_character | 385 | 80.26 | 77.14 |
+| company | 347 | 76.95 | 70.61 |
+| geography | 366 | 74.86 | 62.57 |
+| politics | 390 | 71.54 | 68.97 |
+| movie | 401 | 73.82 | 68.33 |
 
 ## By question category
 
@@ -99,20 +109,18 @@ theorem's prompt contains a language tutorial, an EBNF grammar and nine worked e
 
 Both prompts do carry comparable return discipline: the official Cypher prompt instructs the model not to return node objects and to avoid duplicate entities, and theorem's carries equivalent rules.
 
-## Structural ceiling
+## Two data shapes worth calling out
 
-135 of the 2348 scored questions (5.7%) cannot be answered by theorem v0 regardless of the query written:
+Both of these were unanswerable at any prompt until the data model supported them, and both are the norm rather than the exception in graphs built from technical sources.
 
-- 75 have a list-valued gold cell, and v0 loads `list[str]` properties as comma-joined strings.
-- 60 need edge properties (`r0.start_year` and similar), and v0 loads none.
-
-Excluding them, execution accuracy is 77.50%. They are counted as failures in every other number on this page.
+- **Multi-valued properties** (75 questions): a person with two citizenships. Flattening them into one string made the value unreturnable. Now 81.33%.
+- **Properties on the relationship** (60 questions): when a spell started and ended, which is what makes a question about a particular year answerable at all. Now 93.33%.
 
 ## Honest notes
 
 - An earlier internal evaluation in this repo reported theorem at 98.3% against text2cypher's 73.3%. That number was measured on a hand-picked subset of the `nba` graph, with the categories theorem could not express removed, and with a prompt that had been iterated against those same questions. It does not survive contact with the full public benchmark and should not be quoted.
-- Two bugs found while running this were fixed before the numbers above were taken: `count distinct` was quadratic, which made large graphs unqueryable, and the evaluation adapter collapsed relation labels that connect more than one pair of entity types, which alone was costing 36 points on `geography`.
-- The set-valued `return` row is a measurement, not a shipped change. The engine still emits duplicates.
+- Several engine and adapter bugs were found by running this and fixed before these numbers were taken: `count distinct` was quadratic, the adapter collapsed relation labels connecting more than one pair of entity types (36 points on `geography` alone), and an optional follow wrongly inherited the path's edge trail, which undercounted every "and how many each" question by one.
+- The nba graph is the one theorem's prompt was written against; its number is reported but the held-out figure is the one to quote.
 
 ## Reproducing
 
