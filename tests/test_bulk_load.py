@@ -12,6 +12,7 @@ from theorem.cli import main
 from theorem.ingest.bulk import LoadError, load_edges, load_nodes
 from theorem.schema import Schema
 from theorem.session import Session
+from theorem.verifier import VerifyError
 
 
 @pytest.fixture
@@ -270,6 +271,6 @@ def test_rows_returns_values_and_raises_on_error(tmp_path):
     s = Session(tmp_path / "db", Schema.supply_chain())
     load_nodes(s, write(tmp_path, "p.csv", "name,unit_cost\nAnode,0.4\n"), "part")
     assert s.rows("find part as p\nreturn p.name") == [["Anode"]]
-    with pytest.raises(Exception):
+    with pytest.raises(VerifyError):
         s.rows("find part as p\nreturn p.colour")
     s.close()

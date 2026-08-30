@@ -8,7 +8,6 @@ usable on graphs with hundreds of thousands of nodes.
 
 import time
 
-import pytest
 
 from theorem.engine.executor import execute_rows
 from theorem.engine.storage import Store

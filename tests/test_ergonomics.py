@@ -8,7 +8,7 @@ from in the CypherBench run.
 import pytest
 
 from theorem.engine.executor import execute_rows
-from theorem.parser import parse
+from theorem.parser import ParseError, parse
 from theorem.schema import Schema
 from theorem.verifier import verify
 
@@ -169,7 +169,7 @@ def test_or_branches_may_use_different_edges(fixture_store):
 
 
 def test_trailing_or_is_an_error():
-    with pytest.raises(Exception):
+    with pytest.raises(ParseError):
         parse("find product as p\nor\n")
 
 

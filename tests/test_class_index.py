@@ -64,7 +64,7 @@ def test_find_cost_tracks_the_class_not_the_store(tmp_path):
 
 def test_retired_nodes_stay_out_of_find(tmp_path):
     store, schema = _store(tmp_path, 2, 2)
-    victim = [n.id for n in store.nodes.values() if n.cls == "small"][0]
+    victim = next(n.id for n in store.nodes.values() if n.cls == "small")
     store.apply({"op": "retire", "id": victim, "reason": "gone"})
     rows = execute_rows(
         verify(parse("find small as s\nreturn s.name"), schema), store, schema

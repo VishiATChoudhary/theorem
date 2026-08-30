@@ -86,13 +86,12 @@ def main() -> None:
     args = ap.parse_args()
     model = args.model
 
-    gl, gl_missing = load("exec", model)
-    cy, cy_missing = load("cyexec", model)
+    gl, _ = load("exec", model)
+    cy, _ = load("cyexec", model)
     if not gl:
         raise SystemExit("no theorem results yet")
 
     questions = {q["qid"]: q for q in questions_for()}
-    total_q = len(questions)
 
     L = []
     w = L.append
@@ -151,7 +150,7 @@ def main() -> None:
                 False,
             )
         )
-    rows += [(f"text2cypher (published)", n, e, x, False) for n, e, x in PUBLISHED]
+    rows += [("text2cypher (published)", n, e, x, False) for n, e, x in PUBLISHED]
     for name, m, e, x, bold in sorted(rows, key=lambda r: -r[2]):
         val = f"**{e:.2f}**" if bold else f"{e:.2f}"
         w(f"| {name} | {m} | {val} | {x:.2f} |")

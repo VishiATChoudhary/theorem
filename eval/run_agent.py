@@ -489,7 +489,7 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
     w("## Reproducing")
     w("")
     w("```bash")
-    w(f"uv run python -m eval.run_agent run --graph terrorist_attack --n 120")
+    w("uv run python -m eval.run_agent run --graph terrorist_attack --n 120")
     w("uv run python -m eval.run_agent report")
     w("```")
     w("")

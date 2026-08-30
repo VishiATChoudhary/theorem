@@ -20,7 +20,7 @@ DOCS = Path(__file__).resolve().parents[1] / "docs"
 
 def blocks(name: str, lang: str) -> list[str]:
     text = (DOCS / name).read_text(encoding="utf-8")
-    return re.findall(rf"```{lang}\n(.*?)```", text, re.S)
+    return re.findall(rf"```{lang}\n(.*?)```", text, re.DOTALL)
 
 
 def test_the_tutorial_runs(tmp_path):
@@ -60,7 +60,7 @@ def _verbs() -> set[str]:
 @pytest.mark.parametrize("verb", sorted(_verbs()))
 def test_every_verb_is_in_the_spec(verb):
     spec = (DOCS / "language-spec.md").read_text(encoding="utf-8")
-    grammar = re.search(r"```\n(.*?)```", spec, re.S).group(1)
+    grammar = re.search(r"```\n(.*?)```", spec, re.DOTALL).group(1)
     assert re.search(rf"\b{re.escape(verb)}\b", grammar), (
         f"the parser accepts `{verb}` and the spec does not mention it. "
         "A verb documented only in the source is a verb nobody can use."

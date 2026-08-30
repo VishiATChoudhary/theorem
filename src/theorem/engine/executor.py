@@ -706,7 +706,6 @@ def _aggregate(stmt: Aggregate, table: Table, store: Store, schema: Schema) -> N
         return
     member = stmt.col[1]
     prop = stmt.col[2] if len(stmt.col) > 2 else None
-    key_col, kind = table.group_meta[gname]
 
     _materialize_groups(gname, table, store, schema)
 

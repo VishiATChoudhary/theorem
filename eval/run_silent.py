@@ -433,7 +433,7 @@ def write_doc(graphs: list[str]) -> Path:
         "with a broken query, not how often a model breaks one. How often is",
         "the execution-accuracy benchmark, which is a separate page.",
         "",
-        f"Reproduce: `uv run python -m eval.run_silent --graph {list(per_graph)[0]}`.",
+        f"Reproduce: `uv run python -m eval.run_silent --graph {next(iter(per_graph))}`.",
         "",
     ]
     DOC.parent.mkdir(parents=True, exist_ok=True)

@@ -65,8 +65,8 @@ EXEC_TIMEOUT_S = 120  # official metric's per-query timeout
 # theorem arm needs no driver installed, but it covers the same Date case
 # the original handles.
 
-import random
-from typing import Dict, List, Set, Tuple
+import random  # noqa: E402  (the vendored comparator's own imports)
+from typing import Dict, List, Set, Tuple  # noqa: E402
 
 
 def to_hashable(obj, unorder_list=True):
@@ -447,7 +447,7 @@ def exec_graph(graph: str, model: str) -> None:
     if done:
         print(f"[{graph}] resuming, {len(done)} already scored")
     questions = questions_for(graph)
-    for i, q in enumerate(questions):
+    for q in questions:
         if q["qid"] in done or q["qid"] not in queries:
             continue  # not yet generated; a later resume run picks it up
         query = queries[q["qid"]]

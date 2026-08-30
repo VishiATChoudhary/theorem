@@ -12,7 +12,7 @@ import sys
 
 import pytest
 
-from theorem import Schema, Session, StoreLocked, agent_prompt
+from theorem import Schema, Session, agent_prompt
 
 SCHEMA = """derive class factory from entity with {country: str, opened: int}
 derive class component from entity with {sku: str, grams: float}
