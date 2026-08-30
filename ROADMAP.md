@@ -23,6 +23,23 @@ interesting questions are about reach rather than about one hop:
 
 Each needs a language proposal issue first (see [CONTRIBUTING](CONTRIBUTING.md), spec-first rule).
 
+## v0.4: close the prompt-token gap
+
+The agent-loop benchmark ties with text2cypher on accuracy and costs 2.5x
+the tokens, because a language the model has never seen carries its tutorial
+in every prompt. Cutting the tutorial from 2,433 to 1,241 tokens cost nothing
+measurable; cutting it to 818 hurt repair. So the remaining ideas are
+structural rather than editorial:
+
+- **Teach from the schema.** The schema render is already half the size of
+  the equivalent Cypher JSON. Rules that could be read off a richer schema
+  need not be prose in the prompt.
+- **Errors that carry the rule they enforce.** If a verifier error states the
+  rule, the prompt need not pre-state it. The 818-token experiment suggests
+  today's errors do not yet do this well enough.
+- **A second graph in the agent benchmark.** At n=120 the interval is six
+  points wide; nothing subtle is measurable until that shrinks.
+
 ## v0.x: engine
 
 - Concurrent readers during a write (currently single process, single writer).
