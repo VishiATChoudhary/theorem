@@ -90,3 +90,50 @@ def test_a_session_can_follow_one(tmp_path):
             ["VoltaChem"],
         ]
         reader.close()
+
+
+def test_a_readers_index_catches_up_too(tmp_path):
+    """A reader that built an index and then replayed new records must not
+    answer from the index it had before them."""
+    from theorem.engine.executor import execute_rows
+    from theorem.parser import parse
+    from theorem.schema import ClassDef, Schema
+    from theorem.verifier import verify
+
+    schema = Schema()
+    schema.classes["supplier"] = ClassDef("supplier", {"name": "str", "country": "str"})
+    query = 'find supplier where country = "JP" as s\nreturn s.name'
+
+    writer = Store(tmp_path)
+    writer.bulk(
+        [
+            {
+                "op": "put_node",
+                "id": f"#s-{i}",
+                "cls": "supplier",
+                "props": {"name": f"S{i}", "country": "DE"},
+            }
+            for i in range(1, 6001)
+        ]
+    )
+    reader = Store(tmp_path, lock=False)
+    assert execute_rows(verify(parse(query), schema), reader, schema) == []
+    assert reader.indexed_props  # the index is built and says nobody is in JP
+
+    writer.apply(
+        {
+            "op": "put_node",
+            "id": "#s-9999",
+            "cls": "supplier",
+            "props": {"name": "Ionix", "country": "JP"},
+        }
+    )
+    writer.apply({"op": "patch_node", "id": "#s-1", "props": {"country": "JP"}})
+    reader.refresh()
+
+    found = sorted(
+        r[0] for r in execute_rows(verify(parse(query), schema), reader, schema)
+    )
+    assert found == ["Ionix", "S1"]
+    writer.close()
+    reader.close()
