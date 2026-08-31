@@ -267,3 +267,13 @@ def test_stats_on_a_missing_database_says_so(tmp_path, capsys):
 
     assert main(["stats", "--db", str(tmp_path / "nope")]) == 1
     assert "no database" in capsys.readouterr().err
+
+
+def test_the_help_names_the_subcommands(capsys):
+    """A subcommand nobody can discover is a subcommand nobody uses."""
+    from theorem.cli import main
+
+    main([])
+    out = capsys.readouterr().out
+    for sub in ("load", "stats", "ingest", "playbook"):
+        assert sub in out

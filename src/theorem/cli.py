@@ -258,7 +258,20 @@ def main(argv: list[str] | None = None) -> int:
         elif subcommand == "stats":
             return _handle_stats(argv[1:])
 
-    ap = argparse.ArgumentParser(prog="theorem")
+    ap = argparse.ArgumentParser(
+        prog="theorem",
+        epilog=(
+            "subcommands:\n"
+            "  load      write a CSV or JSONL file into a class or edge type\n"
+            "  stats     counts, log state, and memory against the ceiling\n"
+            "  ingest    stage a document and have an agent extract from it\n"
+            "  playbook  compile a prose playbook into schema statements\n"
+            "\n"
+            "Each takes -h of its own. With no subcommand, theorem runs a .thm\n"
+            "program, or opens a session with --repl."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     ap.add_argument("file", nargs="?", help="a .thm program to run")
     ap.add_argument("--db", default=".theorem-db", help="database directory")
     _add_schema_arg(ap)
