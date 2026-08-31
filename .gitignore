@@ -13,3 +13,4 @@ eval/out/*.log
 handoffs/
 eval/out/public-archive-*/
 eval/out/*.log
+eval/out/public/agent-archive-*/
