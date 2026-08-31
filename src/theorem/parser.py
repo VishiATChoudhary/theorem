@@ -458,6 +458,12 @@ class _Parser:
             return self.cond()
         return cond
 
+    def _unqualify_col(self, col, name: str):
+        """The same rule for `order by`, which is a column and not a condition."""
+        if col is not None and len(col) > 1 and col[0] == name:
+            return col[1:]
+        return col
+
     def _unqualify(self, cond: Cond, name: str) -> Cond:
         """Let a condition name the binding its own statement creates.
 
@@ -490,7 +496,11 @@ class _Parser:
         if order_by is None:
             order_by, desc = self.order_by_opt()
         return Find(
-            target, self._unqualify(cond, name), name, order_by=order_by, desc=desc
+            target,
+            self._unqualify(cond, name),
+            name,
+            order_by=self._unqualify_col(order_by, name),
+            desc=desc,
         )
 
     def parse_follow(self) -> Follow:

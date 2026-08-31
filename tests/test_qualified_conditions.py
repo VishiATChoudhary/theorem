@@ -102,3 +102,18 @@ def test_via_is_untouched(graph):
         ),
         schema,
     )
+
+
+def test_order_by_may_name_its_own_binding(graph):
+    """`order by` sits in the same statement and reads the same node."""
+    assert run("find lake as l order by l.area_km2 desc\nreturn l.name", graph) == [
+        ["Big"],
+        ["Small"],
+    ]
+
+
+def test_order_by_before_as_still_works(graph):
+    assert run("find lake order by area_km2 desc as l\nreturn l.name", graph) == [
+        ["Big"],
+        ["Small"],
+    ]

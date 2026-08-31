@@ -72,7 +72,7 @@ STRING      := '"' ... '"'
 
 **Roles.** An edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.
 
-**A condition may name its own binding.** `follow c contains part as l where l.unit_cost < 1` means the same as `where unit_cost < 1`: a follow's condition is about the node being arrived at, and `l` is the name for that node. The same holds for `find x as p where p.prop = v`. Only the statement's own name is stripped; any other binding keeps meaning what it meant, so `where r.prop` in a follow that binds `l` is still a reference to `r` and is checked as one.
+**A condition may name its own binding.** `follow c contains part as l where l.unit_cost < 1` means the same as `where unit_cost < 1`: a follow's condition is about the node being arrived at, and `l` is the name for that node. The same holds for `find x as p where p.prop = v`. The same holds for a `find`'s `order by`. Only the statement's own name is stripped; any other binding keeps meaning what it meant, so `where r.prop` in a follow that binds `l` is still a reference to `r` and is checked as one.
 
 **Alternative branches (`or`).** A line holding only the word `or` ends the current branch and starts another. Each branch is a `find`/`follow` sequence evaluated independently; the branches' rows are unioned before whatever follows. Rows are a set, so a node found by two branches answers once. Everything after the last branch (group, aggregate, keep, compute, return) applies to the union, which is how "how many players played for either team" is one query rather than two.
 
