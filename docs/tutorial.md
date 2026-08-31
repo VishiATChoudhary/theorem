@@ -318,7 +318,7 @@ comes back:
 distinct v2, volta reason "different legal entities"
 ```
 
-`merge` keeps the older node as survivor, aliases the absorbed id forever, and records both pre-merge states in lineage. Also available: `retire` (temporal invalidation with history), `flag` (mark a node as having caused a failure), `refine` (split a blob into typed children with lineage), `compact` (summarize a node set), `derive class` (provisional subclass), and per-node health you can query like any property:
+`merge` keeps the older node as survivor, aliases the absorbed id forever, and records both pre-merge states in lineage. Also available: `retire` (temporal invalidation with history), `flag` (mark a node as having caused a failure), `refine` (split a blob into typed children with lineage), `compact` (summarize a node set), `derive class` (provisional subclass, whose instances a `find` on the base class also reads), and per-node health you can query like any property:
 
 ```theorem
 find nodes where health.loss > 0.8 as sick
