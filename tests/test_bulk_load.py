@@ -175,19 +175,21 @@ def test_an_ambiguous_name_is_an_error_not_a_coin_flip(sess, tmp_path):
 
 
 def test_the_cli_loads_nodes_and_edges(tmp_path, capsys):
+    """`--role` maps a role to a COLUMN, which is why the columns here are
+    named `part` and `supplier` rather than the roles `item` and `source`."""
     db = tmp_path / "db"
+    demo = ["--db", str(db), "--schema", "demo"]
     parts = write(tmp_path, "parts.csv", "name,unit_cost\nAnode,0.4\n")
     sups = write(tmp_path, "sups.csv", "name,country\nVoltaChem,DE\n")
     links = write(tmp_path, "links.csv", "part,supplier\nAnode,VoltaChem\n")
-    assert main(["load", str(parts), "--db", str(db), "--class", "part"]) == 0
-    assert main(["load", str(sups), "--db", str(db), "--class", "supplier"]) == 0
+    assert main(["load", str(parts), *demo, "--class", "part"]) == 0
+    assert main(["load", str(sups), *demo, "--class", "supplier"]) == 0
     assert (
         main(
             [
                 "load",
                 str(links),
-                "--db",
-                str(db),
+                *demo,
                 "--edge",
                 "supplied_by",
                 "--role",
@@ -221,7 +223,18 @@ def test_the_cli_refuses_both_class_and_edge(tmp_path, capsys):
 
 def test_the_cli_reports_a_load_error_without_a_traceback(tmp_path, capsys):
     f = write(tmp_path, "parts.csv", "name,colour\nAnode,black\n")
-    code = main(["load", str(f), "--db", str(tmp_path / "db"), "--class", "part"])
+    code = main(
+        [
+            "load",
+            str(f),
+            "--db",
+            str(tmp_path / "db"),
+            "--schema",
+            "demo",
+            "--class",
+            "part",
+        ]
+    )
     assert code == 1
     assert "colour" in capsys.readouterr().err
 
@@ -230,19 +243,22 @@ def test_the_cli_reports_a_load_error_without_a_traceback(tmp_path, capsys):
 
 
 def test_the_cli_can_open_a_database_without_the_demo_classes(tmp_path, capsys):
-    """A production user's schema is their own; the demo supply chain
-    must not be the only thing the CLI can open a database with."""
+    """A production user's schema is their own, and it is now the default:
+    `supplier`, `part` and `product` are common enough names that shipping
+    them by default collides with real domains. `--schema demo` opts in."""
     program = tmp_path / "s.thm"
     program.write_text(
         "derive class widget from entity with {sku: str}\n"
         'assert widget {name: "W1", sku: "A-1"} as w\n'
         "find widget as w2\nreturn w2.sku\n"
     )
-    code = main([str(program), "--db", str(tmp_path / "db"), "--schema", "base"])
-    out = capsys.readouterr().out
-    assert code == 0, out
-    assert "A-1" in out
-    assert "product" not in out
+    for extra in ([], ["--schema", "base"]):  # base is the default
+        db = tmp_path / f"db{len(extra)}"
+        code = main([str(program), "--db", str(db), *extra])
+        out = capsys.readouterr().out
+        assert code == 0, out
+        assert "A-1" in out
+        assert "product" not in out
 
 
 def test_the_package_exports_what_an_application_needs():

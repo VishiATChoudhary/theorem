@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .engine.executor import ExecError
 from .engine.storage import Store, StoreLocked
 from .ingest.bulk import LoadError, load_edges, load_nodes
 from .ingest.extract import extract
@@ -16,21 +17,33 @@ from .ingest.stage import stage
 from .parser import ParseError
 from .schema import Schema
 from .session import Session
+from .engine.writes import WriteError
 from .verifier import VerifyError
 
 
 def _add_schema_arg(ap: argparse.ArgumentParser) -> None:
     ap.add_argument(
         "--schema",
-        choices=["demo", "base"],
-        default="demo",
-        help="demo: the tutorial's supply-chain classes. base: entity and "
-        "the document classes only, to derive your own from.",
+        choices=["base", "demo"],
+        default="base",
+        help="base (default): entity and the document classes, to derive "
+        "your own from. demo: adds the tutorial's supply-chain classes.",
     )
 
 
 def _schema_for(name: str) -> Schema:
     return Schema.supply_chain() if name == "demo" else Schema()
+
+
+def _said(e: Exception) -> str:
+    """One `error:` prefix, not two.
+
+    The verifier's messages are written for a reader and already lead
+    with it; the executor's are not. Prefixing unconditionally produced
+    `error: error: unknown class ...`.
+    """
+    text = str(e)
+    return text if text.startswith("error:") else f"error: {text}"
 
 
 def _handle_ingest(argv: list[str]) -> int:
@@ -243,11 +256,38 @@ def _handle_playbook(argv: list[str]) -> int:
     return 1
 
 
+def _handle_canonical(argv: list[str]) -> int:
+    """Print the one canonical spelling of a program.
+
+    Two correct answers to the same question are the same program, which
+    is what makes a plan cache and a diffable audit log possible. This
+    exposes that to a shell: pipe two agents' queries through it and
+    compare the output rather than the text they happened to emit.
+    """
+    ap = argparse.ArgumentParser(
+        prog="theorem canonical",
+        description="Rewrite a program in its canonical spelling. "
+        "Reads a file, or stdin when none is given. No database needed.",
+    )
+    ap.add_argument("file", nargs="?", help="a .thm program (default: stdin)")
+    args = ap.parse_args(argv)
+
+    from .canonical import CanonicalError, canonical
+
+    text = Path(args.file).read_text() if args.file else sys.stdin.read()
+    try:
+        print(canonical(text))
+    except (ParseError, CanonicalError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
-    if argv and argv[0] in ("ingest", "playbook", "load", "stats"):
+    if argv and argv[0] in ("ingest", "playbook", "load", "stats", "canonical"):
         subcommand = argv[0]
         if subcommand == "ingest":
             return _handle_ingest(argv[1:])
@@ -257,6 +297,8 @@ def main(argv: list[str] | None = None) -> int:
             return _handle_load(argv[1:])
         elif subcommand == "stats":
             return _handle_stats(argv[1:])
+        elif subcommand == "canonical":
+            return _handle_canonical(argv[1:])
 
     ap = argparse.ArgumentParser(
         prog="theorem",
@@ -264,6 +306,7 @@ def main(argv: list[str] | None = None) -> int:
             "subcommands:\n"
             "  load      write a CSV or JSONL file into a class or edge type\n"
             "  stats     counts, log state, and memory against the ceiling\n"
+            "  canonical rewrite a program in its one canonical spelling\n"
             "  ingest    stage a document and have an agent extract from it\n"
             "  playbook  compile a prose playbook into schema statements\n"
             "\n"
@@ -286,9 +329,16 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {e}", file=sys.stderr)
         return 1
     if args.file:
-        print(session.run(Path(args.file).read_text()))
-        session.close()
-        return 0
+        # A program that failed must exit non-zero, or a Makefile, a CI
+        # step or a shell `&&` treats a refused query as a done one.
+        try:
+            print(session.execute(Path(args.file).read_text()))
+            return 0
+        except (ParseError, VerifyError, ExecError, WriteError) as e:
+            print(_said(e), file=sys.stderr)
+            return 1
+        finally:
+            session.close()
     if args.repl:
         print(
             "theorem v0. one statement per line; blank line to execute a block; ctrl-d to exit."

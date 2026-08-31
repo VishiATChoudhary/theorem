@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/wordmark.svg" alt="theorem" width="340">
+  <img src="https://raw.githubusercontent.com/VishiATChoudhary/theorem/main/docs/assets/wordmark.svg" alt="theorem" width="340">
 </p>
 
 <p align="center"><b>A graph language agents can't get wrong.</b><br>
@@ -18,7 +18,7 @@ LLMs get roughly **40% of Cypher queries wrong** on realistic schemas. Two model
 **theorem** removes each failure mode by construction. On the full public CypherBench test set, all 2,348 questions, the small Haiku model writing theorem reaches **78.0%** execution accuracy where the same model writing Cypher reaches **70.4%**, ahead on all seven graphs.
 
 <p align="center">
-  <img src="docs/assets/demo.gif" alt="theorem REPL: a typo is caught before execution with a suggestion; a five-step pipeline aggregates suppliers" width="720">
+  <img src="https://raw.githubusercontent.com/VishiATChoudhary/theorem/main/docs/assets/demo.gif" alt="theorem REPL: a typo is caught before execution with a suggestion; a five-step pipeline aggregates suppliers" width="720">
 </p>
 
 ## Install
@@ -86,6 +86,11 @@ theorem load links.csv --db ./db --edge supplied_by --role item=part --role sour
 theorem stats --db ./db
 ```
 
+`--role` maps a role to the **column** naming the node that fills it, so
+`links.csv` there has columns `part` and `supplier`. A program that fails
+exits non-zero, so `theorem build.thm --db ./db && deploy` does what it looks
+like it does.
+
 ## Why agents stop failing
 
 - **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can distinguish them. That exception is [6.1% of our own broken queries](docs/benchmarks/silent-failure.md), and it is the honest ceiling on the headline of this README.
@@ -143,12 +148,14 @@ uv run pytest -q     # unit, property-based, and end-to-end deployment tests
 | `src/theorem/prompt.py` | The prompt and agent loop the benchmarks measure |
 | `src/theorem/ingest/bulk.py` | CSV/JSONL bulk load |
 | `eval/` | CypherBench, agent-loop, frontier, broken-query and prompt-cost harnesses |
+| `skills/theorem/` | The agent skill: how to use the language, for a model |
 | `docs/language-spec.md` | Normative grammar and semantics |
 
 ## Community
 
 theorem is a community project under Apache-2.0. The language grows spec-first: proposals are discussed as issues before syntax lands ([how it works](CONTRIBUTING.md)).
 
+- [CHANGELOG.md](CHANGELOG.md): what changed in each release, and why
 - [CONTRIBUTING.md](CONTRIBUTING.md): setup, test loop, DCO sign-off
 - [ROADMAP.md](ROADMAP.md): every open objective states the number that closes it
 - [Good first issues](https://github.com/VishiATChoudhary/theorem/labels/good%20first%20issue)

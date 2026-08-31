@@ -132,6 +132,9 @@ theorem load links.csv --db ./mydb --edge supplied_by \
 theorem stats --db ./mydb
 ```
 
+`--role` maps a role to the **column** naming the node that fills it, so
+`links.csv` there has columns `part` and `supplier`, not `item` and `source`.
+
 Or in process, with a receipt of what landed:
 
 ```python
@@ -201,3 +204,22 @@ refuses to open on an older one and says so, rather than misreading it.
 `theorem stats --db ./mydb` prints the counts, the log state, and memory
 against the ceiling, which is the cheapest way to check a store still
 holds what you think it does.
+
+## Running programs from a shell
+
+```bash
+theorem build.thm --db ./mydb          # runs it; exits 1 if anything failed
+theorem canonical query.thm            # one spelling, no database needed
+theorem --repl --db ./mydb             # interactive
+```
+
+The CLI opens the **base** schema by default, so the classes in your store
+are the ones you derived. `--schema demo` adds the tutorial's supply-chain
+classes; you want that only while following the tutorial.
+
+A failed program exits non-zero and writes the error to stderr, so
+`theorem build.thm --db ./mydb && deploy` does what it looks like it does.
+
+`canonical` exists because there is exactly one way to write each
+operation: pipe two agents' queries through it and compare the output
+rather than the text they happened to emit.

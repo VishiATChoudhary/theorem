@@ -119,7 +119,10 @@ def normalize(data: bytes, filename: str) -> Envelope:
         try:
             import pdfplumber
         except ImportError as e:
-            raise IngestError("PDF support needs: pip install theorem[pdf]") from e
+            raise IngestError(
+                "PDF support needs the pdf extra: pip install "
+                '"theorem[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git"'
+            ) from e
         try:
             env = Envelope(meta={"format": "pdf", "filename": filename})
             parts: list[str] = []

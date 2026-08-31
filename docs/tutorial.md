@@ -4,7 +4,7 @@ This walks a small supply-chain graph from empty database to multi-hop aggregate
 
 ```bash
 pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
-theorem --repl --db ./tutorial-db
+theorem --repl --db ./tutorial-db --schema demo
 ```
 
 The REPL executes a block when you enter a blank line.
@@ -55,6 +55,14 @@ have, `load` writes it directly:
 theorem load parts.csv --db mydb --class part
 theorem load links.csv --db mydb --edge supplied_by \
     --role item=part --role source=supplier
+```
+
+`--role` maps a **role** to the **column** that names the node filling it,
+so the `links.csv` above has columns called `part` and `supplier`:
+
+```text
+part,supplier
+Anode,VoltaChem
 ```
 
 CSV or JSONL. Columns must be properties the class declares and values
@@ -223,8 +231,11 @@ with Session("mydb", Schema()) as db:
 
 `Schema()` is the base schema: `entity` to derive your own classes from,
 plus the document classes the ingest pipeline uses.
-`Schema.supply_chain()` adds the demo classes this tutorial uses, and is
-what the CLI opens with unless you pass `--schema base`.
+`Schema.supply_chain()` adds the demo classes this tutorial uses, which is
+why the REPL at the top of this page is opened with `--schema demo`. The
+CLI defaults to the base schema: `supplier`, `part` and `product` are
+ordinary domain names, and shipping them by default collides with real
+ones.
 
 The session holds an exclusive lock on the directory for as long as it is
 open, so close it (or use it as a context manager, as above) before
