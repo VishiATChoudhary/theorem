@@ -99,6 +99,12 @@ questions in 330.
   schema distinguishes `subj` from `obj`; a schema that named them `child` and
   `father` would make the mistake visible to the model, if not to the verifier.
 
+- A canonical printer. Two correct answers to the same question are the same
+  parsed program, but the language accepts one redundant spelling (a condition
+  qualified by its own binding) and normalizes it in the parser, so equality
+  holds of the tree and not of the text. Rendering a program back to canonical
+  text would let a cache key on a string again.
+
 ## Research track
 
 - Adversarial schema suite: near-miss class names, overloaded edge labels.

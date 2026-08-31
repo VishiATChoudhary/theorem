@@ -1,6 +1,10 @@
 # Language spec
 
-The normative grammar and semantics for theorem v0. Canonical forms: exactly one spelling per operation, no optional shorthands beyond what is written here.
+The normative grammar and semantics for theorem v0.
+
+**Canonical forms.** Exactly one spelling per operation, and no optional shorthands beyond what is written here. The point is that two correct answers to the same question are the same program, which makes plan caching and auditing possible.
+
+There is one redundant variant, and the parser removes it rather than carrying it: a condition may name the binding its own statement creates (`where l.area_km2 < 1` for `where area_km2 < 1`), and the two parse to the same tree. Models write the qualified form constantly and rejecting it cost four points of accuracy, so the language accepts it and normalizes it away. Canonicality therefore holds of the parsed program, not of the input text. A printer that renders a program back to its canonical text is not yet exposed; until it is, cache on the parse, not on the string.
 
 ## Program structure
 
@@ -52,11 +56,11 @@ col         := NAME ["." NAME ["." NAME]]              ; e.g. sups.name, health.
              | "via" "." NAME                          ; a follow's edge property
              ; in a find's or follow's own condition, a leading NAME that
              ; is the statement's own "as" name is optional and ignored
-literal     := ... | "none"                            ; the absent value
 props       := "{" NAME ":" literal ("," NAME ":" literal)* "}"
 mapping     := "{" NAME ":" "col" STRING ("," NAME ":" "col" STRING)* "}"
 propdecls   := "{" NAME ":" TYPENAME ("," NAME ":" TYPENAME)* "}"  ; TYPENAME: str|int|float|bool
-literal     := STRING | NUMBER | "true" | "false" | ATTACH
+literal     := STRING | NUMBER | "true" | "false" | "none" | ATTACH
+                                                       ; none = absent
 ref         := NAME | NODEID
 NODEID      := "#" [a-z]+ "-" [a-z0-9]+
 POSITION    := "@t-" [0-9]+
