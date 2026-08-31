@@ -54,8 +54,17 @@ sound. To turn it on:
    - Repository name: `theorem`
    - Workflow name: `release.yml`
    - Environment name: `pypi`
-2. On GitHub, **Settings, Environments, New environment** named `pypi`.
-   No secrets go in it; it exists so the OIDC claim matches step 1.
+2. On GitHub, an environment named `pypi` must exist so the OIDC claim
+   matches step 1. **It already does**: GitHub creates one the first time
+   a workflow declares it, and release.yml does, so it appeared when the
+   v0.3.0 tag run fired. No secrets go in it. Confirm with:
+
+   ```bash
+   gh api repos/VishiATChoudhary/theorem/environments --jq '.environments[].name'
+   ```
+
+   The page is in repo Settings, left sidebar under Code and automation.
+   Not account settings, and absent on a private repo without a paid plan.
 3. Re-push the tag to rerun the workflow:
    ```bash
    git push origin :refs/tags/v0.3.0 && git push origin v0.3.0
