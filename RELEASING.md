@@ -27,14 +27,25 @@ uv venv /tmp/check && uv pip install --python /tmp/check/bin/python /tmp/dist/th
 /tmp/check/bin/theorem --help
 ```
 
-## PyPI, one-time setup
+## Publishing to PyPI
 
-The workflow uses [trusted publishing](https://docs.pypi.org/trusted-publishers/),
-so no token is stored anywhere. It is not configured yet, which is why
-the v0.3.0 release run ended in `Missing credentials`. Nothing was
-published, and the tag is otherwise sound.
+Two routes. Both upload the same two files, a wheel and an sdist, built
+by `uv build` into `dist/`. Check them before either:
 
-To turn it on:
+```bash
+uv build
+uvx twine check dist/*        # catches a README that will not render
+tar tzf dist/theorem-*.tar.gz # 36 files; no eval data, no docs, no db
+```
+
+### Route A: trusted publishing (recommended, already wired)
+
+No token is stored anywhere. GitHub proves its identity to PyPI over
+OIDC, which is why this is the route the workflow uses.
+
+It is not configured yet, which is why the v0.3.0 release run ended in
+`Missing credentials`. Nothing was published, and the tag is otherwise
+sound. To turn it on:
 
 1. On PyPI, **Your projects, Publishing, Add a new pending publisher**
    (https://pypi.org/manage/account/publishing/) with:
@@ -51,7 +62,33 @@ To turn it on:
    ```
 
 Check the name is still free before step 1: PyPI returned 404 for
-`theorem` as of this writing, but names get taken.
+`theorem` as of 2026-08-31, but names get taken.
+
+### Route B: one-off from your machine
+
+For a first upload when you would rather not set up OIDC yet. The token
+is a secret: paste it at the prompt or put it in the environment, never
+in a file that gets committed.
+
+```bash
+# https://pypi.org/manage/account/token/  scope: "Entire account"
+# (narrow it to the theorem project after the first upload)
+export UV_PUBLISH_TOKEN='pypi-...'
+uv build
+uv publish
+```
+
+Rehearse against TestPyPI first if you want to see the page before it is
+permanent. TestPyPI is a separate account with a separate token:
+
+```bash
+UV_PUBLISH_TOKEN='pypi-...' uv publish --publish-url https://test.pypi.org/legacy/
+pip install -i https://test.pypi.org/simple/ theorem
+```
+
+**A version is permanent.** PyPI will not let you re-upload `0.3.0` even
+after deleting it, so a mistake costs a version number. Hence the
+`twine check` above.
 
 Once it publishes, change the install instructions in `README.md`,
 `docs/index.md`, `docs/tutorial.md` and `docs/using-theorem.md` back to

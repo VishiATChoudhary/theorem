@@ -23,8 +23,10 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/VishiATChoudhary/theorem"
+Documentation = "https://vishiatchoudhary.github.io/theorem/"
 Repository = "https://github.com/VishiATChoudhary/theorem"
 Issues = "https://github.com/VishiATChoudhary/theorem/issues"
+Changelog = "https://github.com/VishiATChoudhary/theorem/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 pdf = ["pdfplumber>=0.11"]
