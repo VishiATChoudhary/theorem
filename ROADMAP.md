@@ -89,6 +89,12 @@ two declared roles would fix it and would cost the canonical-form rule that
 there is exactly one spelling per operation. Not obviously worth it: four
 questions in 330.
 
+- Transactional writes. A program that verifies can still fail while running,
+  and each write commits as it happens, so a failure leaves the writes before it
+  in place. The error now says how many, which is honest rather than fixed.
+  Making a program atomic needs begin/commit markers in the log and a rollback
+  of in-memory state.
+
 ## Open: agent ergonomics
 
 - Session-level schema diffing: tell the agent what changed since it last looked.

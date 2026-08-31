@@ -154,6 +154,7 @@ class Session:
         outputs: list[str] = []
         table = Table()
         read_batch = []
+        committed = 0
         try:
             for plan in plans:
                 if isinstance(plan.stmt, READ_STMTS):
@@ -182,6 +183,7 @@ class Session:
                     self._export_bindings(table)
                     receipt = execute_write(plan.stmt, self.write_ctx)
                     outputs.append(receipt.render())
+                    committed += 1
                 self.type_env = plan.binding_types
             if read_batch:
                 outputs.append(
@@ -191,6 +193,16 @@ class Session:
                 )
         except (ExecError, WriteError) as e:
             outputs.append(f"error: {e}")
+            if committed:
+                # Verification is all or nothing; execution is not. Saying
+                # so here is the difference between an agent retrying the
+                # whole program and an agent retrying the rest of it.
+                outputs.append(
+                    f"{committed} write"
+                    + ("s" if committed > 1 else "")
+                    + " before this one committed; their receipts are above. "
+                    "The rest of the program did not run."
+                )
         except Exception as e:  # the REPL/agent contract is
             # that run() always returns a message, never a raw traceback
             outputs.append(f"internal error: {type(e).__name__}: {e}")

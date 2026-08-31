@@ -106,3 +106,33 @@ def test_nothing_was_executed_is_said_once_a_program_runs(tmp_path):
     out = session.run("find playerz as p\nreturn p.name")
     assert "nothing was executed" in out.lower()
     session.close()
+
+
+def test_a_failure_partway_through_says_what_committed(tmp_path):
+    """Verification is all or nothing; execution is not. An agent's next
+    move depends on knowing which it hit."""
+    from theorem import Schema, Session
+
+    session = Session(tmp_path / "db", Schema.supply_chain())
+    session.run("derive class widget from entity with {sku: str} quota 2")
+    out = session.run(
+        "\n".join(
+            f'assert widget {{name: "W{i}", sku: "S{i}"}} as w{i}' for i in range(4)
+        )
+    )
+    assert "at quota" in out
+    assert "2 writes before this one committed" in out
+    assert "did not run" in out
+    session.close()
+
+
+def test_a_program_that_fails_to_verify_says_nothing_ran(tmp_path):
+    from theorem import Schema, Session
+
+    session = Session(tmp_path / "db", Schema.supply_chain())
+    out = session.run(
+        'assert part {name: "Anode", unit_cost: 0.4} as p\nfind nosuchclass as x\nreturn x.name'
+    )
+    assert "nothing was executed" in out.lower()
+    assert not session.store.nodes  # and the assert really did not run
+    session.close()

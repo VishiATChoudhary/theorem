@@ -102,7 +102,9 @@ STRING      := '"' ... '"'
 
 **Result format.** Header line `results: <shown> of <total>[, complete|budget hit]`. Each detailed node prints once as `class "name" {props}` with its result-relevant edges indented under it; referenced nodes are named only. Ordering: distance from query anchors, then recency. Tabular returns (aggregates, property lists) print rows as `value, value, ...` under a `columns:` header.
 
-**Verify before execute.** The whole program is verified against the live schema before anything runs. Unknown class, edge, role, or property produces a corrective error naming the line, offering the nearest schema alternatives, and stating `nothing was executed.` Partial execution never happens.
+**Verify before execute.** The whole program is verified against the live schema before anything runs. Unknown class, edge, role, or property produces a corrective error naming the line, offering the nearest schema alternatives, and stating `nothing was executed.` A program that fails to verify never partly runs.
+
+A program that verifies can still fail while running, on something the schema cannot predict: a quota reached, a merge of two nodes that are already one. Execution is not a transaction. Each write commits as it happens and returns its own receipt, and a failure stops the program with the writes before it committed. The error says how many those were, because the next thing an agent does depends on it.
 
 ## Write semantics
 
