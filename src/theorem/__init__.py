@@ -14,6 +14,7 @@ plus the document classes the ingest pipeline uses. `Schema.supply_chain()`
 adds the demo classes the tutorial is written against.
 """
 
+from .canonical import CanonicalError, canonical
 from .engine.executor import ExecError, Limits, limits
 from .engine.storage import Store, StoreError, StoreLocked
 from .ingest.bulk import LoadError, load_edges, load_nodes
@@ -27,6 +28,7 @@ __version__ = "0.2.0"
 
 __all__ = [
     "Answer",
+    "CanonicalError",
     "ClassDef",
     "EdgeDef",
     "ExecError",
@@ -42,6 +44,7 @@ __all__ = [
     "__version__",
     "agent_prompt",
     "answer",
+    "canonical",
     "limits",
     "load_edges",
     "load_nodes",
