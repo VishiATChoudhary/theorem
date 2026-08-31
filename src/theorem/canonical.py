@@ -70,7 +70,9 @@ def _literal(v: object) -> str:
     if isinstance(v, bool):
         return "true" if v else "false"
     if isinstance(v, str):
-        return f'"{v}"'
+        # The escapes the parser undoes, in the order it undoes them:
+        # a backslash first, so escaping a quote does not double it.
+        return '"' + v.replace("\\", "\\\\").replace('"', '\\"') + '"'
     if isinstance(v, float) and v.is_integer():
         # 3.0 and 3 compare equal and mean the same filter; one spelling.
         return str(int(v))

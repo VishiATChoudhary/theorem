@@ -115,3 +115,16 @@ def test_every_generated_query_round_trips():
         assert once == twice, q
         checked += 1
     assert checked > 100
+
+
+@pytest.mark.parametrize(
+    "value",
+    ['say "hi"', "back\\slash", 'both " and \\', "it's", "plain", "café"],
+)
+def test_a_string_with_a_quote_or_a_backslash_round_trips(value):
+    """The printer has to redo the escapes the parser undid, or it emits
+    text that does not parse."""
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    program = f'find part where name = "{escaped}" as p\nreturn p.name'
+    assert _no_lines(parse(canonical(program))) == _no_lines(parse(program))
+    assert parse(canonical(program))[0].cond[0][1].value == value
