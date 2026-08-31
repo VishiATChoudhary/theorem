@@ -5,8 +5,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1995,
-  "latency_ms": 2.173250075429678,
+  "tokens": 1997,
+  "latency_ms": 2.575000049546361,
   "errors": [],
   "query": "find terroristattack as t\nreturn t.name, t.locations"
  },
@@ -16,10 +16,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1477,
-  "latency_ms": 0.9332920890301466,
+  "tokens": 1474,
+  "latency_ms": 0.5372089799493551,
   "errors": [],
-  "query": "find terrorist where name = \"Franco Bonisoli\" as t\nfollow t perpetratedBy terroristattack as attack\nfollow attack occursIn country as c\nreturn distinct c.name"
+  "query": "find terrorist where name = \"Franco Bonisoli\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a occursIn country as c\nreturn c.name"
  },
  {
   "qid": "1ae5b500-e165-4b7a-acf3-d21496c7e35f",
@@ -27,10 +27,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1479,
-  "latency_ms": 0.8274579886347055,
+  "tokens": 1482,
+  "latency_ms": 1.5910000074654818,
   "errors": [],
-  "query": "find target where name = \"Adolfo Suarez Madrid-Barajas Airport\" as t\nfollow t targets terroristattack as a\nmin a.number_of_deaths as min_deaths\nreturn min_deaths"
+  "query": "find terroristattack as a\nfollow a targets target where name = \"Adolfo Suarez Madrid-Barajas Airport\" as t\nmin a.number_of_deaths as lowest_deaths\nreturn lowest_deaths"
  },
  {
   "qid": "fb9ff579-39dc-44c7-8711-1a10bb41a54b",
@@ -38,10 +38,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1508,
-  "latency_ms": 0.7771251257508993,
+  "tokens": 1506,
+  "latency_ms": 0.7891249842941761,
   "errors": [],
-  "query": "find terroristattack where name = \"July 1979 Madrid bombings\" as a1\nfollow a1 targets target as t\nfind terroristattack where name = \"2006 Madrid\u2013Barajas Airport bombing\" as a2\nfollow a2 targets target as t\nreturn t.name"
+  "query": "find target as t\nfollow t targets terroristattack as a1 where name = \"July 1979 Madrid bombings\"\nfollow t targets terroristattack as a2 where name = \"2006 Madrid\u2013Barajas Airport bombing\"\nreturn t.name"
  },
  {
   "qid": "86d7e813-4ae7-477b-a29d-d935c69284ec",
@@ -49,10 +49,10 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1448,
-  "latency_ms": 0.6747909355908632,
+  "tokens": 1450,
+  "latency_ms": 0.7301659788936377,
   "errors": [],
-  "query": "find terroristattack where name = \"2011 Al Hillah bombing\" as ta\nreturn ta.number_of_deaths"
+  "query": "find terroristattack where name = \"2011 Al Hillah bombing\" as a\nreturn a.number_of_deaths"
  },
  {
   "qid": "57321de4-4234-4a68-9aa0-e06af63df1d2",
@@ -60,8 +60,8 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1533,
-  "latency_ms": 0.6774580106139183,
+  "tokens": 1535,
+  "latency_ms": 0.7725839968770742,
   "errors": [],
   "query": "find terroristattack where name = \"Bomb attack by the Revolutionary Brigades on the Recruitment and Mobilization District n\u00ba 1 (DRM 1)\" as attack1\nfind terroristattack where name = \"1980 Markina attack\" as attack2\ncompute attack1.number_of_deaths same attack2.number_of_deaths as same_deaths\nreturn same_deaths"
  },
@@ -71,10 +71,10 @@
   "category": "special_optional-match",
   "turns": 1,
   "solved": true,
-  "tokens": 1620,
-  "latency_ms": 2.981750061735511,
+  "tokens": 1622,
+  "latency_ms": 2.3417919874191284,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a employs weapon where name = \"bomb\" as w\nfollow a targets target as tgt or none\ngroup by a as g\ncount distinct g.tgt as num_targets\nreturn a.name, num_targets"
+  "query": "find terroristattack as ta\nfollow ta employs weapon as w where name = \"bomb\"\nfollow ta targets target as t or none\ngroup by ta as g\ncount distinct g.t as num_targets\nreturn ta.name, num_targets"
  },
  {
   "qid": "d67f749e-d096-46e6-ae95-d1a05a4b0581",
@@ -82,8 +82,8 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1515,
-  "latency_ms": 2.185666002333164,
+  "tokens": 1517,
+  "latency_ms": 1.9153750035911798,
   "errors": [],
   "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"hand grenade\" as hg\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
  },
@@ -93,10 +93,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1499,
-  "latency_ms": 2.8068330138921738,
+  "tokens": 1503,
+  "latency_ms": 4.112000111490488,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a targets target where name = \"Gran Teatre del Liceu\" as t\nor\nfind terroristattack as a\nfollow a perpetratedBy terrorist where name = \"Santiago Salvador Franch\" as ter\ncount distinct a as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta targets target where name = \"Gran Teatre del Liceu\" as t\nor\nfind terroristattack as ta\nfollow ta perpetratedBy terrorist where name = \"Santiago Salvador Franch\" as terr\ncount distinct ta as n\nreturn n"
  },
  {
   "qid": "8a366952-9c22-4042-8802-739e9fbfa443",
@@ -104,8 +104,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1661,
-  "latency_ms": 0.7688330952078104,
+  "tokens": 1663,
+  "latency_ms": 1.2034580577164888,
   "errors": [],
   "query": "find terrorist as t\nreturn t.name order by t.date_of_birth"
  },
@@ -116,20 +116,20 @@
   "turns": 1,
   "solved": true,
   "tokens": 1475,
-  "latency_ms": 1.0555828921496868,
+  "latency_ms": 1.3019999023526907,
   "errors": [],
-  "query": "find terrorist where name = \"Khairi Alqam\" as t\nfollow t perpetratedBy terroristattack as ta\nfollow ta occursIn country as c\nreturn distinct c.name"
+  "query": "find terrorist where name = \"Khairi Alqam\" as t\nfollow t perpetratedBy terroristattack as ta\nfollow ta occursIn country as c\nreturn c.name"
  },
  {
   "qid": "6d8e0be0-f13c-43b0-92b4-c7265b1369d3",
   "arm": "theorem",
   "category": "basic_(n)-(m0*)",
   "turns": 3,
-  "solved": false,
-  "tokens": 4520,
-  "latency_ms": 5.280916346237063,
+  "solved": true,
+  "tokens": 4541,
+  "latency_ms": 4.506290890276432,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a targets target as t where name = \"St. Sebastian's Church\"\nreturn a.name, a.date"
+  "query": "find terroristattack as ta\nfollow ta targets target where name contains \"Sebastian\" as tgt\nreturn ta.name, ta.date"
  },
  {
   "qid": "0a1eea20-54d2-443f-b688-e5f7bd0b572d",
@@ -137,10 +137,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1487,
-  "latency_ms": 2.4494589306414127,
+  "tokens": 1489,
+  "latency_ms": 2.1222501527518034,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a targets target where name = \"Uffizi Gallery\" as t\nfollow a employs weapon where name = \"car bomb\" as w\nreturn a.name, a.date"
+  "query": "find terroristattack as a\nfollow a targets target as t where name = \"Uffizi Gallery\"\nfollow a employs weapon as w where name = \"car bomb\"\nreturn a.name, a.date"
  },
  {
   "qid": "41d04ffc-5b3f-4844-96ce-5e6dba685a3c",
@@ -148,8 +148,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1451,
-  "latency_ms": 0.6387499161064625,
+  "tokens": 1453,
+  "latency_ms": 0.7421248592436314,
   "errors": [],
   "query": "find terroristattack where name = \"Afula mall bombing\" as attack\nreturn attack.number_of_injuries"
  },
@@ -157,23 +157,25 @@
   "qid": "3f99ad08-e76a-458c-adab-39757c6a37e4",
   "arm": "theorem",
   "category": "special_comparison",
-  "turns": 3,
-  "solved": false,
-  "tokens": 4653,
-  "latency_ms": 21.45708305761218,
-  "errors": [],
-  "query": "find terroristattack where name contains \"Burgas\" or name contains \"Orly\" as attack\nreturn attack.name, attack.date order by attack.date desc limit 1"
+  "turns": 2,
+  "solved": true,
+  "tokens": 3100,
+  "latency_ms": 0.7986670825630426,
+  "errors": [
+   "ParseError: parse error at line 5: 'order' is not a statement; it is a clause of `return` or `find`: `return p.name order by p.age desc`"
+  ],
+  "query": "find terroristattack where name = \"2012 Burgas bus bombing\" as a\nor\nfind terroristattack where name = \"Orly Airport attack\" as a\nreturn a.name order by a.date desc limit 1"
  },
  {
   "qid": "2a344205-eeff-4134-8614-9173d242e1eb",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 3,
-  "solved": false,
-  "tokens": 5198,
-  "latency_ms": 13.806917238980532,
+  "turns": 1,
+  "solved": true,
+  "tokens": 1892,
+  "latency_ms": 1.1824171524494886,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"United States of America\" as c\nfollow ta perpetratedBy terrorist as t\ngroup by ta as g\ncount distinct g.t as terrorist_count\nreturn ta.name, terrorist_count"
+  "query": "find country where name = \"United States of America\" as c\nfollow c occursIn terroristattack as attack\nfollow attack perpetratedBy terrorist as t or none\ngroup by attack as g\ncount distinct g.t as n\nreturn attack.name, n"
  },
  {
   "qid": "f8665b8d-2dcf-4dd5-9c3f-2a781b7ec4e9",
@@ -181,8 +183,8 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1508,
-  "latency_ms": 1.0528750717639923,
+  "tokens": 1510,
+  "latency_ms": 0.8312920108437538,
   "errors": [],
   "query": "find country where name = \"Egypt\" as c\nfollow c occursIn terroristattack as ta\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
  },
@@ -192,10 +194,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1847,
-  "latency_ms": 7.427791832014918,
+  "tokens": 1848,
+  "latency_ms": 5.694583058357239,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"United States of America\" as c\nor\nfind terroristattack as ta\nfollow ta employs weapon where name = \"pipe bomb\" as w\nreturn ta.name"
+  "query": "find terroristattack as t\nfollow t occursIn country where name = \"United States of America\" as c\nor\nfind terroristattack as t\nfollow t employs weapon where name = \"pipe bomb\" as w\nreturn t.name"
  },
  {
   "qid": "c2fadfdb-5955-48e7-8452-31ab3e4153cb",
@@ -203,8 +205,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1576,
-  "latency_ms": 0.6983750499784946,
+  "tokens": 1578,
+  "latency_ms": 0.626124907284975,
   "errors": [],
   "query": "find weapon as w\nreturn w.name"
  },
@@ -214,21 +216,21 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 3,
   "solved": false,
-  "tokens": 4668,
-  "latency_ms": 12.524251127615571,
+  "tokens": 5205,
+  "latency_ms": 10.889041004702449,
   "errors": [],
-  "query": "find terroristattack where name = \"Camp Chapman\" as camp\nfollow camp occursIn country as c\nfind terroristattack as attack\nfollow attack occursIn country as c\nreturn attack.name order by attack.date"
+  "query": "find terroristattack where name = \"Camp Chapman\" as attack\nfollow attack occursIn country as c\nfollow c occursIn terroristattack as attack2\nreturn attack2.name order by attack2.date"
  },
  {
   "qid": "fdb83b70-494e-4654-957f-aec78ae8bbe4",
   "arm": "theorem",
   "category": "basic_(n)-(m0*)",
-  "turns": 1,
+  "turns": 3,
   "solved": true,
-  "tokens": 1456,
-  "latency_ms": 0.5433328915387392,
+  "tokens": 4524,
+  "latency_ms": 9.55554167740047,
   "errors": [],
-  "query": "find terroristattack where name = \"Murder of Jo Cox\" as attack\nfollow attack employs weapon as w\nreturn w.name"
+  "query": "find terroristattack where name contains \"Jo Cox\" as attack\nfollow attack employs weapon as w\nreturn w.name"
  },
  {
   "qid": "2ce1fb19-2474-4ad5-baca-ec0e99bd5b32",
@@ -236,10 +238,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1479,
-  "latency_ms": 1.1174578685313463,
+  "tokens": 1487,
+  "latency_ms": 1.379125053063035,
   "errors": [],
-  "query": "find terrorist where name = \"Thomas Mair\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a employs weapon as w where name = \"rifle\"\nreturn a.name"
+  "query": "find terrorist where name = \"Thomas Mair\" as thomas\nfollow thomas perpetratedBy terroristattack as attack\nfollow attack employs weapon where name = \"rifle\" as w\nreturn attack.name"
  },
  {
   "qid": "d0cc64ac-afc8-4013-955a-0df9e484f022",
@@ -247,8 +249,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1441,
-  "latency_ms": 0.5912079941481352,
+  "tokens": 1443,
+  "latency_ms": 0.7829999085515738,
   "errors": [],
   "query": "find terrorist where name = \"Amedy Coulibaly\" as t\nreturn t.date_of_birth"
  },
@@ -256,23 +258,23 @@
   "qid": "800976c4-1734-4ab1-97b5-f0548fe767fb",
   "arm": "theorem",
   "category": "special_comparison",
-  "turns": 3,
-  "solved": false,
-  "tokens": 4703,
-  "latency_ms": 37.85670688375831,
+  "turns": 1,
+  "solved": true,
+  "tokens": 1490,
+  "latency_ms": 0.8365840185433626,
   "errors": [],
-  "query": "find terroristattack where name contains \"Air India\" as a1\nfind terroristattack where name contains \"Mumbai\" as a2\ncompute a1.number_of_deaths minus a2.number_of_deaths as diff\nreturn diff"
+  "query": "find terroristattack where name = \"1984 Montreal bombing\" as m\nfind terroristattack where name = \"2003 Mumbai bus bombing\" as b\ncompute m.number_of_deaths minus b.number_of_deaths as diff\nreturn diff"
  },
  {
   "qid": "fd5c4a3b-f72e-456a-b6ed-4a369fe6b8b1",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 1,
-  "solved": true,
-  "tokens": 1502,
-  "latency_ms": 2.1299999207258224,
+  "turns": 3,
+  "solved": false,
+  "tokens": 4672,
+  "latency_ms": 6.116041215136647,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a targets target where name = \"The Pentagon\" as pentagon\nfollow a targets target as t or none\ngroup by a as g\ncount distinct g.t as n\nreturn a.name, n"
+  "query": "find terroristattack as ta\nfollow ta targets target as t where name = \"The Pentagon\"\nfollow ta targets target as all_t where name != \"The Pentagon\"\ngroup by ta as g\ncount distinct g.all_t as n\nreturn ta.name, n"
  },
  {
   "qid": "b13e9d34-56b9-43d3-9f91-7c3b5b46b1a8",
@@ -280,10 +282,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1546,
-  "latency_ms": 0.7853331044316292,
+  "tokens": 1547,
+  "latency_ms": 0.8747091051191092,
   "errors": [],
-  "query": "find target where name = \"Zion Church, Batticaloa\" as zion\nfollow zion targets terroristattack as attack\nfollow attack targets target as t\ngroup by t as g\ncount distinct g.attack as n\nreturn t.name, n"
+  "query": "find target where name = \"Zion Church, Batticaloa\" as zt\nfollow zt targets terroristattack as attack\nfollow attack targets target as t\ngroup by t as g\ncount distinct g.attack as n\nreturn t.name, n"
  },
  {
   "qid": "60e06859-d451-4d73-b116-b0fd030b7ec6",
@@ -291,10 +293,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1854,
-  "latency_ms": 1.256417017430067,
+  "tokens": 1858,
+  "latency_ms": 2.5987077970057726,
   "errors": [],
-  "query": "find terrorist where name = \"Thomas Edwin Blanton, Jr.\" as t\nfollow t perpetratedBy terroristattack as a\nor\nfind country where name = \"United States of America\" as c\nfollow c occursIn terroristattack as a\nreturn a.name"
+  "query": "find terrorist where name = \"Thomas Edwin Blanton, Jr.\" as t\nfollow t perpetratedBy terroristattack as a\nor\nfind country where name = \"United States of America\" as c\nfollow c occursIn terroristattack as a\nreturn distinct a.name"
  },
  {
   "qid": "c47368e0-32ed-4044-bbc2-635e6d3d30a0",
@@ -302,8 +304,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1774,
-  "latency_ms": 2.951666945591569,
+  "tokens": 1776,
+  "latency_ms": 3.224082989618182,
   "errors": [],
   "query": "find terroristattack as t\nreturn t.name"
  },
@@ -313,10 +315,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1473,
-  "latency_ms": 0.9312089532613754,
+  "tokens": 1476,
+  "latency_ms": 0.6264590192586184,
   "errors": [],
-  "query": "find terrorist where name = \"Philip Manshaus\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a occursIn country as c\nreturn c.name"
+  "query": "find terrorist where name = \"Philip Manshaus\" as t\nfollow t perpetratedBy terroristattack as ta\nfollow ta occursIn country as c\nreturn c.name"
  },
  {
   "qid": "c4a663e1-53fb-45ed-8ae7-5af108e53d2d",
@@ -324,8 +326,8 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1477,
-  "latency_ms": 0.9987091179937124,
+  "tokens": 1479,
+  "latency_ms": 1.3127920683473349,
   "errors": [],
   "query": "find terrorist where name = \"Carsten Schultze\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name, a.number_of_deaths"
  },
@@ -335,10 +337,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1488,
-  "latency_ms": 2.700542099773884,
+  "tokens": 1490,
+  "latency_ms": 0.6438749842345715,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta perpetratedBy terrorist where name = \"Thomas Mair\" as t\nfollow ta employs weapon where name = \"rifle\" as w\nreturn ta.name, ta.date"
+  "query": "find terrorist where name = \"Thomas Mair\" as t\nfollow t perpetratedBy terroristattack as ta\nfollow ta employs weapon as w where name = \"rifle\"\nreturn ta.name, ta.date"
  },
  {
   "qid": "9edbb449-65d9-4997-91ce-7683e21e2b40",
@@ -346,8 +348,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1442,
-  "latency_ms": 0.9725829586386681,
+  "tokens": 1444,
+  "latency_ms": 0.49070781096816063,
   "errors": [],
   "query": "find terrorist where name = \"Mohammad Saifullah Ozaki\" as t\nreturn t.gender"
  },
@@ -357,21 +359,21 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1506,
-  "latency_ms": 0.8013751357793808,
+  "tokens": 1498,
+  "latency_ms": 0.7846250664442778,
   "errors": [],
-  "query": "find terroristattack where name = \"Dolphinarium discotheque suicide bombing\" as attack1\nfind terroristattack where name = \"2014 Dijon attack\" as attack2\ncompute attack1.number_of_injuries same attack2.number_of_injuries as same_injuries\nreturn same_injuries"
+  "query": "find terroristattack where name = \"Dolphinarium discotheque suicide bombing\" as a1\nfind terroristattack where name = \"2014 Dijon attack\" as a2\ncompute a1.number_of_injuries same a2.number_of_injuries as same\nreturn same"
  },
  {
   "qid": "0f30b6b6-563e-4215-98f5-e2ba7c1c27ca",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 1,
-  "solved": true,
-  "tokens": 1873,
-  "latency_ms": 5.401124944910407,
+  "turns": 3,
+  "solved": false,
+  "tokens": 4659,
+  "latency_ms": 9.534833021461964,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Iraq\" as c\nfollow ta employs weapon as w or none\ngroup by ta as g\ncount distinct g.w as num_weapons\nreturn ta.name, num_weapons"
+  "query": "find country where name = \"Iraq\" as c\nfollow c occursIn terroristattack as ta\nfollow ta employs weapon as w\ngroup by ta as g\ncount distinct g.w as weapon_count\nreturn ta.name, weapon_count"
  },
  {
   "qid": "00372bf1-41c6-4a26-996e-efc4ca541c44",
@@ -379,10 +381,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1531,
-  "latency_ms": 1.0735420510172844,
+  "tokens": 1544,
+  "latency_ms": 1.333459047600627,
   "errors": [],
-  "query": "find target where name = \"Oberoi Trident\" as ot\nfollow ot targets terroristattack as attack\nfollow attack targets target as t\ngroup by t as g\ncount distinct g.attack as n\nreturn t.name, n"
+  "query": "find target where name = \"Oberoi Trident\" as oberoi\nfollow oberoi targets terroristattack as attack\nfollow attack targets target as other_target\ngroup by other_target as g\ncount distinct g.attack as n\nreturn other_target.name, n"
  },
  {
   "qid": "9899c75b-fa17-489e-9f5d-14a8562c8ab1",
@@ -390,10 +392,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1580,
-  "latency_ms": 0.9800000116229057,
+  "tokens": 1584,
+  "latency_ms": 4.9386250320822,
   "errors": [],
-  "query": "find country where name = \"Ukraine\" as c\nfollow c occursIn terroristattack as a\nor\nfind target where name = \"Chaplyne\" as t\nfollow t targets terroristattack as a\nreturn a.name"
+  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"Ukraine\"\nor\nfind terroristattack as ta\nfollow ta targets target as t where name = \"Chaplyne\"\nreturn ta.name"
  },
  {
   "qid": "1cc3fbfb-4bed-493a-af46-c83868b10692",
@@ -401,8 +403,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1437,
-  "latency_ms": 1.046458026394248,
+  "tokens": 1439,
+  "latency_ms": 1.9470828119665384,
   "errors": [],
   "query": "find terroristattack as t\ncount distinct t as n\nreturn n"
  },
@@ -412,10 +414,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1503,
-  "latency_ms": 1.0107080452144146,
+  "tokens": 1492,
+  "latency_ms": 0.7108338177204132,
   "errors": [],
-  "query": "find target where name = \"Consulate General of the United Kingdom in Istanbul\" as specific_target\nfollow specific_target targets terroristattack as attack\nfollow attack targets target as t\ncount distinct t as num_targets\nreturn num_targets"
+  "query": "find target where name = \"Consulate General of the United Kingdom in Istanbul\" as t1\nfollow t1 targets terroristattack as a\nfollow a targets target as t2\ncount distinct t2 as n\nreturn n"
  },
  {
   "qid": "79b8099b-6a5e-4922-a561-c4412aa594c6",
@@ -423,23 +425,21 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1490,
-  "latency_ms": 2.119791926816106,
+  "tokens": 1488,
+  "latency_ms": 0.35716709680855274,
   "errors": [],
-  "query": "find terroristattack as attack\nfollow attack targets target where name = \"Combined Arms Military School in Koulikoro\" as t\nreturn attack.name, attack.number_of_deaths"
+  "query": "find target where name = \"Combined Arms Military School in Koulikoro\" as t\nfollow t targets terroristattack as ta\nreturn ta.name, ta.number_of_deaths"
  },
  {
   "qid": "b40f20d1-daea-4316-948b-3cb6107321f0",
   "arm": "theorem",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 3145,
-  "latency_ms": 0.8275839500129223,
-  "errors": [
-   "VerifyError: error: unknown property \"br\" on class terrorist. did you mean one of: country_of_citizenship, date_of_birth, gender, name, place_of_birth? in line 3\nnothing was executed."
-  ],
-  "query": "find target where name = \"Al Noor Mosque\" as t\nfollow t targets terroristattack as a\nfollow a perpetratedBy terrorist as br where name = \"Brenton Tarrant\"\nreturn a.name, a.date"
+  "tokens": 1498,
+  "latency_ms": 0.7295841351151466,
+  "errors": [],
+  "query": "find terrorist where name = \"Brenton Tarrant\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a targets target where name = \"Al Noor Mosque\" as tgt\nreturn a.name, a.date"
  },
  {
   "qid": "073860b5-0918-4013-b9e5-512121d78a97",
@@ -447,21 +447,21 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1451,
-  "latency_ms": 0.39658299647271633,
+  "tokens": 1453,
+  "latency_ms": 0.5146660842001438,
   "errors": [],
-  "query": "find terroristattack where name = \"Bir-Hakeim bridge attack\" as t\nreturn t.number_of_injuries"
+  "query": "find terroristattack where name = \"Bir-Hakeim bridge attack\" as ta\nreturn ta.number_of_injuries"
  },
  {
   "qid": "da00b9f0-1bc5-4411-a758-fd882e93fb4b",
   "arm": "theorem",
   "category": "special_comparison",
-  "turns": 3,
-  "solved": false,
-  "tokens": 4684,
-  "latency_ms": 2.3927500005811453,
+  "turns": 1,
+  "solved": true,
+  "tokens": 1490,
+  "latency_ms": 0.8557499386370182,
   "errors": [],
-  "query": "find terroristattack where name = \"Meenambakkam bomb blast\" as a\nor\nfind terroristattack where name = \"Jaffa Road bus bombings\" as a\nreturn a.name, a.number_of_deaths order by a.number_of_deaths desc limit 1"
+  "query": "find terroristattack where name = \"Meenambakkam bomb blast\" as a\nor\nfind terroristattack where name = \"Jaffa Road bus bombings\" as a\nreturn a.name order by a.number_of_deaths desc limit 1"
  },
  {
   "qid": "90da63ea-ba97-4826-bd52-907962e27b06",
@@ -469,13 +469,10 @@
   "category": "special_optional-match",
   "turns": 3,
   "solved": false,
-  "tokens": 4735,
-  "latency_ms": 2.0233329851180315,
-  "errors": [
-   "ExecError: cannot resolve column g.w.name",
-   "ExecError: cannot resolve column g.all_weapons.name"
-  ],
-  "query": "find terroristattack as ta\nfollow ta employs weapon as all_weapons\ngroup by ta as g\ncount distinct g.all_weapons as weapon_count\nkeep g where all_weapons.name contains \"automatic firearm\"\nreturn ta.name, weapon_count"
+  "tokens": 4871,
+  "latency_ms": 10.398791870102286,
+  "errors": [],
+  "query": "find terroristattack as t\nfollow t employs weapon where name contains \"automatic\" as w\ngroup by t as g\ncount distinct g.w as weapon_count\nreturn t.name, weapon_count"
  },
  {
   "qid": "a86c93af-2b97-4756-9478-e9492cd606ff",
@@ -483,10 +480,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1527,
-  "latency_ms": 2.5471248663961887,
+  "tokens": 1528,
+  "latency_ms": 2.964082872495055,
   "errors": [],
-  "query": "find terroristattack where name = \"2018 Ariel stabbing\" as ariel\nfollow ariel employs weapon as w\nfind terroristattack as attack\nfollow attack employs weapon as w\ngroup by attack as g\ncount distinct g.w as weapon_count\nreturn attack.name, weapon_count"
+  "query": "find terroristattack where name = \"2018 Ariel stabbing\" as a1\nfollow a1 employs weapon as w\nfollow w employs terroristattack as a2 where name != \"2018 Ariel stabbing\"\ngroup by a2 as g\ncount distinct g.w as weapon_count\nreturn a2.name, weapon_count"
  },
  {
   "qid": "6569c54b-bf88-4e38-b2a9-05e9c6434a6c",
@@ -494,10 +491,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1493,
-  "latency_ms": 0.9682909585535526,
+  "tokens": 1495,
+  "latency_ms": 2.2706249728798866,
   "errors": [],
-  "query": "find target where name = \"Tokyo subway\" as tgt\nfollow tgt targets terroristattack as ta\nor\nfind terrorist where name = \"Kiyotaka Tonozaki\" as t\nfollow t perpetratedBy terroristattack as ta\ncount distinct ta as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta targets target as t where name = \"Tokyo subway\"\nor\nfind terroristattack as ta\nfollow ta perpetratedBy terrorist as ter where name = \"Kiyotaka Tonozaki\"\ncount distinct ta as n\nreturn n"
  },
  {
   "qid": "ba6d9281-be31-4add-bdd3-f62098718235",
@@ -505,10 +502,10 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1848,
-  "latency_ms": 2.167291007936001,
+  "tokens": 1851,
+  "latency_ms": 4.550041165202856,
   "errors": [],
-  "query": "find terroristattack as t\nreturn t.name, t.number_of_injuries"
+  "query": "find terroristattack as ta\nreturn ta.name, ta.number_of_injuries"
  },
  {
   "qid": "afb4c51f-86c0-49d4-826a-84aa615be90f",
@@ -516,10 +513,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1468,
-  "latency_ms": 5.544790998101234,
+  "tokens": 1469,
+  "latency_ms": 1.3252079952508211,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Portugal\" as c\nfollow ta targets target as tg\ncount distinct tg as n\nreturn n"
+  "query": "find country where name = \"Portugal\" as c\nfollow c occursIn terroristattack as ta\nfollow ta targets target as t\ncount distinct t as n\nreturn n"
  },
  {
   "qid": "f67fa1c4-653b-45dd-a45c-e2d8fa521a1b",
@@ -527,12 +524,12 @@
   "category": "basic_(n)-(m0*)",
   "turns": 3,
   "solved": false,
-  "tokens": 4573,
-  "latency_ms": 8.820666931569576,
+  "tokens": 4571,
+  "latency_ms": 8.848167024552822,
   "errors": [
-   "VerifyError: error: unknown property \"c\" on class country. did you mean one of: name? in line 2\nnothing was executed."
+   "ParseError: parse error at line 4: 'order' is not a statement; it is a clause of `return` or `find`: `return p.name order by p.age desc`"
   ],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Niger\" as c\nreturn ta.locations"
+  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Niger\" as c\nreturn ta.locations\norder by ta.locations"
  },
  {
   "qid": "255815a3-70ce-43c8-a5d9-0029719491b2",
@@ -540,10 +537,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1478,
-  "latency_ms": 2.4656669702380896,
+  "tokens": 1479,
+  "latency_ms": 3.1987500842660666,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"bazooka\" as w\nfollow ta occursIn country where name = \"Israel\" as c\nreturn ta.name"
+  "query": "find terroristattack as a\nfollow a employs weapon where name = \"bazooka\" as w\nfollow a occursIn country where name = \"Israel\" as c\nreturn a.name"
  },
  {
   "qid": "ca53df3d-3e96-4ea4-b7ab-ee3527bdb873",
@@ -551,21 +548,21 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1445,
-  "latency_ms": 0.651791924610734,
+  "tokens": 1447,
+  "latency_ms": 1.1132080107927322,
   "errors": [],
-  "query": "find terroristattack where name = \"2021 Kandahar bombing\" as t\nreturn t.date"
+  "query": "find terroristattack where name = \"2021 Kandahar bombing\" as ta\nreturn ta.date"
  },
  {
   "qid": "02d47855-fed8-43eb-81bd-0cb0e862c36c",
   "arm": "theorem",
   "category": "special_comparison",
-  "turns": 2,
-  "solved": true,
-  "tokens": 3066,
-  "latency_ms": 13.462999137118459,
+  "turns": 3,
+  "solved": false,
+  "tokens": 4680,
+  "latency_ms": 9.963833959773183,
   "errors": [],
-  "query": "find terroristattack where name contains \"Red Fort\" as a\nor\nfind terroristattack where name contains \"Corinthia Hotel\" as a\nreturn a.name order by a.date desc limit 1"
+  "query": "find terroristattack where name contains \"Red Fort\" as a\nor\nfind terroristattack where name contains \"Corinthia Hotel\" as a\nreturn a.name, a.date order by a.date desc limit 1"
  },
  {
   "qid": "7c79063e-4dd6-4cf3-a03e-55644256648d",
@@ -573,10 +570,10 @@
   "category": "special_optional-match",
   "turns": 1,
   "solved": true,
-  "tokens": 1522,
-  "latency_ms": 1.9357078708708286,
+  "tokens": 1525,
+  "latency_ms": 2.411250025033951,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a employs weapon where name = \"shotgun\" as w\nfollow a targets target as t or none\ngroup by a as g\ncount distinct g.t as target_count\nreturn a.name, target_count"
+  "query": "find terroristattack as ta\nfollow ta employs weapon as w where name = \"shotgun\"\nfollow ta targets target as t or none\ngroup by ta as g\ncount distinct g.t as target_count\nreturn ta.name, target_count"
  },
  {
   "qid": "1c346f85-f126-4b59-a52f-95162898cb02",
@@ -584,10 +581,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1516,
-  "latency_ms": 2.8714591171592474,
+  "tokens": 1517,
+  "latency_ms": 1.7891658935695887,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"hand grenade\" as w\nfollow ta occursIn country as c\ngroup by c as g\ncount distinct g.ta as n\nreturn c.name, n"
+  "query": "find weapon where name = \"hand grenade\" as w\nfollow w employs terroristattack as a\nfollow a occursIn country as c\ngroup by c as g\ncount distinct g.a as n\nreturn c.name, n"
  },
  {
   "qid": "cf490460-cbee-4110-95ab-c4cf5a39f86b",
@@ -595,10 +592,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1494,
-  "latency_ms": 1.68479117564857,
+  "tokens": 1497,
+  "latency_ms": 6.0196248814463615,
   "errors": [],
-  "query": "find country where name = \"United States of America\" as c\nfollow c occursIn terroristattack as t\nor\nfind weapon where name = \"pipe bomb\" as w\nfollow w employs terroristattack as t\ncount distinct t as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"United States of America\"\nor\nfind terroristattack as ta\nfollow ta employs weapon as w where name = \"pipe bomb\"\ncount distinct ta as n\nreturn n"
  },
  {
   "qid": "ae9919ae-95c0-478d-ae95-8b0aae29fe95",
@@ -606,21 +603,21 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1796,
-  "latency_ms": 2.917666919529438,
+  "tokens": 1798,
+  "latency_ms": 3.4564160741865635,
   "errors": [],
-  "query": "find terroristattack where number_of_deaths < 130 as ta\nreturn ta.name"
+  "query": "find terroristattack where number_of_deaths < 130 as a\nreturn a.name"
  },
  {
   "qid": "39a5486e-31b8-4cc6-afe1-4bed7fc7b577",
   "arm": "theorem",
   "category": "basic_(n)-(m0)-(m1*)",
-  "turns": 1,
+  "turns": 2,
   "solved": true,
-  "tokens": 1484,
-  "latency_ms": 2.60854116640985,
+  "tokens": 3050,
+  "latency_ms": 6.0658331494778395,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"shoulder-fired missile\" as missile\nfollow ta employs weapon as w\nreturn distinct w.name"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name contains \"shoulder-fired missile\" as w1\nfollow ta employs weapon as w2\nkeep w2 where w2.name != \"shoulder-fired missile\"\nreturn distinct w2.name"
  },
  {
   "qid": "185f8572-c93f-4a01-b684-fab586836fb2",
@@ -628,10 +625,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1469,
-  "latency_ms": 0.9255418553948402,
+  "tokens": 1470,
+  "latency_ms": 1.1558751575648785,
   "errors": [],
-  "query": "find target where name = \"Minsk Metro\" as t\nfollow t targets terroristattack as ta\nreturn ta.name, ta.number_of_deaths"
+  "query": "find target where name = \"Minsk Metro\" as t\nfollow t targets terroristattack as a\nreturn a.name, a.number_of_deaths"
  },
  {
   "qid": "708c36b7-912a-4c9a-b61f-0383909b89d8",
@@ -639,10 +636,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1498,
-  "latency_ms": 0.7515840698033571,
+  "tokens": 1497,
+  "latency_ms": 0.9687088895589113,
   "errors": [],
-  "query": "find target where name = \"Georgia Guidestones\" as t\nfollow t targets terroristattack as attack\nfollow attack occursIn country where name = \"United States of America\" as c\nreturn attack.name"
+  "query": "find target where name = \"Georgia Guidestones\" as t\nfollow t targets terroristattack as ta\nfollow ta occursIn country where name = \"United States of America\" as c\nreturn ta.name"
  },
  {
   "qid": "6cd1d3bb-2133-4826-b078-4dab74cdae5d",
@@ -650,10 +647,10 @@
   "category": "basic_(n*)",
   "turns": 2,
   "solved": true,
-  "tokens": 2974,
-  "latency_ms": 1.6498328186571598,
+  "tokens": 2972,
+  "latency_ms": 1.201376086100936,
   "errors": [],
-  "query": "find terroristattack where name = \"2011 Al Hillah bombing\" as attack\nreturn attack.locations"
+  "query": "find terroristattack where name = \"2011 Al Hillah bombing\" as ta\nreturn ta.locations"
  },
  {
   "qid": "19bb76aa-75f8-4646-8727-1bd8a7f3383a",
@@ -661,8 +658,8 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1492,
-  "latency_ms": 0.7814581040292978,
+  "tokens": 1494,
+  "latency_ms": 0.85491593927145,
   "errors": [],
   "query": "find terroristattack where name = \"Bombing of Cinema Capri\" as a\nor\nfind terroristattack where name = \"2012 Brindisi school bombing\" as a\nreturn a.name order by a.number_of_injuries desc limit 1"
  },
@@ -672,21 +669,21 @@
   "category": "special_optional-match",
   "turns": 3,
   "solved": false,
-  "tokens": 4978,
-  "latency_ms": 10.997914941981435,
+  "tokens": 4939,
+  "latency_ms": 8.594374172389507,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a occursIn country as c where name = \"Russia\"\nfollow a employs weapon as w\ngroup by a as g\ncount distinct g.w as n\nreturn a.name, n"
+  "query": "find terroristattack where locations = \"Russia\" as ta\nfollow ta employs weapon as w\ngroup by ta as g\ncount distinct g.w as weapon_count\nreturn ta.name, weapon_count"
  },
  {
   "qid": "1c5ff37c-dd5b-424c-b72c-e7afe9671688",
   "arm": "theorem",
   "category": "special_three-node-groupby",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 3743,
-  "latency_ms": 18.290334148332477,
+  "tokens": 1542,
+  "latency_ms": 4.85791708342731,
   "errors": [],
-  "query": "find terroristattack where name = \"September 11 attacks\" as sept11\nfollow sept11 targets target as t\nfind terroristattack as a where name != \"September 11 attacks\"\nfollow a targets target as t\ngroup by a as g\ncount distinct g.t as shared\nreturn a.name, shared order by shared desc"
+  "query": "find terroristattack where name = \"September 11 attacks\" as sept11\nfollow sept11 targets target as t\nfind terroristattack where name != \"September 11 attacks\" as ta\nfollow ta targets target as t\ngroup by ta as g\ncount distinct g.t as shared_count\nreturn ta.name, shared_count"
  },
  {
   "qid": "04dcece2-d47f-43b3-a939-cb7f4bb902b4",
@@ -694,10 +691,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1494,
-  "latency_ms": 8.1024169921875,
+  "tokens": 1497,
+  "latency_ms": 4.350458038970828,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a occursIn country where name = \"France\" as c\nor\nfind terroristattack as a\nfollow a perpetratedBy terrorist where name = \"Armand Rajabpour-Miyandoab\" as t\ncount distinct a as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"France\"\nor\nfind terroristattack as ta\nfollow ta perpetratedBy terrorist as t where name = \"Armand Rajabpour-Miyandoab\"\ncount distinct ta as n\nreturn n"
  },
  {
   "qid": "1f545628-5e83-438f-bdc5-6347f7f938bc",
@@ -705,8 +702,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1841,
-  "latency_ms": 4.311959026381373,
+  "tokens": 1843,
+  "latency_ms": 3.9778328500688076,
   "errors": [],
   "query": "find terroristattack as ta\nreturn ta.name, ta.number_of_deaths"
  },
@@ -716,10 +713,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1497,
-  "latency_ms": 0.7387080695480108,
+  "tokens": 1500,
+  "latency_ms": 0.9536249563097954,
   "errors": [],
-  "query": "find terroristattack where name = \"American Airlines Flight 77\" as aa77\nfollow aa77 targets target as t\nfollow t targets terroristattack as attack\nreturn attack.name, attack.number_of_injuries"
+  "query": "find terroristattack where name = \"American Airlines Flight 77\" as aa77\nfollow aa77 targets target as t\nfollow t targets terroristattack as other_aa\nreturn other_aa.name, other_aa.number_of_injuries"
  },
  {
   "qid": "85d69484-c0d1-45ed-bff5-aa0029e6760a",
@@ -727,10 +724,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1456,
-  "latency_ms": 0.7883331272751093,
+  "tokens": 1458,
+  "latency_ms": 0.6964169442653656,
   "errors": [],
-  "query": "find terroristattack where name = \"2017 Sinai mosque attack\" as t\nfollow t occursIn country as c\nreturn c.name"
+  "query": "find terroristattack where name = \"2017 Sinai mosque attack\" as a\nfollow a occursIn country as c\nreturn c.name"
  },
  {
   "qid": "eca46d72-f906-47d8-b25c-042afe1d87dd",
@@ -738,10 +735,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1497,
-  "latency_ms": 1.1998340487480164,
+  "tokens": 1499,
+  "latency_ms": 0.6991249974817038,
   "errors": [],
-  "query": "find terrorist where name = \"Gaspare Spatuzza\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a targets target where name = \"Uffizi Gallery\" as tg\nreturn a.name, a.locations"
+  "query": "find terrorist where name = \"Gaspare Spatuzza\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a targets target where name = \"Uffizi Gallery\" as tgt\nreturn a.name, a.locations"
  },
  {
   "qid": "65891a53-68ce-4a41-b004-05bf8431295b",
@@ -749,8 +746,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1439,
-  "latency_ms": 0.6598748732358217,
+  "tokens": 1441,
+  "latency_ms": 0.6474580150097609,
   "errors": [],
   "query": "find terrorist where name = \"Abdullakh Anzorov\" as t\nreturn t.gender"
  },
@@ -760,21 +757,21 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1493,
-  "latency_ms": 0.8268328383564949,
+  "tokens": 1499,
+  "latency_ms": 0.7484580855816603,
   "errors": [],
-  "query": "find terroristattack where name = \"Bombing of Cinema Capri\" as a1\nfind terroristattack where name = \"2012 Brindisi school bombing\" as a2\ncompute a1.number_of_injuries same a2.number_of_injuries as match\nreturn match"
+  "query": "find terroristattack where name = \"Bombing of Cinema Capri\" as a1\nfind terroristattack where name = \"2012 Brindisi school bombing\" as a2\ncompute a1.number_of_injuries same a2.number_of_injuries as same_injuries\nreturn same_injuries"
  },
  {
   "qid": "3329b712-9356-4113-b0d4-736c6203ee36",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 1,
-  "solved": true,
-  "tokens": 1542,
-  "latency_ms": 2.917500212788582,
+  "turns": 3,
+  "solved": false,
+  "tokens": 4681,
+  "latency_ms": 10.927001014351845,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a employs weapon where name = \"pipe bomb\" as w\nfollow a targets target as t or none\ngroup by a as g\ncount distinct g.t as target_count\nreturn a.name, target_count"
+  "query": "find terroristattack as a\nfollow a employs weapon as w where name contains \"pipe\"\nfollow a targets target as t\ngroup by a as g\ncount distinct g.t as target_count\nreturn a.name, target_count"
  },
  {
   "qid": "f1840bff-0517-4de9-a969-6bddea44f48b",
@@ -783,9 +780,9 @@
   "turns": 1,
   "solved": true,
   "tokens": 1498,
-  "latency_ms": 3.151792101562023,
+  "latency_ms": 2.4222079664468765,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"sword\" as sword_weapon\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"sword\" as sword\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
  },
  {
   "qid": "e5e8f062-94ad-4317-b8e8-feab8cd917d0",
@@ -794,9 +791,9 @@
   "turns": 1,
   "solved": true,
   "tokens": 1509,
-  "latency_ms": 3.755416953936219,
+  "latency_ms": 2.0473329350352287,
   "errors": [],
-  "query": "find terroristattack as t\nfollow t employs weapon where name = \"rifle\" as w\nor\nfind terroristattack as t\nfollow t targets target where name = \"Al-Noor Islamic Centre\" as tgt\nreturn distinct t.name"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"rifle\" as w\nor\nfind terroristattack as ta\nfollow ta targets target where name = \"Al-Noor Islamic Centre\" as t\nreturn ta.name"
  },
  {
   "qid": "3a69f990-b9cd-4bdb-b3b9-5250e5cc8292",
@@ -804,10 +801,12 @@
   "category": "basic_(n)",
   "turns": 3,
   "solved": false,
-  "tokens": 5396,
-  "latency_ms": 6.649000104516745,
-  "errors": [],
-  "query": "find terroristattack as ta\nreturn distinct ta.locations"
+  "tokens": 5237,
+  "latency_ms": 10.068167001008987,
+  "errors": [
+   "ParseError: parse error at line 2: 'where' is not a statement; it is a clause of `find` or `follow`. To filter rows that already exist, and groups after an aggregate, use `keep <name> where ...`"
+  ],
+  "query": "find terroristattack where locations != none as ta\nreturn distinct ta.locations order by ta.locations"
  },
  {
   "qid": "0838f8ce-43cc-4451-baa6-25de054ec9e2",
@@ -815,10 +814,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1470,
-  "latency_ms": 4.056917037814856,
+  "tokens": 1472,
+  "latency_ms": 0.6808328907936811,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Austria\" as c\nfollow ta targets target as t\nreturn t.name"
+  "query": "find country where name = \"Austria\" as c\nfollow c occursIn terroristattack as ta\nfollow ta targets target as t\nreturn t.name"
  },
  {
   "qid": "c0ac503d-215b-4047-843d-b23790693e0d",
@@ -826,10 +825,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1477,
-  "latency_ms": 0.9339998941868544,
+  "tokens": 1475,
+  "latency_ms": 0.6525418721139431,
   "errors": [],
-  "query": "find terrorist where name = \"Shamsidin Fariduni\" as t\nfollow t perpetratedBy terroristattack as attack\nreturn attack.name, attack.date"
+  "query": "find terrorist where name = \"Shamsidin Fariduni\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name, a.date"
  },
  {
   "qid": "03064c47-7c3f-4a6a-be1f-86b1c3367067",
@@ -837,10 +836,10 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1485,
-  "latency_ms": 1.1947089806199074,
+  "tokens": 1487,
+  "latency_ms": 2.1373748313635588,
   "errors": [],
-  "query": "find target where name = \"The Tropical Inn Hotel\" as t1\nfollow t1 targets terroristattack as a\nfollow a targets target as t2 where name = \"The Kingsbury\"\nreturn a.name"
+  "query": "find terroristattack as a\nfollow a targets target where name = \"The Tropical Inn Hotel\" as t1\nfollow a targets target where name = \"The Kingsbury\" as t2\nreturn a.name"
  },
  {
   "qid": "00f4bca3-1dfb-43e1-a15a-6f6353f6c965",
@@ -848,34 +847,32 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1458,
-  "latency_ms": 8.437458891421556,
+  "tokens": 1456,
+  "latency_ms": 0.5272079724818468,
   "errors": [],
-  "query": "find terroristattack where date = \"2019-02-28\" and name contains \"Mogadishu\" as attack\nreturn attack.locations"
+  "query": "find terroristattack where name = \"28 February 2019 Mogadishu bombings\" as t\nreturn t.locations"
  },
  {
   "qid": "9fee6a44-2d8d-42d6-bb52-05f1d61c8317",
   "arm": "theorem",
   "category": "special_comparison",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 3120,
-  "latency_ms": 1.667916076257825,
+  "tokens": 1501,
+  "latency_ms": 0.7787079084664583,
   "errors": [],
-  "query": "find terroristattack where name = \"1981 Iranian Prime Minister's office bombing\" as a1\nfind terroristattack where name = \"Huanggutun Incident\" as a2\ncompute a1.number_of_deaths same a2.number_of_deaths as same\nreturn same"
+  "query": "find terroristattack where name = \"1981 Iranian Prime Minister's office bombing\" as a1\nfind terroristattack where name = \"Huanggutun Incident\" as a2\ncompute a1.number_of_deaths same a2.number_of_deaths as result\nreturn result"
  },
  {
   "qid": "e8eeea53-4d13-49af-aefd-acf88bd9a5e7",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 3,
-  "solved": false,
-  "tokens": 5268,
-  "latency_ms": 5.1717080641537905,
-  "errors": [
-   "VerifyError: error: unknown property \"w\" on class weapon. did you mean one of: name? in line 2\nnothing was executed."
-  ],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name contains \"bomb\" as w\nfollow ta perpetratedBy terrorist as t\ngroup by ta as g\ncount distinct g.t as n\nreturn ta.name, n"
+  "turns": 2,
+  "solved": true,
+  "tokens": 3216,
+  "latency_ms": 4.060915904119611,
+  "errors": [],
+  "query": "find terroristattack as a\nfollow a employs weapon as w where name = \"bomb\"\nfollow a perpetratedBy terrorist as t or none\ngroup by a as g\ncount distinct g.t as num_terrorists\nreturn a.name, num_terrorists"
  },
  {
   "qid": "27eb1be5-bfba-4292-9abc-0a4db6ceb0a0",
@@ -883,23 +880,21 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1513,
-  "latency_ms": 6.2853749841451645,
+  "tokens": 1515,
+  "latency_ms": 2.364249899983406,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"Turkey\"\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
+  "query": "find terroristattack as ta\nfollow ta occursIn country as c where c.name = \"Turkey\"\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
  },
  {
   "qid": "220783e0-1725-4044-abbf-33e0c2f538d5",
   "arm": "theorem",
   "category": "special_union",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 3440,
-  "latency_ms": 6.653124932199717,
-  "errors": [
-   "VerifyError: error: unknown property \"c\" on class country. did you mean one of: name? in line 2\nnothing was executed."
-  ],
-  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"Spain\"\nor\nfind terroristattack as ta\nfollow ta employs weapon as w where name = \"letter bomb\"\nreturn distinct ta.name"
+  "tokens": 1819,
+  "latency_ms": 3.4723749849945307,
+  "errors": [],
+  "query": "find terroristattack as t\nfollow t occursIn country where name = \"Spain\" as c\nor\nfind terroristattack as t\nfollow t employs weapon where name = \"letter bomb\" as w\nreturn t.name"
  },
  {
   "qid": "4e2db1d6-bfe7-4e6b-a5a4-5e11f27d8ddf",
@@ -907,8 +902,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1433,
-  "latency_ms": 0.6017920095473528,
+  "tokens": 1435,
+  "latency_ms": 0.6784580182284117,
   "errors": [],
   "query": "find country as c\ncount distinct c as n\nreturn n"
  },
@@ -918,10 +913,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 3,
   "solved": false,
-  "tokens": 4550,
-  "latency_ms": 8.305999916046858,
+  "tokens": 4555,
+  "latency_ms": 9.019792079925537,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a employs weapon where name contains \"firearm\" as w\nfollow a perpetratedBy terrorist as t\ncount distinct t as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta employs weapon as w where w.name contains \"firearm\"\nfollow ta perpetratedBy terrorist as t\ncount distinct t as n\nreturn n"
  },
  {
   "qid": "8db0c239-a08a-4b80-ac22-3b8bf5cece41",
@@ -929,10 +924,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1473,
-  "latency_ms": 3.0537908896803856,
+  "tokens": 1476,
+  "latency_ms": 2.1863749716430902,
   "errors": [],
-  "query": "find terroristattack as t\nfollow t employs weapon where name = \"gun\" as w\nreturn t.name, t.number_of_injuries"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"gun\" as w\nreturn ta.name, ta.number_of_injuries"
  },
  {
   "qid": "092ca523-2a3f-4be6-9013-44a595f372b0",
@@ -940,8 +935,8 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1485,
-  "latency_ms": 2.2502499632537365,
+  "tokens": 1487,
+  "latency_ms": 2.6964580174535513,
   "errors": [],
   "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"bazooka\" as w\nfollow ta occursIn country where name = \"Israel\" as c\nreturn ta.name, ta.date"
  },
@@ -949,12 +944,12 @@
   "qid": "dd5c0e60-edca-44bb-a1c3-c7de0eea9f62",
   "arm": "theorem",
   "category": "basic_(n*)",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 2976,
-  "latency_ms": 17.76145794428885,
+  "tokens": 1456,
+  "latency_ms": 0.4874998703598976,
   "errors": [],
-  "query": "find terroristattack where name contains \"Ramot Junction\" as a\nreturn a.number_of_injuries"
+  "query": "find terroristattack where name = \"2023 Ramot Junction attack\" as attack\nreturn attack.number_of_injuries"
  },
  {
   "qid": "1e2d0334-da24-4d5b-9921-7fd42f5e7211",
@@ -962,23 +957,21 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1495,
-  "latency_ms": 0.5404590629041195,
+  "tokens": 1494,
+  "latency_ms": 1.2287499848753214,
   "errors": [],
-  "query": "find terroristattack where name = \"1981 Antwerp bombing\" as a1\nfind terroristattack where name = \"2010 Chechen Parliament attack\" as a2\ncompute a1.number_of_deaths same a2.number_of_deaths as same_deaths\nreturn same_deaths"
+  "query": "find terroristattack where name = \"1981 Antwerp bombing\" as a1\nfind terroristattack where name = \"2010 Chechen Parliament attack\" as a2\ncompute a1.number_of_deaths same a2.number_of_deaths as equal\nreturn equal"
  },
  {
   "qid": "bcf2e5db-6d4f-4475-8975-cbe33498b2bd",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 3,
+  "turns": 1,
   "solved": true,
-  "tokens": 4887,
-  "latency_ms": 6.228792015463114,
-  "errors": [
-   "VerifyError: error: unknown property \"c\" on class country. did you mean one of: name? in line 2\nnothing was executed."
-  ],
-  "query": "find terroristattack as ta\nfollow ta occursIn country as c where name = \"Italy\"\nfollow ta perpetratedBy terrorist as terr or none\ngroup by ta as g\ncount distinct g.terr as count\nreturn ta.name, count"
+  "tokens": 1659,
+  "latency_ms": 4.416875075548887,
+  "errors": [],
+  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Italy\" as c\nfollow ta perpetratedBy terrorist as t or none\ngroup by ta as g\ncount distinct g.t as num_terrorists\nreturn ta.name, num_terrorists"
  },
  {
   "qid": "6c00b422-03b4-49e3-9d4f-f8fb5a27d763",
@@ -986,10 +979,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1512,
-  "latency_ms": 3.679458051919937,
+  "tokens": 1509,
+  "latency_ms": 2.4247500114142895,
   "errors": [],
-  "query": "find terroristattack as attack\nfollow attack employs weapon where name = \"bolt-action rifle\" as boltrifle\nfollow attack employs weapon as w\ngroup by w as g\ncount distinct g.attack as n\nreturn w.name, n"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"bolt-action rifle\" as rifle\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
  },
  {
   "qid": "6ea8c3e6-1780-4e0d-aef5-9539e7fc2058",
@@ -997,10 +990,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1621,
-  "latency_ms": 4.332292126491666,
+  "tokens": 1618,
+  "latency_ms": 3.725582966580987,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"bomb\" as w\nor\nfind terroristattack as ta\nfollow ta targets target where name = \"Corpus Christi solemnity\" as t\nfollow ta occursIn country where name = \"Barcelona\" as c\nreturn ta.name"
+  "query": "find terroristattack as ta\nfollow ta employs weapon as w where name = \"bomb\"\nor\nfind terroristattack as ta where locations contains \"Barcelona\"\nfollow ta targets target as tgt where name = \"Corpus Christi solemnity\"\nreturn ta.name"
  },
  {
   "qid": "5655e6b1-5b6a-4480-ba78-01105e0a6436",
@@ -1008,8 +1001,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1437,
-  "latency_ms": 0.43191714212298393,
+  "tokens": 1439,
+  "latency_ms": 1.0084169916808605,
   "errors": [],
   "query": "find terrorist as t\nreturn distinct t.gender"
  },
@@ -1020,9 +1013,9 @@
   "turns": 1,
   "solved": true,
   "tokens": 1471,
-  "latency_ms": 0.9308329317718744,
+  "latency_ms": 1.1736250016838312,
   "errors": [],
-  "query": "find country where name = \"Belgium\" as c\nfollow c occursIn terroristattack as t\nfollow t employs weapon as w\nreturn distinct w.name"
+  "query": "find country where name = \"Belgium\" as c\nfollow c occursIn terroristattack as a\nfollow a employs weapon as w\nreturn w.name"
  },
  {
   "qid": "50260089-1f1a-44af-9906-a0a6df6ca8d0",
@@ -1030,24 +1023,21 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1483,
-  "latency_ms": 1.2593329884111881,
+  "tokens": 1488,
+  "latency_ms": 0.7467919494956732,
   "errors": [],
-  "query": "find target where name = \"Kabul International Airport\" as t\nfollow t targets terroristattack as a\nreturn a.name, a.locations"
+  "query": "find target where name = \"Kabul International Airport\" as t\nfollow t targets terroristattack as attack\nreturn attack.name, attack.locations"
  },
  {
   "qid": "3ae2e5f3-89d4-4cad-b684-ac3e22973ad8",
   "arm": "theorem",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "turns": 3,
+  "turns": 1,
   "solved": true,
-  "tokens": 4758,
-  "latency_ms": 2.671124879270792,
-  "errors": [
-   "VerifyError: error: unknown property \"c\" on class country. did you mean one of: name? in line 3\nnothing was executed.",
-   "VerifyError: error: unknown property \"t\" on class terrorist. did you mean one of: country_of_citizenship, date_of_birth, gender, name, place_of_birth? in line 2\nnothing was executed."
-  ],
-  "query": "find terroristattack as ta\nfollow ta perpetratedBy terrorist as t where name = \"Tomomitsu Niimi\"\nfollow ta occursIn country as c where name = \"Japan\"\nreturn ta.name, ta.number_of_injuries"
+  "tokens": 1492,
+  "latency_ms": 1.233791932463646,
+  "errors": [],
+  "query": "find terrorist where name = \"Tomomitsu Niimi\" as t\nfollow t perpetratedBy terroristattack as a\nfollow a occursIn country where name = \"Japan\" as c\nreturn a.name, a.number_of_injuries"
  },
  {
   "qid": "bd29732f-6447-4afe-9318-f7940a1d7c8e",
@@ -1055,8 +1045,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1456,
-  "latency_ms": 0.7009999826550484,
+  "tokens": 1458,
+  "latency_ms": 0.7215410005301237,
   "errors": [],
   "query": "find terroristattack where name = \"Plot of the rue Saint-Nicaise\" as attack\nreturn attack.number_of_deaths"
  },
@@ -1066,8 +1056,8 @@
   "category": "special_comparison",
   "turns": 1,
   "solved": true,
-  "tokens": 1501,
-  "latency_ms": 1.0990840382874012,
+  "tokens": 1503,
+  "latency_ms": 0.866499962285161,
   "errors": [],
   "query": "find terroristattack where name = \"Megiddo Junction bus bombing\" as a1\nfind terroristattack where name = \"HaSharon Mall suicide bombing\" as a2\ncompute a1.number_of_injuries minus a2.number_of_injuries as diff\nreturn diff"
  },
@@ -1075,14 +1065,12 @@
   "qid": "df06c0b3-a514-4322-a94f-80e956a78d63",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 3,
-  "solved": false,
-  "tokens": 4790,
-  "latency_ms": 3.9259998593479395,
-  "errors": [
-   "VerifyError: error: unknown property \"t\" on class terrorist. did you mean one of: country_of_citizenship, date_of_birth, gender, name, place_of_birth? in line 2\nnothing was executed."
-  ],
-  "query": "find terroristattack as a\nfollow a perpetratedBy terrorist as t where name = \"Anders Behring Breivik\"\nfollow a employs weapon as w\ngroup by a as g\ncount distinct g.w as weapon_count\nreturn a.name, weapon_count"
+  "turns": 1,
+  "solved": true,
+  "tokens": 1524,
+  "latency_ms": 1.421250170096755,
+  "errors": [],
+  "query": "find terrorist where name = \"Anders Behring Breivik\" as t\nfollow t perpetratedBy terroristattack as attack\nfollow attack employs weapon as w or none\ngroup by attack as g\ncount distinct g.w as weapon_count\nreturn attack.name, weapon_count"
  },
  {
   "qid": "d9a483ed-3ff1-46e4-89d3-d5b2cd15a59e",
@@ -1090,10 +1078,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1537,
-  "latency_ms": 1.9109169952571392,
+  "tokens": 1538,
+  "latency_ms": 0.9309169836342335,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"bomb\" as w\nfollow ta targets target as t\ngroup by t as g\ncount distinct g.ta as n\nreturn t.name, n"
+  "query": "find weapon where name = \"bomb\" as w\nfollow w employs terroristattack as ta\nfollow ta targets target as t\ngroup by t as g\ncount distinct g.ta as n\nreturn t.name, n"
  },
  {
   "qid": "23ebf0dd-8c5a-4644-b59b-bb3b24d70cf9",
@@ -1101,10 +1089,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1495,
-  "latency_ms": 1.165958121418953,
+  "tokens": 1479,
+  "latency_ms": 0.8587499614804983,
   "errors": [],
-  "query": "find terrorist where name = \"Katsuya Takahashi\" as t\nfollow t perpetratedBy terroristattack as a\nor\nfind terrorist where name = \"Ken'ichi Hirose\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name"
+  "query": "find terrorist where name = \"Katsuya Takahashi\" or name = \"Ken'ichi Hirose\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name"
  },
  {
   "qid": "68fceef9-ef1e-47f4-9c89-cd2f572bbf5c",
@@ -1112,8 +1100,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1764,
-  "latency_ms": 1.1012910399585962,
+  "tokens": 1766,
+  "latency_ms": 1.2703330721706152,
   "errors": [],
   "query": "find terrorist as t\nreturn t.name, t.date_of_birth"
  },
@@ -1123,10 +1111,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1479,
-  "latency_ms": 1.3585409615188837,
+  "tokens": 1478,
+  "latency_ms": 0.64083281904459,
   "errors": [],
-  "query": "find target where name = \"Uffizi Gallery\" as t\nfollow t targets terroristattack as attack\nfollow attack perpetratedBy terrorist as terr\nreturn terr.name"
+  "query": "find target where name = \"Uffizi Gallery\" as t\nfollow t targets terroristattack as ta\nfollow ta perpetratedBy terrorist as ter\nreturn ter.name"
  },
  {
   "qid": "c14d4143-320b-4a46-8f25-492aca712391",
@@ -1134,10 +1122,10 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1476,
-  "latency_ms": 1.1144999880343676,
+  "tokens": 1475,
+  "latency_ms": 0.9824170265346766,
   "errors": [],
-  "query": "find terrorist where name = \"K\u014dichi Kitamura\" as t\nfollow t perpetratedBy terroristattack as attack\nreturn attack.name, attack.number_of_deaths"
+  "query": "find terrorist where name = \"K\u014dichi Kitamura\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name, a.number_of_deaths"
  },
  {
   "qid": "6a042429-26bd-430f-8e59-610ea3e556fd",
@@ -1145,21 +1133,21 @@
   "category": "basic_(n)-(m0*),(n)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1489,
-  "latency_ms": 0.7622088305652142,
+  "tokens": 1490,
+  "latency_ms": 0.821166904643178,
   "errors": [],
-  "query": "find terrorist where name = \"Juraj Kraj\u010d\u00edk\" as t\nfollow t perpetratedBy terroristattack as attack\nfollow attack employs weapon where name = \"firearm\" as w\nreturn distinct attack.name"
+  "query": "find terrorist where name = \"Juraj Kraj\u010d\u00edk\" as t\nfollow t perpetratedBy terroristattack as ta\nfollow ta employs weapon as w\nkeep ta where w.name contains \"firearm\"\nreturn ta.name"
  },
  {
   "qid": "01340171-96f6-4f1d-a8a5-a7b7a8034ebb",
   "arm": "theorem",
   "category": "basic_(n*)",
-  "turns": 2,
+  "turns": 1,
   "solved": true,
-  "tokens": 2969,
-  "latency_ms": 1.668998971581459,
+  "tokens": 1449,
+  "latency_ms": 0.7821249309927225,
   "errors": [],
-  "query": "find terroristattack where name = \"2021 Kandahar bombing\" as ta\nreturn ta.locations"
+  "query": "find terroristattack where name = \"2021 Kandahar bombing\" as t\nreturn t.locations"
  },
  {
   "qid": "187cd578-de7b-4c1b-b67c-02f88132d51f",
@@ -1167,23 +1155,22 @@
   "category": "special_comparison",
   "turns": 3,
   "solved": false,
-  "tokens": 4657,
-  "latency_ms": 2.7776670176535845,
-  "errors": [],
-  "query": "find terroristattack where name = \"Melbourne Turkish consulate bombing\" or name = \"April 2022 Mogadishu bombing\" as a\nreturn a.name, a.date order by a.date desc limit 1"
+  "tokens": 4740,
+  "latency_ms": 1.1741670314222574,
+  "errors": [
+   "ParseError: parse error at line 5: 'order' is not a statement; it is a clause of `return` or `find`: `return p.name order by p.age desc`"
+  ],
+  "query": "find terroristattack where name = \"Melbourne Turkish consulate bombing\" as a\nor\nfind terroristattack where name = \"April 2022 Mogadishu bombing\" as a\nreturn a.name, a.date order by a.date desc"
  },
  {
   "qid": "8e575212-646a-4e49-848d-88afddb01e32",
   "arm": "theorem",
   "category": "special_optional-match",
-  "turns": 3,
+  "turns": 1,
   "solved": true,
-  "tokens": 4734,
-  "latency_ms": 2.3335411678999662,
-  "errors": [
-   "ExecError: cannot resolve column g.w.name",
-   "VerifyError: error: unknown property \"w\" on class weapon. did you mean one of: name? in line 2\nnothing was executed."
-  ],
+  "tokens": 1519,
+  "latency_ms": 2.0007500424981117,
+  "errors": [],
   "query": "find terroristattack as ta\nfollow ta employs weapon as w where name = \"rifle\"\nfollow ta targets target as t or none\ngroup by ta as g\ncount distinct g.t as target_count\nreturn ta.name, target_count"
  },
  {
@@ -1192,10 +1179,10 @@
   "category": "special_three-node-groupby",
   "turns": 1,
   "solved": true,
-  "tokens": 1490,
-  "latency_ms": 0.9159171022474766,
+  "tokens": 1491,
+  "latency_ms": 2.9276248533278704,
   "errors": [],
-  "query": "find country where name = \"India\" as c\nfollow c occursIn terroristattack as ta\nfollow ta employs weapon as w\ngroup by w as g\ncount distinct g.ta as n\nreturn w.name, n"
+  "query": "find terroristattack as t\nfollow t occursIn country where name = \"India\" as c\nfollow t employs weapon as w\ngroup by w as g\ncount distinct g.t as n\nreturn w.name, n"
  },
  {
   "qid": "7ea6763f-d9a9-484e-bba6-a27201c6d4e2",
@@ -1203,10 +1190,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1493,
-  "latency_ms": 1.221250044181943,
+  "tokens": 1496,
+  "latency_ms": 7.5876659248024225,
   "errors": [],
-  "query": "find country where name = \"Russia\" as c\nfollow c occursIn terroristattack as a\nor\nfind terrorist where name = \"Saidakrami Rachabalizodu\" as t\nfollow t perpetratedBy terroristattack as a\ncount distinct a as n\nreturn n"
+  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Russia\" as c\nor\nfind terroristattack as ta\nfollow ta perpetratedBy terrorist where name = \"Saidakrami Rachabalizodu\" as t\ncount distinct ta as n\nreturn n"
  },
  {
   "qid": "19bca5b4-2579-46a2-8423-9541fae1ce9e",
@@ -1214,8 +1201,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1433,
-  "latency_ms": 0.5591670051217079,
+  "tokens": 1435,
+  "latency_ms": 0.7938751950860023,
   "errors": [],
   "query": "find terrorist as t\ncount distinct t as n\nreturn n"
  },
@@ -1225,10 +1212,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1488,
-  "latency_ms": 3.9123331662267447,
+  "tokens": 1481,
+  "latency_ms": 1.7096248921006918,
   "errors": [],
-  "query": "find terroristattack as a\nfollow a employs weapon where name contains \"Improvised Explosive\" or name = \"IED\" as ied\nfollow a employs weapon as w\ncount distinct w as weapon_count\nreturn weapon_count"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"improvised explosive device\" as ied\nfollow ta employs weapon as w\ncount distinct w as n\nreturn n"
  },
  {
   "qid": "b0f9057f-6254-4062-b428-a78e016315b4",
@@ -1236,8 +1223,8 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1470,
-  "latency_ms": 0.6204158999025822,
+  "tokens": 1472,
+  "latency_ms": 1.001249998807907,
   "errors": [],
   "query": "find terrorist where name = \"Mario Moretti\" as t\nfollow t perpetratedBy terroristattack as a\nreturn a.name, a.number_of_deaths"
  },
@@ -1245,12 +1232,12 @@
   "qid": "edaad067-d3fe-4204-b152-b6f735052727",
   "arm": "theorem",
   "category": "basic_(n)-(m0*),(n)-(m1*)",
-  "turns": 1,
-  "solved": true,
-  "tokens": 1485,
-  "latency_ms": 1.0473339352756739,
+  "turns": 3,
+  "solved": false,
+  "tokens": 4587,
+  "latency_ms": 6.176917115226388,
   "errors": [],
-  "query": "find target where name = \"2021 Kabul Airlift\" as t\nfollow t targets terroristattack as ta\nfollow ta employs weapon where name contains \"firearm\" as w\nreturn distinct ta.name"
+  "query": "find terroristattack as ta\nfollow ta targets target where name = \"2021 Kabul Airlift\" as t\nfollow ta employs weapon where name = \"firearms\" as w\nreturn ta.name"
  },
  {
   "qid": "fe605dd3-1dfc-4672-a1f5-68724fa03a47",
@@ -1258,8 +1245,8 @@
   "category": "basic_(n*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1441,
-  "latency_ms": 0.6209169514477253,
+  "tokens": 1443,
+  "latency_ms": 0.3972079139202833,
   "errors": [],
   "query": "find terrorist where name = \"Petter Kristian Kyvik\" as t\nreturn t.gender"
  },
@@ -1269,10 +1256,10 @@
   "category": "special_comparison",
   "turns": 3,
   "solved": false,
-  "tokens": 4915,
-  "latency_ms": 16.0714581143111,
+  "tokens": 4888,
+  "latency_ms": 13.040250167250633,
   "errors": [],
-  "query": "find terroristattack where name = \"Bomb attack by the Revolutionary Brigades on the Recruitment and Mobilization District n\u00ba 1 (DRM 1)\" as a1\nfind terroristattack where name = \"1980 Markina attack\" as a2\ncompute a2.number_of_deaths minus a1.number_of_deaths as diff\nreturn a1.name, a1.number_of_deaths, a2.name, a2.number_of_deaths, diff"
+  "query": "find terroristattack where name contains \"DRM 1\" as a\nor\nfind terroristattack where name = \"1980 Markina attack\" as a\nreturn a.name, a.number_of_deaths order by a.number_of_deaths desc limit 1"
  },
  {
   "qid": "8b919060-bf14-4705-8bf5-a044fb07ca3d",
@@ -1280,10 +1267,10 @@
   "category": "special_optional-match",
   "turns": 1,
   "solved": true,
-  "tokens": 1545,
-  "latency_ms": 4.776458954438567,
+  "tokens": 1547,
+  "latency_ms": 0.8653339464217424,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta occursIn country where name = \"Norway\" as c\nfollow ta targets target as t or none\ngroup by ta as g\ncount distinct g.t as target_count\nreturn ta.name, target_count"
+  "query": "find country where name = \"Norway\" as c\nfollow c occursIn terroristattack as ta\nfollow ta targets target as t or none\ngroup by ta as g\ncount distinct g.t as num_targets\nreturn ta.name, num_targets"
  },
  {
   "qid": "03065de3-c870-482e-8419-c539c874345e",
@@ -1291,13 +1278,12 @@
   "category": "special_three-node-groupby",
   "turns": 3,
   "solved": true,
-  "tokens": 5093,
-  "latency_ms": 6.008125143125653,
+  "tokens": 5018,
+  "latency_ms": 8.205206831917167,
   "errors": [
-   "ParseError: parse error at line 5: expected a literal value, got 'w.name'",
-   "VerifyError: error: unknown property \"attack\" on class terroristattack. did you mean one of: date, locations, name, number_of_deaths, number_of_injuries? in line 3\nnothing was executed."
+   "ParseError: parse error at line 4: expected a literal value, got 'w.name'"
   ],
-  "query": "find terroristattack where name = \"Megiddo Junction bus bombing\" as original\nfollow original employs weapon as w\nfind terroristattack where name != \"Megiddo Junction bus bombing\" as attack\nfollow attack employs weapon as w\ngroup by attack as g\ncount distinct g.w as weapon_count\nreturn attack.name, weapon_count"
+  "query": "find terroristattack where name = \"Megiddo Junction bus bombing\" as attack1\nfollow attack1 employs weapon as w\nfind terroristattack as attack2 where name != \"Megiddo Junction bus bombing\"\nfollow attack2 employs weapon as w\ngroup by attack2 as g\ncount distinct g.w as weapon_count\nreturn attack2.name, weapon_count"
  },
  {
   "qid": "50493a41-f323-47b3-9265-0e624b2a3a9d",
@@ -1305,10 +1291,10 @@
   "category": "special_union",
   "turns": 1,
   "solved": true,
-  "tokens": 1710,
-  "latency_ms": 6.517250090837479,
+  "tokens": 1708,
+  "latency_ms": 4.321542102843523,
   "errors": [],
-  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"grenade launcher\" as w\nor\nfind terroristattack as ta\nfollow ta occursIn country where name = \"Russia\" as c\nreturn distinct ta.name"
+  "query": "find terroristattack as a\nfollow a employs weapon where name = \"grenade launcher\" as w\nor\nfind terroristattack as a\nfollow a occursIn country where name = \"Russia\" as c\nreturn a.name"
  },
  {
   "qid": "8979c7a6-3be3-4439-8cc8-c8af0eabb44d",
@@ -1316,8 +1302,8 @@
   "category": "basic_(n)",
   "turns": 1,
   "solved": true,
-  "tokens": 1930,
-  "latency_ms": 6.229124963283539,
+  "tokens": 1932,
+  "latency_ms": 4.949750145897269,
   "errors": [],
   "query": "find terroristattack where date < \"1997-03-13\" as ta\nreturn ta.name"
  },
@@ -1327,10 +1313,10 @@
   "category": "basic_(n)-(m0)-(m1*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1852,
-  "latency_ms": 2.6837079785764217,
+  "tokens": 1853,
+  "latency_ms": 1.9497910980135202,
   "errors": [],
-  "query": "find terroristattack where name = \"Eden Natan-Zada\" as attack\nfollow attack occursIn country as c\nfind terroristattack as ta\nfollow ta occursIn country as c\nreturn ta.name, ta.number_of_injuries"
+  "query": "find terroristattack where name = \"Eden Natan-Zada\" as attack\nfollow attack occursIn country as c\nfollow c occursIn terroristattack as attacks\nreturn attacks.name, attacks.number_of_injuries"
  },
  {
   "qid": "17bf0d0c-00cf-48e0-8426-6085109f6fa3",
@@ -1338,9 +1324,9 @@
   "category": "basic_(n)-(m0*)",
   "turns": 1,
   "solved": true,
-  "tokens": 1470,
-  "latency_ms": 1.0214580688625574,
+  "tokens": 1473,
+  "latency_ms": 3.401709022000432,
   "errors": [],
-  "query": "find weapon where name = \"grenade launcher\" as w\nfollow w employs terroristattack as ta\nmax ta.number_of_deaths as max_deaths\nreturn max_deaths"
+  "query": "find terroristattack as ta\nfollow ta employs weapon where name = \"grenade launcher\" as w\nmax ta.number_of_deaths as max_deaths\nreturn max_deaths"
  }
 ]

@@ -1,20 +1,20 @@
 {
  "text2cypher": {
-  "n": 122,
-  "solve_at_1": 0.7705,
-  "solve_at_2": 0.8607,
-  "solve_at_3": 0.877,
-  "mean_turns_when_solved": 1.14,
-  "mean_tokens_per_question": 882.7,
-  "mean_exec_ms_per_question": 71.38
+  "n": 240,
+  "solve_at_1": 0.7208,
+  "solve_at_2": 0.8208,
+  "solve_at_3": 0.85,
+  "mean_turns_when_solved": 1.186,
+  "mean_tokens_per_question": 1067.5,
+  "mean_exec_ms_per_question": 101.68
  },
  "theorem": {
-  "n": 123,
-  "solve_at_1": 0.7805,
-  "solve_at_2": 0.8455,
-  "solve_at_3": 0.878,
-  "mean_turns_when_solved": 1.148,
-  "mean_tokens_per_question": 2156.0,
-  "mean_exec_ms_per_question": 10.9
+  "n": 240,
+  "solve_at_1": 0.8292,
+  "solve_at_2": 0.8667,
+  "solve_at_3": 0.8792,
+  "mean_turns_when_solved": 1.071,
+  "mean_tokens_per_question": 2063.8,
+  "mean_exec_ms_per_question": 110.47
  }
 }

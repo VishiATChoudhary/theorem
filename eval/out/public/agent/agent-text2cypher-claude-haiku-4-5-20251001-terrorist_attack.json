@@ -6,7 +6,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 1075,
-  "latency_ms": 119.86204190179706,
+  "latency_ms": 108.74741710722446,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) RETURN ta.name, ta.locations"
  },
@@ -17,7 +17,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 553,
-  "latency_ms": 106.40058410353959,
+  "latency_ms": 93.58179196715355,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Franco Bonisoli\"})<-[:perpetratedBy]-(attack:TerroristAttack)-[:occursIn]->(country:Country) RETURN DISTINCT country.name"
  },
@@ -28,7 +28,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 35.85383389145136,
+  "latency_ms": 36.36687505058944,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target {name: \"Adolfo Suarez Madrid-Barajas Airport\"}) RETURN MIN(attack.number_of_deaths)"
  },
@@ -39,7 +39,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 584,
-  "latency_ms": 44.12095807492733,
+  "latency_ms": 38.789582904428244,
   "errors": [],
   "query": "MATCH (attack1:TerroristAttack {name: \"July 1979 Madrid bombings\"})-[:targets]->(target:Target), (attack2:TerroristAttack {name: \"2006 Madrid\u2013Barajas Airport bombing\"})-[:targets]->(target) RETURN target.name"
  },
@@ -50,7 +50,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 527,
-  "latency_ms": 17.429833067581058,
+  "latency_ms": 36.11025004647672,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack {name: \"2011 Al Hillah bombing\"}) RETURN ta.number_of_deaths"
  },
@@ -61,7 +61,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 588,
-  "latency_ms": 32.95708377845585,
+  "latency_ms": 29.25279107876122,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack), (a2:TerroristAttack) WHERE a1.name CONTAINS \"DRM 1\" AND a2.name CONTAINS \"Markina\" AND a2.name CONTAINS \"1980\" RETURN a1.number_of_deaths = a2.number_of_deaths"
  },
@@ -72,7 +72,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2017,
-  "latency_ms": 89.22783401794732,
+  "latency_ms": 54.29579201154411,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n  \"SKIP\"\n  \"UNION\"\n  \"UNWIND\"\n  \"USE\"\n  \"WITH\"\n  <EOF> (line 1, column 141 (offset: 140))\n\"MATCH (ta"
   ],
@@ -85,7 +85,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1862,
-  "latency_ms": 87.7694170922041,
+  "latency_ms": 91.13612514920533,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(w:Weapon), (ta)-[:employs]->(grenade:Weapon) WHERE toLower(grenade.name) CONTAINS \"grenade\" RETURN w.name, count(DISTINCT ta) as count"
  },
@@ -96,7 +96,7 @@
   "turns": 3,
   "solved": true,
   "tokens": 2283,
-  "latency_ms": 56.18204199708998,
+  "latency_ms": 46.708666952326894,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: PatternExpressions are not allowed to introduce new variables: 'target'. (line 1, column 60 (offset: 59))\n\"MATCH (attack:TerroristAttack) WHERE (attack)-[:targets]->(target:Target {name: \"Gran Teatre del Liceu\"}) OR (attack)-[:perpetratedBy]->(terrorist:Terrorist {name: \"Santiago Salvador Franch\"}) RETURN COUNT(DISTIN",
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: PatternExpressions are not allowed to introduce new variables: 't'. (line 1, column 67 (offset: 66))\n\"MATCH (attack:TerroristAttack) WHERE EXISTS((attack)-[:targets]->(t:Target {name: \"Gran Teatre del Liceu\"})) OR EXISTS((attack)-[:perpetratedBy]->(tr:Terrorist {name: \"Santiago Salvador Franch\"})) RETURN COUNT(DISTINC"
@@ -110,7 +110,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 738,
-  "latency_ms": 30.017291894182563,
+  "latency_ms": 27.046750066801906,
   "errors": [],
   "query": "MATCH (t:Terrorist) RETURN t.name ORDER BY t.date_of_birth ASC"
  },
@@ -121,7 +121,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 547,
-  "latency_ms": 21.12108306027949,
+  "latency_ms": 18.768375040963292,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Khairi Alqam\"})<-[:perpetratedBy]-(a:TerroristAttack)-[:occursIn]->(c:Country) RETURN DISTINCT c.name"
  },
@@ -132,7 +132,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1773,
-  "latency_ms": 44.626250164583325,
+  "latency_ms": 71.20700017549098,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target) WHERE toLower(target.name) CONTAINS toLower(\"St. Sebastian's Church\") RETURN attack.name, attack.date"
  },
@@ -143,7 +143,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 572,
-  "latency_ms": 47.0170839689672,
+  "latency_ms": 23.83566601201892,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target {name: \"Uffizi Gallery\"}), (attack)-[:employs]->(weapon:Weapon {name: \"car bomb\"}) RETURN attack.name, attack.date"
  },
@@ -154,7 +154,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 527,
-  "latency_ms": 35.326250130310655,
+  "latency_ms": 12.97237491235137,
   "errors": [],
   "query": "MATCH (a:TerroristAttack {name: \"Afula mall bombing\"}) RETURN a.number_of_injuries"
  },
@@ -165,7 +165,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 573,
-  "latency_ms": 52.838917123153806,
+  "latency_ms": 20.39833413437009,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"2012 Burgas bus bombing\"}), (a2:TerroristAttack {name: \"Orly Airport attack\"}) RETURN CASE WHEN a1.date > a2.date THEN a1.name ELSE a2.name END"
  },
@@ -176,7 +176,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2433,
-  "latency_ms": 131.8067500833422,
+  "latency_ms": 45.254958095029,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"IN\"\n  \"INSERT\"\n  \"IS\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\""
   ],
@@ -189,7 +189,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 592,
-  "latency_ms": 75.46079088933766,
+  "latency_ms": 20.25016606785357,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Egypt\"}), (attack)-[:employs]->(weapon:Weapon) RETURN weapon.name, count(attack) ORDER BY count(attack) DESC"
  },
@@ -200,7 +200,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 924,
-  "latency_ms": 48.63374982960522,
+  "latency_ms": 26.234457967802882,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) WHERE (attack)-[:occursIn]->(:Country {name: \"United States of America\"}) OR (attack)-[:employs]->(:Weapon {name: \"pipe bomb\"}) RETURN DISTINCT attack.name"
  },
@@ -211,7 +211,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2340,
-  "latency_ms": 69.68020787462592,
+  "latency_ms": 15.727001009508967,
   "errors": [],
   "query": "MATCH (w:Weapon) RETURN DISTINCT w.name"
  },
@@ -222,7 +222,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 931,
-  "latency_ms": 84.51204211451113,
+  "latency_ms": 20.98025009036064,
   "errors": [],
   "query": "MATCH (campChapman:TerroristAttack {name: \"Camp Chapman attack\"}) -[:occursIn]-> (country:Country) <-[:occursIn]- (attack:TerroristAttack) RETURN attack.name ORDER BY attack.date ASC"
  },
@@ -233,7 +233,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1713,
-  "latency_ms": 148.15908414311707,
+  "latency_ms": 40.653208969160914,
   "errors": [],
   "query": "MATCH (target:Target {name: \"Jo Cox\"})<-[:targets]-(ta:TerroristAttack)-[:employs]->(weapon:Weapon) RETURN weapon.name"
  },
@@ -244,7 +244,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 551,
-  "latency_ms": 48.88412496075034,
+  "latency_ms": 14.683375135064125,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(:Weapon {name: \"rifle\"}), (ta)-[:perpetratedBy]->(:Terrorist {name: \"Thomas Mair\"}) RETURN ta.name"
  },
@@ -255,7 +255,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 518,
-  "latency_ms": 16.445707995444536,
+  "latency_ms": 7.565166102722287,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Amedy Coulibaly\"}) RETURN t.date_of_birth"
  },
@@ -266,7 +266,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 563,
-  "latency_ms": 52.26662498898804,
+  "latency_ms": 13.344667153432965,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"1984 Montreal bombing\"}), (a2:TerroristAttack {name: \"2003 Mumbai bus bombing\"}) RETURN a1.number_of_deaths - a2.number_of_deaths"
  },
@@ -277,7 +277,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 585,
-  "latency_ms": 83.2134170923382,
+  "latency_ms": 16.527167055755854,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(:Target {name: \"The Pentagon\"}) WITH DISTINCT attack MATCH (attack)-[:targets]->(t:Target) RETURN attack.name, COUNT(t) as number_of_targets"
  },
@@ -288,7 +288,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1432,
-  "latency_ms": 166.68241587467492,
+  "latency_ms": 67.22629093565047,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(:Target {name: \"Zion Church, Batticaloa\"}) MATCH (attack)-[:targets]->(target:Target) WHERE target.name <> \"Zion Church, Batticaloa\" RETURN target.name AS targetName, COUNT(DISTINCT attack) AS attackCount ORDER BY attackCount DESC"
  },
@@ -299,7 +299,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 925,
-  "latency_ms": 61.17925001308322,
+  "latency_ms": 25.67112515680492,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) WHERE (ta)-[:perpetratedBy]->(:Terrorist {name: \"Thomas Edwin Blanton, Jr.\"}) OR (ta)-[:occursIn]->(:Country {name: \"United States of America\"}) RETURN DISTINCT ta.name"
  },
@@ -310,7 +310,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 850,
-  "latency_ms": 41.073583997786045,
+  "latency_ms": 33.00620801746845,
   "errors": [],
   "query": "MATCH (a:TerroristAttack) RETURN a.name"
  },
@@ -321,7 +321,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 553,
-  "latency_ms": 23.41054193675518,
+  "latency_ms": 5.159290973097086,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Philip Manshaus\"})<-[:perpetratedBy]-(attack:TerroristAttack)-[:occursIn]->(country:Country) RETURN DISTINCT country.name"
  },
@@ -332,7 +332,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 564,
-  "latency_ms": 43.61187503673136,
+  "latency_ms": 12.941875029355288,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:perpetratedBy]->(terrorist:Terrorist {name: \"Carsten Schultze\"}) RETURN attack.name, attack.number_of_deaths"
  },
@@ -343,7 +343,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 572,
-  "latency_ms": 64.31808299385011,
+  "latency_ms": 15.989999985322356,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:perpetratedBy]->(terrorist:Terrorist {name: \"Thomas Mair\"}), (attack)-[:employs]->(weapon:Weapon {name: \"rifle\"}) RETURN attack.name, attack.date"
  },
@@ -354,7 +354,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 518,
-  "latency_ms": 28.43733294866979,
+  "latency_ms": 7.6888748444616795,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Mohammad Saifullah Ozaki\"}) RETURN t.gender"
  },
@@ -365,7 +365,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1243,
-  "latency_ms": 84.87091702409089,
+  "latency_ms": 24.41700012423098,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"Dolphinarium discotheque suicide bombing\"}), (a2:TerroristAttack {name: \"2014 Dijon attack\"}) RETURN a1.number_of_injuries = a2.number_of_injuries"
  },
@@ -376,7 +376,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 955,
-  "latency_ms": 113.38308290578425,
+  "latency_ms": 28.020875062793493,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: 'Iraq'}) OPTIONAL MATCH (attack)-[:employs]->(weapon:Weapon) RETURN attack.name, COUNT(DISTINCT weapon.name) AS weapon_count"
  },
@@ -387,7 +387,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 626,
-  "latency_ms": 68.9609160181135,
+  "latency_ms": 20.227500004693866,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(oberoi:Target {name: \"Oberoi Trident\"}) MATCH (attack)-[:targets]->(target:Target) WHERE target.name <> \"Oberoi Trident\" RETURN target.name, COUNT(attack) AS attack_count ORDER BY attack_count DESC"
  },
@@ -398,7 +398,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 657,
-  "latency_ms": 94.87812500447035,
+  "latency_ms": 36.706916987895966,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:occursIn]->(:Country {name: \"Ukraine\"}) RETURN ta.name UNION MATCH (ta:TerroristAttack)-[:targets]->(:Target {name: \"Chaplyne\"}) RETURN ta.name"
  },
@@ -409,7 +409,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 510,
-  "latency_ms": 24.212458869442344,
+  "latency_ms": 6.300749955698848,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) RETURN count(ta)"
  },
@@ -420,7 +420,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 567,
-  "latency_ms": 71.25049992464483,
+  "latency_ms": 15.220291912555695,
   "errors": [],
   "query": "MATCH (:Target {name: \"Consulate General of the United Kingdom in Istanbul\"})<-[:targets]-(attack:TerroristAttack)-[:targets]->(target:Target) RETURN COUNT(DISTINCT target)"
  },
@@ -431,7 +431,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 571,
-  "latency_ms": 24.242333136498928,
+  "latency_ms": 14.576249988749623,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target {name: \"Combined Arms Military School in Koulikoro\"}) RETURN attack.name, attack.number_of_deaths"
  },
@@ -442,7 +442,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 581,
-  "latency_ms": 45.18495802767575,
+  "latency_ms": 14.651625184342265,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target {name: \"Al Noor Mosque\"}), (attack)-[:perpetratedBy]->(terrorist:Terrorist {name: \"Brenton Tarrant\"}) RETURN attack.name, attack.date"
  },
@@ -453,7 +453,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 533,
-  "latency_ms": 31.419916078448296,
+  "latency_ms": 8.038375061005354,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack {name: \"Bir-Hakeim bridge attack\"}) RETURN attack.number_of_injuries"
  },
@@ -464,7 +464,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1228,
-  "latency_ms": 103.44820795580745,
+  "latency_ms": 33.2153330091387,
   "errors": [],
   "query": "MATCH (a:TerroristAttack) WHERE a.name IN ['Meenambakkam bomb blast', 'Jaffa Road bus bombings'] RETURN a.name ORDER BY a.number_of_deaths DESC LIMIT 1"
  },
@@ -475,7 +475,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 591,
-  "latency_ms": 86.55908284708858,
+  "latency_ms": 15.284958062693477,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon {name: \"automatic firearm\"}) WITH attack MATCH (attack)-[:employs]->(w:Weapon) RETURN attack.name, COUNT(DISTINCT w) as weapon_count"
  },
@@ -486,7 +486,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 634,
-  "latency_ms": 56.16033403202891,
+  "latency_ms": 23.391125025227666,
   "errors": [],
   "query": "MATCH (arielAttack:TerroristAttack {name: \"2018 Ariel stabbing\"})-[:employs]->(arielWeapon:Weapon) WITH arielAttack, COLLECT(arielWeapon) as arielWeapons MATCH (otherAttack:TerroristAttack)-[:employs]->(sharedWeapon:Weapon) WHERE otherAttack <> arielAttack AND sharedWeapon IN arielWeapons RETURN otherAttack.name, COUNT(sharedWeapon) as weapon_count"
  },
@@ -497,7 +497,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 567,
-  "latency_ms": 122.863041004166,
+  "latency_ms": 27.028542011976242,
   "errors": [],
   "query": "CALL { MATCH (ta:TerroristAttack)-[:targets]->(:Target {name: \"Tokyo subway\"}) RETURN ta UNION MATCH (ta:TerroristAttack)-[:perpetratedBy]->(:Terrorist {name: \"Kiyotaka Tonozaki\"}) RETURN ta } RETURN COUNT(*)"
  },
@@ -508,7 +508,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 937,
-  "latency_ms": 53.52945812046528,
+  "latency_ms": 36.577208898961544,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) RETURN attack.name, attack.number_of_injuries"
  },
@@ -519,7 +519,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 546,
-  "latency_ms": 38.54274982586503,
+  "latency_ms": 16.21579099446535,
   "errors": [],
   "query": "MATCH (country:Country {name: \"Portugal\"})<-[:occursIn]-(attack:TerroristAttack)-[:targets]->(target:Target) RETURN COUNT(DISTINCT target)"
  },
@@ -530,7 +530,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 547,
-  "latency_ms": 61.11333309672773,
+  "latency_ms": 11.928291991353035,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Niger\"}) UNWIND attack.locations AS location RETURN DISTINCT location"
  },
@@ -541,7 +541,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 39.866500068455935,
+  "latency_ms": 14.129583025351167,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon {name: 'bazooka'}), (attack)-[:occursIn]->(country:Country {name: 'Israel'}) RETURN attack.name"
  },
@@ -552,7 +552,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 523,
-  "latency_ms": 24.425625102594495,
+  "latency_ms": 8.617958053946495,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack {name: \"2021 Kandahar bombing\"}) RETURN attack.date"
  },
@@ -563,7 +563,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1527,
-  "latency_ms": 138.47224996425211,
+  "latency_ms": 68.95704218186438,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'year' (line 1, column 124 (offset: 123))\n\"MATCH (a1:TerroristAttack), (a2:TerroristAttack) WHERE ((a1.name CONTAINS \"Red Fort\") OR (\"Red Fort\" IN a1.locations)) AND year(a1.date) = 2000 AND ((a2.name CONTAINS \"Corinthia Hotel\") OR (\"Corinthia Hotel\" IN a2.locations)) AND year(a2.date) = 2015 RETURN C"
   ],
@@ -576,7 +576,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 609,
-  "latency_ms": 93.92245789058506,
+  "latency_ms": 18.33066693507135,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon {name: \"shotgun\"}) OPTIONAL MATCH (attack)-[:targets]->(target:Target) WITH attack, COUNT(target) as number_of_targets RETURN attack.name, number_of_targets"
  },
@@ -587,7 +587,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 588,
-  "latency_ms": 88.34208408370614,
+  "latency_ms": 13.760332949459553,
   "errors": [],
   "query": "MATCH (c:Country)<-[:occursIn]-(ta:TerroristAttack)-[:employs]->(:Weapon {name: \"hand grenade\"}) RETURN c.name, count(ta) as count ORDER BY count DESC"
  },
@@ -598,7 +598,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 570,
-  "latency_ms": 82.46516715735197,
+  "latency_ms": 19.421458011493087,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) WHERE ((attack)-[:occursIn]->(:Country {name: \"United States of America\"})) OR ((attack)-[:employs]->(:Weapon {name: \"pipe bomb\"})) RETURN COUNT(DISTINCT attack)"
  },
@@ -609,7 +609,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 888,
-  "latency_ms": 65.7771248370409,
+  "latency_ms": 28.68458302691579,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) WHERE ta.number_of_deaths < 130 RETURN ta.name"
  },
@@ -620,7 +620,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 42.61475009843707,
+  "latency_ms": 12.74116593413055,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(w:Weapon), (ta)-[:employs]->(:Weapon {name: \"shoulder-fired missile\"}) RETURN DISTINCT w.name"
  },
@@ -631,7 +631,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 555,
-  "latency_ms": 10.917583014816046,
+  "latency_ms": 8.446207968518138,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target {name: \"Minsk Metro\"}) RETURN attack.name, attack.number_of_deaths"
  },
@@ -642,7 +642,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 567,
-  "latency_ms": 65.56916702538729,
+  "latency_ms": 13.646499952301383,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:targets]->(t:Target {name: \"Georgia Guidestones\"}), (ta)-[:occursIn]->(c:Country {name: \"United States of America\"}) RETURN ta.name"
  },
@@ -653,7 +653,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 527,
-  "latency_ms": 55.75254210270941,
+  "latency_ms": 7.646083831787109,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack {name: \"2011 Al Hillah bombing\"}) RETURN attack.locations"
  },
@@ -664,7 +664,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1300,
-  "latency_ms": 94.49595888145268,
+  "latency_ms": 28.376291040331125,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"Bombing of Cinema Capri\"}), (a2:TerroristAttack {name: \"2012 Brindisi school bombing\"}) RETURN CASE WHEN a1.number_of_injuries > a2.number_of_injuries THEN a1.name ELSE a2.name END"
  },
@@ -675,7 +675,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 813,
-  "latency_ms": 67.03158398158848,
+  "latency_ms": 18.679332919418812,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Russia\"}) OPTIONAL MATCH (attack)-[:employs]->(weapon:Weapon) RETURN attack.name, count(DISTINCT weapon) as weapon_count"
  },
@@ -686,7 +686,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 657,
-  "latency_ms": 55.74199999682605,
+  "latency_ms": 18.262333003804088,
   "errors": [],
   "query": "MATCH (sept11:TerroristAttack {name: \"September 11 attacks\"})-[:targets]->(sept11Target:Target) WITH collect(DISTINCT sept11Target) as sept11Targets MATCH (otherAttack:TerroristAttack)-[:targets]->(sharedTarget:Target) WHERE sharedTarget IN sept11Targets AND otherAttack.name <> \"September 11 attacks\" WITH DISTINCT otherAttack.name as attackName, count(DISTINCT sharedTarget) as sharedCount RETURN attackName, sharedCount"
  },
@@ -697,7 +697,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 561,
-  "latency_ms": 68.59200005419552,
+  "latency_ms": 18.666791962459683,
   "errors": [],
   "query": "MATCH (a:TerroristAttack) WHERE EXISTS((a)-[:occursIn]->(:Country {name: \"France\"})) OR EXISTS((a)-[:perpetratedBy]->(:Terrorist {name: \"Armand Rajabpour-Miyandoab\"})) RETURN COUNT(a)"
  },
@@ -708,7 +708,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 928,
-  "latency_ms": 54.89245802164078,
+  "latency_ms": 32.956958981230855,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) RETURN attack.name, attack.number_of_deaths"
  },
@@ -719,7 +719,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 582,
-  "latency_ms": 79.24904185347259,
+  "latency_ms": 17.89279212243855,
   "errors": [],
   "query": "MATCH (attack1:TerroristAttack {name: \"American Airlines Flight 77\"})-[:targets]->(target:Target)<-[:targets]-(attack2:TerroristAttack) RETURN DISTINCT attack2.name, attack2.number_of_injuries"
  },
@@ -730,7 +730,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 537,
-  "latency_ms": 43.23016689158976,
+  "latency_ms": 8.982916828244925,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack {name: \"2017 Sinai mosque attack\"})-[:occursIn]->(country:Country) RETURN country.name"
  },
@@ -741,7 +741,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 572,
-  "latency_ms": 68.1690841447562,
+  "latency_ms": 12.452124850824475,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Gaspare Spatuzza\"})<-[:perpetratedBy]-(a:TerroristAttack)-[:targets]->(tg:Target {name: \"Uffizi Gallery\"}) RETURN a.name, a.locations"
  },
@@ -752,7 +752,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 515,
-  "latency_ms": 9.754291037097573,
+  "latency_ms": 3.685791976749897,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Abdullakh Anzorov\"}) RETURN t.gender"
  },
@@ -763,7 +763,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 569,
-  "latency_ms": 20.9437501616776,
+  "latency_ms": 4.438166972249746,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"Bombing of Cinema Capri\"}), (a2:TerroristAttack {name: \"2012 Brindisi school bombing\"}) RETURN a1.number_of_injuries = a2.number_of_injuries"
  },
@@ -774,7 +774,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 618,
-  "latency_ms": 62.41383287124336,
+  "latency_ms": 42.23524988628924,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(w:Weapon {name: \"pipe bomb\"}) OPTIONAL MATCH (ta)-[:targets]->(target:Target) RETURN ta.name, COUNT(target) as number_of_targets"
  },
@@ -785,7 +785,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 570,
-  "latency_ms": 60.38912502117455,
+  "latency_ms": 13.576624915003777,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(sword:Weapon {name: \"sword\"}), (attack)-[:employs]->(w:Weapon) RETURN w.name, COUNT(DISTINCT attack) as count"
  },
@@ -796,7 +796,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 577,
-  "latency_ms": 49.46199990808964,
+  "latency_ms": 19.26404214464128,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) WHERE (ta)-[:employs]->(:Weapon {name: \"rifle\"}) OR (ta)-[:targets]->(:Target {name: \"Al-Noor Islamic Centre\"}) RETURN DISTINCT ta.name"
  },
@@ -807,7 +807,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 683,
-  "latency_ms": 70.01816714182496,
+  "latency_ms": 28.731707949191332,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) UNWIND ta.locations AS location RETURN DISTINCT location"
  },
@@ -818,7 +818,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 552,
-  "latency_ms": 49.060292076319456,
+  "latency_ms": 11.768375057727098,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Austria\"}), (attack)-[:targets]->(target:Target) RETURN DISTINCT target.name"
  },
@@ -829,7 +829,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 549,
-  "latency_ms": 55.08679081685841,
+  "latency_ms": 8.768750121816993,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Shamsidin Fariduni\"})<-[:perpetratedBy]-(a:TerroristAttack) RETURN a.name, a.date"
  },
@@ -840,7 +840,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 564,
-  "latency_ms": 45.185500057414174,
+  "latency_ms": 14.960500178858638,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(t1:Target {name: \"The Tropical Inn Hotel\"}), (attack)-[:targets]->(t2:Target {name: \"The Kingsbury\"}) RETURN DISTINCT attack.name"
  },
@@ -851,7 +851,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 538,
-  "latency_ms": 35.62029195018113,
+  "latency_ms": 6.567625096067786,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) WHERE attack.name = \"28 February 2019 Mogadishu bombings\" RETURN attack.locations"
  },
@@ -862,7 +862,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 573,
-  "latency_ms": 58.678832836449146,
+  "latency_ms": 8.936166996136308,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack {name: \"1981 Iranian Prime Minister's office bombing\"}), (a2:TerroristAttack {name: \"Huanggutun Incident\"}) RETURN a1.number_of_deaths = a2.number_of_deaths"
  },
@@ -873,7 +873,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1975,
-  "latency_ms": 188.97841614671052,
+  "latency_ms": 43.79608412273228,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(w:Weapon) WHERE TOLOWER(w.name) = 'bomb' WITH attack MATCH (attack)-[:perpetratedBy]->(terrorist:Terrorist) RETURN attack.name, COUNT(DISTINCT terrorist) AS number_of_terrorists ORDER BY attack.name"
  },
@@ -884,7 +884,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 600,
-  "latency_ms": 47.28475003503263,
+  "latency_ms": 11.80400000885129,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Turkey\"}), (attack)-[:employs]->(weapon:Weapon) RETURN weapon.name, COUNT(attack) AS attack_count ORDER BY attack_count DESC"
  },
@@ -895,7 +895,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 892,
-  "latency_ms": 61.26433308236301,
+  "latency_ms": 18.134042154997587,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) WHERE (attack)-[:occursIn]->(:Country {name: \"Spain\"}) OR (attack)-[:employs]->(:Weapon {name: \"letter bomb\"}) RETURN DISTINCT attack.name"
  },
@@ -906,7 +906,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 505,
-  "latency_ms": 20.56733309291303,
+  "latency_ms": 5.3851669654250145,
   "errors": [],
   "query": "MATCH (c:Country) RETURN count(c)"
  },
@@ -917,7 +917,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1823,
-  "latency_ms": 172.52612416632473,
+  "latency_ms": 31.41358308494091,
   "errors": [],
   "query": "MATCH (terrorist:Terrorist)<-[:perpetratedBy]-(attack:TerroristAttack)-[:employs]->(weapon:Weapon) WHERE tolower(weapon.name) CONTAINS \"firearm\" RETURN COUNT(DISTINCT terrorist)"
  },
@@ -928,7 +928,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 560,
-  "latency_ms": 34.93724996224046,
+  "latency_ms": 9.537207894027233,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon {name: \"gun\"}) RETURN attack.name, attack.number_of_injuries"
  },
@@ -939,7 +939,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 574,
-  "latency_ms": 57.23187490366399,
+  "latency_ms": 14.060124987736344,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon), (attack)-[:occursIn]->(country:Country) WHERE weapon.name = \"bazooka\" AND country.name = \"Israel\" RETURN attack.name, attack.date"
  },
@@ -950,7 +950,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1910,
-  "latency_ms": 52.407625364139676,
+  "latency_ms": 10.140042286366224,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'year' (line 1, column 70 (offset: 69))\n\"MATCH (a:TerroristAttack) WHERE a.name = \"Ramot Junction attack\" AND year(a.date) = 2023 RETURN a.number_of_injuries\"\n                                                                      ^} {gql_status: 50N42} {gql_status_description: error: general processing"
   ],
@@ -963,7 +963,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 566,
-  "latency_ms": 51.23566696420312,
+  "latency_ms": 10.832791915163398,
   "errors": [],
   "query": "MATCH (a:TerroristAttack {name: \"1981 Antwerp bombing\"}), (b:TerroristAttack {name: \"2010 Chechen Parliament attack\"}) RETURN a.number_of_deaths = b.number_of_deaths"
  },
@@ -974,7 +974,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 1984,
-  "latency_ms": 138.44454172067344,
+  "latency_ms": 22.69729203544557,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"IN\"\n  \"INSERT\"\n  \"IS\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\""
   ],
@@ -987,7 +987,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2026,
-  "latency_ms": 190.65454206429422,
+  "latency_ms": 62.58116685785353,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon) WHERE EXISTS((attack)-[:employs]->(:Weapon {name: \"bolt-action rifle\"})) RETURN weapon.name, COUNT(DISTINCT attack) AS count ORDER BY count DESC"
  },
@@ -998,7 +998,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 689,
-  "latency_ms": 86.50633390061557,
+  "latency_ms": 25.39370791055262,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) WHERE EXISTS((ta)-[:employs]->(:Weapon {name: \"bomb\"})) OR (EXISTS((ta)-[:targets]->(:Target {name: \"Corpus Christi solemnity\"})) AND \"Barcelona\" IN ta.locations) RETURN DISTINCT ta.name"
  },
@@ -1009,7 +1009,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 513,
-  "latency_ms": 18.07333412580192,
+  "latency_ms": 5.722459172829986,
   "errors": [],
   "query": "MATCH (t:Terrorist) RETURN DISTINCT t.gender"
  },
@@ -1020,7 +1020,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 545,
-  "latency_ms": 68.83474998176098,
+  "latency_ms": 13.721624854952097,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[occursIn]->(c:Country {name: \"Belgium\"}), (ta)-[employs]->(w:Weapon) RETURN DISTINCT w.name"
  },
@@ -1031,7 +1031,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 569,
-  "latency_ms": 35.0448340177536,
+  "latency_ms": 9.230124996975064,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:targets]->(target:Target) WHERE target.name = \"Kabul International Airport\" RETURN attack.name, attack.locations"
  },
@@ -1042,7 +1042,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 576,
-  "latency_ms": 55.47741707414389,
+  "latency_ms": 11.723042000085115,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:perpetratedBy]->(t:Terrorist {name: \"Tomomitsu Niimi\"}), (attack)-[:occursIn]->(country:Country {name: \"Japan\"}) RETURN attack.name, attack.number_of_injuries"
  },
@@ -1053,7 +1053,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 535,
-  "latency_ms": 24.818083038553596,
+  "latency_ms": 6.443625083193183,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack {name: \"Plot of the rue Saint-Nicaise\"}) RETURN attack.number_of_deaths"
  },
@@ -1064,7 +1064,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2011,
-  "latency_ms": 183.9400816243142,
+  "latency_ms": 37.86583407782018,
   "errors": [],
   "query": "MATCH (attack1:TerroristAttack {name: \"Megiddo Junction bus bombing\"}), (attack2:TerroristAttack {name: \"HaSharon Mall suicide bombing\"}) RETURN attack1.number_of_injuries, attack2.number_of_injuries, ABS(attack1.number_of_injuries - attack2.number_of_injuries)"
  },
@@ -1075,7 +1075,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2197,
-  "latency_ms": 59.548874851316214,
+  "latency_ms": 11.23358285985887,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"IN\"\n  \"INSERT\"\n  \"IS\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"",
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \"!=\"\n  \"%\"\n  \"*\"\n  \"+\"\n  \",\"\n  \"-\"\n  \"/\"\n  \"::\"\n  \"<\"\n  \"<=\"\n  \"<>\"\n  \"=\"\n  \"=~\"\n  \">\"\n  \">=\"\n  \"AND\"\n  \"AS\"\n  \"CALL\"\n  \"CONTAINS\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"ENDS\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"IN\"\n  \"INSERT\"\n  \"IS\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\""
@@ -1089,7 +1089,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 616,
-  "latency_ms": 52.4677918292582,
+  "latency_ms": 11.797749903053045,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:employs]->(weapon:Weapon), (attack)-[:targets]->(target:Target) WHERE weapon.name = \"bomb\" RETURN target.name, count(attack)"
  },
@@ -1100,7 +1100,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1222,
-  "latency_ms": 71.14229188300669,
+  "latency_ms": 16.698248917236924,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:perpetratedBy]->(terrorist:Terrorist) WHERE terrorist.name IN [\"Katsuya Takahashi\", \"Ken'ichi Hirose\"] RETURN DISTINCT attack.name"
  },
@@ -1111,7 +1111,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 845,
-  "latency_ms": 54.2842501308769,
+  "latency_ms": 11.695750057697296,
   "errors": [],
   "query": "MATCH (t:Terrorist) RETURN t.name, t.date_of_birth"
  },
@@ -1122,7 +1122,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 42.15170885436237,
+  "latency_ms": 9.161291876807809,
   "errors": [],
   "query": "MATCH (t:Target {name: \"Uffizi Gallery\"})<-[:targets]-(attack:TerroristAttack)-[:perpetratedBy]->(terrorist:Terrorist) RETURN DISTINCT terrorist.name"
  },
@@ -1133,7 +1133,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 561,
-  "latency_ms": 16.516041941940784,
+  "latency_ms": 3.5951249301433563,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:perpetratedBy]->(terrorist:Terrorist {name: \"K\u014dichi Kitamura\"}) RETURN attack.name, attack.number_of_deaths"
  },
@@ -1144,7 +1144,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1181,
-  "latency_ms": 74.21220932155848,
+  "latency_ms": 22.46820810250938,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:perpetratedBy]->(t:Terrorist {name: \"Juraj Kraj\u010d\u00edk\"}), (ta)-[:employs]->(w:Weapon) WHERE TOLOWER(w.name) CONTAINS \"firearm\" RETURN ta.name"
  },
@@ -1155,7 +1155,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1304,
-  "latency_ms": 44.72720809280872,
+  "latency_ms": 8.710750145837665,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Unknown function 'year' (line 1, column 64 (offset: 63))\n\"MATCH (a:TerroristAttack) WHERE a.name CONTAINS \"Kandahar\" AND year(a.date) = 2021 RETURN a.locations\"\n                                                                ^} {gql_status: 50N42} {gql_status_description: error: general processing exception - unexpect"
   ],
@@ -1168,7 +1168,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1345,
-  "latency_ms": 143.90258374623954,
+  "latency_ms": 24.28812487050891,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack), (a2:TerroristAttack) WHERE a1.name CONTAINS \"Melbourne\" AND a1.name CONTAINS \"Turkish\" AND a2.name CONTAINS \"April\" AND a2.name CONTAINS \"Mogadishu\" AND a2.name CONTAINS \"2022\" RETURN CASE WHEN a1.date > a2.date THEN a1.name ELSE a2.name END"
  },
@@ -1179,7 +1179,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2034,
-  "latency_ms": 74.89195792004466,
+  "latency_ms": 12.329875025898218,
   "errors": [
    "CypherSyntaxError: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Invalid input 'GROUP': expected\n  \",\"\n  \"CALL\"\n  \"CREATE\"\n  \"DELETE\"\n  \"DETACH\"\n  \"FINISH\"\n  \"FOREACH\"\n  \"INSERT\"\n  \"LIMIT\"\n  \"LOAD\"\n  \"MATCH\"\n  \"MERGE\"\n  \"NODETACH\"\n  \"OPTIONAL\"\n  \"ORDER\"\n  \"REMOVE\"\n  \"RETURN\"\n  \"SET\"\n  \"SKIP\"\n  \"UNION\"\n  \"UNWIND\"\n  \"USE\"\n  \"WITH\"\n  <EOF> (line 1, column 145 (offset: 144))\n\"MATCH (ta"
   ],
@@ -1192,7 +1192,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 53.2430000603199,
+  "latency_ms": 9.681666968390346,
   "errors": [],
   "query": "MATCH (c:Country {name: \"India\"})<-[:occursIn]-(ta:TerroristAttack)-[:employs]->(w:Weapon) RETURN w.name, COUNT(ta)"
  },
@@ -1203,7 +1203,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 561,
-  "latency_ms": 67.24041700363159,
+  "latency_ms": 20.1152500230819,
   "errors": [],
   "query": "MATCH (a:TerroristAttack) WHERE (a)-[:occursIn]->(:Country {name: \"Russia\"}) OR (a)-[:perpetratedBy]->(:Terrorist {name: \"Saidakrami Rachabalizodu\"}) RETURN count(DISTINCT a)"
  },
@@ -1214,7 +1214,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 505,
-  "latency_ms": 22.859124932438135,
+  "latency_ms": 5.169250071048737,
   "errors": [],
   "query": "MATCH (t:Terrorist) RETURN count(t)"
  },
@@ -1225,7 +1225,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 556,
-  "latency_ms": 58.539291843771935,
+  "latency_ms": 14.007834019139409,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(ied:Weapon {name: \"improvised explosive device\"}), (ta)-[:employs]->(w:Weapon) RETURN COUNT(DISTINCT w.name)"
  },
@@ -1236,7 +1236,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 548,
-  "latency_ms": 34.953375114127994,
+  "latency_ms": 11.101625161245465,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Mario Moretti\"})<-[:perpetratedBy]-(a:TerroristAttack) RETURN a.name, a.number_of_deaths"
  },
@@ -1247,7 +1247,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1185,
-  "latency_ms": 86.77391684614122,
+  "latency_ms": 31.769874971359968,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:targets]->(tgt:Target), (ta)-[:employs]->(w:Weapon) WHERE tgt.name CONTAINS \"Kabul Airlift\" AND w.name CONTAINS \"firearm\" RETURN DISTINCT ta.name"
  },
@@ -1258,7 +1258,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 517,
-  "latency_ms": 13.863832922652364,
+  "latency_ms": 3.8699160795658827,
   "errors": [],
   "query": "MATCH (t:Terrorist {name: \"Petter Kristian Kyvik\"}) RETURN t.gender"
  },
@@ -1269,7 +1269,7 @@
   "turns": 3,
   "solved": false,
   "tokens": 2038,
-  "latency_ms": 175.56308396160603,
+  "latency_ms": 38.275958271697164,
   "errors": [],
   "query": "MATCH (a1:TerroristAttack) WHERE a1.name CONTAINS \"DRM 1\" MATCH (a2:TerroristAttack) WHERE a2.name CONTAINS \"Markina\" RETURN a1.name, a1.number_of_deaths, a2.name, a2.number_of_deaths"
  },
@@ -1280,7 +1280,7 @@
   "turns": 2,
   "solved": true,
   "tokens": 1306,
-  "latency_ms": 134.3884589150548,
+  "latency_ms": 26.25466580502689,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack)-[:occursIn]->(country:Country {name: \"Norway\"}) OPTIONAL MATCH (attack)-[:targets]->(target:Target) RETURN attack.name, COUNT(DISTINCT target)"
  },
@@ -1291,7 +1291,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 757,
-  "latency_ms": 66.20912509970367,
+  "latency_ms": 17.609332920983434,
   "errors": [],
   "query": "MATCH (megiddo:TerroristAttack {name: \"Megiddo Junction bus bombing\"})-[:employs]->(w:Weapon) WITH collect(w) as megiddo_weapons MATCH (attack:TerroristAttack)-[:employs]->(w:Weapon) WHERE w IN megiddo_weapons AND attack.name <> \"Megiddo Junction bus bombing\" RETURN attack.name, count(w) as weapon_count"
  },
@@ -1302,7 +1302,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 777,
-  "latency_ms": 68.77033412456512,
+  "latency_ms": 41.676499880850315,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack) WHERE (ta)-[:employs]->(:Weapon {name: \"grenade launcher\"}) OR (ta)-[:occursIn]->(:Country {name: \"Russia\"}) RETURN DISTINCT ta.name"
  },
@@ -1313,7 +1313,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 899,
-  "latency_ms": 43.68508397601545,
+  "latency_ms": 19.30204196833074,
   "errors": [],
   "query": "MATCH (attack:TerroristAttack) WHERE attack.date < date('1997-03-13') RETURN attack.name"
  },
@@ -1324,7 +1324,7 @@
   "turns": 3,
   "solved": true,
   "tokens": 2306,
-  "latency_ms": 181.34333426132798,
+  "latency_ms": 47.886542277410626,
   "errors": [],
   "query": "MATCH (attack1:TerroristAttack)-[:occursIn]->(country:Country)<-[:occursIn]-(attack2:TerroristAttack) WHERE toLower(attack1.name) CONTAINS toLower(\"natan-zada\") RETURN attack2.name, attack2.number_of_injuries"
  },
@@ -1335,7 +1335,7 @@
   "turns": 1,
   "solved": true,
   "tokens": 544,
-  "latency_ms": 39.40466605126858,
+  "latency_ms": 10.029457975178957,
   "errors": [],
   "query": "MATCH (ta:TerroristAttack)-[:employs]->(w:Weapon) WHERE w.name = \"grenade launcher\" RETURN max(ta.number_of_deaths)"
  }

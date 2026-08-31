@@ -289,6 +289,8 @@ def run_graph(graph: str, n: int, model: str, which: str) -> None:
 def report(model: str) -> None:
     arms: dict[str, list] = {}
     for p in sorted(AGENT_OUT.glob(f"agent-*-{model}-*.json")):
+        if p.name.endswith(".meta.json"):
+            continue  # provenance, not results
         rows = json.loads(p.read_text())
         arms.setdefault(rows[0]["arm"], []).extend(rows)
     if not arms:
@@ -475,14 +477,34 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
         )
         w("")
         w(
-            "What is not in doubt is the cost. theorem executes "
-            f"{c['mean_exec_ms_per_question'] / max(t['mean_exec_ms_per_question'], 0.01):.0f}x "
-            "faster, and costs "
+            "What the tie does not cover is the first attempt. theorem "
+            f"solves {t['solve_at_1'] * 100:.1f}% of these questions without a "
+            f"retry against {c['solve_at_1'] * 100:.1f}%, a gap of "
+            f"{(t['solve_at_1'] - c['solve_at_1']) * 100:.1f} points that the "
+            "retries then close, and it converges in "
+            f"{t['mean_turns_when_solved']:.2f} turns against "
+            f"{c['mean_turns_when_solved']:.2f}. An agent that can retry pays "
+            "for the difference in turns rather than in answers; one that "
+            "cannot pays for it in answers."
+        )
+        w("")
+        w(
+            "The token cost is "
             f"{t['mean_tokens_per_question'] / c['mean_tokens_per_question']:.1f}x "
-            "the tokens per question, because a language the model has never "
-            "seen carries its own tutorial in every prompt while Cypher "
-            "arrives already known. Both gaps are large enough not to be "
-            "noise, and the token one is the honest cost of a new language."
+            "per question, because a language the model has never seen "
+            "carries its own tutorial in every prompt while Cypher arrives "
+            "already known. That is the honest price of a new language, and "
+            "the next section is where it stops being one."
+        )
+        w("")
+        w(
+            "Execution time is not a useful comparison on this benchmark. "
+            f"The means are {t['mean_exec_ms_per_question']:.0f} ms and "
+            f"{c['mean_exec_ms_per_question']:.0f} ms, but they are dominated "
+            "by a handful of wide queries over `soccer`, and theorem runs "
+            "in-process while Cypher goes over bolt to a container. The "
+            "CypherBench page has the median, where the difference is real "
+            "and large."
         )
         w("")
         w(
@@ -506,10 +528,12 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
     w(
         "That matters because the two costs scale differently. The rules "
         "are a fixed cost per turn no matter how big the graph is; the "
-        "schema grows with it. Measured over merged CypherBench schemas, "
-        "each additional class costs theorem about 42 tokens and Cypher "
-        "about 104, so theorem's fixed overhead is repaid at roughly 18 to "
-        "20 classes and is pure profit above that."
+        "schema grows with it. Measured on the seven test schemas and on "
+        "their union, each additional class costs theorem 39 tokens and "
+        "text2cypher 85, and the two lines cross at 31 classes. That "
+        "crossing is inside the measured range rather than past it: on the "
+        "union, 40 classes, theorem's prompt is the smaller of the two. "
+        "See [prompt cost](prompt-cost.md) for the method and the table."
     )
     w("")
     w("| Schema | Classes | theorem | text2cypher |")
