@@ -65,6 +65,30 @@ way.
 - Faster dedup blocking beyond 10^6 nodes.
 - Import from a Cypher dump, so migrating does not mean re-exporting.
 
+## Open: expressiveness, with evidence
+
+Sampled from what the shipped prompt generates on the CypherBench test set,
+after the qualified-condition widening took verification from 93.8% to 97.9%.
+Seven failures remain in ~330 questions, in two classes.
+
+**Comparing two bindings' properties.** `keep c where birth_loc.name =
+death_loc.name` is rejected: a condition's right-hand side must be a literal.
+The question family ("born and died in the same place", "lakes in the same
+country as X") is common and the workaround, `compute a.x same b.y as flag`
+then `keep c where flag = true`, is not what anyone writes first. A dotted
+right-hand side is unambiguous, since literals are never dotted, so this is a
+widening rather than a new concept. Needs a language proposal issue first
+(CONTRIBUTING's spec-first rule).
+
+**Role guessing on same-class edges.** A model writes `follow p hasHeadOfState
+subj` where the schema declares `country` and `politician`, or `follow c
+hasMother character` where it declares `subj` and `obj`. The error lists the
+roles, so a repair turn fixes it and the agent loop is unaffected; single-shot
+loses the question. Accepting `subj`/`obj` as positional aliases for an edge's
+two declared roles would fix it and would cost the canonical-form rule that
+there is exactly one spelling per operation. Not obviously worth it: four
+questions in 330.
+
 ## Open: agent ergonomics
 
 - Session-level schema diffing: tell the agent what changed since it last looked.
