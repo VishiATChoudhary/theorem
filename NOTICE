@@ -3,3 +3,19 @@ Copyright 2026 Vishisht Choudhary and the theorem contributors
 
 This product includes software developed as part of the theorem project
 (https://github.com/VishiATChoudhary/theorem).
+
+---
+
+This product contains code vendored from third-party projects:
+
+CypherBench (https://github.com/megagonlabs/cypherbench)
+Copyright Megagon Labs, licensed under the Apache License 2.0.
+The execution-accuracy comparison helpers in `eval/run_public.py` are
+vendored from `cypherbench/metrics/execution_accuracy.py` so that theorem's
+published results are scored by the benchmark's own comparator rather than
+by a reimplementation of it. The vendored block is marked in that file.
+
+CypherBench's graphs, questions and gold answers are not redistributed here.
+They are downloaded from huggingface.co/datasets/megagonlabs/cypherbench at
+evaluation time, and `eval/data/` is not tracked.
+
