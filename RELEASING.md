@@ -49,7 +49,7 @@ sound. To turn it on:
 
 1. On PyPI, **Your projects, Publishing, Add a new pending publisher**
    (https://pypi.org/manage/account/publishing/) with:
-   - PyPI project name: `theorem`
+   - PyPI project name: `theoremql`
    - Owner: `VishiATChoudhary`
    - Repository name: `theorem`
    - Workflow name: `release.yml`
@@ -70,8 +70,14 @@ sound. To turn it on:
    git push origin :refs/tags/v0.3.0 && git push origin v0.3.0
    ```
 
-Check the name is still free before step 1: PyPI returned 404 for
-`theorem` as of 2026-08-31, but names get taken.
+**The distribution is `theoremql`, not `theorem`.** PyPI prohibits
+`theorem`: it 404s on the JSON API but the upload form rejects it, which
+is the prohibited-names path rather than the too-similar one. The module
+you import and the command you run are still `theorem`; only the name on
+the index differs, and `[tool.uv.build-backend] module-name` in
+pyproject.toml is what keeps them apart. `tests/test_distribution_name.py`
+fails if an extras message or a doc drifts back to `theorem[pdf]`, which
+would resolve nothing.
 
 ### Route B: one-off from your machine
 
@@ -100,8 +106,10 @@ after deleting it, so a mistake costs a version number. Hence the
 `twine check` above.
 
 Once it publishes, change the install instructions in `README.md`,
-`docs/index.md`, `docs/tutorial.md` and `docs/using-theorem.md` back to
-`pip install theorem`, and restore the PyPI badge in the README.
+`docs/index.md`, `docs/tutorial.md`, `docs/using-theorem.md` and
+`skills/theorem/SKILL.md` from the git URL to `pip install theoremql`,
+and restore the PyPI badge in the README pointing at
+https://pypi.org/project/theoremql/.
 
 ## Docs
 

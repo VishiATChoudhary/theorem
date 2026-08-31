@@ -1314,8 +1314,8 @@ wheels = [
 ]
 
 [[package]]
-name = "theorem"
-version = "0.3.0"
+name = "theoremql"
+version = "0.3.1"
 source = { editable = "." }
 
 [package.optional-dependencies]

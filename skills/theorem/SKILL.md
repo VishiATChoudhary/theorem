@@ -51,7 +51,13 @@ pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
 theorem --help
 ```
 
-Extras: `[pdf]` for PDF ingest, `[office]` for docx/xlsx/pptx.
+Extras: `[pdf]` for PDF ingest, `[office]` for docx/xlsx/pptx. They name
+the distribution, which is `theoremql` (PyPI prohibits `theorem`), while
+the module and the command stay `theorem`:
+
+```bash
+pip install "theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+```
 
 ## Pick the right call. This is the one thing to get right.
 

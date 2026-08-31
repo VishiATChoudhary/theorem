@@ -37,7 +37,11 @@ the language and the storage format to hold still:
 pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
 ```
 
-The core package has no dependencies. Run a program or an interactive session:
+The core package has no dependencies. On PyPI the distribution is named
+**`theoremql`**, because PyPI prohibits `theorem`; the module you import
+and the command you run are `theorem` either way.
+
+Run a program or an interactive session:
 
 ```bash
 theorem program.thm --db ./db
@@ -80,7 +84,7 @@ One line, one step, one name. Reading it top to bottom is the whole mental model
 Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: markdown, text, CSV, JSON/JSONL, PDFs, docx/xlsx/pptx, and images (stored with metadata) all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
 
 ```bash
-pip install "theorem[pdf,office] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install "theoremql[pdf,office] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
 theorem ingest report.pdf --db ./db
 theorem playbook compile playbook.md --db ./db --agent claude
 ```

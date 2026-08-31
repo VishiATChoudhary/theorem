@@ -25,6 +25,14 @@ pip install "git+https://github.com/VishiATChoudhary/theorem.git@<sha>"
 Optional extras add document ingest: `[pdf]` for PDFs, `[office]` for
 docx/xlsx/pptx. The core package has **no dependencies at all**.
 
+The distribution is named **`theoremql`** on PyPI, because PyPI prohibits
+the name `theorem`. Nothing else changes: you `import theorem`, you run
+`theorem`, and an extras spec names the distribution:
+
+```bash
+pip install "theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+```
+
 ## Three APIs, and which one is yours
 
 This is the only part of the library it is possible to get wrong, so it

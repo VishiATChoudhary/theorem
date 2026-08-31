@@ -121,7 +121,7 @@ def normalize(data: bytes, filename: str) -> Envelope:
         except ImportError as e:
             raise IngestError(
                 "PDF support needs the pdf extra: pip install "
-                '"theorem[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git"'
+                '"theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git"'
             ) from e
         try:
             env = Envelope(meta={"format": "pdf", "filename": filename})
@@ -166,7 +166,10 @@ def normalize(data: bytes, filename: str) -> Envelope:
     raise IngestError(f"Unknown format: {fmt}")
 
 
-_OFFICE_EXTRA_MESSAGE = "Office format support requires: pip install 'theorem[office]'"
+_OFFICE_EXTRA_MESSAGE = (
+    "Office format support needs the office extra: pip install "
+    "'theoremql[office] @ git+https://github.com/VishiATChoudhary/theorem.git'"
+)
 
 
 def _normalize_docx(data: bytes, filename: str) -> Envelope:

@@ -4,6 +4,22 @@ Versions follow the 0.x line: the language surface in
 [docs/language-spec.md](docs/language-spec.md) is what the benchmarks pin
 and is the least likely thing to move; everything else may.
 
+## 0.3.1
+
+### Changed
+
+- **The distribution is named `theoremql`.** PyPI prohibits the name
+  `theorem`: it returns 404 on the JSON API, but the upload form rejects
+  it outright, which is the prohibited-names path rather than the
+  too-similar one. Nothing else moves. You still `import theorem`, still
+  run `theorem`, and the repository keeps its name. Only `pip install`
+  and an extras spec change, because an extras spec names the
+  distribution: `pip install "theoremql[pdf]"`, never `theorem[pdf]`,
+  which resolves nothing. `tests/test_distribution_name.py` fails if a
+  message or a doc drifts back.
+- Added `Documentation` and `Changelog` to the package metadata, so the
+  PyPI sidebar points at the site and the release notes.
+
 ## 0.3.0
 
 First release intended to be installed by someone else.

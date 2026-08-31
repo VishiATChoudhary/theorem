@@ -43,7 +43,7 @@ def test_pdf_without_extra_names_the_extra(monkeypatch):
     # happens to be installed in this environment: setting a module to None
     # in sys.modules makes `import pdfplumber` raise ImportError.
     monkeypatch.setitem(sys.modules, "pdfplumber", None)
-    with pytest.raises(IngestError, match=r"theorem\[pdf\]"):
+    with pytest.raises(IngestError, match=r"theoremql\[pdf\]"):
         normalize(b"%PDF-1.7", "d.pdf")
 
 

@@ -1,6 +1,6 @@
 [project]
-name = "theorem"
-version = "0.3.0"
+name = "theoremql"
+version = "0.3.1"
 description = "A graph query and construction language for AI agents. Every query verified whole before it runs."
 readme = "README.md"
 license = "Apache-2.0"
@@ -34,6 +34,13 @@ office = ["python-docx>=1.1", "openpyxl>=3.1", "python-pptx>=1.0"]
 
 [project.scripts]
 theorem = "theorem.cli:main"
+
+# The distribution is `theoremql` because PyPI prohibits the name
+# `theorem`, but the module stays `theorem`: that is what the docs, the
+# benchmarks and every existing program import. uv infers the module name
+# from the project name, so it has to be told.
+[tool.uv.build-backend]
+module-name = "theorem"
 
 [build-system]
 requires = ["uv_build>=0.9.15,<0.10.0"]

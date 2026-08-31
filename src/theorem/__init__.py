@@ -24,7 +24,7 @@ from .schema import ClassDef, EdgeDef, Schema
 from .session import Session
 from .verifier import VerifyError, verify
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "Answer",

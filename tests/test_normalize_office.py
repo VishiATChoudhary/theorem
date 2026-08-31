@@ -63,17 +63,17 @@ def test_docx_corrupt_zip_raises_ingest_error():
 
 def test_docx_without_extra_names_the_extra(monkeypatch):
     monkeypatch.setitem(sys.modules, "docx", None)
-    with pytest.raises(IngestError, match=r"theorem\[office\]"):
+    with pytest.raises(IngestError, match=r"theoremql\[office\]"):
         normalize(_fake_ooxml_bytes("word/document.xml"), "d.docx")
 
 
 def test_xlsx_without_extra_names_the_extra(monkeypatch):
     monkeypatch.setitem(sys.modules, "openpyxl", None)
-    with pytest.raises(IngestError, match=r"theorem\[office\]"):
+    with pytest.raises(IngestError, match=r"theoremql\[office\]"):
         normalize(_fake_ooxml_bytes("xl/workbook.xml"), "s.xlsx")
 
 
 def test_pptx_without_extra_names_the_extra(monkeypatch):
     monkeypatch.setitem(sys.modules, "pptx", None)
-    with pytest.raises(IngestError, match=r"theorem\[office\]"):
+    with pytest.raises(IngestError, match=r"theoremql\[office\]"):
         normalize(_fake_ooxml_bytes("ppt/presentation.xml"), "d.pptx")
