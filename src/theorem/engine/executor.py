@@ -300,27 +300,59 @@ def _candidate_rows(store: Store) -> list[dict]:
     return rows
 
 
+# Below this many nodes a scan is cheap and an index is memory spent to
+# save nothing. Above it, on a 275k-node class, the same filter is 288 ms
+# scanned and a lookup indexed.
+INDEX_WORTH_IT = 5_000
+
+
 def _name_lookup(stmt: Find, store: Store) -> list[str] | None:
-    """Node ids that could match a name-equality condition, else None.
+    """Node ids that could match the condition, or None for "read the class".
 
     A prefilter only: the caller still evaluates the whole condition on
-    every candidate, so this can safely return a superset and matching
-    semantics are untouched. Returns None when the condition is not
-    purely name equality, which means "no shortcut, read the class".
+    every candidate, so this may safely return a superset and matching
+    semantics are untouched. The union over the clauses is a superset
+    whether they are joined by `and` (the answer is their intersection)
+    or by `or` (it is their union), which is why no attention is paid to
+    the joiners.
+
+    `name` is always indexed. Any other property is indexed the first
+    time a query asks about it, and only on a class large enough for the
+    scan to be worth avoiding.
     """
-    if not stmt.cond:
+    if not stmt.cond or stmt.target not in store.by_class:
         return None
+    props = []
     for _joiner, clause in stmt.cond:
         if (
-            clause.col != ("name",)
+            len(clause.col) != 1
             or clause.op != "="
-            or not isinstance(clause.value, str)
+            or not isinstance(clause.value, (str, int, float))
+            or isinstance(clause.value, bool)
         ):
             return None
+        props.append(clause.col[0])
+    if any(p != "name" for p in props):
+        if len(store.by_class.get(stmt.target, ())) < INDEX_WORTH_IT:
+            return None
+        for prop in set(props):
+            if prop != "name":
+                store.index_prop(stmt.target, prop)
+        if any(
+            (stmt.target, p) not in store.indexed_props for p in props if p != "name"
+        ):
+            return None  # indexing is off; read the class
     ids: list[str] = []
     seen: set[str] = set()
     for _joiner, clause in stmt.cond:
-        for nid in store.by_name.get((stmt.target, _fold(clause.value)), ()):
+        prop = clause.col[0]
+        if prop == "name":
+            found = store.by_name.get((stmt.target, _fold(clause.value)), ())
+        else:
+            found = store.by_prop.get((stmt.target, prop), {}).get(
+                _fold(clause.value), ()
+            )
+        for nid in found:
             if nid not in seen:
                 seen.add(nid)
                 ids.append(nid)

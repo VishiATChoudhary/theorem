@@ -78,6 +78,22 @@ class Edge:
     retired_at: int | None = None
 
 
+def _index_values(value) -> list:
+    """The keys a property value is findable under.
+
+    A property holding several values matches if any one of them does,
+    so a list is indexed under each member. Folding here is the same
+    folding a condition does, or the index would answer a different
+    question from the scan it replaces.
+    """
+    from .text import fold
+
+    if value is None:
+        return []
+    items = value if isinstance(value, list) else [value]
+    return [fold(v) for v in items if v is not None]
+
+
 class Store:
     """One writer per directory.
 
@@ -122,6 +138,14 @@ class Store:
         # (class, folded name) -> node ids, so looking a node up by name
         # costs the name rather than the class
         self.by_name: dict[tuple[str, str], list[str]] = {}
+        # (class, prop) -> folded value -> node ids, built on demand by
+        # index_prop() and maintained by every write after that
+        self.by_prop: dict[tuple[str, str], dict] = {}
+        self.indexed_props: set[tuple[str, str]] = set()
+        # Off switch for the differential tests, which have to be able to
+        # ask for the answer an unindexed store would give. Clearing the
+        # index is not enough: the next query rebuilds it.
+        self.auto_index = True
         self.edges: dict[str, list[Edge]] = {}
         self.edge_index: dict[str, Edge] = {}
         self.lineage: list[dict] = []
@@ -302,6 +326,7 @@ class Store:
         self.nodes = {}
         self.by_class = {}
         self.by_name = {}
+        self.by_prop = {k: {} for k in self.indexed_props}
         self.edges = {}
         self.edge_index = {}
         self.lineage = []
@@ -479,6 +504,49 @@ class Store:
         for stale in runs[: -self.keep_runs] if self.keep_runs else runs:
             stale.unlink(missing_ok=True)
 
+    # ---- property indexes -------------------------------------------
+
+    def index_prop(self, cls: str, prop: str) -> None:
+        """Index a class by one property, if it is not already.
+
+        Built on demand, because indexing every property of every class
+        doubles the memory of a store to answer questions nobody asked.
+        The first query that filters on a (class, property) pays a scan,
+        and every one after it does not.
+        """
+        key = (cls, prop)
+        if key in self.indexed_props or not self.auto_index:
+            return
+        self.indexed_props.add(key)
+        index = self.by_prop.setdefault(key, {})
+        for nid in self.by_class.get(cls, ()):
+            node = self.nodes.get(nid)
+            if node is not None:
+                for value in _index_values(node.props.get(prop)):
+                    index.setdefault(value, []).append(nid)
+
+    def _index_props(self, node) -> None:
+        for cls, prop in self.indexed_props:
+            if node.cls != cls:
+                continue
+            index = self.by_prop.setdefault((cls, prop), {})
+            for value in _index_values(node.props.get(prop)):
+                index.setdefault(value, []).append(node.id)
+
+    def _deindex_props(self, node) -> None:
+        for cls, prop in self.indexed_props:
+            if node.cls != cls:
+                continue
+            index = self.by_prop.get((cls, prop))
+            if index is None:
+                continue
+            for value in _index_values(node.props.get(prop)):
+                ids = [i for i in index.get(value, ()) if i != node.id]
+                if ids:
+                    index[value] = ids
+                else:
+                    index.pop(value, None)
+
     def _name_key(self, node) -> tuple[str, str] | None:
         from .text import fold
 
@@ -553,12 +621,17 @@ class Store:
             self.nodes[node.id] = node
             self.by_class.setdefault(node.cls, []).append(node.id)
             self._index_name(node)
+            self._index_props(node)
             self.edges.setdefault(node.id, [])
             self._bump_counter(node.cls, node.id)
         elif op == "patch_node":
             node = self.nodes[rec["id"]]
             if "name" in rec["props"]:
                 self._deindex_name(node)
+            # Deindex on the old values before they are overwritten, or
+            # the entries under them are never removed and the index
+            # starts answering with nodes that no longer match.
+            self._deindex_props(node)
             for k, v in rec["props"].items():
                 if k in node.props and node.props[k] != v:
                     node.conflict_count += 1
@@ -568,6 +641,7 @@ class Store:
                 node.state = rec["state"]
             if "name" in rec["props"]:
                 self._index_name(node)
+            self._index_props(node)
         elif op == "put_edge":
             edge = Edge(
                 id=rec["id"],
