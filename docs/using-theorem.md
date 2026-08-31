@@ -7,31 +7,30 @@ own are marked, and their API names are checked instead.
 
 ## Install
 
-theorem is not on PyPI yet, so install it from the repository:
-
 ```bash
-uv add "theorem @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+uv add theoremql
 # or
-pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install theoremql
 ```
 
-Pin a commit rather than `main` if you want the language and the storage
-format to hold still:
+Pin it if you want the language and the storage format to hold still:
 
 ```bash
-pip install "git+https://github.com/VishiATChoudhary/theorem.git@<sha>"
+pip install "theoremql==0.3.1"
 ```
 
 Optional extras add document ingest: `[pdf]` for PDFs, `[office]` for
 docx/xlsx/pptx. The core package has **no dependencies at all**.
 
-The distribution is named **`theoremql`** on PyPI, because PyPI prohibits
-the name `theorem`. Nothing else changes: you `import theorem`, you run
-`theorem`, and an extras spec names the distribution:
+The distribution is named **`theoremql`**, because PyPI prohibits the name
+`theorem`. Nothing else changes: you `import theorem`, you run `theorem`,
+and an extras spec names the distribution rather than the module:
 
 ```bash
-pip install "theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install "theoremql[pdf,office]"
 ```
+
+Never `theorem[pdf]`, which resolves nothing.
 
 ## Three APIs, and which one is yours
 

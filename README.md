@@ -14,6 +14,7 @@ Every query is verified whole against the live schema before anything runs.</p>
 
 <p align="center">
   <a href="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml"><img src="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml/badge.svg" alt="CI"></a>
+  <a href="https://pypi.org/project/theoremql/"><img src="https://img.shields.io/pypi/v/theoremql" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue" alt="Python versions">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License"></a>
 </p>
@@ -30,16 +31,12 @@ LLMs get roughly **40% of Cypher queries wrong** on realistic schemas. Two model
 
 ## Install
 
-Not on PyPI yet. Install from the repository, pinning a commit if you want
-the language and the storage format to hold still:
-
 ```bash
-pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install theoremql
 ```
 
-The core package has no dependencies. On PyPI the distribution is named
-**`theoremql`**, because PyPI prohibits `theorem`; the module you import
-and the command you run are `theorem` either way.
+The distribution is `theoremql` because PyPI prohibits the name `theorem`;
+what you import and what you run are `theorem`. No dependencies.
 
 Run a program or an interactive session:
 
@@ -84,7 +81,7 @@ One line, one step, one name. Reading it top to bottom is the whole mental model
 Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: markdown, text, CSV, JSON/JSONL, PDFs, docx/xlsx/pptx, and images (stored with metadata) all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
 
 ```bash
-pip install "theoremql[pdf,office] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install "theoremql[pdf,office]"
 theorem ingest report.pdf --db ./db
 theorem playbook compile playbook.md --db ./db --agent claude
 ```

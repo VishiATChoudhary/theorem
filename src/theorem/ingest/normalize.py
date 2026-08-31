@@ -120,8 +120,7 @@ def normalize(data: bytes, filename: str) -> Envelope:
             import pdfplumber
         except ImportError as e:
             raise IngestError(
-                "PDF support needs the pdf extra: pip install "
-                '"theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git"'
+                'PDF support needs the pdf extra: pip install "theoremql[pdf]"'
             ) from e
         try:
             env = Envelope(meta={"format": "pdf", "filename": filename})
@@ -167,8 +166,7 @@ def normalize(data: bytes, filename: str) -> Envelope:
 
 
 _OFFICE_EXTRA_MESSAGE = (
-    "Office format support needs the office extra: pip install "
-    "'theoremql[office] @ git+https://github.com/VishiATChoudhary/theorem.git'"
+    "Office format support needs the office extra: pip install 'theoremql[office]'"
 )
 
 

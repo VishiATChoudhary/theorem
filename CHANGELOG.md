@@ -6,6 +6,8 @@ and is the least likely thing to move; everything else may.
 
 ## 0.3.1
 
+First version on PyPI: https://pypi.org/project/theoremql/
+
 ### Changed
 
 - **The distribution is named `theoremql`.** PyPI prohibits the name

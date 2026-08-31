@@ -44,20 +44,17 @@ got.rows, got.query, got.turns, got.errors
 
 ## Install
 
-Not on PyPI. The core package has no dependencies.
+No dependencies.
 
 ```bash
-pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install theoremql
 theorem --help
 ```
 
 Extras: `[pdf]` for PDF ingest, `[office]` for docx/xlsx/pptx. They name
 the distribution, which is `theoremql` (PyPI prohibits `theorem`), while
-the module and the command stay `theorem`:
-
-```bash
-pip install "theoremql[pdf] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
-```
+the module and the command stay `theorem`: `pip install "theoremql[pdf]"`,
+never `theorem[pdf]`, which resolves nothing.
 
 ## Pick the right call. This is the one thing to get right.
 

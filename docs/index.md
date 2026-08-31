@@ -8,11 +8,12 @@ LLMs get roughly 40% of Cypher queries wrong on realistic schemas, and two years
 
 ## Install
 
-Not on PyPI yet; install from the repository. The core package has no dependencies.
-
 ```bash
-pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
+pip install theoremql
 ```
+
+The distribution is `theoremql` (PyPI prohibits `theorem`); you still
+`import theorem` and still run `theorem`. No dependencies.
 
 ```bash
 theorem program.thm --db ./db    # run a program

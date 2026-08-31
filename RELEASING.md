@@ -43,9 +43,9 @@ tar tzf dist/theorem-*.tar.gz # 36 files; no eval data, no docs, no db
 No token is stored anywhere. GitHub proves its identity to PyPI over
 OIDC, which is why this is the route the workflow uses.
 
-It is not configured yet, which is why the v0.3.0 release run ended in
-`Missing credentials`. Nothing was published, and the tag is otherwise
-sound. To turn it on:
+**This is configured and working**: v0.3.1 published through it on
+2026-08-31. The steps below are the record of how, and what to redo if
+the publisher is ever removed.
 
 1. On PyPI, **Your projects, Publishing, Add a new pending publisher**
    (https://pypi.org/manage/account/publishing/) with:
@@ -105,11 +105,11 @@ pip install -i https://test.pypi.org/simple/ theorem
 after deleting it, so a mistake costs a version number. Hence the
 `twine check` above.
 
-Once it publishes, change the install instructions in `README.md`,
-`docs/index.md`, `docs/tutorial.md`, `docs/using-theorem.md` and
-`skills/theorem/SKILL.md` from the git URL to `pip install theoremql`,
-and restore the PyPI badge in the README pointing at
-https://pypi.org/project/theoremql/.
+The install instructions in `README.md`, `docs/index.md`,
+`docs/tutorial.md`, `docs/using-theorem.md` and `skills/theorem/SKILL.md`
+now say `pip install theoremql`, and the README carries the PyPI badge
+again. A pending publisher becomes a normal one on the first upload;
+there is nothing further to wait for.
 
 ## Docs
 

@@ -49,6 +49,14 @@ def test_an_extras_message_names_the_distribution(extra):
     "doc", ["README.md", "docs/using-theorem.md", "skills/theorem/SKILL.md"]
 )
 def test_a_doc_never_tells_you_to_install_the_module_name(doc):
+    """Only what a reader would copy.
+
+    These pages name `theorem[pdf]` on purpose, to say it resolves
+    nothing. What must never appear is that spelling behind a
+    `pip install`, so the match is anchored to the command.
+    """
     text = (ROOT / doc).read_text(encoding="utf-8")
-    for match in re.findall(r"[\w.-]+\[(?:pdf|office)[\w,]*\]", text):
-        assert match.startswith(DIST), f"{doc} says {match!r}, not {DIST}"
+    installs = re.findall(r"(?:pip install|uv add)\s+\"?([\w.-]+\[[\w,]+\])", text)
+    assert installs, f"{doc} shows no extras install to check"
+    for spec in installs:
+        assert spec.startswith(DIST), f"{doc} says `pip install {spec}`, not {DIST}"
