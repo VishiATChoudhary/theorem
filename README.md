@@ -97,8 +97,8 @@ The complete public [CypherBench](https://github.com/megagonlabs/cypherbench) te
 
 | Condition | EX | Multi-hop EX | Executable | Mean result tokens |
 |-----------|---:|-------------:|-----------:|-------------------:|
-| theorem + Haiku 4.5 | **78.0%** | **78.7%** | 97.4% | **159** |
-| text2cypher + Haiku 4.5 | 70.4% | 68.9% | 95.3% | 242 |
+| theorem + Haiku 4.5 | **78.0%** | **78.7%** | 96.6% | **167** |
+| text2cypher + Haiku 4.5 | 70.4% | 69.6% | 95.3% | 242 |
 | text2cypher + Claude 3.5 Sonnet (published) | 61.6% | — | 96.3% | — |
 | text2cypher + GPT-4o (published) | 60.2% | — | 94.9% | — |
 

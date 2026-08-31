@@ -40,6 +40,24 @@ its results, so a report cannot describe a prompt it never ran. Editing the
 prompt invalidates the frozen file by design: a stale one is not found rather
 than silently scored.
 
+## A note on the prompt version
+
+The 78.0% above was regenerated in August 2026 against prompt fingerprint
+`eb0f4010`, the tutorial the package ships. The figure published before it,
+78.02%, came from `3ad56b1c`, a tutorial roughly twice as long that was halved
+afterwards and validated only on the agent loop, where a repair turn can hide a
+regression that one-shot translation cannot. The frozen-query fingerprint is
+what surfaced the mismatch: a query file generated from one tutorial is simply
+not found when another is checked out.
+
+Regenerating moved the full-set figure by 0.04 points, 78.02% to 77.98%, and
+left the held-out figure unchanged at 76.85%. It did not start there. Sampling
+the first generations found the shorter prompt verifying 93.8% where the longer
+one verified 97.8% on the same questions, almost all of it one rejected
+spelling: `follow c locatedIn lake as l where l.area_km2 < 390000`, which means
+exactly what the accepted form means. The language now accepts it, which took
+verification back to 97.9% without touching the prompt.
+
 ## A note on earlier numbers
 
 An earlier version of this page reported 98.3% for theorem against 73.3% for text2cypher, and 96% against 56% on multi-hop. Those came from a 60-question hand-picked slice of the `nba` graph with the categories theorem could not then express removed, and with a prompt that had been iterated against those same questions. They did not survive the full public benchmark and should not be quoted. The numbers above are the whole test set with nothing excluded.

@@ -1,0 +1,92 @@
+{
+ "benchmark": "CypherBench test set (megagonlabs/cypherbench)",
+ "protocol": "full test set, all 7 test graphs, all match categories (no slice), full unsampled graphs, zero-shot single generation, no repair retry, official execution-accuracy comparison vs published gold answers",
+ "system": "theorem v0 grammar-prompting + theorem engine",
+ "model": "claude-haiku-4-5-20251001",
+ "graphs_completed": [
+  "flight_accident",
+  "nba",
+  "fictional_character",
+  "company",
+  "geography",
+  "politics",
+  "movie"
+ ],
+ "graphs_missing": [],
+ "n": 2348,
+ "overall_ex": 0.7798,
+ "held_out_ex": 0.7685,
+ "held_out_n": 2078,
+ "executable_pct": 0.9659,
+ "hard_data_shapes": {
+  "list_valued_gold": {
+   "n": 75,
+   "ex": 0.8667
+  },
+  "needs_edge_properties": {
+   "n": 60,
+   "ex": 0.9
+  },
+  "note": "multi-valued properties and properties on the edge itself; both were unanswerable before the language supported them"
+ },
+ "ex_excluding_hard_shapes": 0.7736,
+ "by_graph": {
+  "company": 0.781,
+  "fictional_character": 0.8,
+  "flight_accident": 0.8836,
+  "geography": 0.7459,
+  "movie": 0.7232,
+  "nba": 0.8667,
+  "politics": 0.7385
+ },
+ "by_category": {
+  "basic_(n)": {
+   "ex": 0.918,
+   "n": 61
+  },
+  "basic_(n)-(m0)": {
+   "ex": 0.6056,
+   "n": 71
+  },
+  "basic_(n)-(m0)-(m1*)": {
+   "ex": 0.7872,
+   "n": 329
+  },
+  "basic_(n)-(m0*)": {
+   "ex": 0.8764,
+   "n": 356
+  },
+  "basic_(n)-(m0*),(n)-(m1*)": {
+   "ex": 0.7688,
+   "n": 333
+  },
+  "basic_(n)=(m0)": {
+   "ex": 0.5745,
+   "n": 94
+  },
+  "basic_(n*)": {
+   "ex": 0.9661,
+   "n": 59
+  },
+  "special_comparison": {
+   "ex": 0.7483,
+   "n": 147
+  },
+  "special_optional-match": {
+   "ex": 0.6343,
+   "n": 268
+  },
+  "special_three-node-groupby": {
+   "ex": 0.7654,
+   "n": 260
+  },
+  "special_time-sensitive": {
+   "ex": 0.9,
+   "n": 60
+  },
+  "special_union": {
+   "ex": 0.8419,
+   "n": 310
+  }
+ }
+}

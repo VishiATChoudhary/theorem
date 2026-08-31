@@ -6,11 +6,11 @@ These are theorem's results on that benchmark, run under the published protocol.
 
 ## Result
 
-**theorem scores 78.02% execution accuracy on the full test set. The same model writing Cypher scores 70.36%.** theorem is ahead by 7.7 points, and ahead of every baseline the paper published.
+**theorem scores 77.98% execution accuracy on the full test set. The same model writing Cypher scores 70.36%.** theorem is ahead by 7.6 points, and ahead of every baseline the paper published.
 
 | System | Model | EX (%) | Executable (%) |
 | --- | --- | --- | --- |
-| **theorem** | claude-haiku-4-5-20251001 | **78.02** | 97.40 |
+| **theorem** | claude-haiku-4-5-20251001 | **77.98** | 96.59 |
 | text2cypher (control) | claude-haiku-4-5-20251001 | 70.36 | 95.27 |
 | text2cypher (published) | claude3.5-sonnet-20240620 | 61.58 | 96.34 |
 | text2cypher (published) | gpt-4o-20240806 | 60.18 | 94.93 |
@@ -36,10 +36,10 @@ Accuracy is not the only axis an agent pays for. These are measured on the same 
 | Measure | theorem | text2cypher |
 | --- | --- | --- |
 | Result tokens returned, median | 19.0 | 20.0 |
-| Result tokens returned, mean | 158.9 | 241.9 |
-| Query tokens written, mean | 42.5 | 35.7 |
+| Result tokens returned, mean | 167.4 | 241.9 |
+| Query tokens written, mean | 42.7 | 35.7 |
 | Execution latency, median | 0.2 ms | 67.2 ms |
-| Execution latency, mean | 35.1 ms | 95.9 ms |
+| Execution latency, mean | 51.0 ms | 95.9 ms |
 
 Counted over the questions each system answered correctly, so the comparison is between two right answers rather than between a right answer and an empty one.
 
@@ -52,52 +52,52 @@ An earlier run of this same protocol scored 50.94%. The gain did not come from p
 | Change | Category it unblocked | Before | Now |
 | --- | --- | --- | --- |
 | `or` branches for union | `special_union` | 9.35 | 84.19 |
-| edge properties and `none` | `special_time-sensitive` | 38.33 | 93.33 |
-| `or none` for optional match | `special_optional-match` | 23.51 | 51.12 |
-| name reuse means the same node | `basic_(n)=(m0)` | 3.19 | 67.02 |
+| edge properties and `none` | `special_time-sensitive` | 38.33 | 90.00 |
+| `or none` for optional match | `special_optional-match` | 23.51 | 63.43 |
+| name reuse means the same node | `basic_(n)=(m0)` | 3.19 | 57.45 |
 
-Executable queries went from 82.75% to 97.40%, which is the clearest single sign: the language now accepts what the model writes without being taught to write differently.
+Executable queries went from 82.75% to 96.59%, which is the clearest single sign: the language now accepts what the model writes without being taught to write differently.
 
 ## Where it still loses
 
-- `special_optional-match`: 51.12% over 268 questions, against text2cypher's 53.73%.
-- `basic_(n)-(m0)`: 64.79% over 71 questions, against text2cypher's 63.38%.
-- `basic_(n)=(m0)`: 67.02% over 94 questions, against text2cypher's 67.02%.
+- `basic_(n)=(m0)`: 57.45% over 94 questions, against text2cypher's 67.02%.
+- `basic_(n)-(m0)`: 60.56% over 71 questions, against text2cypher's 63.38%.
+- `special_optional-match`: 63.43% over 268 questions, against text2cypher's 53.73%.
 
-61 queries of 2348 still fail to run at all. The rest are queries that execute and return the wrong rows, which is the harder half to fix.
+80 queries of 2348 still fail to run at all. The rest are queries that execute and return the wrong rows, which is the harder half to fix.
 
 ## By graph
 
 | Graph | Questions | theorem EX (%) | text2cypher EX (%) |
 | --- | --- | --- | --- |
-| flight_accident | 189 | 91.01 | 76.19 |
-| nba *(tuned on)* | 270 | 87.04 | 71.85 |
-| fictional_character | 385 | 80.26 | 77.14 |
-| company | 347 | 76.95 | 70.61 |
-| geography | 366 | 74.86 | 62.57 |
-| politics | 390 | 71.54 | 68.97 |
-| movie | 401 | 73.82 | 68.33 |
+| flight_accident | 189 | 88.36 | 76.19 |
+| nba *(tuned on)* | 270 | 86.67 | 71.85 |
+| fictional_character | 385 | 80.00 | 77.14 |
+| company | 347 | 78.10 | 70.61 |
+| geography | 366 | 74.59 | 62.57 |
+| politics | 390 | 73.85 | 68.97 |
+| movie | 401 | 72.32 | 68.33 |
 
 ## By question category
 
 | Category | Questions | theorem EX (%) | text2cypher EX (%) | Delta |
 | --- | --- | --- | --- | --- |
 | `basic_(n)` | 61 | 91.80 | 90.16 | +1.6 |
-| `basic_(n*)` | 59 | 98.31 | 84.75 | +13.6 |
-| `basic_(n)-(m0)` | 71 | 64.79 | 63.38 | +1.4 |
-| `basic_(n)-(m0*)` | 356 | 85.39 | 84.27 | +1.1 |
-| `basic_(n)=(m0)` | 94 | 67.02 | 67.02 | +0.0 |
-| `basic_(n)-(m0)-(m1*)` | 329 | 81.46 | 69.60 | +11.9 |
-| `basic_(n)-(m0*),(n)-(m1*)` | 333 | 74.17 | 74.77 | -0.6 |
-| `special_three-node-groupby` | 260 | 81.15 | 60.38 | +20.8 |
-| `special_comparison` | 147 | 85.03 | 64.63 | +20.4 |
+| `basic_(n*)` | 59 | 96.61 | 84.75 | +11.9 |
+| `basic_(n)-(m0)` | 71 | 60.56 | 63.38 | -2.8 |
+| `basic_(n)-(m0*)` | 356 | 87.64 | 84.27 | +3.4 |
+| `basic_(n)=(m0)` | 94 | 57.45 | 67.02 | -9.6 |
+| `basic_(n)-(m0)-(m1*)` | 329 | 78.72 | 69.60 | +9.1 |
+| `basic_(n)-(m0*),(n)-(m1*)` | 333 | 76.88 | 74.77 | +2.1 |
+| `special_three-node-groupby` | 260 | 76.54 | 60.38 | +16.2 |
+| `special_comparison` | 147 | 74.83 | 64.63 | +10.2 |
 | `special_union` | 310 | 84.19 | 68.71 | +15.5 |
-| `special_optional-match` | 268 | 51.12 | 53.73 | -2.6 |
-| `special_time-sensitive` | 60 | 93.33 | 86.67 | +6.7 |
+| `special_optional-match` | 268 | 63.43 | 53.73 | +9.7 |
+| `special_time-sensitive` | 60 | 90.00 | 86.67 | +3.3 |
 
 ## Protocol
 
-- **Prompt version**: fingerprint `eb0f4010`. The frozen query file is keyed by this hash, so a run cannot silently score queries generated from a different tutorial.
+- **Prompt version**: fingerprint `eb0f4010`, read from the name of the frozen query file these results were scored from. Recomputing it here instead would print the tutorial that happens to be checked out, which is how a report comes to claim a prompt it never ran.
 - **Questions**: the full published test set, all 2,348 questions across all 7 test graphs. No category was excluded, including the ones theorem v0 cannot express.
 - **Graphs**: the full unsampled `simplekg` graphs, the same files the official Docker deployment loads, so the published gold answers apply unchanged.
 - **Generation**: zero-shot, one generation per question, no repair retry, no self-consistency, no reranking.
@@ -114,8 +114,8 @@ Both prompts do carry comparable return discipline: the official Cypher prompt i
 
 Both of these were unanswerable at any prompt until the data model supported them, and both are the norm rather than the exception in graphs built from technical sources.
 
-- **Multi-valued properties** (75 questions): a person with two citizenships. Flattening them into one string made the value unreturnable. Now 81.33%.
-- **Properties on the relationship** (60 questions): when a spell started and ended, which is what makes a question about a particular year answerable at all. Now 93.33%.
+- **Multi-valued properties** (75 questions): a person with two citizenships. Flattening them into one string made the value unreturnable. Now 86.67%.
+- **Properties on the relationship** (60 questions): when a spell started and ended, which is what makes a question about a particular year answerable at all. Now 90.00%.
 
 ## Honest notes
 
