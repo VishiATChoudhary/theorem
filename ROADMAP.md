@@ -62,6 +62,12 @@ way.
   and no way to read a consistent snapshot while one is in progress.
 - Spill to disk. Everything is in memory at ~6.7 KB per node, so a 32 GB machine
   holds 2-4 M nodes and the next node fails.
+- An index for equality on a property other than `name`. On a 275k-node class,
+  a name lookup is 0.03 ms and a filter on any other property is 288 ms, because
+  the second is a scan that folds both sides of the comparison on every row.
+  Building the index lazily, on the first query that filters a given
+  (class, property), keeps the memory cost proportional to what is actually
+  queried.
 - Faster dedup blocking beyond 10^6 nodes.
 - Import from a Cypher dump, so migrating does not mean re-exporting.
 
