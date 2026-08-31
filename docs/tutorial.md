@@ -23,7 +23,7 @@ supplied_by(item: part, source: supplier) via{start_year, contract_end}
 ```
 
 (the edges, abridged from the full render). `via{...}` lists the
-properties an edge carries itself, which section 9 asks about.
+properties an edge carries itself, which section 10 asks about.
 
 Roles are how you traverse. There are no arrows anywhere in the language.
 
@@ -46,7 +46,7 @@ assert edge supplied_by(item: cell, source: volta)
 
 Both roles are named explicitly. Passing a node of the wrong class to a role is a verify-time error; nothing executes.
 
-## 3b. Load a file instead of typing it
+## 4. Load a file instead of typing it
 
 Writing a row at a time is fine for a handful. For a table you already
 have, `load` writes it directly:
@@ -68,7 +68,7 @@ For a PDF or anything else whose structure is not already known, use
 `theorem ingest`, which stages the document and has an agent extract from
 it.
 
-## 4. Read: find and follow
+## 5. Read: find and follow
 
 ```theorem
 find product where launch_year > 2024 as recent
@@ -78,7 +78,7 @@ return parts.name
 
 A query builds one binding table. `find` seeds rows; each `follow` extends every row through edges of the named type, arriving at the named role. `follow recent uses component` reads as: from `recent`, cross `uses` edges, arrive at the `component` role.
 
-## 5. Make a mistake (on purpose)
+## 6. Make a mistake (on purpose)
 
 ```theorem-error
 find product where lunch_year > 2024 as recent
@@ -92,7 +92,7 @@ nothing was executed.
 
 The whole program was verified before execution, so the error names the line, suggests the fix, and guarantees no partial effects. This is the core loop that makes agents reliable: mistakes are loud and cheap.
 
-## 6. Aggregate in stages
+## 7. Aggregate in stages
 
 ```theorem
 find product where launch_year > 2024 as recent
@@ -105,7 +105,7 @@ return sups.name, n_parts order by n_parts desc budget 2000 tokens
 
 `group by sups` groups by node identity (`group by sups.country` would group by value; the difference is visible in the spelling). The aggregate names its input group and its output column. Adding a column to `return` can never change the grouping, because grouping happened two lines earlier.
 
-## 7. Reach: how far does this go
+## 8. Reach: how far does this go
 
 A single `follow` crosses one edge. Questions about dependency graphs are
 about reach: what does this contain, all the way down.
@@ -138,7 +138,7 @@ return cheap.name
 Cycles terminate. Reach is a set of nodes rather than of paths, so a part
 two routes lead to is one answer.
 
-## 8. Rows that would otherwise disappear
+## 9. Rows that would otherwise disappear
 
 A `follow` drops rows that match nothing. That is wrong for "how many
 parts does each product use", because a product using none should report
@@ -180,7 +180,7 @@ return parts.name
 Only parts with a German supplier *and* a Japanese one survive, because
 both follows extend the same row.
 
-## 9. Ask about the relationship, and filter after counting
+## 10. Ask about the relationship, and filter after counting
 
 `via.<prop>` inside a follow's `where` reads a property of the edge
 rather than of the node you arrive at. `none` is the absent value:
@@ -208,7 +208,7 @@ return sups.name, n order by n desc
 collapses repeated nodes. Two suppliers sharing a name are two rows under
 `return` and one under `return distinct`.
 
-## 9b. Use it from Python
+## 11. Use it from Python
 
 The CLI is a wrapper. An application embeds the session directly:
 
@@ -230,7 +230,7 @@ The session holds an exclusive lock on the directory for as long as it is
 open, so close it (or use it as a context manager, as above) before
 another process opens the same database.
 
-## 9c. Let an agent write the queries
+## 12. Let an agent write the queries
 
 The prompt the benchmarks use is the prompt the package ships:
 
@@ -264,7 +264,7 @@ The tutorial inside that prompt is versioned by its own hash
 files by it, so a published number can never come from a prompt other
 than the one it names.
 
-## 10. Budgets and continuations
+## 13. Budgets and continuations
 
 `budget 2000 tokens` caps the serialized result. On overflow the result truncates at a row boundary and prints a handle:
 
@@ -276,7 +276,7 @@ truncated: 40 more. resume with: continue @c1a
 continue @c1a budget 500 tokens
 ```
 
-## 10b. Know where you stand
+## 14. Know where you stand
 
 ```bash
 theorem stats --db mydb
@@ -297,7 +297,7 @@ Everything is in memory with no spill to disk, so the ceiling is real and
 worth watching. `stats` does not take the lock, because a store being
 written by someone else is exactly when its numbers are worth reading.
 
-## 11. The maintenance surface
+## 15. The maintenance surface
 
 When a duplicate slips in, the receipt tells you at write time:
 
