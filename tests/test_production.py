@@ -277,3 +277,35 @@ def test_the_help_names_the_subcommands(capsys):
     out = capsys.readouterr().out
     for sub in ("load", "stats", "ingest", "playbook"):
         assert sub in out
+
+
+@pytest.mark.parametrize(
+    "reply,why",
+    [
+        ("", "no query"),
+        ("```\n```", "no query"),
+        ("I cannot answer that.", "unknown verb"),
+        ("find factory as f", "asks for nothing"),
+    ],
+)
+def test_a_reply_that_answers_nothing_is_not_an_empty_answer(db, reply, why):
+    """A program with no `return`, or no program at all, used to come back
+    as a successful answer of zero rows, which is indistinguishable from a
+    true empty answer. That is the failure the language exists to remove,
+    and it had grown back inside the agent loop."""
+    from theorem import answer
+
+    with Session(db, Schema()) as s:
+        s.run(SCHEMA)
+        got = answer(s, "anything", lambda _prompt: reply, turns=2)
+
+    assert not got.ran
+    assert got.errors
+    assert why in " ".join(got.errors)
+
+
+def test_rows_still_returns_a_genuinely_empty_answer(db):
+    """The point is to tell the two apart, not to reject empty results."""
+    with Session(db, Schema()) as s:
+        s.run(SCHEMA)
+        assert s.rows("find factory as f\nreturn f.name") == []

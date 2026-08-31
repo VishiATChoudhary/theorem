@@ -136,6 +136,17 @@ class Session:
                     f"rows() runs reads; {type(plan.stmt).__name__} is a write. "
                     "Use run() for writes, which returns their receipt."
                 )
+        if not any(isinstance(p.stmt, Return) for p in plans):
+            # Without this, a program that forgot its `return`, or an empty
+            # one, comes back as a successful answer of no rows, which is
+            # indistinguishable from a true empty answer. That is the exact
+            # failure the language exists to remove.
+            raise ExecError(
+                "this program asks for nothing: a read ends with "
+                "`return <col>, ...` naming the properties you want."
+                if plans
+                else "there is no query here."
+            )
         return execute_rows(plans, self.store, self.schema)
 
     def run(self, text: str) -> str:

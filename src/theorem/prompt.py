@@ -206,6 +206,10 @@ def answer(session, question: str, ask, turns: int = 3) -> Answer:
     prompt, query, errors = base, "", []
     for turn in range(1, turns + 1):
         query = _strip_fences(ask(prompt))
+        if not query:
+            errors.append("the reply contained no query.")
+            prompt = base + "\n" + repair_prompt(query, errors[-1])
+            continue
         try:
             return Answer(session.rows(query), query, turn, errors)
         except Exception as e:
