@@ -64,15 +64,22 @@ def _col(col: Col) -> str:
     return ".".join(col)
 
 
+def _quoted(v: str) -> str:
+    """A string literal, with the escapes the parser undoes put back.
+
+    Backslash first, so escaping a quote does not double the backslash
+    that escapes it.
+    """
+    return '"' + v.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def _literal(v: object) -> str:
     if type(v).__name__ == "_Missing":
         return "none"
     if isinstance(v, bool):
         return "true" if v else "false"
     if isinstance(v, str):
-        # The escapes the parser undoes, in the order it undoes them:
-        # a backslash first, so escaping a quote does not double it.
-        return '"' + v.replace("\\", "\\\\").replace('"', '\\"') + '"'
+        return _quoted(v)
     if isinstance(v, float) and v.is_integer():
         # 3.0 and 3 compare equal and mean the same filter; one spelling.
         return str(int(v))
@@ -169,16 +176,16 @@ def render_stmt(stmt: Stmt) -> str:
             out = f"merge {a}, {b}"
             return out + (f" prefer {policy}" if policy else "")
         case Distinct(a=a, b=b, reason=reason):
-            return f'distinct {a}, {b} reason "{reason}"'
+            return f"distinct {a}, {b} reason {_quoted(reason)}"
         case Refine(ref=ref, into_cls=cls, mapping=mapping, name=n):
-            cols = ", ".join(f'{k}: col "{v}"' for k, v in mapping.items())
+            cols = ", ".join(f"{k}: col {_quoted(v)}" for k, v in mapping.items())
             return f"refine {ref} into {cls} with {{{cols}}} as {n}"
         case Compact(src=src, name=n, props=props):
             return f"compact {src} as {n} {_props(props)}"
         case Retire(ref=ref, reason=reason):
-            return f'retire {ref} reason "{reason}"'
+            return f"retire {ref} reason {_quoted(reason)}"
         case Flag(ref=ref, reason=reason):
-            return f'flag {ref} reason "{reason}"'
+            return f"flag {ref} reason {_quoted(reason)}"
         case DeriveClass(name=n, base=base, props=props, quota=quota, dedup=dedup):
             decls = ", ".join(f"{k}: {v}" for k, v in props.items())
             out = f"derive class {n} from {base} with {{{decls}}}"

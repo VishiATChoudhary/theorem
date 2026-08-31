@@ -128,3 +128,18 @@ def test_a_string_with_a_quote_or_a_backslash_round_trips(value):
     program = f'find part where name = "{escaped}" as p\nreturn p.name'
     assert _no_lines(parse(canonical(program))) == _no_lines(parse(program))
     assert parse(canonical(program))[0].cond[0][1].value == value
+
+
+@pytest.mark.parametrize(
+    "program",
+    [
+        'retire a reason "he said \\"no\\""',
+        'flag a reason "path C:\\\\tmp"',
+        'distinct a, b reason "one \\" quote"',
+        'refine b into row with {sku: col "the \\"SKU\\" column"} as r',
+        'assert part {name: "say \\"hi\\""} as p',
+    ],
+)
+def test_every_quoted_field_round_trips(program):
+    """Four other renderers wrote a bare string into double quotes."""
+    assert _no_lines(parse(canonical(program))) == _no_lines(parse(program))
