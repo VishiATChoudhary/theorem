@@ -68,6 +68,14 @@ PUBLISHED_BASELINES = {
 }
 
 
+ATTEMPTS = 8
+
+
+def _backoff(attempt: int) -> float:
+    "Wait before the next attempt, capped so the tail stays bounded."
+    return min(5 * 2**attempt, 180)
+
+
 def llm(prompt: str, model: str, cache_key: str) -> str:
     import hashlib
 
@@ -79,8 +87,12 @@ def llm(prompt: str, model: str, cache_key: str) -> str:
     # A failed CLI call (rate limit, transport error) must never be cached
     # as if it were the model's answer: that would silently score as a miss
     # and be indistinguishable from a real one on re-runs.
+    # Five attempts with 5, 10, 20 and 40 second waits is 75 seconds of
+    # patience, which rides out a transport blip and not a rate limit. A
+    # sustained one failed 524 of 2,348 calls in a single run. The waits
+    # now reach ten minutes in total, capped so the tail stays bounded.
     last = ""
-    for attempt in range(5):
+    for attempt in range(ATTEMPTS):
         try:
             result = subprocess.run(
                 ["claude", "-p", "--model", model, "--max-turns", "1"],
@@ -91,20 +103,29 @@ def llm(prompt: str, model: str, cache_key: str) -> str:
             )
         except subprocess.TimeoutExpired:
             last = "timeout"
-            time.sleep(5 * 2**attempt)
+            time.sleep(_backoff(attempt))
             continue
         if result.returncode != 0 or not result.stdout.strip():
-            last = f"rc={result.returncode} stderr={result.stderr.strip()[:200]}"
-            time.sleep(5 * 2**attempt)
+            # stdout as well as stderr: the CLI reports a usage limit on
+            # stdout with an empty stderr, and a diagnosis of "rc=1" with
+            # nothing after it is not a diagnosis.
+            last = (
+                f"rc={result.returncode} "
+                f"stderr={result.stderr.strip()[:200]!r} "
+                f"stdout={result.stdout.strip()[:200]!r}"
+            )
+            time.sleep(_backoff(attempt))
             continue
         text = _extract_query(result.stdout)
         if not text.strip():
             last = f"empty after extraction from {result.stdout.strip()[:200]!r}"
-            time.sleep(5 * 2**attempt)
+            time.sleep(_backoff(attempt))
             continue
         cache_file.write_text(text)
         return text
-    raise RuntimeError(f"llm call failed after 5 attempts ({cache_key}): {last}")
+    raise RuntimeError(
+        f"llm call failed after {ATTEMPTS} attempts ({cache_key}): {last}"
+    )
 
 
 GL_VERBS = (

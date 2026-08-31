@@ -428,7 +428,9 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
         "charged against it rather than hidden."
     )
     w("")
-    w(f"Graphs: {', '.join(graphs)}. Prompt fingerprint `{_scored_fingerprint(model)}`.")
+    w(
+        f"Graphs: {', '.join(graphs)}. Prompt fingerprint `{_scored_fingerprint(model)}`."
+    )
     w("")
     w("## Results")
     w("")
