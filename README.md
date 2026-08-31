@@ -81,7 +81,7 @@ theorem stats --db ./db
 
 ## Why agents stop failing
 
-- **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result.
+- **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can distinguish them ([measured](docs/benchmarks/silent-failure.md)).
 - **One line, one step, one name.** No chaining, no nesting, nothing to balance.
 - **Explicit staged aggregation.** `group by sups as g`, then `count distinct g.parts as n`. Adding a return column can never change the grouping.
 - **Schema-closed vocabulary.** Every query is verified whole against the live schema before anything runs; errors name the line, suggest the fix, and confirm nothing executed.
