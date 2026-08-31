@@ -81,3 +81,43 @@ def test_a_deep_chain_is_followed(tmp_path):
     assert s.rows("find part as p\nreturn p.name") == [["G1"]]
     assert s.rows("find widget as w\nreturn w.name") == [["G1"]]
     s.close()
+
+
+def test_the_index_and_the_subclass_rule_agree(tmp_path):
+    """The prefilter has to span the same classes the seed does. If it
+    indexed only the class named in the `find`, a large derived class
+    would come back empty and look like an answer."""
+    from theorem.engine.executor import execute_rows
+    from theorem.parser import parse
+    from theorem.verifier import verify
+
+    s = Session(tmp_path / "db", Schema.supply_chain())
+    s.run("derive class widget from part with {sku: str} quota 20000")
+    s.store.bulk(
+        [
+            {
+                "op": "put_node",
+                "id": f"#w-{i}",
+                "cls": "widget",
+                "props": {
+                    "name": f"W{i}",
+                    "sku": f"S{i}",
+                    # an inherited property, which is the only kind a
+                    # `find part` may filter on
+                    "unit_cost": 1.0 if i % 3 else 9.0,
+                },
+            }
+            for i in range(1, 6001)
+        ]
+    )
+    query = "find part where unit_cost = 9.0 as p\nreturn p.name"
+    plans = verify(parse(query), s.schema)
+
+    indexed = execute_rows(plans, s.store, s.schema)
+    s.store.indexed_props, s.store.by_prop, s.store.auto_index = set(), {}, False
+    scanned = execute_rows(plans, s.store, s.schema)
+    s.store.auto_index = True
+
+    assert len(indexed) == 2000
+    assert sorted(map(str, indexed)) == sorted(map(str, scanned))
+    s.close()
