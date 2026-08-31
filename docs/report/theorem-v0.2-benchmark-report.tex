@@ -1,0 +1,530 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\definecolor{kw}{RGB}{20,60,140}
+\definecolor{codebg}{RGB}{246,246,242}
+\definecolor{errbg}{RGB}{252,244,242}
+
+\lstdefinestyle{gl}{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries\color{kw},
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{gray!50},
+  framesep=5pt, breaklines=true,
+  showstringspaces=false, sensitive=true,
+  morekeywords={find,follow,group,count,sum,avg,min,max,compute,return,limit,budget,
+    tokens,where,order,by,as,and,or,none,contains,assert,edge,merge,distinct,refine,
+    compact,retire,flag,derive,class,keep,upto,any,from,with,into,col,prefer,newest,
+    source,reason,continue,after,schema,same,minus,plus,times,over,desc,true,false,via}
+}
+\lstdefinestyle{err}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{errbg},
+  frame=single, rulecolor=\color{red!30!gray},
+  framesep=5pt, breaklines=true, showstringspaces=false
+}
+
+\setlist[itemize]{itemsep=2pt,topsep=4pt}
+\setlist[enumerate]{itemsep=2pt,topsep=4pt}
+
+\title{\textbf{theorem v0.2}\\[4pt]
+\large Benchmarks, engine work, and what the numbers do and do not support}
+\author{}
+\date{31 August 2026}
+
+\begin{document}
+\maketitle
+\vspace{-2.2em}
+
+\begin{center}
+\begin{minipage}{0.92\textwidth}
+\small
+\textbf{Summary.} theorem is a graph query and construction language designed so
+that a language model cannot express the mistakes it usually makes. This report
+covers a working session that rebuilt its evidence base: four benchmarks (two
+regenerated, two new), eight defects found in shipped code, four found in the
+benchmark harness, and the engine work that makes the system usable outside a
+demo. Every figure is reproducible from per-question data committed to the
+repository.
+
+The session began by discovering that the published headline number could not be
+reproduced by the code that shipped it. That finding, and the guard that
+surfaced it, shape everything that follows.
+\end{minipage}
+\end{center}
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\tableofcontents
+\newpage
+
+\section{What theorem is, in one page}
+
+Language models write graph queries badly, and they fail in structural,
+predictable ways: reversed relationship directions, hallucinated labels,
+implicit grouping, long-range bracket errors. Two model generations of scaling
+have not fixed it; frontier models still sit near 51--61\% execution accuracy on
+public benchmarks.
+
+theorem removes each failure mode by construction rather than by prompting
+around it:
+
+\begin{itemize}
+  \item \textbf{No direction glyphs.} Edges are traversed by naming the
+    \emph{role} you arrive at, not by drawing an arrow. A wrong role is a type
+    error caught before execution.
+  \item \textbf{One line, one step, one name.} No chaining, no nesting, nothing
+    to balance.
+  \item \textbf{Explicit staged aggregation.} \texttt{group by} then
+    \texttt{count}; adding a column to \texttt{return} can never silently change
+    the grouping.
+  \item \textbf{Schema-closed vocabulary.} The whole program is verified against
+    the live schema before anything runs. Errors name the line, suggest the fix,
+    and state \texttt{nothing was executed.}
+  \item \textbf{Token-budgeted results} with explicit truncation and
+    continuation handles.
+\end{itemize}
+
+\begin{lstlisting}[style=gl]
+find product where launch_year > 2024 as recent
+follow recent uses component as parts
+follow parts supplied_by source as sups
+group by sups as g
+count distinct g.parts as n_parts
+return sups.name, n_parts order by n_parts desc
+\end{lstlisting}
+
+\noindent The engine is a single-process store: an append-only write-ahead log
+plus immutable snapshot runs, with the graph held in memory.
+
+\section{The finding that made the session necessary}
+
+The repository published \textbf{78.02\%} execution accuracy on the full
+CypherBench test set. That number was not fabricated, but it did not belong to
+the code that shipped.
+
+Frozen query files are named by a hash of the prompt that generated them. The
+shipped prompt hashed to \texttt{eb0f4010}; the published run's queries came from
+\texttt{3ad56b1c}. The tutorial inside the prompt had been halved after that run
+and validated only on the \emph{agent-loop} benchmark, where a repair turn can
+hide a regression that one-shot translation cannot.
+
+So the repository could not reproduce its own headline. The guard worked; nobody
+had run it. Everything in Section~\ref{sec:results} is a regeneration against the
+prompt that actually ships.
+
+\section{Results}
+\label{sec:results}
+
+Four benchmarks. Two existed and were regenerated; two did not exist.
+
+\subsection{CypherBench: the full public test set}
+
+All 2{,}348 questions, all seven test graphs, every match category, full
+unsampled graphs, zero-shot, one generation, no retry, scored by the benchmark's
+own comparator against its published gold answers. The text2cypher row is a
+\emph{control} run under the official zero-shot prompt on the official Neo4j
+image, not a citation.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+ & theorem & text2cypher & delta \\
+\midrule
+Execution accuracy      & \textbf{77.98\%} & 70.36\% & $+7.6$ \\
+Held out (excl.\ \texttt{nba}) & \textbf{76.85\%} & --- & \\
+Executable              & 96.6\%  & 95.3\%  & \\
+Median execution latency & 0.2\,ms & 67.2\,ms & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Ahead on all seven graphs:
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+graph & theorem & text2cypher \\
+\midrule
+flight\_accident     & 88.4\% & 76.2\% \\
+nba                  & 86.7\% & 71.9\% \\
+fictional\_character & 80.0\% & 77.1\% \\
+company              & 78.1\% & 70.6\% \\
+geography            & 74.6\% & 62.6\% \\
+politics             & 73.9\% & 69.0\% \\
+movie                & 72.3\% & 68.3\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\texttt{nba} is the graph theorem's prompt was written against, which is why the
+held-out figure excluding it is reported alongside. Published 2024 baselines for
+context: Claude 3.5 Sonnet 61.6\%, GPT-4o 60.2\%.
+
+Regenerating against the shipped prompt moved the full-set number by
+\textbf{0.04 points} (78.02 to 77.98) and left the held-out number unchanged.
+Half the prompt for four hundredths of a point. Section~\ref{sec:sampling}
+explains why that outcome was not free.
+
+\subsection{The agent loop}
+
+CypherBench measures one-shot translation. An agent writes a query, reads the
+error, and tries again. This measures whether it converges, in how many turns,
+and for how many tokens, on graphs nothing was tuned on: CypherBench's
+\emph{train} split, which shares no schema, question or qid with the test set.
+Doubled this session from $n=120$ to $n=240$ across two held-out graphs.
+
+\begin{center}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & $n$ & solve@1 & solve@2 & solve@3 & turns & tokens/q \\
+\midrule
+theorem     & 240 & \textbf{82.9\%} & 86.7\% & 87.9\% & 1.07 & 2{,}064 \\
+text2cypher & 240 & 72.1\% & 82.1\% & 85.0\% & 1.19 & 1{,}068 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Of 240 questions, 183 were solved by both and 8 by neither. The verdict rests on
+the 49 they disagree about: theorem alone 28, text2cypher alone 21. Exact
+McNemar two-sided $p = 0.392$.
+
+\textbf{solve@3 is a tie, and the published page says so.} Reading a winner into
+a 2.9-point difference at this sample size would be reading noise.
+
+What doubling the sample surfaced is the \emph{first attempt}: 82.9\% against
+72.1\%, a 10.8-point gap that the retries then close, with convergence in 1.07
+turns against 1.19. An agent that can retry pays the difference in turns; one
+that cannot pays it in answers.
+
+\subsection{Silent failure (new)}
+
+Execution accuracy counts what a model gets right and says nothing about what
+happens when it gets one wrong. That is where the two languages differ most, and
+nothing measured it.
+
+\textbf{Method.} Take a query known to be correct, break exactly one token the
+way models break them, run it, and record what the caller sees. Four mutations
+(wrong class, wrong edge type, wrong property, reversed direction), applied to
+each arm's own correct queries: theorem's are generated queries that scored 1.0,
+Cypher's are CypherBench's gold. Outcomes are \textbf{rejected} (an error instead
+of an answer), \textbf{empty} (ran, returned nothing, indistinguishable from a
+true empty answer), \textbf{wrong} (ran, returned rows that are not the right
+rows), and \textbf{inert} (the mutation did not change the answer; not counted).
+
+\begin{center}
+\begin{tabular}{lrrrrr}
+\toprule
+arm & mutants & rejected & empty & wrong & undetectable \\
+\midrule
+theorem     & 1{,}928 & \textbf{1{,}811} & 69 & 48 & \textbf{6.1\%} \\
+text2cypher & 1{,}997 & \textbf{0} & 1{,}281 & 716 & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every broken Cypher query returned rows or a confident empty set. Not one
+produced an error. Three caveats ship on the page rather than buried:
+
+\begin{itemize}
+  \item \textbf{theorem's 6.1\% is entirely direction}, and only on edges whose
+    two roles hold the same class. \texttt{hasFather(subj: person, obj: person)}
+    is type-correct either way round, so swapping the roles asks a different
+    question rather than an invalid one, and no schema check can tell. On
+    \texttt{nba}, which has no such edge, theorem catches everything: 0.0\%
+    across 843 mutants. On \texttt{fictional\_character}, which has five, half
+    the direction mutants survive.
+  \item \textbf{Neo4j does notify the driver.} A missing label, relationship type
+    or property raises a \texttt{01N42} notification alongside a successful
+    result: 1{,}532 of the 1{,}997. It is a warning on a call that succeeded, it
+    never fires on a reversed arrow, and no published text2cypher pipeline reads
+    it. It is counted in its own column.
+  \item \textbf{A mutation is not a model.} This measures what a language does
+    with a broken query, not how often a model breaks one.
+\end{itemize}
+
+\subsection{Frontier model (new)}
+
+The standing objection to a new query language is that it is scaffolding for
+weak models, and that a better model writes Cypher well enough to make the
+exercise pointless. It predicts the gap narrows with model scale.
+
+498 questions sampled from the test set, seeded and stratified by graph and
+match category, run through both languages on both models, so the comparison is
+paired across models as well as across languages.
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Model & theorem & text2cypher & gap \\
+\midrule
+Haiku 4.5 & 84.3\% & 75.5\% & $\mathbf{+8.8}$ \\
+Sonnet 5  & 74.1\% & 64.3\% & $\mathbf{+9.8}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+On Sonnet 5, theorem alone answers 96 of these questions and text2cypher alone
+answers 47. Exact McNemar $p = 0.0001$. \textbf{The gap does not close; it is
+slightly wider on the frontier model.}
+
+The same run found something nobody was looking for: \emph{both} arms score about
+ten points worse on the frontier model than on the small one, on identical
+questions, by roughly the same amount in each language. That makes it a property
+of the task rather than of either language. The obvious guess is that a benchmark
+rewarding terse literal translation penalises a model that elaborates, but
+nothing in this run measures the mechanism, and it is published as a question
+rather than an answer.
+
+\subsection{Prompt cost (new)}
+
+theorem carries a tutorial in every prompt because the model has never seen the
+language; Cypher carries none because it has. That is a fixed cost. Against it,
+theorem's schema render is much cheaper per class than the JSON schema a
+text2cypher prompt sends, so the two costs are lines with different slopes.
+
+The roadmap had quoted a crossover at 18--20 classes, fitted over graphs with
+9--13 classes, which is both theorem's worst region and the region least able to
+show a crossing. Measured instead, on the seven test schemas and on their union
+(a real 40-class, 62-edge-type schema assembled from real ones):
+
+\begin{itemize}
+  \item theorem: \textbf{39 tokens per class}, on 1{,}357 tokens of fixed tutorial.
+  \item text2cypher: \textbf{85 tokens per class}, on 99.
+  \item The lines cross at \textbf{31 classes}.
+\end{itemize}
+
+The crossing is inside the measured range rather than past it: on the union,
+theorem's prompt is the smaller of the two, 2{,}793 tokens against 3{,}186.
+
+\section{The guards}
+
+Published results are a property of a version of the code, and an engine change
+can move them without anyone noticing. Two guards exist and both earned their
+keep.
+
+\paragraph{Replay.} \texttt{eval/verify\_replay.py} re-executes the exact queries
+that were scored, against the exact stores they were scored on, and reports any
+question whose score moved. It generates nothing and calls no model, so it costs
+minutes rather than hours. Every engine change this session was checked this way:
+\textbf{2{,}348 questions, zero moved} for every change except one deliberate
+language widening, which moved nine questions, \emph{all of them from 0 to 1}.
+
+It also resolved a provenance problem. The final execution phase resumed from
+partial files scored before the engine changes landed, which would have made the
+published number a blend of two engines. Replaying all 2{,}348 on the finished
+engine reproduced every score, so the blend was not a blend.
+
+\paragraph{Prompt fingerprint.} Frozen query files are named by the hash of the
+tutorial that produced them, and each scored graph now writes its own fingerprint
+beside its results. A report reads the hash from the runs rather than recomputing
+it, because recomputing prints whatever tutorial happens to be checked out. That
+is precisely how a report comes to claim a prompt it never ran, and the
+CypherBench page was doing it.
+
+\section{What the sampling found}
+\label{sec:sampling}
+
+Partway through regeneration, sampling the queries the new prompt was producing
+showed it verifying \textbf{93.8\%} where the old prompt verified \textbf{97.8\%}
+on identical questions. A four-point regression, invisible in the agent loop
+where a repair turn recovers it, and fatal to a one-shot benchmark.
+
+Almost the entire gap was one rejected spelling:
+
+\begin{lstlisting}[style=err]
+follow c locatedIn lake as l where l.area_km2 < 390000   # rejected
+follow c locatedIn lake where area_km2 < 390000 as l     # accepted
+\end{lstlisting}
+
+They mean the same thing. A follow's condition is about the node being arrived
+at, and \texttt{l} is the name for that node. Models write the qualified form
+constantly because it is the unambiguous one.
+
+The parser now drops a leading binding name from a condition when it is the name
+that statement itself creates. Verification went to \textbf{97.9\%}, level with
+the long prompt, \emph{without touching the prompt}, which would have invalidated
+a thousand cached generations. That fix is why the headline held at $-0.04$
+points instead of dropping four.
+
+Two residual failure classes remain, seven questions in about 330, both recorded
+in the roadmap with the evidence rather than quietly fixed: comparing two
+bindings' properties (\texttt{keep c where birth\_loc.name = death\_loc.name}),
+which the language cannot express, and role guessing on edges whose roles are
+named for their classes, which the error already teaches and a repair turn
+already fixes.
+
+\section{Defects found in shipped code}
+
+Eight, all predating the session, all fixed and covered by tests.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.34\textwidth}p{0.58\textwidth}}
+\toprule
+Defect & Symptom \\
+\midrule
+\texttt{upto any} walked paths, not nodes & A 60-node ring did not finish in 400\,s for a 60-row answer \\
+Two writers on one store & Both allocated \texttt{\#e-1}, both wrote, one node survived, \textbf{no error} \\
+\texttt{snapshot()} had no callers & The log grew forever; every startup replayed all history \\
+Reads were writes & 4{,}178 log records and 129\,ms for one ordinary query; 17\,ms and none after \\
+\texttt{or} and \texttt{keep} unreachable & Missing from the session's read-statement list, so any program using them was routed to the write path and rejected \\
+Name reuse ignored under \texttt{upto} & The join rule held or not depending on whether you wrote \texttt{upto} \\
+\texttt{find} ignored subclasses & \texttt{derive class} partitioned instances away from every query against the base; the shipped ingest pipeline answered nothing for \texttt{find piece} on a store full of pieces \\
+``Partial execution never happens'' & True of verification, false of execution: four asserts against a quota of two wrote two nodes and printed only an error \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The reads-as-writes defect deserves a note. All four benchmark harnesses were
+monkey-patching \texttt{store.apply} on the read path, with a comment explaining
+why, which meant the published latency described an engine that was not shipping.
+The patch is gone from all four; they now measure what ships.
+
+\section{Defects found in the benchmark harness}
+
+Four, all caught before publication.
+
+\begin{enumerate}
+  \item \textbf{Generation aborted on one transport failure.} A sustained rate
+    limit failed 524 of 2{,}348 calls, and a single unrecovered failure would
+    have taken the other 2{,}347 with it hours in. Generation now records the
+    miss and continues, and \emph{refuses to write a frozen query file with holes
+    in it}, because holes score as wrong answers. When the throttle hit, that is
+    exactly what happened: no frozen file, and the execution phase reported
+    \texttt{INCOMPLETE} rather than publishing a partial number.
+  \item \textbf{Retry patience did not match the failure.} Five attempts spanning
+    75 seconds rides out a transport blip, not a rate limit. Now eight attempts
+    reaching about eleven minutes, recording stdout as well as stderr, because
+    the CLI reports usage limits on stdout and \texttt{rc=1} with nothing after
+    it is not a diagnosis.
+  \item \textbf{The frontier Cypher arm got the wrong prompt.} It was handed the
+    raw schema JSON instead of the benchmark's own schema rendering. The model
+    dutifully wrote \texttt{\{label: "..."\}} for every node, matched nothing,
+    and the arm \textbf{scored 0.000}.
+  \item \textbf{Then it got the wrong scoring.} Neo4j records were reshaped by a
+    helper meant for gold rows. The arm \textbf{scored 0.000 again.}
+\end{enumerate}
+
+Both frontier bugs would have published ``theorem 74\% against Cypher 0\%''. They
+were absurd enough to notice. A subtler version would not have been, which is the
+argument for the replay checker existing at all. A fifth, smaller one: the report
+generator read the new provenance files as result files, because they matched the
+same glob.
+
+\section{Production readiness}
+
+Benchmarks are half of what ``publishable'' needs; the other half is an engine
+somebody can run. Beyond the eight defects above:
+
+\begin{itemize}
+  \item \textbf{One writer per store}, enforced by an advisory lock that a crash
+    releases, refusing the second opener by name.
+  \item \textbf{Automatic WAL compaction}, amortized so the threshold is at least
+    the size of the live data. Without that, a million-node ingest rewrites a
+    million-record run file on every threshold crossing.
+  \item \textbf{A row and wall-clock ceiling on every read}, in the engine rather
+    than in each caller.
+  \item \textbf{A stated durability contract}: a committed record survives the
+    process dying, because the write has reached the operating system. It does
+    not survive power loss, because the write path does not fsync. Snapshots do.
+  \item \textbf{\texttt{theorem load}} for CSV and JSONL, refusing the file rather
+    than writing half of it.
+  \item \textbf{An import surface.} \texttt{import theorem} previously returned a
+    \texttt{hello()} stub from the project template.
+  \item \textbf{The prompt and the agent loop ship.} They lived in \texttt{eval/},
+    so no user had the prompt the numbers describe. They are
+    \texttt{theorem.prompt} and \texttt{theorem.answer} now, byte-identical, and
+    the harness re-exports them.
+  \item \textbf{A property index}, built on first use above 5{,}000 nodes:
+    299\,ms to 20\,ms for a common value, 341\,ms to 0.8\,ms for a rare one, and
+    304\,ms to nothing for a value no node has.
+  \item \textbf{\texttt{theorem.canonical}}, \texttt{theorem stats},
+    \texttt{Store.refresh()} so a reader can follow a writer, and a release
+    workflow that refuses to publish a tag disagreeing with the package version.
+\end{itemize}
+
+540 tests on Python 3.11, 3.12 and 3.13. Lint clean and pinned. Coverage 89.8\%.
+The wheel builds and imports in an isolated environment.
+
+\section{What the numbers do not support}
+
+Stated plainly, because someone will look for these.
+
+\begin{itemize}
+  \item \textbf{The agent loop is a tie.} 87.9\% against 85.0\% at $n=240$ is
+    $p = 0.392$. The first-attempt gap is real and large; the third-attempt gap
+    is not established.
+  \item \textbf{The two arms have different prompts.} theorem's is a tutorial
+    with an EBNF grammar and nine worked examples; Cypher's is the official
+    zero-shot prompt. This is each system with its natural prompting, not a
+    matched-prompt comparison, so the 7.6 points mixes the language with how it
+    is taught. \emph{This is the strongest available criticism, and answering it
+    means running the Cypher arm few-shot.}
+  \item \textbf{\texttt{nba} is in theorem's tuning set.} Hence the 76.85\%
+    held-out figure, which is the number to quote under scrutiny.
+  \item \textbf{Nothing has been run against a 40-class graph.} The prompt-cost
+    crossover is measured; accuracy at that scale is not.
+  \item \textbf{The frontier drop is unexplained.} Both languages lose about ten
+    points on the larger model, and the mechanism is a guess.
+  \item \textbf{Writes are not transactional.} A program that verifies can still
+    fail while running, and each write commits as it happens.
+\end{itemize}
+
+\section{Reproducing any of it}
+
+Per-question results for both arms, both frozen query files, and each graph's
+prompt fingerprint are committed under \texttt{eval/out/public/}. Every table
+above can be recomputed rather than trusted.
+
+\begin{lstlisting}[style=gl]
+uv run python -m eval.run_public all      # CypherBench, both phases
+uv run python -m eval.run_cypher_public all   # the Cypher control (needs docker)
+uv run python -m eval.run_agent run --graph soccer --n 120 --arm both
+uv run python -m eval.run_silent --graph nba  # silent failure
+uv run python -m eval.token_crossover --report # prompt cost, no model calls
+uv run python -m eval.run_frontier gen --model claude-sonnet-5
+uv run python -m eval.verify_replay       # did an engine change move a score?
+\end{lstlisting}
+
+\section{The short version}
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+ & theorem & text2cypher \\
+\midrule
+CypherBench, 2{,}348 questions      & \textbf{77.98\%} & 70.36\% \\
+Agent loop, $n=240$, solve@3        & 87.9\% & 85.0\% \\
+Agent loop, $n=240$, solve@1        & \textbf{82.9\%} & 72.1\% \\
+Silent failure, 3{,}925 mutants     & refuses \textbf{1{,}811/1{,}928} & refuses \textbf{0/1{,}997} \\
+Frontier model, 498 questions       & \textbf{74.1\%} & 64.3\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.6em}
+
+The headline survived a prompt change that should have cost it four points,
+because sampling caught the regression and a language widening closed it. The
+strongest objection to the project, that model scale dissolves the advantage, was
+tested directly and does not hold. The claim the project is actually built on,
+that a wrong query is loud rather than plausible, now has a number: 6.1\% against
+100\%.
+
+And the number the repository published at the start of the day could not be
+reproduced by the code that shipped it, which is the finding that made the rest
+of the day necessary.
+
+\end{document}
