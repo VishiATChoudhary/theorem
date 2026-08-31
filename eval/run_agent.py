@@ -270,6 +270,18 @@ def run_graph(graph: str, n: int, model: str, which: str) -> None:
         finally:
             arm.close()
         out.write_text(json.dumps(results, indent=1))
+        # The prompt these turns were run under, recorded beside them.
+        # Recomputing it at render time prints whatever tutorial happens
+        # to be checked out, which is how a report claims a prompt it
+        # never ran.
+        from theorem.prompt import fingerprint
+
+        out.with_suffix(".meta.json").write_text(
+            json.dumps(
+                {"prompt_fingerprint": fingerprint(), "model": model, "graph": graph},
+                indent=1,
+            )
+        )
         s = sum(r["solved"] for r in results)
         print(f"[{graph}] {cls.name}: solved {s}/{len(results)}", flush=True)
 
@@ -346,11 +358,45 @@ def _paired(arms: dict) -> dict:
     }
 
 
-def _write_doc(summary: dict, model: str, arms: dict) -> None:
-    from eval.run_public import prompt_fingerprint
+def _scored_fingerprint(model: str) -> str:
+    """The prompt the recorded turns were actually run under.
 
+    A run with no record beside it counts as unknown rather than being
+    ignored: reading the hash off the runs that did record one would
+    stamp the whole page with a prompt only some of it used.
+    """
+    runs = [
+        p
+        for p in AGENT_OUT.glob(f"agent-*-{model}-*.json")
+        if not p.name.endswith(".meta.json")
+    ]
+    stamps = set()
+    for run in runs:
+        meta = run.with_suffix(".meta.json")
+        stamps.add(
+            json.loads(meta.read_text()).get("prompt_fingerprint")
+            if meta.exists()
+            else None
+        )
+    if None in stamps:
+        return "unrecorded for at least one run"
+    if not stamps:
+        return "unrecorded"
+    if len(stamps) > 1:
+        raise SystemExit(
+            f"these runs came from different prompts: {sorted(stamps)}. "
+            "Re-run the stale ones rather than reporting a mixture."
+        )
+    return stamps.pop()
+
+
+def _write_doc(summary: dict, model: str, arms: dict) -> None:
     graphs = sorted(
-        {p.stem.rsplit("-", 1)[-1] for p in AGENT_OUT.glob(f"agent-*-{model}-*.json")}
+        {
+            p.stem.rsplit("-", 1)[-1]
+            for p in AGENT_OUT.glob(f"agent-*-{model}-*.json")
+            if not p.name.endswith(".meta.json")
+        }
     )
     L = ["# theorem in an agent loop", ""]
     w = L.append
@@ -382,7 +428,7 @@ def _write_doc(summary: dict, model: str, arms: dict) -> None:
         "charged against it rather than hidden."
     )
     w("")
-    w(f"Graphs: {', '.join(graphs)}. Prompt fingerprint `{prompt_fingerprint()}`.")
+    w(f"Graphs: {', '.join(graphs)}. Prompt fingerprint `{_scored_fingerprint(model)}`.")
     w("")
     w("## Results")
     w("")
