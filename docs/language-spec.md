@@ -72,6 +72,10 @@ STRING      := '"' ... '"'
 
 ## Read semantics
 
+**find and subclasses.** `find part` reads parts and everything derived from part. `derive class widget from part` says a widget is a part, and the rest of the language already agrees: a widget is accepted wherever a role takes a part, and it inherits part's properties. Reading only nodes whose class is literally `part` would partition a derived class away from every query written against the base, which is what the document classes did: `chunk` and `media` derive from `piece`, so `find piece` answered nothing on a store full of pieces.
+
+The binding's static type is still the class named in the `find`, so `find piece as p` followed by `return p.text` is a verifier error even when every piece in the store is a chunk. Ask for the class whose properties you want.
+
 **Binding table.** A query builds one binding table (SPARQL solution-mapping style). Each `as NAME` is a column. `find` seeds rows. `follow X edge role as Y` extends every row: for each row, for each edge of type `edge` incident to the node in column X, bind the node at `role` to Y. Rows multiply; rows with no match are dropped. Homomorphism semantics: repeated nodes are allowed. Edge instances are per-row unique (trail semantics, matching Cypher's MATCH default).
 
 **Roles.** An edge type declares exactly two roles: `uses(whole: product, component: part)`. `follow parts supplied_by source` means: arrive at the `source` role. Asking to arrive at the role your binding already occupies is a verifier type error when endpoint classes differ.

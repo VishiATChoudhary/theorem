@@ -306,7 +306,27 @@ def _candidate_rows(store: Store) -> list[dict]:
 INDEX_WORTH_IT = 5_000
 
 
-def _name_lookup(stmt: Find, store: Store) -> list[str] | None:
+def _seed_classes(schema: Schema, target: str) -> list[str]:
+    """The classes a `find <target>` reads: the target and what derives from it.
+
+    `derive class widget from part` says a widget is a part, and the rest
+    of the system already agrees: a widget is accepted wherever a role
+    takes a part, and it inherits part's properties. `find part` used to
+    read only nodes whose class is literally `part`, so deriving a
+    subclass quietly partitioned the data away from every query that had
+    been written against the base. The shipped ingest pipeline hit this:
+    it writes `chunk` and `media`, both derived from `piece`, so
+    `find piece` answered nothing on a store full of pieces.
+    """
+    subs = [
+        c.name
+        for c in schema.classes.values()
+        if c.name != target and schema.is_subclass(c.name, target)
+    ]
+    return [target, *subs]
+
+
+def _name_lookup(stmt: Find, store: Store, schema: Schema) -> list[str] | None:
     """Node ids that could match the condition, or None for "read the class".
 
     A prefilter only: the caller still evaluates the whole condition on
@@ -320,8 +340,9 @@ def _name_lookup(stmt: Find, store: Store) -> list[str] | None:
     time a query asks about it, and only on a class large enough for the
     scan to be worth avoiding.
     """
-    if not stmt.cond or stmt.target not in store.by_class:
+    if not stmt.cond or stmt.target not in schema.classes:
         return None
+    targets = _seed_classes(schema, stmt.target)
     props = []
     for _joiner, clause in stmt.cond:
         if (
@@ -346,16 +367,16 @@ def _name_lookup(stmt: Find, store: Store) -> list[str] | None:
     seen: set[str] = set()
     for _joiner, clause in stmt.cond:
         prop = clause.col[0]
-        if prop == "name":
-            found = store.by_name.get((stmt.target, _fold(clause.value)), ())
-        else:
-            found = store.by_prop.get((stmt.target, prop), {}).get(
-                _fold(clause.value), ()
-            )
-        for nid in found:
-            if nid not in seen:
-                seen.add(nid)
-                ids.append(nid)
+        folded = _fold(clause.value)
+        for target in targets:
+            if prop == "name":
+                found = store.by_name.get((target, folded), ())
+            else:
+                found = store.by_prop.get((target, prop), {}).get(folded, ())
+            for nid in found:
+                if nid not in seen:
+                    seen.add(nid)
+                    ids.append(nid)
     return ids
 
 
@@ -385,15 +406,14 @@ def _find_rows(stmt: Find, store: Store, schema: Schema) -> list[dict]:
         if stmt.target == "nodes":
             nodes = [n for n in store.nodes.values()]
         else:
-            candidates = _name_lookup(stmt, store)
-            nodes = [
-                store.nodes[nid]
-                for nid in (
-                    store.by_class.get(stmt.target, ())
-                    if candidates is None
-                    else candidates
-                )
-            ]
+            candidates = _name_lookup(stmt, store, schema)
+            if candidates is None:
+                candidates = [
+                    nid
+                    for target in _seed_classes(schema, stmt.target)
+                    for nid in store.by_class.get(target, ())
+                ]
+            nodes = [store.nodes[nid] for nid in candidates]
         pool = [
             {name: n.id}
             for n in nodes
