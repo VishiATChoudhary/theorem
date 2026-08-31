@@ -18,3 +18,7 @@ eval/out/public/agent-archive-*/
 # internal planning notes and session handoffs, not part of the published project
 docs/superpowers/
 handoffs/
+.coverage
+.coverage.*
+.ruff_cache/
+.DS_Store
