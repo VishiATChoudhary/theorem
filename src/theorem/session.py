@@ -52,6 +52,25 @@ READ_STMTS = (
 )
 
 
+def _partial(committed: int, *, receipts: bool = False) -> str:
+    """How much of a failed program stuck, as a leading-newline suffix.
+
+    Verification is all or nothing; execution is not. Saying so is the
+    difference between a caller retrying the whole program and a caller
+    retrying the rest of it, and it is the one fact an exception has to
+    carry that a rendered error carries in its text.
+    """
+    if not committed:
+        return ""
+    plural = "s" if committed > 1 else ""
+    above = " their receipts are above." if receipts else ""
+    joiner = ";" if receipts else "."
+    return (
+        f"\n{committed} write{plural} before this one committed{joiner}{above} "
+        "The rest of the program did not run."
+    )
+
+
 class Session:
     def __init__(self, path: str | Path, schema: Schema, *, lock: bool = True):
         self.store = Store(path, lock=lock)
@@ -150,6 +169,27 @@ class Session:
         return execute_rows(plans, self.store, self.schema)
 
     def run(self, text: str) -> str:
+        """Run a program and render the result, errors included, as text.
+
+        This is the agent contract: a model that made a mistake gets the
+        corrective message back verbatim and tries again, so a failure is
+        a string rather than an exception. Code embedding theorem wants
+        the opposite and should call `execute` or `rows`.
+        """
+        return self._execute(text, strict=False)
+
+    def execute(self, text: str) -> str:
+        """Run a program and raise if any part of it fails.
+
+        Same pipeline as `run`, for callers that are programs rather than
+        models: an error is raised instead of returned as text, so a
+        caller cannot mistake a failure for an answer by forgetting to
+        read one. Reads and writes are both allowed, which is what
+        separates this from `rows`.
+        """
+        return self._execute(text, strict=True)
+
+    def _execute(self, text: str, *, strict: bool) -> str:
         try:
             stmts = parse(text)
             stale_env = {
@@ -158,8 +198,12 @@ class Session:
             }
             plans = verify(stmts, self.schema, stale_env)
         except ParseError as e:
+            if strict:
+                raise
             return f"error: {e}\nnothing was executed."
         except VerifyError as e:
+            if strict:
+                raise
             return str(e)
 
         outputs: list[str] = []
@@ -203,19 +247,18 @@ class Session:
                     )
                 )
         except (ExecError, WriteError) as e:
+            if strict:
+                # The same fact the message below carries, on the exception,
+                # because a caller in code has no message to read.
+                self._export_bindings(table)
+                raise type(e)(f"{e}{_partial(committed)}") from e
             outputs.append(f"error: {e}")
-            if committed:
-                # Verification is all or nothing; execution is not. Saying
-                # so here is the difference between an agent retrying the
-                # whole program and an agent retrying the rest of it.
-                outputs.append(
-                    f"{committed} write"
-                    + ("s" if committed > 1 else "")
-                    + " before this one committed; their receipts are above. "
-                    "The rest of the program did not run."
-                )
+            outputs.append(_partial(committed, receipts=True).lstrip())
         except Exception as e:  # the REPL/agent contract is
             # that run() always returns a message, never a raw traceback
+            if strict:
+                self._export_bindings(table)
+                raise
             outputs.append(f"internal error: {type(e).__name__}: {e}")
         self._export_bindings(table)
         return "\n".join(o for o in outputs if o)

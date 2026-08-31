@@ -7,7 +7,6 @@ Every query is verified whole against the live schema before anything runs.</p>
 
 <p align="center">
   <a href="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml"><img src="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml/badge.svg" alt="CI"></a>
-  <a href="https://pypi.org/project/theorem/"><img src="https://img.shields.io/pypi/v/theorem" alt="PyPI"></a>
   <img src="https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue" alt="Python versions">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License"></a>
 </p>
@@ -24,11 +23,14 @@ LLMs get roughly **40% of Cypher queries wrong** on realistic schemas. Two model
 
 ## Install
 
+Not on PyPI yet. Install from the repository, pinning a commit if you want
+the language and the storage format to hold still:
+
 ```bash
-pip install theorem
+pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
 ```
 
-Run a program or an interactive session:
+The core package has no dependencies. Run a program or an interactive session:
 
 ```bash
 theorem program.thm --db ./db
@@ -41,12 +43,17 @@ Or embed it, and let a model write the queries:
 from theorem import Schema, Session, answer
 
 with Session("./db", Schema()) as db:
-    db.run("derive class supplier from entity with {country: str}")
+    db.execute("derive class supplier from entity with {country: str}")
     got = answer(db, "Which suppliers are in Germany?", your_model)
     print(got.rows, got.turns, got.errors)
 ```
 
 `answer` is the loop the benchmarks measure: write, run, and on an error hand the error back verbatim and try again. Nothing is ever partly applied, so a repair is a fresh attempt rather than a cleanup.
+
+Use `execute` (raises) and `rows` (raises, reads only) from your own code, and
+`run` (renders the error as text) when a model is the caller. Getting that choice
+right is the whole of [Using theorem in a project](docs/using-theorem.md), which
+also covers schemas, locking, bulk loading and query limits.
 
 ## Sixty seconds of theorem
 
@@ -66,7 +73,7 @@ One line, one step, one name. Reading it top to bottom is the whole mental model
 Any file, not just CSVs, lands as queryable graph nodes with page-level provenance: markdown, text, CSV, JSON/JSONL, PDFs, docx/xlsx/pptx, and images (stored with metadata) all normalize into document, chunk, table, and media nodes joined by `part_of` and traceable back to their source page. CSVs stay first-class and refinable as before. For domain-specific schemas, a playbook is a markdown file describing a use case in prose; any agent CLI compiles it into verified `derive class`/`derive edge` statements with lineage back to the playbook.
 
 ```bash
-pip install "theorem[pdf,office]"
+pip install "theorem[pdf,office] @ git+https://github.com/VishiATChoudhary/theorem.git@main"
 theorem ingest report.pdf --db ./db
 theorem playbook compile playbook.md --db ./db --agent claude
 ```
@@ -81,13 +88,11 @@ theorem stats --db ./db
 
 ## Why agents stop failing
 
-- **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can distinguish them ([measured](docs/benchmarks/silent-failure.md)).
+- **No direction glyphs.** Edges traverse by role name: `follow parts supplied_by source as sups`. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can distinguish them. That exception is [6.1% of our own broken queries](docs/benchmarks/silent-failure.md), and it is the honest ceiling on the headline of this README.
 - **One line, one step, one name.** No chaining, no nesting, nothing to balance.
 - **Explicit staged aggregation.** `group by sups as g`, then `count distinct g.parts as n`. Adding a return column can never change the grouping.
 - **Schema-closed vocabulary.** Every query is verified whole against the live schema before anything runs; errors name the line, suggest the fix, and confirm nothing executed.
 - **Token budgets.** `budget 2000 tokens` caps serialized results with explicit truncation and `continue @c...` handles.
-
-Break a correct query one token, the way models break them, and ask what the caller sees. theorem refuses 1,811 of 1,928 such mutants; text2cypher refuses **none** of 1,997, returning rows or a confident empty set every time ([silent-failure benchmark](docs/benchmarks/silent-failure.md), which also reports the one case theorem does not catch).
 
 And a write surface no existing query language has: `assert` with provenance, receipts carrying dedup candidates, `merge`/`distinct` resolution, `refine`/`compact` granularity verbs with full lineage, `retire`, `flag`, `derive class`, and queryable per-node health (`find nodes where health.loss > 0.8`).
 
@@ -137,7 +142,7 @@ uv run pytest -q     # unit, property-based, and end-to-end deployment tests
 | `src/theorem/session.py` | Session facade (parse, verify, execute, rows) |
 | `src/theorem/prompt.py` | The prompt and agent loop the benchmarks measure |
 | `src/theorem/ingest/bulk.py` | CSV/JSONL bulk load |
-| `eval/` | CypherBench, agent-loop, silent-failure and prompt-cost harnesses |
+| `eval/` | CypherBench, agent-loop, frontier, broken-query and prompt-cost harnesses |
 | `docs/language-spec.md` | Normative grammar and semantics |
 
 ## Community

@@ -3,7 +3,7 @@
 This walks a small supply-chain graph from empty database to multi-hop aggregate. Run everything in the REPL:
 
 ```bash
-pip install theorem
+pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
 theorem --repl --db ./tutorial-db
 ```
 
