@@ -15,6 +15,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
+      # A tag that disagrees with the package version publishes the wrong
+      # release under the right name, and nothing downstream can tell.
+      - name: Tag matches the package version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg=$(uv run python -c "import theorem; print(theorem.__version__)")
+          echo "tag=$tag package=$pkg"
+          test "$tag" = "$pkg"
       - run: uv run pytest -q
       - run: uv build
       - run: uv publish
