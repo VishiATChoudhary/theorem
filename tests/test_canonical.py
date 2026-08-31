@@ -90,3 +90,28 @@ def test_upto_one_is_a_plain_follow():
     assert "upto" not in canonical(
         "find part as p\nfollow p contains component upto 1 as c\nreturn c.name"
     )
+
+
+def test_every_generated_query_round_trips():
+    """Real model output is the only corpus that finds the cases a
+    handwritten list does not think of."""
+    import json
+    from pathlib import Path
+
+    frozen = sorted(
+        (Path(__file__).resolve().parents[1] / "eval/out/public").glob("queries-*.json")
+    )
+    if not frozen:
+        pytest.skip("no frozen query file checked in")
+    queries = [q for f in frozen for q in json.loads(f.read_text()).values()]
+    assert len(queries) > 100, "the corpus should be the whole test set"
+    checked = 0
+    for q in queries:
+        try:
+            once = _no_lines(parse(q))
+        except Exception:
+            continue  # a query the model got wrong is not this test's business
+        twice = _no_lines(parse(canonical(q)))
+        assert once == twice, q
+        checked += 1
+    assert checked > 100
