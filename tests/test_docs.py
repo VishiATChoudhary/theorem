@@ -104,3 +104,43 @@ def test_the_prompt_teaches_every_verb_it_can_write():
 
     for verb in ("find", "follow", "group", "keep", "compute", "return", "upto"):
         assert verb in TUTORIAL
+
+
+def test_the_python_examples_parse_and_name_real_things():
+    """They cannot be run as written (they open a database in the current
+    directory and call the reader's own model), but a rename should not be
+    able to leave them pointing at something that no longer exists."""
+    import ast
+
+    import theorem
+
+    exported = set(theorem.__all__)
+    for name in ("tutorial.md", "index.md"):
+        for block in blocks(name, "python"):
+            tree = ast.parse(block)  # a syntax error here is a broken doc
+            imported = {
+                alias.name
+                for node in ast.walk(tree)
+                if isinstance(node, ast.ImportFrom) and node.module == "theorem"
+                for alias in node.names
+            }
+            unknown = imported - exported
+            assert not unknown, f"{name} imports {unknown} from theorem"
+
+
+def test_the_readme_examples_too():
+    import ast
+    import re
+
+    import theorem
+
+    readme = (DOCS.parent / "README.md").read_text(encoding="utf-8")
+    for block in re.findall(r"```python\n(.*?)```", readme, re.S):
+        tree = ast.parse(block)
+        imported = {
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "theorem"
+            for alias in node.names
+        }
+        assert not imported - set(theorem.__all__)
