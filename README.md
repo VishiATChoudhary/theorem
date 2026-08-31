@@ -6,6 +6,13 @@
 Every query is verified whole against the live schema before anything runs.</p>
 
 <p align="center">
+  <a href="https://vishiatchoudhary.github.io/theorem/">Documentation</a> &middot;
+  <a href="https://vishiatchoudhary.github.io/theorem/tutorial/">Tutorial</a> &middot;
+  <a href="https://vishiatchoudhary.github.io/theorem/using-theorem/">Use it in a project</a> &middot;
+  <a href="https://vishiatchoudhary.github.io/theorem/benchmarks/">Benchmarks</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml"><img src="https://github.com/VishiATChoudhary/theorem/actions/workflows/test.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/python-3.11%20|%203.12%20|%203.13-blue" alt="Python versions">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-green" alt="License"></a>
@@ -156,6 +163,7 @@ uv run pytest -q     # unit, property-based, and end-to-end deployment tests
 theorem is a community project under Apache-2.0. The language grows spec-first: proposals are discussed as issues before syntax lands ([how it works](CONTRIBUTING.md)).
 
 - [CHANGELOG.md](CHANGELOG.md): what changed in each release, and why
+- [RELEASING.md](RELEASING.md): how a version is cut, and the PyPI setup that is still pending
 - [CONTRIBUTING.md](CONTRIBUTING.md): setup, test loop, DCO sign-off
 - [ROADMAP.md](ROADMAP.md): every open objective states the number that closes it
 - [Good first issues](https://github.com/VishiATChoudhary/theorem/labels/good%20first%20issue)
