@@ -135,7 +135,7 @@ def test_the_readme_examples_too():
     import theorem
 
     readme = (DOCS.parent / "README.md").read_text(encoding="utf-8")
-    for block in re.findall(r"```python\n(.*?)```", readme, re.S):
+    for block in re.findall(r"```python\n(.*?)```", readme, re.DOTALL):
         tree = ast.parse(block)
         imported = {
             alias.name
