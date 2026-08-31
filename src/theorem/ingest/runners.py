@@ -47,6 +47,13 @@ class CLIRunner:
             raise RunnerError(
                 f"Command timed out after {self.timeout}s: {' '.join(cmd)}"
             ) from e
+        except (FileNotFoundError, NotADirectoryError) as e:
+            # An agent CLI that is simply not installed is the most likely
+            # failure here, and it deserves the same one-line message as
+            # every other operator problem rather than a traceback.
+            raise RunnerError(
+                f"{self.argv[0]!r} is not installed, or is not on PATH."
+            ) from e
 
 
 @dataclass
