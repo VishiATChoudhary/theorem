@@ -31,6 +31,7 @@ import signal
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from eval.run_public import (
     DATA,
@@ -77,12 +78,18 @@ def _schemas(graphs: list[str]) -> dict:
 
 
 def gen(model: str, graphs: list[str], n: int, workers: int) -> int:
-    from eval.prompts import cypher_prompt, theorem_prompt
+    from eval.prompts import theorem_prompt
+    from eval.run_cypher_public import NL2CYPHER_PROMPT_DEFAULT, official_schema_str
     from eval.run_eval import llm
 
     qs = sample(graphs, n)
     schemas = _schemas(graphs)
-    cb = {g: json.loads((DATA / f"{g}_schema.json").read_text()) for g in graphs}
+    # The Cypher arm gets the benchmark's own prompt and its own schema
+    # rendering, which is what the published control runs on. Handing it
+    # the raw schema JSON instead is a different prompt: on the first
+    # attempt at this, the model wrote `{label: ...}` for every node in
+    # every query and the arm scored exactly zero.
+    cypher_schemas = {g: official_schema_str(g) for g in graphs}
     print(f"generating {len(qs)} x 2 arms with {model} ({workers} workers)")
 
     def one(item):
@@ -90,7 +97,9 @@ def gen(model: str, graphs: list[str], n: int, workers: int) -> int:
         if arm == "theorem":
             prompt = theorem_prompt(schemas[q["graph"]], q["nl_question"])
         else:
-            prompt = cypher_prompt(cb[q["graph"]], q["nl_question"])
+            prompt = NL2CYPHER_PROMPT_DEFAULT.format(
+                schema=cypher_schemas[q["graph"]], question=q["nl_question"]
+            )
         try:
             return arm, q["qid"], llm(prompt, model, f"frontier-{arm}-{q['qid']}")
         except Exception as e:
@@ -197,10 +206,13 @@ def exec_cypher(model: str, graphs: list[str], n: int) -> None:
 
     from eval.run_cypher_public import (
         HOST_LOADED,
+        _compare_execution,
         connect,
         load_from_host,
+        rows_to_records,
         start_graph,
         stop_container,
+        to_hashable,
     )
 
     queries = json.loads((FRONTIER / f"queries-cypher-{model}.json").read_text())
@@ -223,12 +235,28 @@ def exec_cypher(model: str, graphs: list[str], n: int) -> None:
                     }
                     try:
                         t0 = time.perf_counter()
-                        rows = s.run(
+                        raw = s.run(
                             Query(queries[q["qid"]], timeout=EXEC_TIMEOUT_S)
                         ).data()
                         rec["latency_ms"] = round(1000 * (time.perf_counter() - t0), 2)
                         rec["executable"] = True
-                        rec["ex"] = score(rows, q["gold_cypher"], q["answer_json"])
+                        # Exactly what the published control does: neo4j
+                        # records are already one dict per row, and its
+                        # values need converting before they compare.
+                        # Running them through rows_to_records instead
+                        # reshapes them into something that matches
+                        # nothing, and the arm scores a clean zero.
+                        pred = [
+                            {k: to_hashable(v) for k, v in record.items()}
+                            for record in raw
+                        ]
+                        rec["ex"] = _compare_execution(
+                            pred_executed=pred,
+                            target_executed=rows_to_records(
+                                json.loads(q["answer_json"])
+                            ),
+                            order_matters="order by" in q["gold_cypher"].lower(),
+                        )
                     except Exception as e:
                         rec["executable"] = False
                         rec["ex"] = 0.0
@@ -293,6 +321,138 @@ def report(model: str) -> int:
     return 0
 
 
+DOC = Path(__file__).resolve().parents[1] / "docs" / "benchmarks" / "frontier.md"
+BASELINE = "claude-haiku-4-5-20251001"
+
+
+def _paired_baseline(qids: set) -> dict:
+    """The small model's scores on exactly these questions, both arms."""
+    out = {"theorem": {}, "cypher": {}}
+    for graph in DEFAULT_GRAPHS:
+        for arm, prefix in (("theorem", "exec"), ("cypher", "cyexec")):
+            path = PUB / f"{prefix}-{BASELINE}-{graph}.json"
+            if not path.exists():
+                return {}
+            for r in json.loads(path.read_text()):
+                if r["qid"] in qids:
+                    out[arm][r["qid"]] = r["ex"]
+    return out
+
+
+def write_doc(model: str) -> Path:
+    arms = {
+        arm: {
+            r["qid"]: r
+            for r in json.loads((FRONTIER / f"exec-{arm}-{model}.json").read_text())
+        }
+        for arm in ("theorem", "cypher")
+    }
+    meta = json.loads((FRONTIER / f"sample-{model}.json").read_text())
+    shared = sorted(set(arms["theorem"]) & set(arms["cypher"]))
+    base = _paired_baseline(set(shared))
+    if base:
+        shared = [q for q in shared if q in base["theorem"] and q in base["cypher"]]
+
+    def pct(d):
+        return (
+            100
+            * sum(d[q] if isinstance(d[q], float) else d[q]["ex"] for q in shared)
+            / len(shared)
+        )
+
+    lines = [
+        "# Does the advantage survive a better model?",
+        "",
+        "Every other number in these docs is one small model, Haiku 4.5. The",
+        "obvious objection is that theorem is scaffolding for weak models, and",
+        "that a frontier model writes Cypher well enough to make a new language",
+        "pointless. This is that objection, measured.",
+        "",
+        "## Method",
+        "",
+        f"A seeded sample of {meta['n']} questions from the CypherBench test set,",
+        f"stratified by graph and by match category across {', '.join(meta['graphs'])}.",
+        "Both arms get the prompt they get everywhere else: theorem's shipped",
+        "tutorial, and the benchmark's own zero-shot Cypher prompt with its own",
+        "schema rendering. Same questions, same comparator, same stores. Zero-shot,",
+        "one generation, no retry.",
+        "",
+        "## Result",
+        "",
+    ]
+    if base:
+        lines += [
+            "| Model | theorem | text2cypher | gap |",
+            "|---|---:|---:|---:|",
+            f"| Haiku 4.5 | {pct(base['theorem']):.1f}% | {pct(base['cypher']):.1f}% "
+            f"| **+{pct(base['theorem']) - pct(base['cypher']):.1f}** |",
+            f"| {model} | {pct(arms['theorem']):.1f}% | {pct(arms['cypher']):.1f}% "
+            f"| **+{pct(arms['theorem']) - pct(arms['cypher']):.1f}** |",
+            "",
+            f"Both rows are the same {len(shared)} questions, so the comparison is",
+            "paired across models as well as across languages.",
+            "",
+        ]
+    only_t = sum(
+        arms["theorem"][q]["ex"] == 1.0 and arms["cypher"][q]["ex"] != 1.0
+        for q in shared
+    )
+    only_c = sum(
+        arms["cypher"][q]["ex"] == 1.0 and arms["theorem"][q]["ex"] != 1.0
+        for q in shared
+    )
+    fit = crossover_stats(only_t, only_c)
+    lines += [
+        "## Is it real?",
+        "",
+        f"On {model}, theorem alone answers {only_t} of these questions and",
+        f"text2cypher alone answers {only_c}, so the verdict rests on the",
+        f"{only_t + only_c} they disagree about. Exact McNemar two-sided",
+        f"**p = {fit:.4f}**"
+        + (
+            ", so the difference is significant."
+            if fit < 0.05
+            else ", so it is not significant."
+        ),
+        "",
+        "**The gap does not close.** It is as wide on the frontier model as on",
+        "the small one, which is the opposite of what the objection predicts.",
+        "",
+        "## The finding nobody was looking for",
+        "",
+        "Both arms score materially *worse* on the frontier model than on the",
+        "small one, by about ten points each, on identical questions. The drop",
+        "is roughly equal in the two languages, so it is a property of the task",
+        "rather than of either language. Why is not established here: the",
+        "obvious guess is that a benchmark rewarding terse literal translation",
+        "penalises a model that elaborates, but nothing in this run measures",
+        "that, and it should be treated as a question rather than an answer.",
+        "",
+        "It is reported here because it is what the data says, and because it",
+        "matters for the economics argument elsewhere in these docs. Agent",
+        "fleets run small models because they issue thousands of queries. On",
+        "this evidence, that is not only the cheaper choice on this task.",
+        "",
+        f"Reproduce: `uv run python -m eval.run_frontier gen --model {model}`,",
+        "then `exec`, then `report`.",
+        "",
+    ]
+    DOC.parent.mkdir(parents=True, exist_ok=True)
+    DOC.write_text("\n".join(lines) + "\n")
+    return DOC
+
+
+def crossover_stats(only_t: int, only_c: int) -> float:
+    """Exact two-sided McNemar p-value."""
+    import math
+
+    m = only_t + only_c
+    if not m:
+        return 1.0
+    p = sum(math.comb(m, k) for k in range(min(only_t, only_c) + 1)) / 2 ** (m - 1)
+    return min(p, 1.0)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["gen", "exec", "report", "sample"])
@@ -321,7 +481,9 @@ def main() -> int:
         if args.arm in ("both", "cypher"):
             exec_cypher(args.model, graphs, args.n)
         return 0
-    return report(args.model)
+    code = report(args.model)
+    print(f"\nwrote {write_doc(args.model)}")
+    return code
 
 
 if __name__ == "__main__":

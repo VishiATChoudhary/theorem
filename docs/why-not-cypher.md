@@ -6,7 +6,9 @@ The obvious objection to theorem is that model progress will dissolve it: wait a
 
 Between late 2024 and mid 2026 the frontier advanced from Claude 3.5 Sonnet and GPT-4o to Claude Opus 4.8 and GPT-5.5, several major model generations. Cypher generation did not move with it. Text2GraphQuery-Bench (Feb 2026, arXiv 2602.11745) evaluates exactly these newest models: 51.2% Cypher execution accuracy for Claude Opus 4.8 and 53.3% for GPT-5.5 zero-shot, rising only to 57.6% and 55.3% few-shot. On the hardest query tier, GPT-5.5 falls to 19.1% zero-shot.
 
-Our own control is a live second data point: on the full public CypherBench test set, the same Haiku 4.5 model scores 70.4% writing Cypher and 78.0% writing theorem, and the published frontier baselines from 2024 sit below both at 60-62%. Model scaling has been flat on this task; language design has not. Dedicated Cypher repair-and-triage systems were still being published in June 2026 (CYGNET, arXiv 2606.04645), which is not what an about-to-be-solved problem looks like.
+Our own control is a live second data point: on the full public CypherBench test set, the same Haiku 4.5 model scores 70.4% writing Cypher and 78.0% writing theorem, and the published frontier baselines from 2024 sit below both at 60-62%. Model scaling has been flat on this task; language design has not.
+
+And the objection has now been tested directly rather than argued about. On 498 questions run through both languages on both a small model and a frontier one, the advantage is +8.8 points on Haiku 4.5 and +9.8 on Sonnet 5, McNemar p = 0.0001. It does not close. The same run found both languages losing about ten points on the frontier model, equally, which is a fact about the task worth knowing and is on the [frontier page](benchmarks/frontier.md). Dedicated Cypher repair-and-triage systems were still being published in June 2026 (CYGNET, arXiv 2606.04645), which is not what an about-to-be-solved problem looks like.
 
 ## The reason it stays flat is structural: corpus, not capacity
 

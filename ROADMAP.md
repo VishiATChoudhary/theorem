@@ -49,11 +49,16 @@ prompt is *smaller*, 2,793 tokens against 3,186. The benchmark graphs have 9 to
 See [prompt cost](docs/benchmarks/prompt-cost.md). What is still open is
 accuracy at that size: nothing has been run against a 40-class graph.
 
-**Check the thesis against a frontier model.** Every result is one small model.
-If the gap closes on a frontier model, the language is scaffolding for weak
-models and the moat has an expiry date.
-*Closes at* both arms, >= 500 questions, one frontier model, published either
-way.
+**Checked against a frontier model: the gap does not close.** On 498 questions
+sampled from the test set, paired across both models and both languages,
+Haiku 4.5 scores 84.3% against 75.5% and Sonnet 5 scores 74.1% against 64.3%.
+The advantage is +8.8 points on the small model and +9.8 on the frontier one,
+McNemar p = 0.0001. See [frontier model](docs/benchmarks/frontier.md).
+
+What that run also found, and did not explain, is that both arms score about
+ten points worse on the frontier model than on the small one, on identical
+questions. The drop is the same size in both languages, so it belongs to the
+task rather than to either of them. Worth understanding.
 
 ## Open: engine
 

@@ -1,0 +1,3986 @@
+[
+ {
+  "qid": "0174ba44-5756-4cfd-9ff3-103a4b131721",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.62,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "032f1ce7-3acb-4de9-b37d-290c512a5c2f",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "03f17d98-a4a9-4287-9f4c-217a37ba6b9e",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0486ad8d-495e-4116-b4b5-f0b38bf0914b",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.55,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "048c39e7-9056-42b3-931a-d7016ed96490",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.53,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "05885222-231e-47c3-a064-a713dab2a132",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0834680e-22f8-4e23-84e8-7807640928ab",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0ca8e2d8-6c25-4108-a5aa-d5c2a83d711d",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.24,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0f76e925-cb2e-46c6-8a73-cdb9478a6df1",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "104ae671-8b3d-47eb-affd-070ec693f1e5",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "110334f1-21c2-4784-b215-120b6383ac4e",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1299c4cf-de88-4603-95b0-1dc278bb66ee",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 8.35,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "16725cad-e28c-4b23-8d61-c5c86740b740",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "169efd3d-5147-4a6e-98c3-826eef355b3a",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1b62d569-60ef-422a-8d44-58d9fbd9b7be",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1d1022b9-209b-4f78-84c9-8784e8dc22de",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 1.29,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1e60e349-2eb1-4da0-950b-2e0a5cf0f4d3",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2342d395-d41a-49ad-ac01-0a095d805658",
+  "graph": "nba",
+  "category": "basic_(n*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "254422cc-b184-4b01-a197-d41229f8f41d",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 3.64,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "26414c4a-54c7-4266-8f15-f7854fd714cb",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 6.99,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "27c8c0f4-feb3-4de2-b801-47b5af2020f3",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "29bb366e-8b46-48bf-a5b6-c9125bc7b64a",
+  "graph": "nba",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: type error: \"v\" is a team, which already occupies role \"team\"; to traverse hasHomeVenue from team arrive at role \"venue\" in line 2\nnothing was executed."
+ },
+ {
+  "qid": "2a814f17-2928-47ff-a560-d6894ca3e414",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 1.63,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2d5f1e6f-ae3c-4e71-8fbe-e05f69294e46",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.88,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2daca1ae-e59e-4241-8cf3-ba1cf07680aa",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2e2c70f0-7a57-4aa8-89d6-459d45cfb643",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2e548453-7ec9-452d-aaf6-66847b9d242f",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 16.55,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3043b730-ff1a-4ecc-9970-aed55ba7512e",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "34c88f84-1297-48aa-8f12-2a14ee597e19",
+  "graph": "nba",
+  "category": "basic_(n*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "362e614b-168a-478c-98db-a0fafce1b1e0",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.96,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "39425312-ac63-44c2-a8ae-bca437f11406",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3c61a785-dd4f-4246-8c10-937e21f19b72",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3c847c81-e000-4031-b1bc-d039f1594816",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.23,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3d3b116c-6da1-4cce-9080-e08f1c4ba87a",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.3,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3dc0ecd4-6103-4db3-840e-906be0a25f44",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 1.91,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3dffa227-502f-42e3-bffb-09947424be00",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"conference\" on edge partOfDivision; roles are team (team), division (division). did you mean one of: division, team? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "3f28fa8b-8b37-46ad-ab48-d4e573500312",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.86,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "44e56e56-e9d2-4efb-87fa-1b9673e881e8",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 1.01,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "452aab89-80b8-4b69-8d1a-4cbfd98dc024",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.76,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "4615e1e9-a9be-49ac-8aee-0085570c7a7a",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 3.64,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "49b5b6a9-b72d-4152-a7d0-edd85bdf301d",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.97,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4bdecfd4-4b6c-4c70-a077-026ecb1989c3",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 1.04,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4cbfd81b-f7d7-42df-b67a-9b3fc942c36f",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 6.45,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4e2dd668-77c3-4ad2-a5ad-7520194e8809",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4e5ed21a-4d0a-418d-98a9-cde47903857b",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "4f663af5-dab4-4246-bd48-df2f50302e4f",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4ff544f2-5ff0-47fa-8ff3-818c73cd83e8",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "50d44b7a-64e6-49f6-8ba2-602c29e3ef9e",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.49,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5257c6c3-779f-4b96-90d8-aaf6083d9e27",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "543ea313-3750-42a7-b6cd-415cfc19469b",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 1.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "54f574bd-53ff-42cd-be6b-a2ffade30007",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "56e62758-4355-47e3-ab35-27f316d2a681",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 5.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5715c139-758a-48e4-af9f-dcebb56721d7",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.23,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "59cf99b7-51f8-4c7c-a7e7-9a58e5ce69a2",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 9.36,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5c4218c5-4f9e-435b-8f09-af57060e9ad7",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5d04cdc7-8f1b-4d57-b469-d601bdc9806a",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "60f51daa-d6f7-4f29-a101-87cd09850353",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.29,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "61ff55fc-962f-42fb-8ddd-66791d0f75c8",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "62fa1d94-cc62-461e-aaef-2d0e7e56e32c",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6392f8db-296a-48dd-892e-72d3e4e371dc",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.42,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "64b5710f-ef46-4e79-80ac-99660231cd2d",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.59,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "65eb9ed3-3ad2-4438-99fe-76f8fbbdc1d4",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 11.03,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "66818788-9342-460b-9a4b-7d26cc3f73bc",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.23,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6a0e3125-a01a-4106-8bf8-5dedf4dad1a8",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.33,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6a803862-a32e-458d-b368-833fc7973c91",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6b0ce2fe-f6ab-4f9a-89e6-53df6622c36a",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6b3e04ef-80e2-43e7-b7ea-fdcc0aaf11c9",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 1.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6cfe27cd-d135-4369-879c-c22ca9a29755",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"conference\" on edge partOfDivision; roles are team (team), division (division). did you mean one of: division, team? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "6f6470c7-185b-4331-a6e7-adc86dfbc523",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "70338d8d-1a76-44bd-911d-413d96a0972e",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 32.44,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "737d13a2-ac2b-49ff-b517-2f83d1745cc3",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.23,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7427da01-2c98-4f7e-9d27-774839ca147c",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "75295cc6-0576-4131-9226-11efc882228d",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "75362c1e-12f9-4b88-8550-56f9e878c525",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "76db58f6-8e70-42d7-9ab3-29660ba8b9ae",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.61,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "77741715-db78-4186-a03b-146bfce2ba79",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.72,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "777d9ce9-a708-4eca-b669-526f54523d2f",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7bd31ea5-9bdd-4733-af1a-29a164a5387a",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7def5609-998a-4326-b7a4-f1dba4a57e30",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: type error: \"v\" is a team, which already occupies role \"team\"; to traverse hasHomeVenue from team arrive at role \"venue\" in line 2\nnothing was executed."
+ },
+ {
+  "qid": "7e3ede6f-663f-484f-a228-42593db7bd0b",
+  "graph": "nba",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 1051.42,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7ee9045b-2a28-48dd-82dd-9256673e3135",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 3.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "81fbe95c-c86d-4ea4-a414-53dcc7c0aa81",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "829e543d-503e-45a1-aa9a-8a14ae871d47",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.24,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "84db92d8-6589-4714-9d29-72a4bfe23469",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: \"date_of_death\" is not bound. did you mean one of: p, t, v? in line 5\nnothing was executed."
+ },
+ {
+  "qid": "8a980812-f705-434c-8917-990558916d43",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8ace4649-473b-4df5-a0d1-500e4bc0d51c",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "92ad9905-dbac-47b8-9d19-bab0ee2316fe",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 9.42,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "930cb5de-91ac-4934-8b0d-dfd69fb7c5b9",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.34,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "93830abd-079d-43de-b596-3e3b98ab7fa7",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "958ba905-ee0c-4a0f-8a5a-250fab423c92",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"conference\" on edge partOfDivision; roles are team (team), division (division). did you mean one of: division, team? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "9949be94-04e8-4e5f-97a3-6b0337882684",
+  "graph": "nba",
+  "category": "basic_(n*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9973aa44-a59a-4f3c-a664-eebe7794893e",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9a4685c2-cb2d-4ede-a508-ce077526051b",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9bf0c917-b7a2-4c1e-9b3e-9661030b372f",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9bfc2e59-1348-4667-90fc-779016840ec5",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9e194653-50e4-4ca2-8721-9b8a874679e3",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "9e9c32cf-8e1c-460d-8d9c-8a6b2b53696f",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 11.36,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a0e95770-7dad-49a3-ba30-8be6b9e09c4c",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 1.63,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a45276ae-ac0b-43f9-a182-912eff75f6b1",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 2.59,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a535cd95-402c-429b-8939-68d143eaa700",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown property \"a2\" on class award. did you mean one of: name? in line 4\nnothing was executed."
+ },
+ {
+  "qid": "a7bfa0a6-69dc-4639-bccf-6ff8dafc2b6b",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a9ced4d1-6f09-42f3-beeb-1638eccea8d2",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a9d24b7a-4f99-40b2-ac81-b63b3fc01bab",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.62,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a9e50885-4a72-4f47-b146-c38f8f41e266",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ace37a08-2323-4bf0-9e5d-e0cc837dee05",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b0285463-0a21-4600-afc4-2d72c94e0efe",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b08c1bf4-6125-4e60-b895-46488a92ab2c",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 1.07,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b297f41f-f097-46fb-9971-1390033e183e",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b497abff-4bba-4f4d-a53b-dd3a35fc93ab",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 4.64,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b5c759bb-c89b-4d32-b063-4909efc645dd",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b8db7ffe-dc7b-4fc0-836c-3535b1f4ca16",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b8e6e457-0c08-4b03-b922-f70dd4c696ee",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.64,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bbbf9f6d-0ccd-4e42-8b6b-20d2af3addd2",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "be667a90-0313-4806-a6ca-e7d1d69e5303",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c00cad2c-7c11-40de-8f19-fc661b304f8e",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c1985c8d-170e-414f-a2d9-58cd52ff5aca",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c1d20c6f-ee69-4307-ae76-d720a4fc27cb",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.32,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c21c5900-7028-4de2-a792-1459cf645449",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c2cc845c-b8ed-40ae-867d-7b3260a00962",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c3de4204-22b3-4a1e-bd43-99fb555b8900",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.35,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c4e0c873-fc3b-4a28-88fa-ba111e2e9256",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c6c6699e-c63a-4c0d-87d8-6efc71b8c2fa",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "c7ccd057-43f3-482b-b78a-a176f92d9e16",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c960408d-76ca-492c-88d0-ea4088ea4e7b",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cc4636c5-3c72-4dd7-8faa-20718aa96cbb",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 1.62,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ccfadb00-96aa-42bb-bbb3-d3b0ee64a2f9",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cda3e6ed-7ca2-43ac-80c8-e851b7116153",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.49,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "cfcf8b07-15eb-4617-9096-23bbfb3b8d62",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.32,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d0fae0dc-8ab8-4c35-a1c2-79c6bebe4a0d",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d332a07b-c0a7-4b9c-985d-e1aedfffc886",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.42,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d3827784-7139-4952-af2c-ce949e880ceb",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d6badaed-4add-4b95-a078-68bf10f3541f",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d70022fe-68d7-4f80-a2a6-8a821d06ee54",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d775cbb0-4f5f-4217-b2f3-b8b0ae778a04",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 1.83,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "d837eba0-6d59-40a7-8f33-6e6facccea23",
+  "graph": "nba",
+  "category": "special_time-sensitive",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d94d0061-7000-4478-b913-15d833f73958",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 3.44,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "db8afe3d-a67c-4f78-9602-0cc823dc39d5",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 1.76,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "df1a1489-cdae-457e-9d7c-accb98d9507c",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "df3389b0-1ba2-4dea-9216-b1c5eabd79e8",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e01ace2f-7bde-4e43-9d56-1d65f52ef670",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.5,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e0edce9f-b01e-4a89-ab2f-71a2ebf8360f",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e15b64e4-7dd9-4b3c-ae55-b3ab0ad5f861",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.46,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e26821b6-6a22-4d03-8f13-5461db203d7c",
+  "graph": "nba",
+  "category": "basic_(n)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e3518c25-3bb1-41d3-b3f2-e1677096ee67",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 1.38,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e66f1f03-39da-426f-8b8e-158d804347a0",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.26,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e7d7ac09-21e7-4da8-b389-2d42d404bbf9",
+  "graph": "nba",
+  "category": "basic_(n*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "eec765d7-ebd3-4828-8041-e698f81a9bab",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "eed738c7-f7f7-4058-b8b9-27c70431015d",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f0052196-f3fa-4178-8063-2a5196717aa7",
+  "graph": "nba",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.82,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f0519f0b-778e-42b3-bbba-6787e29d0e9b",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 0.52,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f070dc0e-8c06-437d-a889-5ef6008d5806",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f1a0ab55-fdf4-4d8c-b5ef-ab2395fa4504",
+  "graph": "nba",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f29c01d9-fb9f-4384-b5fa-77a0538d9943",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f58f6ea7-8297-45df-aae2-d3591e411e37",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.75,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f7ab951c-44d8-4085-8d0c-f8ce94fdbef8",
+  "graph": "nba",
+  "category": "special_union",
+  "latency_ms": 10.82,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "fa814366-30bf-4c2c-9edb-2fc947a82ef9",
+  "graph": "nba",
+  "category": "special_optional-match",
+  "latency_ms": 0.78,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "fc233aa5-328c-4f5a-a18e-19ee17dd24d6",
+  "graph": "nba",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 1.37,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ffee6402-a29f-498d-85d8-8c8669f2afa5",
+  "graph": "nba",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.56,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "00c50f73-b5ed-4ee2-9d0d-8d86d21b81e8",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0245150d-ce55-4900-abf7-37e7ac3ed0eb",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0510a184-0934-48e2-af9d-75482987130b",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0548c291-bf76-4df1-b9ef-8ec933b067f9",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "063f4b61-0848-4ec8-afa4-60f353894e05",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.56,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "06a0e95a-31a8-4b69-95af-24dc0d732b37",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "09648530-5fbf-419d-af64-1bad55e9a834",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 1.22,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0c26b909-4545-4656-bc14-c86aa3c6eab2",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.88,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0f3dbdb0-6b02-4ed8-8964-b6da3f0ae9c9",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "11305436-476f-4e74-bbe4-7468a16cd68f",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 0.86,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "11e8d87d-b916-4a26-bb09-f3b52045a138",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1589d423-e502-4228-87af-dbdfb3e99f98",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "168ce5e4-8b46-4a7a-a080-66f58fa95bd3",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "16ec5e8c-b81f-489d-8b0b-21894bde152c",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "17275690-a3df-415b-bfd1-c4f74f0d1e6e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "17e9f281-1c7c-43f6-aab1-823a4bd4413e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1a05bc3a-5cd7-43b1-b6ee-880941e8c7d8",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1a362a72-8818-458e-a676-ea0fe100a795",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.45,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1aa2c918-dea8-4c6b-82ac-708641302d78",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1cfe704a-be27-4915-849d-ada3deea6e4c",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1da3b437-281e-42dc-9dac-f617d2f50859",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "203c08d7-5e3a-47f5-b05e-b2c6d27946c7",
+  "graph": "flight_accident",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "22e968a6-b56b-42b2-9c13-83ad4383609b",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "23c6b9bd-a6c1-4c0d-a1c9-d45625b56f6e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "273a8763-5c31-429c-b8e9-78ad89efb39e",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "281f4568-2e58-4d3f-8dff-1ce04afbc0df",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2905b85e-9d10-4366-a7a6-defd89437225",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.44,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "29f698ad-ba1e-4717-b768-998349b62965",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2c69cbfb-5586-4fea-9362-dfca8d2b3974",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2d155826-7a57-4012-a300-d3856662ca00",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2d5ca45f-f5e8-4258-8a76-35806e6d7f19",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2de16ac0-7626-4788-a91c-17b71454e1c8",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2fffb0a9-e821-475a-90d4-324468d2df9a",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "34280834-51d2-4a51-be3a-02ae354ba3b7",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3578bb63-d6da-48ab-bb1f-95829e158bca",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3663de88-5f9a-4064-9a98-c103bfd42bf6",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "36b522bb-62b6-45d4-aaf7-e87de99995ce",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3b544fc4-bb90-4859-afc8-914365f137fc",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3f7e1fa9-c3f5-462d-8f8f-9da98dd461a3",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "400c8b2a-d232-41d9-b568-13d654523b2b",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.43,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4597621d-99ec-4059-82ee-372813631e84",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "47fe58b8-1678-4dc1-b979-9514508acebd",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "498e4613-6c00-4e1c-aad4-8ef3857a775e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4b207cc6-5054-4e62-bf40-5b95acefc489",
+  "graph": "flight_accident",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 0.84,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "50bbcdc9-707d-4c8c-8dfa-25061a72369e",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "52fcdd5b-ba15-4ca3-a0ed-1a56ed2c3b3c",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5305e108-c717-4ba8-b70d-b276ed75609b",
+  "graph": "flight_accident",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 0.79,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "59689af4-b48e-46a9-8259-db1c079bfba8",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.78,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "62032476-9450-40a3-a93b-35153b58479d",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.45,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "6320e534-f0dd-4b28-8224-bbef3a5eb180",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6612f9a2-5f1d-42f6-aa51-59756b2a17ca",
+  "graph": "flight_accident",
+  "category": "special_optional-match",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6f17abc8-a541-4e77-9e77-1851477f6e57",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "737ff3ee-a333-4c81-9f60-5a60eae0ed87",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "75235715-7599-4a36-ae17-f1f3ad87360a",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.25,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "758a29ae-3b7e-4598-acd9-76215273c0c7",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 1.76,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "76c911d1-148a-4dcc-95c7-cf49ed08801b",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.93,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "77d6a1ae-1830-4943-a8d9-51a747ccb620",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "78d5740d-f6bb-490d-b350-cc90cd7e3aff",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "79a90866-e0fd-457c-9977-ec710fb6899e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7b450f61-fad7-4ca7-b408-1a6ebdfc098a",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7eef8610-a154-4d72-8db0-a0f9b5dae221",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 1.54,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "821c6b82-d08c-4d70-b8f9-0cfcfa07dc00",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "839115e8-6788-428f-be5a-25c04257f57f",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8593b48b-329d-47b3-9a4d-ecbcffa185de",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "87b87779-fb01-4097-b417-b029ec0e03c4",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8cf1e0ba-4055-49e9-8e45-a1b7394b111d",
+  "graph": "flight_accident",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 1.44,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "8d050038-4e73-43e4-ad18-0b7ee1a137c2",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "91554936-08c9-4012-a49a-d756dca42d9f",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "916f5e4c-3cf6-4c00-aa24-5f3497f1ccc1",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "91c17b7c-641c-4b18-9325-b6eccdf9f2e7",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "93567b31-fda0-4b63-a0dc-abe3da0ce29c",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.32,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "93ab0e74-ae5c-45fa-8d5f-31fbf4d635a2",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "93ab6592-24f8-42b4-b91a-9ad3136dce9d",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "93ddfe79-a307-4728-9e4f-ef66a9de3d45",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9a82a465-6a85-42b3-b3e0-75299d1d68e1",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9af6d17e-0214-4cb4-8a66-635230fd7813",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9d433b20-15c1-4c03-b2ab-bbe50407f8fd",
+  "graph": "flight_accident",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 0.89,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9ebd6b65-44fc-4c08-a2e6-dc8f38870132",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "a55f2df9-de1b-4e03-a7f5-808c474db7f3",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a5b6a031-dbb2-4991-b5a0-b80124de5d14",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a669524d-71f1-491b-aa36-b6c89180c5a1",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a9de2625-45ff-45f4-b832-c2637dc46d48",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ab2ad73f-ea17-4f7c-89fd-08c6b9933acd",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ab891a64-2197-4f41-91e9-204b5538f3fd",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 1.03,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "adf3c4a8-916d-4092-ad56-74436f21807b",
+  "graph": "flight_accident",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b1f5e46e-125a-4954-ae0c-88536f946e4b",
+  "graph": "flight_accident",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b5c8ecfb-b8fe-46f1-a71a-815fc25176e5",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b68ffcb4-82cc-4dad-8007-c563f0ac3125",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b8bdc7b3-6b67-49e3-a211-b8ec455ad097",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c0a24565-b569-4e65-a946-7c9a4a7d2d65",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.45,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "c34ad241-00b9-483d-a52c-6e460f29988a",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c54b9f25-1d3b-4df6-88e8-bd37b9eb305e",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "c6b5eee2-20b5-4240-9443-6fbc960acfd1",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c81fbb3e-741c-49b1-a940-6e081ba1842b",
+  "graph": "flight_accident",
+  "category": "basic_(n*)",
+  "latency_ms": 0.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cbccfce8-9347-442e-b67d-2d22a4fadc24",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cd852481-e1cb-4920-a90d-84ecc005ee11",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "cf67f0ab-d4d3-4e18-842b-47428dddce33",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d0658a9a-4fb0-4803-a136-80adafdf7e49",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "d3359ea1-8082-4c6d-a64a-54a1de41f7c0",
+  "graph": "flight_accident",
+  "category": "special_optional-match",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d37d6da4-7814-4f5d-af68-698f941c570e",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d8dbaf06-d2fe-4e34-903d-63b37f155ebf",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d8ebd0aa-ec94-4635-a314-c1c33b659c5a",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "da09e771-9079-4f29-9fb6-80f257485500",
+  "graph": "flight_accident",
+  "category": "special_union",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e43d2907-daa4-4ac8-8725-ecac69a64848",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e7795ef7-9edc-40c2-88d7-17dc7619be5f",
+  "graph": "flight_accident",
+  "category": "basic_(n)",
+  "latency_ms": 0.69,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "eadf52cf-f7c1-4b3a-a17d-176f98ad249b",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 1.4,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ecff50a5-6cc7-49fc-b6bd-11ba37bd5b83",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f265c5e3-20d1-4481-92ca-4537f93466a2",
+  "graph": "flight_accident",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.78,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f330a387-ba8d-4895-ac32-b4b4b53857af",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f411e690-32a5-4488-82d7-3a724b517f99",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.81,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f7c484a2-5db9-4177-aafa-72bb7a6cee02",
+  "graph": "flight_accident",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 0.84,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ff429c7d-42b0-4b3b-972d-1284e0164e2c",
+  "graph": "flight_accident",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0035a8ec-c55b-47a5-9429-ca74b117f86f",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "017fdb80-d699-44f6-a520-25d3d8dbd76c",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 15.08,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "02f75164-8d47-4710-80b0-1c308af90bc1",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "03e8a960-4d7c-4a81-9db8-75e5d417c81b",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.57,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "058d1185-51b4-4006-b0b3-2df5f824c594",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasSpouse; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "06ff52f2-e056-41a1-9349-0f9b0315f9fd",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0773f12e-6c40-470e-a221-b9216387c76c",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 1: expected a comparison operator, got 'location'"
+ },
+ {
+  "qid": "09d172d7-9970-42cc-86de-5b14da7420e7",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 12.65,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0ef659d6-71d9-4892-8c13-95b573551568",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0f75d737-0b3f-4720-b3e1-21f40ce06511",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "0f9a6d6e-e581-449a-9380-17a330274f35",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "0fa1aba2-ae80-4b17-8a4b-18e8e8df3a14",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "10ae08c7-a70d-4e61-81ae-85692cec09f8",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 24.92,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "110eb4c3-c692-4ac4-9e00-9e1381e99e1c",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "112ed42f-cf08-4f5d-8c82-4767df9035ec",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "127a06e4-2a6f-4ed7-96d6-12ae7686a941",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1283fa34-82bb-4c54-b1a3-aa4520611a36",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 10.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "160b8a6f-dc6b-43d3-aeb7-7ebf09bea69b",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 31.1,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "18c3970d-bd8a-4ad1-81ef-f776f57939ca",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1901cf47-d89b-4bc3-bc39-306208288e17",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "197a8a64-9c77-4d0d-bf13-df25e7b4727e",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 10.77,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1a67d9a3-785b-48a1-bf49-a637d42dde78",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 10.33,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1bdc8f7e-3027-492f-8605-4a530adc0d8d",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "1bdef171-1f79-4e70-860f-abc154f8baa9",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1d008f83-1117-4447-b4d3-2917f695cca3",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1d454724-b7b5-4fc0-83ca-925fc6236713",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 12.59,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1db5105c-6db8-4d0e-a628-17b008680f07",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 26.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "1df29512-c6e9-4076-b12b-3d733febc868",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge killedBy; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 3\nnothing was executed."
+ },
+ {
+  "qid": "1dfdc19a-bcca-4ab8-a310-d7f7b3d42f23",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "207d7f3c-20b6-47cb-a7cd-b7b601ee5397",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "241a4e0f-7836-4ad8-8a24-d3222826017e",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasMother; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 5\nnothing was executed."
+ },
+ {
+  "qid": "24cc9025-19da-4f70-9586-330d1e35ac4f",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "27622291-d50f-4c03-acb7-efe14589e888",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 10.22,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2817af09-4399-4db4-afdc-ed8abb314858",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 12.96,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "28d846af-fa4c-43d4-aaf4-3f5b30c9b17f",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2931ed14-cb38-41eb-90cc-7085fd9ea9fa",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.38,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2a8cdda7-bc21-45d9-9b32-f21bf88d28d0",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 9.59,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2af7b01e-166c-4569-a608-72f765d9e1e8",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2b28c382-7c5c-4a1f-add2-b6bec408ae3e",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2b9a5e3f-9902-4bd1-8eb1-7c00167734a0",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2ca64126-4d4a-4b65-9aaa-4f96af2124fb",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2ce37ae6-7021-485d-8469-84c4af112e77",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 9.82,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "2eaf55b4-1420-4910-9afc-7c9d827f0df7",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "2ed382b8-2a28-4c95-b467-dde2083a4e76",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "30f2712a-db80-48bc-9819-7503ee04a122",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "32273d7b-227d-4674-862e-fc4a92a989fa",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 22.99,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "326dcba2-8057-4f17-a749-268078571f43",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3273de86-a1a7-4ec1-bb1e-7f2b5f06ab31",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge killedBy; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "335a8e5b-e84e-48ff-bcfc-dd076742b25c",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "35c87df9-0418-4574-a7ec-4ecbb1b1ed7c",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "368bde79-3826-436e-ba45-45ba067deea8",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "37e8c485-8043-489e-ad29-0377499b97b3",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 10.78,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3838a30e-eaba-4b6a-8db7-ec1a64f46948",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.24,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "39583118-e09c-4862-8712-fa44983386e5",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 12.43,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "3a7dd820-8f67-4e4b-b103-3d812542f468",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3d55452a-465f-4b90-8e4b-f08a7cf966f8",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3d679949-de8d-4429-a6da-1ee8e3c1e701",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.25,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3d9debd8-3744-4cf0-8fee-ddf74bd75191",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "3e9e6064-908c-4535-93ad-9fc6ddbeec43",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 12.46,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "40d4ba4c-fd83-480a-ac75-28ce10cf8a1a",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4341d8e4-1436-4928-beec-191e3d3da669",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column spouse.name"
+ },
+ {
+  "qid": "454effca-2525-4631-b4a8-8e38fdffb7cf",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "460e4bd4-f2ae-4ad9-a43a-4123bfef5179",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 1.05,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "4760d85a-ff57-4be7-92d2-99ad65f4f53c",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse_character\". did you mean: fromUniverse_character_fictionaluniverse, fromUniverse_organization_fictionaluniverse? in line 3\nnothing was executed."
+ },
+ {
+  "qid": "48261954-ce63-437d-859f-c6af2a42811e",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 9.37,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "49037d3b-0640-417a-a12a-39dfa4f51406",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.41,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "512acdb6-f473-4290-9817-680de705c3e2",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5287e50c-c999-431d-bde8-d4db88be889a",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasSpouse; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "528e14c6-2812-4a5b-9408-cd6e9d945690",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 35.24,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "54ebd630-30f2-4da4-997c-02a9d37ad463",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 9: unknown verb 'Wait'"
+ },
+ {
+  "qid": "551ae641-2f37-423d-a682-0d06719b74df",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasMother; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 3\nnothing was executed."
+ },
+ {
+  "qid": "560aa50f-e4fc-49e3-827c-d752602642cd",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "599f3166-6c9e-4e23-8bdc-3077405fd757",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5a703e5c-8b2e-4d91-99c7-c99746ab9b94",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 12.05,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5beda893-cd5d-477b-aca0-188fe6e63556",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "5d204b48-5ce0-4d51-a664-bd868789bce2",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5ed05ae2-67c0-4cd5-b3ba-40a2d61c14b1",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "5ed19b70-ee31-4177-aee2-1463d3076ddc",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 4: 'distinct' does not belong here; it is part of `return distinct ...` or `count distinct <col> as n`"
+ },
+ {
+  "qid": "5efc62f0-a3ed-458d-8e09-287d30dd4a4f",
+  "graph": "fictional_character",
+  "category": "basic_(n)",
+  "latency_ms": 0.66,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6036ecb5-178e-4da8-ba08-5dbca395f396",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "60cdeeaf-bdbd-4c6e-b162-f0e816662be0",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "60dfbe4d-60a9-4bad-ab0b-1fe1f69cb984",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "62bf830e-6807-44af-b20b-d981c27accfb",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse\". in line 2\nnothing was executed."
+ },
+ {
+  "qid": "63146250-5247-4974-823e-dbc3371415f6",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "637a373c-8dc1-4b2f-8c1f-e5fd1898efeb",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "643c3b69-54b9-49b7-882f-b0a134e925db",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column c.name"
+ },
+ {
+  "qid": "660e9cfc-06e2-47ee-b743-8137ab8385e9",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "67866ef6-da98-4689-b70f-57b6c86111bc",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 10.28,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6849bdbb-3fcc-49f0-8849-4380cffdb175",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6888fb15-f155-4820-9f9a-0740f3fda88d",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 12.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6a4e7878-8a92-4d4a-b1b3-03f74c85ce38",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.25,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6a90777b-5fad-4361-acb4-c46f3bfd5794",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "6ae20ffc-ea3e-4016-b23b-f5ef993a143d",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 9.48,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6d34ada8-6241-4cf0-9ec8-bf5d06549583",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse_organization\". did you mean: fromUniverse_organization_fictionaluniverse, fromUniverse_character_fictionaluniverse? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "6e60fdff-dc7f-4c2c-b3d6-905d4792f2d8",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6f517796-d8af-4caa-a6da-300ff91d9dfb",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 10.09,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "6fef3d99-ab39-40b8-9c70-21cfba9e9d22",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 14.76,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7065849e-5efb-4817-9ed2-99b49cafed69",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasStudent; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "71da344b-a0e3-4866-8274-b47009ca35fc",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "71fd7826-a492-489b-b00e-cb3e02fd2db5",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "722fc123-4ef7-4b83-b38f-18ea2d45c0d7",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7305f0b4-37e2-4546-bf0f-d221262d27e8",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown property \"killedBy\" on class character. did you mean one of: birth_name, country_of_citizenship, creator, gender, name, occupation? in line 1\nnothing was executed."
+ },
+ {
+  "qid": "743ec4f1-da62-4231-8d87-179984362622",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 31.37,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "74957e3f-5311-4798-bd29-4748cebcec8a",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 27.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "75487975-4100-4ed0-bc1b-c5dde0bcf230",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "769ea215-8d10-456b-8a03-7b7baa8cb342",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "773bc77f-48d4-45d6-beda-1cde13b2c574",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7971b568-2912-420a-a1ad-c82b2560a7c6",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasSpouse; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 5\nnothing was executed."
+ },
+ {
+  "qid": "799cd3a0-0b73-4b59-a36f-373f5c5b65e4",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.48,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7c84e66f-3534-4c94-b20c-fd2b13743938",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "7d0dedcc-7d0f-4f4a-ba77-f009f64db515",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7dc85f40-87e2-4b1d-bbcc-987a8f2fd9b5",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "7dd7f1e5-b41c-4b28-846e-5bf8b91370d7",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 1.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "7f539f60-4b6f-4d96-8aad-eeb0b04bbe45",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "82126fe1-62c6-41b6-895a-78e35b803e70",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "84b90659-1ec7-43c8-92da-f1b8130a0bbd",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8566e9a9-427c-40be-a4fe-31e0b99335c4",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "863a551c-7ed3-441e-8749-e0a3723110f1",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8a908fe9-d69f-4a23-82a0-ec221116df52",
+  "graph": "fictional_character",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8adcc9bf-513b-4b01-b2b7-e0bb11268883",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 11.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8bbeb5b7-9295-4175-b78e-054e99ca7767",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 10.53,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "8de6f40e-42c3-4d01-becd-5e72ed10fffa",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge killedBy; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "92026828-267d-485d-8a87-b9b5845c8908",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "938f7fd8-9047-4677-89f9-da471e733a97",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasSpouse; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "9463bb29-dac8-443e-936a-0a5595badf78",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "94a73b37-7e11-4b26-ab7f-cfcd5719aade",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "96775e2e-7f2b-46b8-af84-a9e489e46072",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "96e6ede4-9bff-452e-9891-389fedbf48b5",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9987a0e1-1b1e-4130-881c-1c78355aef08",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "9bb1fbe3-f3b9-40c0-b4b8-8fb02aa518b7",
+  "graph": "fictional_character",
+  "category": "basic_(n)",
+  "latency_ms": 1.52,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9be25d8e-67fc-4194-b8f3-27023d506d07",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9c603952-4f3e-4352-82ce-13b8ff626372",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "9d6b52f2-d152-4e78-b4dd-73d8a70b3075",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 23.6,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a1a02cb8-ac33-42c9-883f-fcbe9548a681",
+  "graph": "fictional_character",
+  "category": "special_comparison",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a388048c-70a1-4fd5-b6e2-fa5f03cb1212",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a3a7cb4c-c3f3-4f90-aaf6-9394b9d5a955",
+  "graph": "fictional_character",
+  "category": "special_comparison",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse\". in line 2\nnothing was executed."
+ },
+ {
+  "qid": "a4827f5a-3685-49c5-8389-5a5caac23f6b",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a4b1e84e-4e03-49bd-8b3d-92c69f079dc1",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.22,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a60b1255-f266-472b-a050-8deb12a0d5d2",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a6ca41d9-4398-4a1a-afa0-fd4a8938a68d",
+  "graph": "fictional_character",
+  "category": "basic_(n*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a6e41c65-e65f-4bc7-a3ef-a80a0ce2bbfa",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 14.8,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a7b7b894-5209-4295-972f-7144e745aa48",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.24,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a872f926-0b50-4d32-a1f5-a655f5871712",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a98ac8ca-2488-4b88-b03f-cf6e476b6218",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "a9d8e736-6348-400c-bb15-6a5de9975f4f",
+  "graph": "fictional_character",
+  "category": "basic_(n)",
+  "latency_ms": 0.55,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "aa219cbf-2a9e-49e9-aebf-038aa8496e7a",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ab1720b7-a2f9-4e62-905b-f971b2add39c",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 13.81,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ab4b3364-ddbd-4b19-a2b4-b309349ae047",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "abf91710-d1c6-4b3e-9c9d-6d049ed4a591",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: \"c\" is not bound. in line 1\nnothing was executed."
+ },
+ {
+  "qid": "ac96c3e3-fabb-4aae-ae2e-f69263bf226d",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasStudent; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 3\nnothing was executed."
+ },
+ {
+  "qid": "acec8b03-e286-4b79-9192-5bcda301b94a",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasSpouse; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "ae14794f-64bb-4f46-8ea7-6eab35b73d10",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 12.96,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b023bea6-7bc6-4785-9d24-f3cb296aebb9",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 10.48,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b0694919-729f-43bf-899a-d7ee4d77684d",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b47f4ce6-bb96-4663-b449-8ff3d8114b83",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b5537744-1224-4fb1-992f-0bdf7212893f",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 12.81,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b846ab1a-0d05-4efd-baec-7645ec718048",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.23,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "b9c5ef09-b8e8-4f9e-b090-3ab374312f66",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bad0dc2c-bad3-4eff-9d35-4508d6e6f476",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bb687968-e32c-464c-9619-c7ac3ba10ed4",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 12.74,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bb6b47f3-69e6-497f-aef7-cf41b6de8dc3",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 17.03,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bbc1ee55-528b-4bc3-9e8a-6b5fa0377c93",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bc6c7825-71dd-4c45-b0d8-58a34c0f8a43",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 10.81,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bd06629b-c699-42f1-91d3-866ac3f34d36",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "bda7e832-edaf-4b74-b699-455ca4e6e052",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 7.5,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "be44226e-0ce6-4b9d-8638-aa24d63d4531",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.19,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "bf384648-d5a7-46cb-a394-c8e6c8bad408",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c41220e8-71cb-4361-8671-e2974494364f",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "c41a19d4-95f2-4668-bbe9-e0b528b27eed",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c540c788-57c0-42a0-add0-498688baf958",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasStudent; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "c59e9f77-9354-49e3-957c-3e023eb87b6c",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 14.4,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c5fb1974-a47e-48ad-9811-64b52843cbb0",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c5fd47f1-ad30-42d6-94ed-5e603c53eb2a",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c65d78a8-1614-4863-be45-49fd653098a1",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "latency_ms": 13.91,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c7ab146f-580e-4bfb-a012-a8f0ffcb1925",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 13.49,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c82feac7-d2dc-4bea-97b4-11b498c6f96d",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 10.25,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c8b2abc5-49de-494d-96c3-51f005af15c5",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c8f31910-1dae-4962-9be0-fc5b9cdd45fa",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.15,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "c8fdd8f6-bb90-4040-b37c-7583ae325d6e",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 13.97,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "ca5940f8-4b39-4c54-b9da-79b108c0163c",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fictionaluniverse\". did you mean: fromUniverse_character_fictionaluniverse, fromUniverse_organization_fictionaluniverse? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "cac64b27-c60f-40fa-a445-6ee4c0439748",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse_character\". did you mean: fromUniverse_character_fictionaluniverse, fromUniverse_organization_fictionaluniverse? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "cb182e51-a406-416c-adca-7d071c71727e",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d086f967-d370-4fd5-be4a-913ab4671ac1",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 3: expected a literal value, got 'loc1.name'"
+ },
+ {
+  "qid": "d17121c1-6577-4d89-92f7-bc135c8099aa",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d3af8686-338a-47cb-b886-9b5744063432",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ParseError: parse error at line 8: unknown verb 'Wait'"
+ },
+ {
+  "qid": "d43468fd-1d27-40f3-88bc-8d007df90ea6",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse_character\". did you mean: fromUniverse_character_fictionaluniverse, fromUniverse_organization_fictionaluniverse? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "d50301a7-94fc-4361-aff4-6ba7a5f5a6b9",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasMother; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "d50ae51c-c3d5-4d8d-859c-26333de681ac",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d5554f22-cf6d-4219-ac4f-e1fd3e2b2ca9",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d5f95ecc-c522-4ec6-be6e-e2ef1d745b54",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d68fcc8f-826c-413a-9454-51a138b2583f",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d76a50ab-f1e8-4fd9-832c-75cd330ac46e",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasMother; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "d84e25f0-5c1d-481e-8051-c31451886340",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 13.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d8ffb6e2-f062-4d63-bdbe-03f1cf1b2641",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "d9b33125-8ab6-4e0c-8609-e37d41d367e7",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "da6f872a-5775-4f80-aa58-d2d96425708e",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 37.99,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dcf6f2ac-7916-47e2-bd1d-ad530dcafc86",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.2,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dd029021-ea21-405b-a328-db866dd3ac9f",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse\". in line 2\nnothing was executed."
+ },
+ {
+  "qid": "dd1c9715-d580-4c63-b929-9aa1f913ac86",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "dd71c7fc-c4a9-46a6-a262-b531b016baff",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse\". in line 2\nnothing was executed."
+ },
+ {
+  "qid": "dee807d3-4950-4fad-a7a7-10daaeb1d299",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "df30a18b-ee6e-4673-b747-4de57c0f9125",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e1c72b12-3030-4e8e-a670-d55772680113",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e3cf221a-5cc5-4cec-b780-f78ad821e152",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "e3f2bf68-1e45-4cdf-851f-8bf9a8a1c8a7",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e40876f0-0191-4d81-9de4-878564c7983e",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "latency_ms": 11.6,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "e9123579-c4c2-4768-b125-de247ff47ecf",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "eb7c8d06-042a-406b-acdf-d20085cad988",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.16,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ec713ad6-915f-49fb-a485-cac62a4306d9",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ee96c44b-7d20-4f65-96b8-5e15d52a0529",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 10.21,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "ef119b8c-e442-4086-b8c5-dda9ee5a61e6",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*),(n)-(m1*)",
+  "latency_ms": 0.18,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "f0950157-8ee8-447c-83b7-f08f263799fd",
+  "graph": "fictional_character",
+  "category": "basic_(n)=(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasStudent; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "f15bd0fd-c218-44fc-9b9d-a2f0c9d9d0bf",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.11,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f20db99e-9f19-4fc6-878d-20c27d47341e",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 9.9,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f23c22ab-5ccf-4d00-a23d-b4cdf621df2c",
+  "graph": "fictional_character",
+  "category": "special_three-node-groupby",
+  "latency_ms": 0.17,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f47e3d29-c441-424d-99e0-99dddb0ebb11",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.14,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f5ad7999-0ef0-48d1-8fd5-0abff4316927",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f5b4e598-1e94-452f-bff5-8f56ab44d707",
+  "graph": "fictional_character",
+  "category": "special_comparison",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "f8780a37-5a11-45ce-bdfc-6ae0f6ca5b7e",
+  "graph": "fictional_character",
+  "category": "special_comparison",
+  "latency_ms": 0.13,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "fa166d06-6c80-41e6-b208-cb8f4e28140a",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "latency_ms": 10.24,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "fa1aad77-5c18-4cad-95f1-efa31f2e3d9f",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown edge type \"fromUniverse_character\". did you mean: fromUniverse_character_fictionaluniverse, fromUniverse_organization_fictionaluniverse? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "facbf2b5-292d-494d-9645-1018f8fe9a37",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.3,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "fc41dc23-f991-40e1-b156-625c18fc48a5",
+  "graph": "fictional_character",
+  "category": "basic_(n)",
+  "latency_ms": 0.28,
+  "executable": true,
+  "ex": 1.0
+ },
+ {
+  "qid": "fd8b8e37-609a-47c5-bc11-eb3456ba46f8",
+  "graph": "fictional_character",
+  "category": "special_optional-match",
+  "latency_ms": 0.12,
+  "executable": true,
+  "ex": 0.0
+ },
+ {
+  "qid": "fdbcbdf4-d1e2-41fd-8990-49682420a131",
+  "graph": "fictional_character",
+  "category": "special_union",
+  "executable": false,
+  "ex": 0.0,
+  "error": "ExecError: cannot resolve column n1"
+ },
+ {
+  "qid": "fe477213-9ae0-44bb-bd31-a32dd9f7365b",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasMother; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "fe8278df-0e77-4658-822d-8f188a2afe38",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0)",
+  "executable": false,
+  "ex": 0.0,
+  "error": "VerifyError: error: unknown role \"character\" on edge hasStudent; roles are subj (character), obj (character). did you mean one of: obj, subj? in line 2\nnothing was executed."
+ },
+ {
+  "qid": "ff75ccbf-df97-4172-8bee-cf539d44b8f1",
+  "graph": "fictional_character",
+  "category": "basic_(n)-(m0*)",
+  "latency_ms": 0.1,
+  "executable": true,
+  "ex": 0.0
+ }
+]
