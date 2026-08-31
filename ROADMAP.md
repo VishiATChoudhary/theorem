@@ -109,10 +109,12 @@ questions in 330.
 - Session-level schema diffing: tell the agent what changed since it last looked.
 - Richer `continue @c...` cursors (seek, sample).
 - Role naming as a checkable property. The one mistake the verifier cannot catch
-  is a reversed role on an edge whose two roles hold the same class
-  ([silent-failure benchmark](docs/benchmarks/silent-failure.md)). Nothing in the
-  schema distinguishes `subj` from `obj`; a schema that named them `child` and
-  `father` would make the mistake visible to the model, if not to the verifier.
+  is a reversed role on an edge whose two roles hold the same class, which is
+  6.1% of our own deliberately broken queries
+  ([the tables](docs/benchmarks/silent-failure.md)). Nothing in the schema
+  distinguishes `subj` from `obj`; a schema that named them `child` and `father`
+  would make the mistake visible to the model, if not to the verifier. Closes
+  when that 6.1% is measured below 1% on a graph with same-class edges.
 
 ## Research track
 

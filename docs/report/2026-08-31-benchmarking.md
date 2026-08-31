@@ -94,11 +94,11 @@ a 10.8-point gap that the retries then close**, with convergence in 1.07 turns
 against 1.19. An agent that can retry pays the difference in turns. One that
 cannot pays it in answers.
 
-### 2.3 Silent failure (new)
+### 2.3 Broken queries (new, and not a benchmark)
 
 Execution accuracy counts what a model gets right and says nothing about what
-happens when it gets one wrong. That is where the two languages differ most, and
-nothing measured it.
+happens when it gets one wrong. We built a mutation harness to look at that, and
+the result it produced is worth reporting mostly for what it is not.
 
 Method: take a query known to be correct, break exactly one token the way models
 break them, run it, record what the caller sees. Four mutations (wrong class,
@@ -119,7 +119,18 @@ answer; not counted).
 Every broken Cypher query returned rows or a confident empty set. Not one
 produced an error.
 
-Three caveats are on the page rather than buried:
+**That comparison is definitional, and we have demoted it accordingly.** theorem
+checks a whole query against the live schema before executing any of it; Cypher
+has no such step. The 1,811-versus-0 split therefore follows from the two
+language definitions, and running 3,925 mutants did not establish it. The four
+mutations are ours as well, chosen and applied uniformly rather than sampled from
+how models actually break queries, so the mix is a guess and a different mix
+moves every number in the table. It is an argument, not evidence, and it is no
+longer listed alongside the three benchmarks or quoted in the README.
+
+What the exercise did earn is the theorem row, which is a self-audit and was not
+guaranteed by the design. It found a blind spot we had assumed away:
+
 
 - **theorem's 6.1% is entirely direction**, and only on edges whose two roles
   hold the same class. `hasFather(subj: person, obj: person)` is type-correct
@@ -133,7 +144,10 @@ Three caveats are on the page rather than buried:
   reversed arrow, and no published text2cypher pipeline reads it. It is counted
   in its own column so the comparison cannot be accused of hiding it.
 - **A mutation is not a model.** This measures what a language does with a
-  broken query, not how often a model breaks one.
+  broken query, not how often a model breaks one. That is execution accuracy,
+  which is a real benchmark, and it is where the case for the language belongs.
+- **Refusing is not answering.** A language that refused every query would score
+  0% undetectable. The figure is meaningless without an accuracy figure beside it.
 
 ### 2.4 Prompt cost (new)
 
@@ -358,15 +372,20 @@ Four benchmarks, all reproducible from checked-in per-question data:
 |---|---:|---:|
 | CypherBench, 2,348 questions | **77.98%** | 70.36% |
 | Agent loop, n=240, held out | 87.9% solve@3, **82.9% solve@1** | 85.0%, 72.1% |
-| Silent failure, 3,925 mutants | refuses **1,811 / 1,928** | refuses **0 / 1,997** |
 | Frontier model, 498 questions | **74.1%** | 64.3%, p = 0.0001 |
+| Prompt cost, per class | **39 tokens** | 85 tokens, crossover at 31 |
 
 The headline survived a prompt change that should have cost it four points,
 because sampling caught the regression and a language widening closed it. The
 strongest objection to the whole project, that model scale dissolves the
-advantage, was tested directly and does not hold. The claim the project is
-actually built on, that a wrong query is loud rather than plausible, now has a
-number: 6.1% against 100%.
+advantage, was tested directly and does not hold.
+
+The claim the project is actually built on, that a wrong query is loud rather
+than plausible, does **not** appear in that table. The mutation study that was
+meant to establish it turned out to restate the design rather than test it, so
+it is reported as a design note. Its one real result is a limit on our own
+language: 6.1% of deliberately broken theorem queries still return an answer,
+all of them a reversed role on an edge whose two roles hold the same class.
 
 And the number the repository published this morning could not be reproduced by
 the code that shipped, which is the finding that made the rest of the day

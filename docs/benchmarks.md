@@ -12,9 +12,23 @@ That page carries the full method, per-graph and per-category breakdowns, the to
 
 Execution accuracy is one question of four, and the other three are measured on their own pages.
 
-- **[Agent loop](benchmarks/agent-loop.md)** &mdash; does it converge under retry, in how many turns, for how many tokens, on graphs nothing was tuned on? Held out by construction: CypherBench's train split shares no schema, question or qid with the test set.
-- **[Silent failure](benchmarks/silent-failure.md)** &mdash; when a query is wrong, does the caller find out? Break a correct query one token and record what comes back. theorem refuses 1,811 of 1,928 mutants; text2cypher refuses none of 1,997.
+- **[Agent loop](benchmarks/agent-loop.md)** &mdash; does it converge under retry, in how many turns, for how many tokens, on graphs nothing was tuned on? Held out by construction: CypherBench's train split shares no schema, question or qid with the test set. On solve rate the two arms are **tied** (McNemar p = 0.392); the difference is in the first attempt, 82.9% against 72.1%.
+- **[Frontier model](benchmarks/frontier.md)** &mdash; does the gap survive a model that writes Cypher well? On a seeded stratified sample of 498 questions with Sonnet 5, theorem 74.1% against 64.3%, paired p = 0.0001.
 - **[Prompt cost](benchmarks/prompt-cost.md)** &mdash; what does a question cost to ask? theorem carries a tutorial the model has never seen, which is a fixed cost, against a schema render that is cheaper per class. The lines cross at 31 classes.
+
+## Not a benchmark
+
+[What happens to a broken query](benchmarks/silent-failure.md) reports that theorem
+refuses 1,811 of 1,928 mutated queries and Cypher refuses none of 1,997. **That
+comparison is definitional and should not be quoted as a result.** theorem verifies
+against the schema before executing; Cypher has no such step; the two numbers follow
+from the language definitions rather than from running anything. The mutations are
+ours as well, chosen rather than sampled from real model errors.
+
+The page is kept because the theorem column is a self-audit that found a real blind
+spot: 6.1% of our own broken queries still run and return an answer, all of them
+reversed direction on an edge whose two roles hold the same class. That is the honest
+ceiling on the "can't get wrong" claim.
 
 ## How these numbers were produced
 

@@ -208,11 +208,11 @@ What doubling the sample surfaced is the \emph{first attempt}: 82.9\% against
 turns against 1.19. An agent that can retry pays the difference in turns; one
 that cannot pays it in answers.
 
-\subsection{Silent failure (new)}
+\subsection{Broken queries (new, and not a benchmark)}
 
 Execution accuracy counts what a model gets right and says nothing about what
-happens when it gets one wrong. That is where the two languages differ most, and
-nothing measured it.
+happens when it gets one wrong. We built a mutation harness to look at that, and
+the result it produced is worth reporting mostly for what it is not.
 
 \textbf{Method.} Take a query known to be correct, break exactly one token the
 way models break them, run it, and record what the caller sees. Four mutations
@@ -235,7 +235,19 @@ text2cypher & 1{,}997 & \textbf{0} & 1{,}281 & 716 & \textbf{100\%} \\
 \end{center}
 
 Every broken Cypher query returned rows or a confident empty set. Not one
-produced an error. Three caveats ship on the page rather than buried:
+produced an error.
+
+\textbf{That comparison is definitional, and it has been demoted accordingly.}
+theorem checks a whole query against the live schema before executing any of it;
+Cypher has no such step. The 1{,}811-versus-0 split therefore follows from the
+two language definitions, and running 3{,}925 mutants did not establish it. The
+four mutations are ours as well, chosen and applied uniformly rather than sampled
+from how models actually break queries, so the mix is a guess and a different mix
+moves every number in the table. It is an argument, not evidence, and it is no
+longer listed alongside the three benchmarks or quoted in the README.
+
+What the exercise did earn is the theorem row, which is a self-audit and was not
+guaranteed by the design. It found a blind spot that had been assumed away:
 
 \begin{itemize}
   \item \textbf{theorem's 6.1\% is entirely direction}, and only on edges whose
@@ -251,7 +263,12 @@ produced an error. Three caveats ship on the page rather than buried:
     never fires on a reversed arrow, and no published text2cypher pipeline reads
     it. It is counted in its own column.
   \item \textbf{A mutation is not a model.} This measures what a language does
-    with a broken query, not how often a model breaks one.
+    with a broken query, not how often a model breaks one. That is execution
+    accuracy, which is a real benchmark, and it is where the case for the
+    language belongs.
+  \item \textbf{Refusing is not answering.} A language that refused every query
+    would score 0\% undetectable here. The figure is meaningless without an
+    accuracy figure beside it.
 \end{itemize}
 
 \subsection{Frontier model (new)}
@@ -492,7 +509,7 @@ above can be recomputed rather than trusted.
 uv run python -m eval.run_public all      # CypherBench, both phases
 uv run python -m eval.run_cypher_public all   # the Cypher control (needs docker)
 uv run python -m eval.run_agent run --graph soccer --n 120 --arm both
-uv run python -m eval.run_silent --graph nba  # silent failure
+uv run python -m eval.run_silent --graph nba  # broken queries (design note)
 uv run python -m eval.token_crossover --report # prompt cost, no model calls
 uv run python -m eval.run_frontier gen --model claude-sonnet-5
 uv run python -m eval.verify_replay       # did an engine change move a score?
@@ -508,8 +525,8 @@ uv run python -m eval.verify_replay       # did an engine change move a score?
 CypherBench, 2{,}348 questions      & \textbf{77.98\%} & 70.36\% \\
 Agent loop, $n=240$, solve@3        & 87.9\% & 85.0\% \\
 Agent loop, $n=240$, solve@1        & \textbf{82.9\%} & 72.1\% \\
-Silent failure, 3{,}925 mutants     & refuses \textbf{1{,}811/1{,}928} & refuses \textbf{0/1{,}997} \\
 Frontier model, 498 questions       & \textbf{74.1\%} & 64.3\% \\
+Prompt cost, tokens per class       & \textbf{39} & 85 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -519,9 +536,15 @@ Frontier model, 498 questions       & \textbf{74.1\%} & 64.3\% \\
 The headline survived a prompt change that should have cost it four points,
 because sampling caught the regression and a language widening closed it. The
 strongest objection to the project, that model scale dissolves the advantage, was
-tested directly and does not hold. The claim the project is actually built on,
-that a wrong query is loud rather than plausible, now has a number: 6.1\% against
-100\%.
+tested directly and does not hold.
+
+The claim the project is actually built on, that a wrong query is loud rather
+than plausible, is \emph{not} in that table. The mutation study meant to
+establish it turned out to restate the design rather than test it, so it is
+reported as a design note (Section~2.3). Its one real result is a limit on this
+language rather than a win over another: 6.1\% of deliberately broken theorem
+queries still return an answer, every one of them a reversed role on an edge
+whose two roles hold the same class.
 
 And the number the repository published at the start of the day could not be
 reproduced by the code that shipped it, which is the finding that made the rest

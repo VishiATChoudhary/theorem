@@ -8,8 +8,10 @@ LLMs get roughly 40% of Cypher queries wrong on realistic schemas, and two years
 
 ## Install
 
+Not on PyPI yet; install from the repository. The core package has no dependencies.
+
 ```bash
-pip install theorem
+pip install "git+https://github.com/VishiATChoudhary/theorem.git@main"
 ```
 
 ```bash
@@ -32,7 +34,7 @@ One line, one step, one name. There is exactly one way to write each operation, 
 
 ## Five design rules
 
-1. **No direction glyphs.** Edges traverse by role name. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can tell ([measured](benchmarks/silent-failure.md)).
+1. **No direction glyphs.** Edges traverse by role name. A wrong role is a type error caught before execution, not a silently empty result, except where an edge's two roles hold the same class and no schema check can tell. That exception is not hypothetical: it is [6.1% of our own broken queries](benchmarks/silent-failure.md), and it is the honest ceiling on the claim in the line above.
 2. **One line, one step, one name.** No chaining, no nesting, nothing to balance.
 3. **Explicit staged aggregation.** Adding a return column can never change the grouping.
 4. **Schema-closed vocabulary.** The whole program is verified against the live schema before anything runs. Errors name the line, suggest the fix, and confirm nothing executed.
@@ -43,7 +45,8 @@ Beyond reads, theorem has a write surface no existing query language has: `asser
 ## Where to go next
 
 - [Tutorial](tutorial.md): productive in ten minutes
+- [Using theorem in a project](using-theorem.md): the embedding API, locking, loading, limits
 - [Language spec](language-spec.md): full grammar and semantics
-- [Benchmarks](benchmarks.md): accuracy, agent loop, silent failure, prompt cost
+- [Benchmarks](benchmarks.md): accuracy, agent loop, frontier model, prompt cost
 - [Why not Cypher?](why-not-cypher.md): the scaling counterargument in full
 - [Contributing](https://github.com/VishiATChoudhary/theorem/blob/main/CONTRIBUTING.md): the language grows spec-first, and proposals are welcome

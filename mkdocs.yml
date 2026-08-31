@@ -28,15 +28,17 @@ theme:
 nav:
   - Home: index.md
   - Tutorial: tutorial.md
+  - Using theorem in a project: using-theorem.md
   - Language spec: language-spec.md
   - Benchmarks:
       - Overview: benchmarks.md
       - CypherBench: benchmarks/cypherbench.md
       - Agent loop: benchmarks/agent-loop.md
-      - Silent failure: benchmarks/silent-failure.md
       - Prompt cost: benchmarks/prompt-cost.md
       - Frontier model: benchmarks/frontier.md
   - Why not Cypher?: why-not-cypher.md
+  - Design notes:
+      - What happens to a broken query: benchmarks/silent-failure.md
 
 exclude_docs: |
   superpowers/
