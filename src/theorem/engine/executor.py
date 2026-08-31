@@ -95,7 +95,11 @@ def _guard(n_rows: int, *, check_clock: bool = True) -> None:
         )
     if check_clock:
         deadline = _DEADLINE.get()
-        if deadline is not None and time.monotonic() > deadline:
+        # `>=`, not `>`: a deadline of exactly now has expired, and the
+        # difference is not academic. Windows' monotonic clock advances in
+        # ~15.6 ms steps, so under `>` a `seconds=0` budget was ignored
+        # entirely by any read that finished inside one tick.
+        if deadline is not None and time.monotonic() >= deadline:
             raise ExecError(
                 "the query took too long and was stopped. Narrow it with a "
                 "`where` on the `find` or on a `follow`, or ask for less with "

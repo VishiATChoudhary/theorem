@@ -100,6 +100,29 @@ def test_the_deadline_is_enforced(wide):
     assert "too long" in str(e.value)
 
 
+def test_a_deadline_of_exactly_now_has_expired(wide):
+    """`seconds=0` must stop the read on the first clock check, whatever
+    the clock's granularity is.
+
+    This was `>` rather than `>=`, so on Windows, whose monotonic clock
+    advances in ~15.6 ms steps, a read that finished inside one tick saw
+    the deadline as not yet reached and ran to completion.
+    """
+    import time
+
+    from theorem.engine import executor
+
+    ticks = iter([100.0, 100.0])  # deadline is set, then checked: no advance
+    real = executor.time.monotonic
+    executor.time.monotonic = lambda: next(ticks, 100.0)
+    try:
+        with limits(seconds=0.0), pytest.raises(ExecError, match="too long"):
+            run("find item as a\nfollow a links to as b\nreturn b.name", wide)
+    finally:
+        executor.time.monotonic = real
+    assert time.monotonic() > 0  # the real clock is back
+
+
 def test_transitive_reach_is_bounded_too(wide):
     """`upto any` is the statement most able to run away."""
     with limits(max_rows=100):
