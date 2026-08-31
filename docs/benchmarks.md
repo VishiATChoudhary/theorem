@@ -16,6 +16,15 @@ Execution accuracy is one question of four, and the other three are measured on 
 - **[Silent failure](benchmarks/silent-failure.md)** &mdash; when a query is wrong, does the caller find out? Break a correct query one token and record what comes back. theorem refuses 1,811 of 1,928 mutants; text2cypher refuses none of 1,997.
 - **[Prompt cost](benchmarks/prompt-cost.md)** &mdash; what does a question cost to ask? theorem carries a tutorial the model has never seen, which is a fixed cost, against a schema render that is cheaper per class. The lines cross at 31 classes.
 
+## How these numbers were produced
+
+[A report on the 31 August 2026 benchmarking session](https://github.com/VishiATChoudhary/theorem/blob/main/docs/report/2026-08-31-benchmarking.md)
+covers all four benchmarks, the guards that keep them honest, the eight defects
+found in shipped code, and the four found in the benchmark harness, two of which
+would have published a spectacular false result. It also records the finding
+that made the session necessary: the previously published headline could not be
+reproduced by the code that shipped it.
+
 ## Changing the engine without moving the numbers
 
 Published results are a property of a version of the code, so an engine change
