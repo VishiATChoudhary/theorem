@@ -338,10 +338,17 @@ class Store:
         return self.position
 
     def bulk(self, records: list[dict]) -> int:
-        """Append many records in one WAL write. Returns the final position."""
+        """Append many records in one WAL write. Returns the final position.
+
+        Every record is validated before any is written. Validating as it
+        went left a failure halfway through with half the batch committed,
+        which is the opposite of what the rest of the system promises: a
+        program that does not verify does not run at all.
+        """
+        for record in records:
+            self._validate(record)
         with self.wal_path.open("a", encoding="utf-8") as f:
             for record in records:
-                self._validate(record)
                 record = {**record, "_pos": self.position + 1}
                 f.write(json.dumps(record) + "\n")
                 self.position += 1

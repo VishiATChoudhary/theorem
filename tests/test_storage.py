@@ -217,3 +217,21 @@ def test_a_store_written_by_an_earlier_release_still_opens(tmp_path):
     assert store.nodes["#p-1"].retired_at == 5
     assert store.edge_index["#e-1"].type == "supplied_by"
     store.close()
+
+
+def test_a_bulk_that_cannot_be_applied_writes_nothing(tmp_path):
+    """Validating as it went committed the records before the bad one,
+    which is the opposite of what the rest of the system promises."""
+    import pytest
+
+    from theorem.engine.storage import StoreError
+
+    store = Store(tmp_path)
+    good = {"op": "put_node", "id": "#s-1", "cls": "supplier", "props": {"name": "A"}}
+    bad = {"op": "retire", "id": "#s-404", "reason": "no such node"}
+    with pytest.raises(StoreError):
+        store.bulk([good, bad])
+    assert store.nodes == {}
+    assert store.wal_len() == 0
+    assert store.position == 0
+    store.close()
