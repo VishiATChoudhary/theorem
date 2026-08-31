@@ -1,0 +1,24 @@
+[
+ {
+  "qid": "05a476f8-ca0c-4406-b577-ba5fdb86a40f",
+  "arm": "text2cypher",
+  "category": "basic_(n)",
+  "turns": 1,
+  "solved": true,
+  "tokens": 903,
+  "latency_ms": 541.2319579627365,
+  "errors": [],
+  "query": "MATCH (c:Club) RETURN c.name ORDER BY c.inception_year ASC"
+ },
+ {
+  "qid": "bc988f52-388b-49f6-9daf-3798ea155fff",
+  "arm": "text2cypher",
+  "category": "basic_(n)-(m0)",
+  "turns": 1,
+  "solved": true,
+  "tokens": 662,
+  "latency_ms": 153.10362493619323,
+  "errors": [],
+  "query": "MATCH (p:Player)-[:receivesAward]->(a:Award) RETURN MAX(p.date_of_death)"
+ }
+]

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import time
 from contextlib import contextmanager
+from functools import lru_cache
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 
@@ -135,8 +136,18 @@ class Table:
     seeded: bool = False  # a find has run; an empty table means zero rows
 
 
+# Names that mean something other than "a property of this node". One set
+# lookup replaces walking the chain of comparisons below on every row of
+# every query, which at 275k rows is measurable and at 3 M is not subtle.
+_DERIVED_PROPS = frozenset(
+    {"class", "id", "state", "query_traffic", "lineage", "health"}
+)
+
+
 def _node_value(store: Store, schema: Schema, node_id: str, prop: str):
     node = store.nodes[store.resolve(node_id)]
+    if prop not in _DERIVED_PROPS:
+        return node.props.get(prop)
     if prop == "class":
         return node.cls
     if prop == "id":
@@ -193,11 +204,22 @@ def _is_none_literal(v) -> bool:
     return type(v).__name__ == "_Missing"
 
 
+@lru_cache(maxsize=8192)
+def _fold_str(s: str) -> str:
+    return fold(s)
+
+
 def _fold(v):
     """Agent-friendly string normalization (shared with dedup; see text.py).
     Agents transliterate names; silently matching nothing is the worse
-    failure mode. Numbers pass through untouched."""
-    return fold(v)
+    failure mode. Numbers pass through untouched.
+
+    Cached for strings, which is where the cost is: folding is two NFKD
+    casefold passes, a clause folds both sides on every candidate row, and
+    the literal side is the same string every time. On a 275k-node class
+    this was a third of the query.
+    """
+    return _fold_str(v) if type(v) is str else fold(v)
 
 
 def _clause_matches(store: Store, schema: Schema, row_value, clause: Clause) -> bool:
