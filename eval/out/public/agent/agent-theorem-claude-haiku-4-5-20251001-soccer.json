@@ -1,0 +1,35 @@
+[
+ {
+  "qid": "05a476f8-ca0c-4406-b577-ba5fdb86a40f",
+  "arm": "theorem",
+  "category": "basic_(n)",
+  "turns": 1,
+  "solved": true,
+  "tokens": 1723,
+  "latency_ms": 119.64566702954471,
+  "errors": [],
+  "query": "find club as c\nreturn c.name order by c.inception_year"
+ },
+ {
+  "qid": "bc988f52-388b-49f6-9daf-3798ea155fff",
+  "arm": "theorem",
+  "category": "basic_(n)-(m0)",
+  "turns": 1,
+  "solved": true,
+  "tokens": 1489,
+  "latency_ms": 759.9747502245009,
+  "errors": [],
+  "query": "find player as p\nfollow p receivesAward award as a\nmax p.date_of_death as latest_death\nreturn latest_death"
+ },
+ {
+  "qid": "02dab0dd-3b33-4702-8872-80abe9f2ca1e",
+  "arm": "theorem",
+  "category": "basic_(n)-(m0)-(m1*)",
+  "turns": 1,
+  "solved": true,
+  "tokens": 1792,
+  "latency_ms": 35.417041974142194,
+  "errors": [],
+  "query": "find club where name = \"FC Luzern\" as luzern\nfollow luzern playsFor player as p\nfollow p playsFor club as c\nreturn c.name, c.owners"
+ }
+]
